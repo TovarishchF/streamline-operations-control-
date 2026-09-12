@@ -1,0 +1,47 @@
+# Секреты — в репозиторий не попадают (CLAUDE.md § 3 п. 8)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!deploy/**/*.key.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Node
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Сгенерированное из контракта — генерируется make api-types
+shared/api-types.ts
+
+# Локальные данные
+*.sqlite3
+media/
+staticfiles/
+
+# Артефакты испытаний: складываются осознанно, мусор — нет
+artifacts/**/tmp/
+artifacts/**/*.raw
+
+# Редакторы и ОС
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Схема, генерируемая из кода для сверки с контрактом
+artifacts/openapi.generated.yaml

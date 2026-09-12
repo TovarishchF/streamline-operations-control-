@@ -1,0 +1,4715 @@
+openapi: 3.1.0
+
+info:
+  title: SOC — Streamline Operations Control API
+  version: 1.0.0-draft
+  summary: Единая диспетчерская платформа управления полётами и логистическими услугами
+  description: |
+    Контракт REST API системы SOC. Согласуется **до** написания кода (`CLAUDE.md § 8` п. 5).
+
+    Сервер реализует этот контракт, клиенты генерируют из него типы
+    (`make api-types` → `shared/api-types.ts`), контрактные тесты проверяют соответствие
+    обеих сторон. Расхождение между этим файлом и схемой, сгенерированной
+    `drf-spectacular`, — ошибка сборки.
+
+    ## Соглашения
+
+    **Деньги.** Передаются объектом `Money` с суммой в виде **строки**
+    (`{"amount": "1234.5600", "currency": "USD"}`). Число с плавающей точкой для денег
+    запрещено на всех уровнях, включая JSON (`CLAUDE.md § 3` п. 1, ADR-002).
+    Хранение — 4 знака, представление — 2.
+
+    **Время.** Все метки — UTC в формате RFC 3339 с суффиксом `Z`. Локальное время —
+    только на отображении, подпись зоны обязательна (`CLAUDE.md § 3` п. 2).
+
+    **Статусы.** Не присваиваются напрямую. Смена статуса — отдельный эндпоинт
+    `POST .../status` с указанием перехода автомата. Определения автоматов —
+    `shared/state-machines/*.json`, единые для сервера и клиента (ADR-015).
+
+    **Идемпотентность.** Заголовок `Idempotency-Key` обязателен для запросов, помеченных
+    `x-idempotency: required` (ADR-018). Повтор с тем же ключом возвращает первый
+    результат, а не создаёт дубль. Ключ хранится 24 часа.
+
+    **Изоляция данных.** Для ролей `client` и `vendor` выборка фильтруется по арендатору.
+    Обращение к чужой записи возвращает **404**, а не 403: факт существования чужой
+    записи не раскрывается (ADR-003).
+
+    **Пагинация.** Списки возвращают `{ data: [...], meta: { total, page, perPage } }`.
+
+    **Ошибки.** `{ error: { code, message, details? } }`. Коды перечислены в схеме
+    `ErrorCode`. Сообщение пишется так, чтобы по нему было понятно, что делать
+    (`BACKEND § 9`).
+
+  contact:
+    name: ИП Третьяк Артем Александрович
+  license:
+    name: Проприетарная, передаётся заказчику по договору
+
+servers:
+  - url: https://{host}/api/v1
+    description: Боевой контур
+    variables:
+      host:
+        default: soc.example.com
+  - url: http://localhost:8000/api/v1
+    description: Локальная разработка
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: auth
+    description: Аутентификация, второй фактор, профиль
+  - name: flights
+    description: Рейсы, шаблоны, конфликты, слоты `[ТЗ 3.1]`
+  - name: orders
+    description: Заявки на услуги `[ТЗ 3.2]`
+  - name: catalog
+    description: 'Справочники: аэропорты, типы ВС, услуги, цены `[ТЗ 3.2.1]`'
+  - name: fleet
+    description: Парк воздушных судов, допуски, техсостояние
+  - name: counterparties
+    description: Клиенты, поставщики, контракты, тарифы `[ТЗ 3.3]`
+  - name: billing
+    description: Котировки, счета, платежи, сверка, маржа `[ТЗ 3.4]`
+  - name: comms
+    description: Уведомления, исходящие, входящие, шаблоны `[ТЗ 3.5]`
+  - name: reports
+    description: Отчёты, дашборды, экспорт `[ТЗ 3.6]`
+  - name: portal-client
+    description: Портал клиента `[ТЗ 3.5.3]`
+  - name: portal-vendor
+    description: Портал поставщика `[ТЗ 4.3]`
+  - name: admin
+    description: Пользователи, аудит, настройки, SLA, интеграции `[ТЗ 4.3]`
+  - name: system
+    description: Проверка работоспособности
+
+paths:
+
+  # ─────────────────────────────── АУТЕНТИФИКАЦИЯ ───────────────────────────────
+
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Вход по логину и паролю
+      description: |
+        Первый шаг. При включённой двухфакторной аутентификации возвращает
+        `twoFactorRequired: true` и временный токен для шага `/auth/2fa`.
+        Блокировка на 15 минут после 5 неудачных попыток `[ТЗ 4.3]` (ADR-013).
+      security: []
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Успешный вход либо требование второго фактора
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '423':
+          description: Учётная запись временно заблокирована
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /auth/2fa:
+    post:
+      tags: [auth]
+      summary: Подтверждение вторым фактором (TOTP или резервный код)
+      security: []
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TwoFactorRequest' }
+      responses:
+        '200':
+          description: Пара токенов
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/refresh:
+    post:
+      tags: [auth]
+      summary: Обновление токена доступа
+      security: []
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '200':
+          description: Новая пара токенов (refresh ротируется)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/logout:
+    post:
+      tags: [auth]
+      summary: Выход, помещение refresh-токена в чёрный список
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refresh]
+              properties:
+                refresh: { type: string }
+      responses:
+        '204': { description: Выход выполнен }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Профиль текущего пользователя и карта прав
+      description: |
+        Карта прав — единый источник истины с фронтендом (`BACKEND § 6`).
+        Клиент использует её для скрытия элементов, но проверка на сервере
+        обязательна в каждом эндпоинте.
+      responses:
+        '200':
+          description: Профиль
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MeResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/2fa/setup:
+    post:
+      tags: [auth]
+      summary: Привязка приложения-аутентификатора, выдача резервных кодов
+      x-idempotency: optional
+      responses:
+        '200':
+          description: Секрет, QR и одноразовые резервные коды
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TwoFactorSetup' }
+
+  # ─────────────────────────────────── РЕЙСЫ ────────────────────────────────────
+
+  /flights:
+    get:
+      tags: [flights]
+      summary: Список рейсов `[ТЗ 3.1.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Ordering'
+        - name: from
+          in: query
+          description: Начало периода по плановому вылету (UTC)
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: status
+          in: query
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/FlightStatus' }
+        - name: aircraftId
+          in: query
+          schema: { type: string }
+        - name: aircraftTypeId
+          in: query
+          schema: { type: string }
+        - name: clientId
+          in: query
+          schema: { type: string }
+        - name: type
+          in: query
+          schema: { $ref: '#/components/schemas/FlightType' }
+        - name: airport
+          in: query
+          description: ICAO вылета или прилёта
+          schema: { type: string }
+        - name: hasUnconfirmedServices
+          in: query
+          schema: { type: boolean }
+        - name: marginBelowPercent
+          in: query
+          description: Маржа ниже указанного процента
+          schema: { type: string }
+      responses:
+        '200':
+          description: Страница рейсов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/FlightListItem' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      tags: [flights]
+      summary: Создание рейса `[ТЗ 3.1.1]`
+      description: |
+        Расстояние, блок-тайм, плановое топливо и время прилёта рассчитываются
+        сервером по `DOMAIN § 7.8`. Валюта расчётов фиксируется из карточки клиента.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FlightCreate' }
+      responses:
+        '201':
+          description: Рейс создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Flight' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /flights/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [flights]
+      summary: Карточка рейса `[ТЗ 3.1.4]`
+      description: Норматив открытия — не более 2 секунд `[ТЗ 4.4]` (ADR-017).
+      responses:
+        '200':
+          description: Рейс
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Flight' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [flights]
+      summary: Изменение рейса `[ТЗ 3.1.3]`
+      description: |
+        Изменение времени, борта или маршрута порождает уведомления клиенту
+        и поставщикам и запись в аудит. Конфликт расписания не блокирует сохранение,
+        но требует подтверждения с указанием причины (`SPEC § 4.1`).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FlightUpdate' }
+      responses:
+        '200':
+          description: Рейс изменён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Flight' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /flights/{id}/status:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Переход статуса рейса `[ТЗ 3.1.2]`
+      description: |
+        Единственный способ изменить статус. Запрещённый переход или невыполненный
+        guard возвращают 409 со списком невыполненных условий в `details.unmetConditions`.
+        Переходы `cancel` и `aog` требуют кода причины и комментария.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FlightTransitionRequest' }
+      responses:
+        '200':
+          description: Переход выполнен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Flight' }
+        '409':
+          description: Переход невозможен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TransitionErrorResponse' }
+
+  /flights/{id}/services:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [orders]
+      summary: Заявки на услуги по рейсу `[ТЗ 3.2.3]`
+      responses:
+        '200':
+          description: Список заявок
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ServiceOrder' }
+    post:
+      tags: [orders]
+      summary: Заказ услуги `[ТЗ 3.2.2]`
+      description: |
+        Выполняет автоматические проверки `SPEC § 5.2`. Провал проверок 1–3
+        (доступность услуги, действующий контракт, актуальная цена) блокирует создание
+        и возвращает 422 с перечнем. Провал 4–5 (лидтайм, погодное условие) требует
+        `overrideReason`.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceOrderCreate' }
+      responses:
+        '201':
+          description: Заявка создана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceOrder' }
+        '422':
+          description: Не пройдены блокирующие проверки
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCheckErrorResponse' }
+
+  /flights/{id}/margin:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [billing]
+      summary: Маржинальность рейса `[ТЗ 3.4.3]`
+      description: |
+        Норматив расчёта — не более 5 секунд `[ТЗ 4.4]`. Отрицательная маржа
+        отображается, а не обнуляется. При нулевой выручке `marginPercent` равен `null`.
+      parameters:
+        - name: mode
+          in: query
+          schema: { $ref: '#/components/schemas/MarginMode' }
+      responses:
+        '200':
+          description: Расчёт маржи
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarginResult' }
+
+  /flights/{id}/history:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [flights]
+      summary: История изменений рейса из аудита `[ТЗ 3.1.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Записи аудита по рейсу
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/AuditEntry' }
+
+  /flights/conflicts:
+    get:
+      tags: [flights]
+      summary: Конфликты расписания `[ТЗ 3.1.1]`
+      description: |
+        Пересечение рейсов одного борта, нарушение минимального времени между рейсами,
+        борт в AOG или на техобслуживании, истёкший допуск борта (ADR-027).
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Список конфликтов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ScheduleConflict' }
+
+  /flight-templates:
+    get:
+      tags: [flights]
+      summary: Шаблоны регулярных рейсов `[ТЗ 3.1.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница шаблонов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/FlightTemplate' }
+    post:
+      tags: [flights]
+      summary: Создание шаблона
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FlightTemplateCreate' }
+      responses:
+        '201':
+          description: Шаблон создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FlightTemplate' }
+
+  /flight-templates/{id}/generate:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Генерация серии рейсов из шаблона `[ТЗ 3.1.1]`
+      description: |
+        Время вылета шаблона хранится в локальной зоне аэропорта вылета и переводится
+        в UTC на каждую дату отдельно — с учётом перехода на летнее время.
+        Режим `preview` возвращает список без создания.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/GenerateSeriesRequest' }
+      responses:
+        '200':
+          description: Предпросмотр серии
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/FlightListItem' }
+        '201':
+          description: Рейсы созданы
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/FlightListItem' }
+
+  /flight-requests:
+    get:
+      tags: [flights]
+      summary: Очередь заявок на рейс от клиентов `[ТЗ 3.5.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/FlightRequestStatus' }
+      responses:
+        '200':
+          description: Страница заявок
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/FlightRequest' }
+
+  /flight-requests/{id}/approve:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Подтверждение заявки клиента и создание рейса
+      description: Заявка становится рейсом только после подтверждения диспетчером.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '201':
+          description: Рейс создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Flight' }
+
+  /flight-requests/{id}/reject:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Отклонение заявки клиента
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReasonRequest' }
+      responses:
+        '200':
+          description: Заявка отклонена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FlightRequest' }
+
+  /slots:
+    get:
+      tags: [flights]
+      summary: Реестр слотов `[ТЗ 3.2.1, 4.2]` (ADR-026)
+      description: |
+        Публичного интерфейса слот-координации не существует. Реестр ведётся вручную,
+        сообщения формата SSIM/SCR формируются и разбираются системой.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: flightId
+          in: query
+          schema: { type: string }
+        - name: airportIcao
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Страница слотов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Slot' }
+    post:
+      tags: [flights]
+      summary: Запрос слота
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SlotCreate' }
+      responses:
+        '201':
+          description: Слот зарегистрирован
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Slot' }
+
+  # ─────────────────────────────── ЗАЯВКИ НА УСЛУГИ ─────────────────────────────
+
+  /service-orders:
+    get:
+      tags: [orders]
+      summary: Список заявок на услуги `[ТЗ 3.2.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: status
+          in: query
+          schema:
+            type: array
+            items: { $ref: '#/components/schemas/ServiceOrderStatus' }
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: flightId
+          in: query
+          schema: { type: string }
+        - name: slaBreached
+          in: query
+          schema: { type: boolean }
+        - name: needsResponse
+          in: query
+          description: Требуют ответа поставщика
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница заявок
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ServiceOrder' }
+
+  /service-orders/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [orders]
+      summary: Карточка заявки
+      responses:
+        '200':
+          description: Заявка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceOrder' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [orders]
+      summary: Изменение заявки, в том числе назначение поставщика `[ТЗ 3.3.2]`
+      description: |
+        Назначение поставщика фиксирует **снимок** закупочной цены и условий контракта
+        на момент операции. Последующее изменение прайса не меняет сумму заявки
+        (`CLAUDE.md § 3` п. 5, ADR-022, ADR-025).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceOrderUpdate' }
+      responses:
+        '200':
+          description: Заявка изменена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceOrder' }
+
+  /service-orders/{id}/status:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [orders]
+      summary: Переход статуса заявки `[ТЗ 3.2.3]`
+      description: |
+        Переход `finish` требует фактического времени и количества, а при
+        `requiresActToComplete` — загруженного документа типа `act`. Создаёт заявку
+        на оплату поставщику.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceOrderTransitionRequest' }
+      responses:
+        '200':
+          description: Переход выполнен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceOrder' }
+        '409':
+          description: Переход невозможен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TransitionErrorResponse' }
+
+  /service-orders/{id}/reassign:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [orders]
+      summary: Переназначение поставщика после отказа `[ТЗ 3.3.2]`
+      description: Создаёт новую заявку со ссылкой `replacedOrderId` на прежнюю.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [vendorId]
+              properties:
+                vendorId: { type: string }
+                comment: { type: string }
+      responses:
+        '201':
+          description: Создана новая заявка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceOrder' }
+
+  /service-orders/{id}/documents:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [orders]
+      summary: Получение ссылки для загрузки документа `[ТЗ 3.2.3]`
+      description: |
+        Возвращает подписанную ссылку на загрузку в объектное хранилище (ADR-007).
+        Файл загружается клиентом напрямую, затем подтверждается через
+        `PATCH /service-orders/{id}` с полученным `storageKey`.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UploadRequest' }
+      responses:
+        '201':
+          description: Ссылка на загрузку
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UploadTicket' }
+
+  # ────────────────────────────────── СПРАВОЧНИКИ ───────────────────────────────
+
+  /catalog/services:
+    get:
+      tags: [catalog]
+      summary: Каталог услуг `[ТЗ 3.2.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: category
+          in: query
+          schema: { $ref: '#/components/schemas/ServiceCategory' }
+      responses:
+        '200':
+          description: Страница позиций каталога
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ServiceCatalogItem' }
+    post:
+      tags: [catalog]
+      summary: Добавление позиции каталога
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceCatalogItemCreate' }
+      responses:
+        '201':
+          description: Позиция создана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCatalogItem' }
+
+  /catalog/services/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    patch:
+      tags: [catalog]
+      summary: Изменение позиции каталога
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ServiceCatalogItemCreate' }
+      responses:
+        '200':
+          description: Позиция изменена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceCatalogItem' }
+
+  /catalog/prices:
+    get:
+      tags: [catalog]
+      summary: Цены поставщиков по аэропортам `[ТЗ 3.2.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: serviceId
+          in: query
+          schema: { type: string }
+        - name: airportIcao
+          in: query
+          schema: { type: string }
+        - name: onDate
+          in: query
+          description: Действующие на указанную дату
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Страница цен
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VendorPrice' }
+    post:
+      tags: [catalog]
+      summary: Добавление цены поставщика
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorPriceCreate' }
+      responses:
+        '201':
+          description: Цена добавлена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorPrice' }
+
+  /airports:
+    get:
+      tags: [catalog]
+      summary: Справочник аэропортов
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: search
+          in: query
+          description: Поиск по ICAO, IATA, названию или городу
+          schema: { type: string }
+        - name: isCoordinated
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница аэропортов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Airport' }
+
+  /aircraft-types:
+    get:
+      tags: [catalog]
+      summary: Справочник типов воздушных судов
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница типов ВС
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/AircraftType' }
+
+  /vat-rates:
+    get:
+      tags: [catalog]
+      summary: Справочник ставок НДС `[ТЗ 3.4.1]`
+      description: |
+        Юридическая корректность применения ставок подтверждается бухгалтером заказчика.
+        Система реализует справочник и применение, но не налоговую экспертизу
+        (`SPEC § 1.3`, `GAPS.md` G-07).
+      responses:
+        '200':
+          description: Ставки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/VatRate' }
+
+  # ───────────────────────────────────── ПАРК ───────────────────────────────────
+
+  /fleet:
+    get:
+      tags: [fleet]
+      summary: Парк воздушных судов, техсостояние, AOG
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/AircraftStatus' }
+      responses:
+        '200':
+          description: Страница бортов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Aircraft' }
+
+  /fleet/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [fleet]
+      summary: Карточка борта с допусками
+      responses:
+        '200':
+          description: Борт
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aircraft' }
+    patch:
+      tags: [fleet]
+      summary: Изменение техсостояния борта
+      description: Перевод в AOG помечает будущие рейсы борта конфликтом (ADR-009).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status: { $ref: '#/components/schemas/AircraftStatus' }
+                notes: { type: string }
+      responses:
+        '200':
+          description: Борт изменён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aircraft' }
+
+  /crew:
+    get:
+      tags: [fleet]
+      summary: Экипажи и квалификации (ADR-028)
+      description: |
+        Персональные данные `[152-ФЗ]`. Доступ ограничен ролями `admin` и `dispatcher`,
+        каждое обращение журналируется в аудите.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница членов экипажа
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/CrewMember' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ──────────────────────────────── КОНТРАГЕНТЫ ─────────────────────────────────
+
+  /vendors:
+    get:
+      tags: [counterparties]
+      summary: Реестр поставщиков `[ТЗ 3.3.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: specialization
+          in: query
+          schema: { $ref: '#/components/schemas/ServiceCategory' }
+        - name: airportIcao
+          in: query
+          schema: { type: string }
+        - name: isActive
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница поставщиков
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Vendor' }
+    post:
+      tags: [counterparties]
+      summary: Создание поставщика
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorCreate' }
+      responses:
+        '201':
+          description: Поставщик создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vendor' }
+
+  /vendors/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [counterparties]
+      summary: Профиль поставщика
+      responses:
+        '200':
+          description: Поставщик
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vendor' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [counterparties]
+      summary: Изменение поставщика
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorCreate' }
+      responses:
+        '200':
+          description: Поставщик изменён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Vendor' }
+
+  /vendors/{id}/rating:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [counterparties]
+      summary: Рейтинг поставщика с разложением на составляющие `[ТЗ 3.3.1]`
+      description: |
+        Рейтинг вычисляется, а не вводится. При менее чем 5 заявках возвращается
+        `sufficientData: false` и `rating: null` — цифра не выдумывается.
+      responses:
+        '200':
+          description: Рейтинг
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorRating' }
+
+  /vendors/suggest:
+    post:
+      tags: [counterparties]
+      summary: Подбор поставщика `[ТЗ 3.3.2]`
+      description: |
+        Возвращает таблицу сравнения кандидатов с разложением балла на составляющие
+        и расчётом влияния на маржу рейса. Решение должно быть объяснимым.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorSuggestRequest' }
+      responses:
+        '200':
+          description: Кандидаты с баллами
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/VendorCandidate' }
+
+  /contracts:
+    get:
+      tags: [counterparties]
+      summary: Договоры с поставщиками `[ТЗ 3.3.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/ContractStatus' }
+      responses:
+        '200':
+          description: Страница договоров
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VendorContract' }
+    post:
+      tags: [counterparties]
+      summary: Создание договора
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorContractCreate' }
+      responses:
+        '201':
+          description: Договор создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorContract' }
+
+  /clients:
+    get:
+      tags: [counterparties]
+      summary: Клиенты (авиакомпании) `[ТЗ 3.4.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница клиентов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Client' }
+    post:
+      tags: [counterparties]
+      summary: Создание клиента
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClientCreate' }
+      responses:
+        '201':
+          description: Клиент создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Client' }
+
+  /clients/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [counterparties]
+      summary: Карточка клиента
+      responses:
+        '200':
+          description: Клиент
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Client' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /clients/{id}/tariffs:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [counterparties]
+      summary: Тарифные правила клиента `[ТЗ 3.4.1]`
+      responses:
+        '200':
+          description: Правила
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/TariffRule' }
+    post:
+      tags: [counterparties]
+      summary: Добавление тарифного правила
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TariffRuleCreate' }
+      responses:
+        '201':
+          description: Правило добавлено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TariffRule' }
+
+  /clients/{id}/tariffs/simulate:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [counterparties]
+      summary: Калькулятор-песочница тарифа `[ТЗ 3.4.1]`
+      description: |
+        Показывает, какое правило сработало и почему, с разложением расчёта по шагам.
+        Без объяснимости тарифная логика неотлаживаема.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TariffSimulateRequest' }
+      responses:
+        '200':
+          description: Результат с объяснением
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TariffSimulateResult' }
+
+  /vendor-service-mappings:
+    get:
+      tags: [counterparties]
+      summary: Сопоставление номенклатуры поставщика с каталогом (ADR-024)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Страница соответствий
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VendorServiceMapping' }
+    post:
+      tags: [counterparties]
+      summary: Добавление соответствия
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorServiceMapping' }
+      responses:
+        '201':
+          description: Соответствие добавлено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorServiceMapping' }
+
+  # ───────────────────────────────────── БИЛЛИНГ ────────────────────────────────
+
+  /quotes:
+    get:
+      tags: [billing]
+      summary: Котировки `[ТЗ 3.4.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: clientId
+          in: query
+          schema: { type: string }
+        - name: flightId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/QuoteStatus' }
+      responses:
+        '200':
+          description: Страница котировок
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Quote' }
+    post:
+      tags: [billing]
+      summary: Формирование котировки из планируемых услуг рейса
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flightId]
+              properties:
+                flightId: { type: string }
+                validUntil: { type: string, format: date-time }
+      responses:
+        '201':
+          description: Черновик котировки
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+
+  /quotes/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [billing]
+      summary: Котировка
+      responses:
+        '200':
+          description: Котировка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /quotes/{id}/issue:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Выставление котировки
+      description: |
+        Присваивает номер из сквозной нумерации без дыр и фиксирует снимок курса.
+        После выставления документ **неизменяем**: правки только через аннулирование
+        и выпуск нового (`BACKEND § 3.4`).
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Котировка выставлена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+        '409': { $ref: '#/components/responses/Conflict' }
+
+  /quotes/{id}/void:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Аннулирование котировки с выпуском новой
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReasonRequest' }
+      responses:
+        '200':
+          description: Аннулирована, создана новая
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+
+  /quotes/{id}/accept:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing, portal-client]
+      summary: Принятие котировки клиентом (ADR-030)
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Котировка принята
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+
+  /quotes/{id}/decline:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing, portal-client]
+      summary: Отклонение котировки клиентом (ADR-030)
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReasonRequest' }
+      responses:
+        '200':
+          description: Котировка отклонена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Quote' }
+
+  /invoices:
+    get:
+      tags: [billing]
+      summary: Счета клиентам `[ТЗ 3.4.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: clientId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/InvoiceStatus' }
+        - name: overdue
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница счетов
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Invoice' }
+    post:
+      tags: [billing]
+      summary: Формирование счёта по фактически оказанным услугам
+      description: |
+        Строки строятся по фактическому количеству и фактическому времени оказания
+        (ADR-020). Возвращает сопоставление «план ↔ факт» в поле `planFactComparison`.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [flightId]
+              properties:
+                flightId: { type: string }
+                quoteId: { type: string }
+      responses:
+        '201':
+          description: Черновик счёта
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+
+  /invoices/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [billing]
+      summary: Счёт
+      responses:
+        '200':
+          description: Счёт
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /invoices/{id}/issue:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Выставление счёта
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Счёт выставлен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+
+  /invoices/{id}/void:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Аннулирование счёта с выпуском нового
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReasonRequest' }
+      responses:
+        '200':
+          description: Аннулирован, создан новый
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+
+  /invoices/{id}/export:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Выгрузка счёта в PDF или XLSX `[ТЗ 3.4.1]`
+      description: |
+        Формируется на сервере. Сумма в выгрузке обязана совпадать с суммой в API
+        и на экране до копейки. При `DEMO_DATA=true` — водяной знак `DEMO` (ADR-008).
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportRequest' }
+      responses:
+        '202':
+          description: Задача поставлена, ссылка появится по готовности
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportTicket' }
+
+  /payments:
+    get:
+      tags: [billing]
+      summary: Поступления от клиентов (ADR-019)
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: invoiceId
+          in: query
+          schema: { type: string }
+        - name: clientId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Страница платежей
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Payment' }
+    post:
+      tags: [billing]
+      summary: Регистрация поступления
+      description: |
+        Статус счёта вычисляется из суммы распределённых платежей, а не присваивается.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PaymentCreate' }
+      responses:
+        '201':
+          description: Платёж зарегистрирован
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Payment' }
+
+  /payables:
+    get:
+      tags: [billing]
+      summary: Заявки на оплату поставщикам `[ТЗ 3.4.2]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/PayableStatus' }
+        - name: overdue
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница заявок на оплату
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/PayableItem' }
+
+  /payables/{id}/approve:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Согласование заявки на оплату
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Заявка согласована
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PayableItem' }
+
+  /reconciliation/import:
+    post:
+      tags: [billing]
+      summary: Импорт счёта поставщика для сверки `[ТЗ 3.4.2]`
+      description: |
+        Принимает CSV или XLSX по шаблону системы либо строки в теле запроса.
+        Сопоставление по ключу `поставщик + аэропорт + дата (±1 день) + код услуги`
+        с допуском 0.01 на округление (`DOMAIN § 7.7`). Неопознанные коды поставщика
+        попадают в очередь сопоставления (ADR-024).
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/VendorInvoiceImport' }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                vendorId: { type: string }
+                file: { type: string, format: binary }
+      responses:
+        '201':
+          description: Счёт импортирован, сверка выполнена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorInvoice' }
+
+  /reconciliation/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    get:
+      tags: [billing]
+      summary: Результат сверки с расхождениями
+      responses:
+        '200':
+          description: Сверка
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorInvoice' }
+
+  /reconciliation/{id}/resolve:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [billing]
+      summary: Решение по расхождению `[ТЗ 3.4.2]`
+      description: Все решения попадают в аудит.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ResolveDiscrepancyRequest' }
+      responses:
+        '200':
+          description: Решение применено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorInvoice' }
+
+  /fx-rates:
+    get:
+      tags: [billing]
+      summary: Курсы валют `[ТЗ 3.4.1]`
+      description: |
+        База — рубль. `rates[c]` — сколько рублей стоит одна единица валюты `c`,
+        номинал источника нормализован (ADR-004). При недоступности источника
+        возвращается последний известный курс с отметкой давности.
+      parameters:
+        - name: onDate
+          in: query
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Курсы на дату
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FxSnapshot' }
+
+  # ────────────────────────────────── КОММУНИКАЦИИ ──────────────────────────────
+
+  /notifications:
+    get:
+      tags: [comms]
+      summary: Внутренние уведомления `[ТЗ 3.5.1]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: unreadOnly
+          in: query
+          schema: { type: boolean }
+        - name: kind
+          in: query
+          schema: { $ref: '#/components/schemas/NotificationKind' }
+      responses:
+        '200':
+          description: Страница уведомлений
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/Notification' }
+
+  /notifications/{id}/read:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [comms]
+      summary: Отметка уведомления прочитанным
+      x-idempotency: optional
+      responses:
+        '204': { description: Отмечено }
+
+  /outbox:
+    get:
+      tags: [comms]
+      summary: Очередь исходящих сообщений `[ТЗ 3.5.2]`
+      description: |
+        Сообщение хранится целиком: канал, получатели, тема, отрендеренное тело,
+        вложения, статус и число попыток. В режиме `stub` внешний вызов не выполняется,
+        сообщение доступно для выгрузки в `.eml`.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: channel
+          in: query
+          schema: { $ref: '#/components/schemas/MessageChannel' }
+        - name: status
+          in: query
+          schema: { $ref: '#/components/schemas/OutboxStatus' }
+      responses:
+        '200':
+          description: Страница исходящих
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/OutboxMessage' }
+
+  /outbox/{id}/retry:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [comms]
+      summary: Повторная отправка сообщения
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Поставлено в очередь
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OutboxMessage' }
+
+  /inbox:
+    get:
+      tags: [comms]
+      summary: Входящие внешние события `[ТЗ 3.2.2]`
+      description: |
+        Подтверждения и отказы поставщиков, счета. Неопознанные входящие попадают
+        в очередь ручного разбора — это штатный сценарий, а не ошибка.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: unrecognizedOnly
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница входящих
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/InboxMessage' }
+
+  /inbox/{id}/apply:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [comms]
+      summary: Применение входящего события к заявке
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                serviceOrderId: { type: string }
+                transition: { type: string }
+      responses:
+        '200':
+          description: Применено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/InboxMessage' }
+
+  /message-templates:
+    get:
+      tags: [comms]
+      summary: Шаблоны сообщений `[ТЗ 3.5.2]`
+      responses:
+        '200':
+          description: Шаблоны
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/MessageTemplate' }
+
+  /message-templates/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    patch:
+      tags: [comms]
+      summary: Изменение шаблона
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MessageTemplate' }
+      responses:
+        '200':
+          description: Шаблон изменён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageTemplate' }
+
+  /message-templates/{id}/preview:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [comms]
+      summary: Предпросмотр шаблона на выбранном рейсе
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                flightId: { type: string }
+                locale: { $ref: '#/components/schemas/Locale' }
+      responses:
+        '200':
+          description: Отрендеренное сообщение
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subject: { type: string }
+                  body: { type: string }
+
+  # ─────────────────────────────────── ОТЧЁТНОСТЬ ───────────────────────────────
+
+  /reports:
+    get:
+      tags: [reports]
+      summary: Каталог отчётов `[ТЗ 3.6.1]`
+      responses:
+        '200':
+          description: Описания отчётов и их параметров
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReportDefinition' }
+
+  /reports/{code}:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/ReportCode' }
+    get:
+      tags: [reports]
+      summary: Построение отчёта `[ТЗ 3.6.1]`
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          schema: { type: string, format: date }
+        - name: clientId
+          in: query
+          schema: { type: string }
+        - name: vendorId
+          in: query
+          schema: { type: string }
+        - name: airportIcao
+          in: query
+          schema: { type: string }
+        - name: category
+          in: query
+          schema: { $ref: '#/components/schemas/ServiceCategory' }
+        - name: currency
+          in: query
+          description: Валюта представления
+          schema: { $ref: '#/components/schemas/CurrencyCode' }
+      responses:
+        '200':
+          description: Результат отчёта
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportResult' }
+
+  /reports/{code}/export:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/ReportCode' }
+    post:
+      tags: [reports]
+      summary: Выгрузка отчёта `[ТЗ 3.6.3]`
+      description: |
+        Форматы PDF, XLSX, CSV, XML. XML валидируется против `soc-report-v1.xsd`
+        (ADR-032). Маркировка демонстрационного режима — по правилам `SPEC § 8.6`
+        с поправкой ADR-008.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExportRequest' }
+      responses:
+        '202':
+          description: Задача выгрузки поставлена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportTicket' }
+
+  /report-subscriptions:
+    get:
+      tags: [reports]
+      summary: Подписки на отчёты по расписанию `[ТЗ 3.6.3]`
+      responses:
+        '200':
+          description: Подписки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/ReportSubscription' }
+    post:
+      tags: [reports]
+      summary: Создание подписки
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReportSubscription' }
+      responses:
+        '201':
+          description: Подписка создана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportSubscription' }
+
+  /dashboards/{role}:
+    parameters:
+      - name: role
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [dispatcher, manager]
+    get:
+      tags: [reports]
+      summary: Данные дашборда `[ТЗ 3.6.2]`
+      responses:
+        '200':
+          description: Виджеты с данными
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardData' }
+
+  /dashboards/{role}/layout:
+    parameters:
+      - name: role
+        in: path
+        required: true
+        schema:
+          type: string
+          enum: [dispatcher, manager]
+    put:
+      tags: [reports]
+      summary: Сохранение раскладки виджетов на пользователя `[ТЗ 3.6.2]`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DashboardLayout' }
+      responses:
+        '200':
+          description: Раскладка сохранена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DashboardLayout' }
+
+  # ─────────────────────────────────── ПОРТАЛЫ ──────────────────────────────────
+
+  /portal/client/flights:
+    get:
+      tags: [portal-client]
+      summary: Рейсы клиента `[ТЗ 3.5.3]`
+      description: |
+        Выборка фильтруется по арендатору на сервере. Закупочные цены и данные
+        поставщиков в ответе отсутствуют — это проверяется отдельным тестом.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница рейсов клиента
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ClientPortalFlight' }
+
+  /portal/client/flight-requests:
+    post:
+      tags: [portal-client]
+      summary: Заявка клиента на рейс `[ТЗ 3.5.3]`
+      description: Становится рейсом только после подтверждения диспетчером.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FlightRequestCreate' }
+      responses:
+        '201':
+          description: Заявка принята
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FlightRequest' }
+
+  /portal/client/documents:
+    get:
+      tags: [portal-client]
+      summary: Финансовые документы клиента `[ТЗ 3.5.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Котировки и счета клиента
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ClientPortalDocument' }
+
+  /portal/vendor/orders:
+    get:
+      tags: [portal-vendor]
+      summary: Входящие заявки поставщика `[ТЗ 4.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: needsResponse
+          in: query
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Страница заявок поставщика
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VendorPortalOrder' }
+
+  /portal/vendor/performance:
+    get:
+      tags: [portal-vendor]
+      summary: Показатели поставщика `[ТЗ 3.3.1]`
+      responses:
+        '200':
+          description: Доля подтверждений в срок, нарушения SLA, рейтинг
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/VendorRating' }
+
+  /portal/vendor/payables:
+    get:
+      tags: [portal-vendor]
+      summary: Заявки на оплату поставщика и их статусы
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница заявок на оплату
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/PayableItem' }
+
+  # ────────────────────────────── АДМИНИСТРИРОВАНИЕ ─────────────────────────────
+
+  /users:
+    get:
+      tags: [admin]
+      summary: Пользователи и роли `[ТЗ 4.3]`
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: role
+          in: query
+          schema: { $ref: '#/components/schemas/Role' }
+      responses:
+        '200':
+          description: Страница пользователей
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/User' }
+    post:
+      tags: [admin]
+      summary: Создание пользователя
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreate' }
+      responses:
+        '201':
+          description: Пользователь создан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+
+  /audit:
+    get:
+      tags: [admin]
+      summary: Журнал аудита `[ТЗ 4.3]`
+      description: |
+        Записи неизменяемы: приложение подключается к базе учётной записью без прав
+        `UPDATE` и `DELETE` на эту таблицу. Записи от демонстрационного генератора
+        помечены `source: seed` и автором `System (демо-генератор)`.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: entityType
+          in: query
+          schema: { $ref: '#/components/schemas/AuditEntityType' }
+        - name: entityId
+          in: query
+          schema: { type: string }
+        - name: actorId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Страница записей аудита
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/AuditEntry' }
+
+  /settings:
+    get:
+      tags: [admin]
+      summary: Настройки системы, влияющие на расчёты
+      responses:
+        '200':
+          description: Настройки
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+    patch:
+      tags: [admin]
+      summary: Изменение настроек
+      description: |
+        Изменение параметров модельного времени запрещено при `DEMO_DATA=false`
+        (ADR-014) и возвращает 403.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Settings' }
+      responses:
+        '200':
+          description: Настройки изменены
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Settings' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /sla-rules:
+    get:
+      tags: [admin]
+      summary: Правила SLA
+      description: |
+        Значения по умолчанию заданы нами до получения реальных сроков из договоров
+        заказчика (`GAPS.md` G-39).
+      responses:
+        '200':
+          description: Правила
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/SlaRule' }
+    post:
+      tags: [admin]
+      summary: Добавление правила SLA
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/SlaRule' }
+      responses:
+        '201':
+          description: Правило добавлено
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SlaRule' }
+
+  /integrations:
+    get:
+      tags: [admin]
+      summary: Состояние внешних подключений `[ТЗ 4.2]`
+      description: |
+        Показывает **фактический** режим каждого подключения. Заглушка не изображает
+        живое подключение (`CLAUDE.md § 4`, `INTEGRATIONS § 7`).
+      responses:
+        '200':
+          description: Подключения
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: '#/components/schemas/IntegrationStatus' }
+
+  /integrations/{code}/test:
+    parameters:
+      - name: code
+        in: path
+        required: true
+        schema: { $ref: '#/components/schemas/IntegrationCode' }
+    post:
+      tags: [admin]
+      summary: Проверка подключения
+      x-idempotency: optional
+      responses:
+        '200':
+          description: Результат проверки
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IntegrationCheckResult' }
+
+  /integrations/logs:
+    get:
+      tags: [admin]
+      summary: Журнал обменов с внешними системами `[INTEGRATIONS § 7]`
+      description: |
+        Доказательная база при разборе спорных ситуаций и главный инструмент отладки
+        при переходе `stub → live`. Реквизиты доступа и персональные данные в журнал
+        не попадают.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: code
+          in: query
+          schema: { $ref: '#/components/schemas/IntegrationCode' }
+        - name: mode
+          in: query
+          schema: { $ref: '#/components/schemas/IntegrationMode' }
+      responses:
+        '200':
+          description: Страница записей журнала
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/IntegrationLogEntry' }
+
+  /performance:
+    get:
+      tags: [admin]
+      summary: Фактические показатели производительности `[ТЗ 4.4]`
+      description: |
+        Измеренные перцентили за период, а не декларация. Серверная метрика и
+        клиентская `largest-contentful-paint` (ADR-017).
+      parameters:
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Показатели
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PerformanceReport' }
+
+  # ─────────────────────────────────── СИСТЕМА ──────────────────────────────────
+
+  /health:
+    get:
+      tags: [system]
+      summary: Проверка работоспособности
+      description: |
+        Используется для алертов и для фиксации окончания восстановления при
+        испытании из резервной копии (`TESTING § 6`).
+      security: []
+      responses:
+        '200':
+          description: Система работоспособна
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+        '503':
+          description: Компонент недоступен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+
+  /clock:
+    get:
+      tags: [system]
+      summary: Текущее время сервера
+      description: |
+        Единственный источник времени для клиентов (`CLAUDE.md § 3` п. 2).
+        При включённом модельном времени на демонстрационном стенде возвращает
+        смещённое значение и признак `shifted: true` (ADR-014).
+      responses:
+        '200':
+          description: Время
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ClockResponse' }
+
+components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Токен доступа, срок жизни 15 минут
+
+  parameters:
+
+    PathId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+    Page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+
+    PerPage:
+      name: perPage
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+
+    Ordering:
+      name: ordering
+      in: query
+      description: Поле сортировки, минус в начале — по убыванию
+      schema: { type: string }
+
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: |
+        Уникальный ключ операции. Повтор с тем же ключом возвращает первый результат,
+        а не создаёт дубль. Хранится 24 часа (ADR-018).
+      schema: { type: string, minLength: 8, maxLength: 128 }
+
+  responses:
+
+    BadRequest:
+      description: Некорректный запрос
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    Unauthorized:
+      description: Не аутентифицирован
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    Forbidden:
+      description: Недостаточно прав
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    NotFound:
+      description: |
+        Не найдено. Для ролей `client` и `vendor` возвращается также при обращении
+        к чужой записи: факт её существования не раскрывается (ADR-003).
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+    Conflict:
+      description: Конфликт состояния
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  schemas:
+
+    # ───────────────────────────── ОБЩИЕ ТИПЫ ─────────────────────────────
+
+    DecimalString:
+      type: string
+      pattern: '^-?\d{1,14}(\.\d{1,4})?$'
+      description: |
+        Десятичное число строкой. Число с плавающей точкой для денег и процентов
+        запрещено (`CLAUDE.md § 3` п. 1).
+      examples: ['1234.5600', '-15.25', '0']
+
+    CurrencyCode:
+      type: string
+      enum: [USD, EUR, RUB]
+
+    Money:
+      type: object
+      required: [amount, currency]
+      properties:
+        amount: { $ref: '#/components/schemas/DecimalString' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+      examples:
+        - { amount: '1234.5600', currency: 'USD' }
+
+    Locale:
+      type: string
+      enum: [ru, en]
+
+    LocalizedName:
+      type: object
+      required: [ru, en]
+      description: Наименования справочников хранятся двумя полями (ADR-031).
+      properties:
+        ru: { type: string }
+        en: { type: string }
+
+    IcaoCode:
+      type: string
+      pattern: '^[A-Z]{4}$'
+      examples: ['UUEE']
+
+    DataSource:
+      type: string
+      enum: [synthetic, user, imported, live]
+      description: |
+        Происхождение записи (ADR-010). Данные, полученные адаптером в режиме `stub`,
+        получают `synthetic`, а не `live`.
+
+    PagedResponse:
+      type: object
+      required: [data, meta]
+      properties:
+        data:
+          type: array
+          items: {}
+        meta:
+          type: object
+          required: [total, page, perPage]
+          properties:
+            total: { type: integer }
+            page: { type: integer }
+            perPage: { type: integer }
+
+    ErrorCode:
+      type: string
+      enum:
+        - VALIDATION_ERROR
+        - AUTHENTICATION_FAILED
+        - TWO_FACTOR_REQUIRED
+        - ACCOUNT_LOCKED
+        - PERMISSION_DENIED
+        - NOT_FOUND
+        - TRANSITION_NOT_ALLOWED
+        - GUARD_NOT_SATISFIED
+        - SERVICE_CHECK_FAILED
+        - CONTRACT_EXPIRED
+        - PRICE_NOT_FOUND
+        - CURRENCY_MISMATCH
+        - DOCUMENT_IMMUTABLE
+        - IDEMPOTENCY_KEY_REQUIRED
+        - IDEMPOTENCY_KEY_CONFLICT
+        - SCHEDULE_CONFLICT
+        - INTEGRATION_UNAVAILABLE
+        - DEMO_ONLY_OPERATION
+        - RATE_LIMITED
+        - INTERNAL_ERROR
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code: { $ref: '#/components/schemas/ErrorCode' }
+            message:
+              type: string
+              description: |
+                Сообщение, по которому понятно, что делать: не «ошибка валидации»,
+                а «у поставщика X истёк контракт 12.03.2026, выберите другого
+                или продлите договор» (`BACKEND § 9`).
+            details:
+              type: object
+              additionalProperties: true
+
+    TransitionErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                details:
+                  type: object
+                  properties:
+                    currentStatus: { type: string }
+                    requestedTransition: { type: string }
+                    unmetConditions:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          code: { type: string }
+                          message: { type: string }
+
+    ServiceCheckErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          properties:
+            error:
+              type: object
+              properties:
+                details:
+                  type: object
+                  properties:
+                    checks:
+                      type: array
+                      items: { $ref: '#/components/schemas/ServiceCheckResult' }
+
+    ServiceCheckResult:
+      type: object
+      required: [code, passed, blocking]
+      properties:
+        code:
+          type: string
+          enum: [availability, contract_valid, price_valid, lead_time, weather]
+        passed: { type: boolean }
+        blocking:
+          type: boolean
+          description: Проверки 1–3 блокируют, 4–5 требуют подтверждения с причиной.
+        message: { type: string }
+
+    ReasonRequest:
+      type: object
+      required: [reasonCode, comment]
+      properties:
+        reasonCode: { type: string }
+        comment: { type: string, minLength: 1 }
+
+    # ───────────────────────────── АУТЕНТИФИКАЦИЯ ─────────────────────────────
+
+    Role:
+      type: string
+      enum: [admin, dispatcher, sales, finance, manager, client, vendor]
+      description: |
+        Роль `sales` добавлена по ТЗ 2.1 (ADR-011) и подлежит подтверждению заказчиком
+        (`GAPS.md` G-06).
+
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+
+    LoginResponse:
+      type: object
+      required: [twoFactorRequired]
+      properties:
+        twoFactorRequired: { type: boolean }
+        twoFactorToken:
+          type: [string, 'null']
+          description: Временный токен для шага `/auth/2fa`
+        tokens:
+          oneOf:
+            - $ref: '#/components/schemas/TokenPair'
+            - type: 'null'
+
+    TwoFactorRequest:
+      type: object
+      required: [twoFactorToken, code]
+      properties:
+        twoFactorToken: { type: string }
+        code:
+          type: string
+          description: Код TOTP из приложения-аутентификатора либо резервный код
+
+    TokenPair:
+      type: object
+      required: [access, refresh, expiresIn]
+      properties:
+        access: { type: string }
+        refresh: { type: string }
+        expiresIn: { type: integer, description: Секунд до истечения access-токена }
+
+    TwoFactorSetup:
+      type: object
+      required: [secret, otpauthUrl, backupCodes]
+      properties:
+        secret: { type: string }
+        otpauthUrl: { type: string }
+        backupCodes:
+          type: array
+          items: { type: string }
+          description: Одноразовые резервные коды, показываются один раз
+
+    MeResponse:
+      type: object
+      required: [user, permissions]
+      properties:
+        user: { $ref: '#/components/schemas/User' }
+        permissions:
+          type: object
+          additionalProperties: { type: boolean }
+          description: |
+            Карта прав текущей роли — единый источник истины с клиентом.
+            Скрытие элемента в интерфейсе не заменяет проверку на сервере.
+        demoMode:
+          type: boolean
+          description: Признак демонстрационного стенда (ADR-008)
+
+    User:
+      type: object
+      required: [id, name, email, role, locale, isActive]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        organizationId: { type: string }
+        clientId:
+          type: [string, 'null']
+          description: Обязателен для роли `client`
+        vendorId:
+          type: [string, 'null']
+          description: Обязателен для роли `vendor`
+        locale: { $ref: '#/components/schemas/Locale' }
+        timezoneMode:
+          type: string
+          enum: [utc, airport_local, user_local]
+        timezone: { type: string, description: 'Зона IANA, например Europe/Moscow' }
+        twoFactorEnabled: { type: boolean }
+        isActive: { type: boolean }
+
+    UserCreate:
+      type: object
+      required: [name, email, role]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        role: { $ref: '#/components/schemas/Role' }
+        clientId: { type: string }
+        vendorId: { type: string }
+        locale: { $ref: '#/components/schemas/Locale' }
+        timezone: { type: string }
+
+    # ───────────────────────────── СПРАВОЧНИКИ ─────────────────────────────
+
+    Airport:
+      type: object
+      required: [id, icao, name, city, country, timezone, lat, lon]
+      properties:
+        id: { type: string }
+        icao: { $ref: '#/components/schemas/IcaoCode' }
+        iata: { type: [string, 'null'] }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        city: { type: string }
+        country: { type: string, description: 'ISO 3166-1 alpha-2' }
+        timezone: { type: string, description: 'Зона IANA' }
+        lat: { type: number }
+        lon: { type: number }
+        elevationFt: { type: integer }
+        isCoordinated:
+          type: boolean
+          description: Требуется слот-координация (ADR-026)
+
+    AircraftType:
+      type: object
+      required: [id, icaoType, name, category, seats, cruiseSpeedKts, turnaroundMin]
+      properties:
+        id: { type: string }
+        icaoType: { type: string, examples: ['CL60', 'GLF5'] }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        category:
+          type: string
+          enum: [light, midsize, heavy, airliner, cargo]
+        seats: { type: integer }
+        cruiseSpeedKts: { type: integer }
+        fuelBurnKgPerHour: { type: integer }
+        turnaroundMin:
+          type: integer
+          description: Минимальное время между рейсами, используется детектором конфликтов
+
+    AircraftStatus:
+      type: string
+      enum: [serviceable, maintenance, aog]
+
+    Aircraft:
+      type: object
+      required: [id, registration, typeId, status, homeBaseIcao]
+      properties:
+        id: { type: string }
+        registration: { type: string, examples: ['RA-67231'] }
+        typeId: { type: string }
+        type: { $ref: '#/components/schemas/AircraftType' }
+        operatorId: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/AircraftStatus' }
+        homeBaseIcao: { $ref: '#/components/schemas/IcaoCode' }
+        approvals:
+          type: array
+          items: { $ref: '#/components/schemas/AircraftApproval' }
+        notes: { type: [string, 'null'] }
+
+    AircraftApproval:
+      type: object
+      required: [kind, validFrom, validTo]
+      description: Допуски борта (ADR-027)
+      properties:
+        kind:
+          type: string
+          enum: [ETOPS, RVSM, MNPS, CAT_II, CAT_III, RNP, other]
+        number: { type: string }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+
+    CrewMember:
+      type: object
+      required: [id, name, role]
+      description: |
+        Персональные данные `[152-ФЗ]`. Доступ ограничен и журналируется (ADR-028).
+      properties:
+        id: { type: string }
+        name: { type: string }
+        role:
+          type: string
+          enum: [PIC, SIC, FA, engineer]
+        licenseNo: { type: [string, 'null'] }
+        qualifications:
+          type: array
+          items: { $ref: '#/components/schemas/CrewQualification' }
+
+    CrewQualification:
+      type: object
+      required: [aircraftTypeId, kind, validTo]
+      properties:
+        aircraftTypeId: { type: string }
+        kind: { type: string }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+
+    ServiceCategory:
+      type: string
+      enum: [fuel, handling, catering, transport, permits, deicing]
+      description: |
+        Категории строго по ТЗ 3.2.1: топливообеспечение, наземное обслуживание,
+        кейтеринг, транспорт, разрешительные документы, противообледенительная обработка.
+
+    ServiceAttributeDef:
+      type: object
+      required: [key, type, required]
+      properties:
+        key: { type: string, examples: ['fuelGrade', 'volumeL'] }
+        type:
+          type: string
+          enum: [number, string, enum, boolean]
+        options:
+          type: array
+          items: { type: string }
+        required: { type: boolean }
+
+    ServiceCatalogItem:
+      type: object
+      required: [id, code, category, name, unit, leadTimeH]
+      properties:
+        id: { type: string }
+        code: { type: string, examples: ['FUEL_JETA1', 'HND_BASIC'] }
+        category: { $ref: '#/components/schemas/ServiceCategory' }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        unit:
+          type: string
+          enum: [L, kg, ea, hour, pax, flight]
+        requiresWeather: { type: boolean }
+        leadTimeH: { type: integer }
+        requiredAttributes:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceAttributeDef' }
+        requiresActToComplete: { type: boolean }
+
+    ServiceCatalogItemCreate:
+      type: object
+      required: [code, category, name, unit]
+      properties:
+        code: { type: string }
+        category: { $ref: '#/components/schemas/ServiceCategory' }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        unit:
+          type: string
+          enum: [L, kg, ea, hour, pax, flight]
+        requiresWeather: { type: boolean }
+        leadTimeH: { type: integer }
+        requiredAttributes:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceAttributeDef' }
+        requiresActToComplete: { type: boolean }
+
+    VatRate:
+      type: object
+      required: [id, code, percent, applicability]
+      properties:
+        id: { type: string }
+        code: { type: string }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        percent: { $ref: '#/components/schemas/DecimalString' }
+        applicability:
+          type: string
+          enum: [domestic, international, export_of_services, exempt]
+
+    Surcharge:
+      type: object
+      required: [code, kind, value]
+      properties:
+        code:
+          type: string
+          enum: [night, weekend, holiday, urgent, into_plane]
+        kind:
+          type: string
+          enum: [percent, fixed]
+        value: { $ref: '#/components/schemas/DecimalString' }
+        appliesWhen:
+          type: object
+          description: Условия применения надбавки (ADR-021)
+          properties:
+            fromLocalTime: { type: string, examples: ['22:00'] }
+            toLocalTime: { type: string, examples: ['06:00'] }
+            weekdays:
+              type: array
+              items: { type: integer, minimum: 1, maximum: 7 }
+            holidayCalendar: { type: string, description: 'Код страны' }
+
+    VendorPrice:
+      type: object
+      required: [id, vendorId, serviceId, airportIcao, price, validFrom, validTo]
+      properties:
+        id: { type: string }
+        vendorId: { type: string }
+        serviceId: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        price: { $ref: '#/components/schemas/Money' }
+        minCharge:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        surcharges:
+          type: array
+          items: { $ref: '#/components/schemas/Surcharge' }
+
+    VendorPriceCreate:
+      type: object
+      required: [vendorId, serviceId, airportIcao, price, validFrom, validTo]
+      properties:
+        vendorId: { type: string }
+        serviceId: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        price: { $ref: '#/components/schemas/Money' }
+        minCharge: { $ref: '#/components/schemas/Money' }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        surcharges:
+          type: array
+          items: { $ref: '#/components/schemas/Surcharge' }
+
+    # ───────────────────────────── КОНТРАГЕНТЫ ─────────────────────────────
+
+    PaymentTerms:
+      type: object
+      required: [mode, deferDays]
+      properties:
+        mode:
+          type: string
+          enum: [prepayment, postpayment, deferred]
+        deferDays: { type: integer, minimum: 0 }
+        prepaymentPercent: { $ref: '#/components/schemas/DecimalString' }
+
+    Contact:
+      type: object
+      required: [name, email, locale, isPrimary]
+      properties:
+        name: { type: string }
+        role: { type: string }
+        email: { type: string, format: email }
+        phone: { type: [string, 'null'] }
+        locale: { $ref: '#/components/schemas/Locale' }
+        isPrimary: { type: boolean }
+
+    Client:
+      type: object
+      required: [id, name, legalName, settlementCurrency, paymentTerms, isActive]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        legalName: { type: string }
+        country: { type: string }
+        settlementCurrency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        contacts:
+          type: array
+          items: { $ref: '#/components/schemas/Contact' }
+        defaultLocale: { $ref: '#/components/schemas/Locale' }
+        creditLimit:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        isActive: { type: boolean }
+        dataSource: { $ref: '#/components/schemas/DataSource' }
+        isDemo: { type: boolean }
+
+    ClientCreate:
+      type: object
+      required: [name, legalName, settlementCurrency, paymentTerms]
+      properties:
+        name: { type: string }
+        legalName: { type: string }
+        country: { type: string }
+        settlementCurrency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        contacts:
+          type: array
+          items: { $ref: '#/components/schemas/Contact' }
+        defaultLocale: { $ref: '#/components/schemas/Locale' }
+
+    VendorCertificate:
+      type: object
+      required: [kind, number, validFrom, validTo]
+      properties:
+        kind:
+          type: string
+          enum: [IATA, ADR, ISO, other]
+        number: { type: string }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+
+    Vendor:
+      type: object
+      required: [id, name, legalName, specializations, settlementCurrency, isActive]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        legalName: { type: string }
+        specializations:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceCategory' }
+        coverage:
+          type: object
+          properties:
+            airports:
+              type: array
+              items: { $ref: '#/components/schemas/IcaoCode' }
+            regions:
+              type: array
+              items: { type: string }
+        settlementCurrency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        certificates:
+          type: array
+          items: { $ref: '#/components/schemas/VendorCertificate' }
+        contacts:
+          type: array
+          items: { $ref: '#/components/schemas/Contact' }
+        exchangeMethod:
+          type: string
+          enum: [portal, email, api]
+          description: Способ обмена заявками (`INTEGRATIONS § 5.2`)
+        manualQualityScore:
+          type: integer
+          minimum: 0
+          maximum: 5
+          description: Ручная оценка качества диспетчером, входит в рейтинг с весом 0.20
+        rating:
+          oneOf:
+            - $ref: '#/components/schemas/VendorRating'
+            - type: 'null'
+        isActive: { type: boolean }
+        dataSource: { $ref: '#/components/schemas/DataSource' }
+        isDemo: { type: boolean }
+
+    VendorCreate:
+      type: object
+      required: [name, legalName, specializations, settlementCurrency]
+      properties:
+        name: { type: string }
+        legalName: { type: string }
+        specializations:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceCategory' }
+        coverage:
+          type: object
+          properties:
+            airports:
+              type: array
+              items: { $ref: '#/components/schemas/IcaoCode' }
+            regions:
+              type: array
+              items: { type: string }
+        settlementCurrency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        contacts:
+          type: array
+          items: { $ref: '#/components/schemas/Contact' }
+        exchangeMethod:
+          type: string
+          enum: [portal, email, api]
+
+    VendorRating:
+      type: object
+      required: [sufficientData]
+      description: |
+        Рейтинг вычисляется по `DOMAIN § 7.4`, а не вводится. При менее чем 5 заявках
+        возвращается `sufficientData: false` — цифра не выдумывается.
+      properties:
+        sufficientData: { type: boolean }
+        rating:
+          oneOf:
+            - $ref: '#/components/schemas/DecimalString'
+            - type: 'null'
+        orderCount: { type: integer }
+        components:
+          type: object
+          properties:
+            onTimeConfirmRate: { $ref: '#/components/schemas/DecimalString' }
+            slaComplianceRate: { $ref: '#/components/schemas/DecimalString' }
+            billingAccuracy: { $ref: '#/components/schemas/DecimalString' }
+            qualityScore: { $ref: '#/components/schemas/DecimalString' }
+        weights:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/DecimalString' }
+
+    VendorSuggestRequest:
+      type: object
+      required: [serviceId, airportIcao, onDate]
+      properties:
+        serviceId: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        onDate: { type: string, format: date-time }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        flightId:
+          type: string
+          description: Для расчёта влияния на маржу рейса
+        mode:
+          type: string
+          enum: [price, rating, proximity, balanced, custom]
+          default: balanced
+        weights:
+          type: object
+          properties:
+            price: { $ref: '#/components/schemas/DecimalString' }
+            rating: { $ref: '#/components/schemas/DecimalString' }
+            proximity: { $ref: '#/components/schemas/DecimalString' }
+
+    VendorCandidate:
+      type: object
+      required: [vendorId, vendorName, cost, totalScore]
+      description: Разложение балла обязательно — решение должно быть объяснимым.
+      properties:
+        vendorId: { type: string }
+        vendorName: { type: string }
+        cost: { $ref: '#/components/schemas/Money' }
+        priceScore: { $ref: '#/components/schemas/DecimalString' }
+        ratingScore: { $ref: '#/components/schemas/DecimalString' }
+        proximityScore: { $ref: '#/components/schemas/DecimalString' }
+        totalScore: { $ref: '#/components/schemas/DecimalString' }
+        distanceKm:
+          type: [number, 'null']
+        hasBaseAtAirport: { type: boolean }
+        marginImpact:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+
+    ContractStatus:
+      type: string
+      enum: [active, expiring, expired, terminated]
+      description: Вычисляется от дат, кроме `terminated` — он от `terminatedAt` (G-42).
+
+    VendorContract:
+      type: object
+      required: [id, vendorId, number, validFrom, validTo, currency, status]
+      properties:
+        id: { type: string }
+        vendorId: { type: string }
+        number: { type: string }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        terminatedAt: { type: [string, 'null'], format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        status: { $ref: '#/components/schemas/ContractStatus' }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/AttachmentRef' }
+
+    VendorContractCreate:
+      type: object
+      required: [vendorId, number, validFrom, validTo, currency, paymentTerms]
+      properties:
+        vendorId: { type: string }
+        number: { type: string }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+
+    TariffRule:
+      type: object
+      required: [id, clientId, scope, pricing, validFrom, validTo]
+      properties:
+        id: { type: string }
+        clientId: { type: string }
+        scope:
+          type: object
+          description: |
+            Приоритет: услуга (3) → категория (2) → всё (1); совпадение аэропорта
+            добавляет 1. При равном приоритете выигрывает более поздний `validFrom`.
+          properties:
+            serviceId: { type: [string, 'null'] }
+            category:
+              oneOf:
+                - $ref: '#/components/schemas/ServiceCategory'
+                - type: 'null'
+            airportIcao: { type: [string, 'null'] }
+        pricing:
+          oneOf:
+            - type: object
+              required: [mode, markupPercent]
+              properties:
+                mode: { type: string, const: cost_plus }
+                markupPercent: { $ref: '#/components/schemas/DecimalString' }
+            - type: object
+              required: [mode, price]
+              properties:
+                mode: { type: string, const: fixed }
+                price: { $ref: '#/components/schemas/Money' }
+            - type: object
+              required: [mode]
+              properties:
+                mode: { type: string, const: pass_through }
+        discount:
+          type: object
+          properties:
+            kind: { type: string, enum: [percent, fixed] }
+            value: { $ref: '#/components/schemas/DecimalString' }
+        validFrom: { type: string, format: date-time }
+        validTo: { type: string, format: date-time }
+
+    TariffRuleCreate:
+      allOf:
+        - $ref: '#/components/schemas/TariffRule'
+
+    TariffSimulateRequest:
+      type: object
+      required: [serviceId, airportIcao, onDate]
+      properties:
+        serviceId: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        onDate: { type: string, format: date-time }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        purchasePrice: { $ref: '#/components/schemas/Money' }
+
+    TariffSimulateResult:
+      type: object
+      required: [salePrice, explanation]
+      properties:
+        salePrice: { $ref: '#/components/schemas/Money' }
+        appliedRuleId: { type: [string, 'null'] }
+        explanation:
+          type: array
+          description: 'Пошаговое объяснение: какое правило выбрано, почему, как посчитано.'
+          items:
+            type: object
+            properties:
+              step: { type: string }
+              detail: { type: string }
+              value: { $ref: '#/components/schemas/DecimalString' }
+        candidateRules:
+          type: array
+          items:
+            type: object
+            properties:
+              ruleId: { type: string }
+              priority: { type: integer }
+              selected: { type: boolean }
+              reason: { type: string }
+
+    VendorServiceMapping:
+      type: object
+      required: [vendorId, vendorCode, serviceId]
+      description: Сопоставление номенклатуры поставщика с каталогом (ADR-024)
+      properties:
+        id: { type: string }
+        vendorId: { type: string }
+        vendorCode: { type: string }
+        vendorName: { type: string }
+        serviceId: { type: string }
+
+    # ───────────────────────────── РЕЙСЫ ─────────────────────────────
+
+    FlightStatus:
+      type: string
+      enum:
+        - planned
+        - in_work
+        - ready_for_departure
+        - in_flight
+        - arrived
+        - completed
+        - cancelled
+        - aog
+      description: |
+        Состояние `arrived` введено ADR-009: между физическим прилётом и закрытием рейса
+        проходят часы, за которые оформляются акты и выставляется счёт.
+        Определение автомата — `shared/state-machines/flight.json`.
+
+    FlightTransition:
+      type: string
+      enum: [start, ready, depart, arrive, complete, cancel, aog, resume]
+
+    FlightType:
+      type: string
+      enum: [charter, ferry, ambulance, cargo, technical]
+
+    Flight:
+      type: object
+      required:
+        [id, number, clientId, type, depIcao, arrIcao, stdUtc, staUtc, status,
+         billingCurrency, isInternational]
+      properties:
+        id: { type: string }
+        number: { type: string, examples: ['SLG-1042'] }
+        clientId: { type: string }
+        aircraftId: { type: [string, 'null'] }
+        type: { $ref: '#/components/schemas/FlightType' }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        stdUtc: { type: string, format: date-time, description: Плановый вылет }
+        staUtc: { type: string, format: date-time, description: Плановый прилёт }
+        atdUtc: { type: [string, 'null'], format: date-time }
+        ataUtc: { type: [string, 'null'], format: date-time }
+        status: { $ref: '#/components/schemas/FlightStatus' }
+        availableTransitions:
+          type: array
+          items: { $ref: '#/components/schemas/FlightTransition' }
+        blockedTransitions:
+          type: array
+          description: Недоступные переходы с перечнем невыполненных условий
+          items:
+            type: object
+            properties:
+              transition: { $ref: '#/components/schemas/FlightTransition' }
+              unmetConditions:
+                type: array
+                items: { type: string }
+        statusReason:
+          type: [object, 'null']
+          properties:
+            code: { type: string }
+            comment: { type: string }
+        isInternational:
+          type: boolean
+          description: Вычисляется из стран аэропортов (G-45)
+        paxCount: { type: integer }
+        crew:
+          type: array
+          items: { $ref: '#/components/schemas/CrewMember' }
+        distanceNm:
+          type: number
+          description: |
+            Ортодромия по координатам. Ветер, эшелоны и запасные аэродромы
+            не учитываются: расчёт плановый и оценочный (`DOMAIN § 7.8`).
+        blockTimeMin: { type: integer }
+        fuelPlanKg: { type: integer }
+        billingCurrency: { $ref: '#/components/schemas/CurrencyCode' }
+        fxSnapshot: { $ref: '#/components/schemas/FxSnapshot' }
+        templateId: { type: [string, 'null'] }
+        remarks: { type: [string, 'null'] }
+        dataSource: { $ref: '#/components/schemas/DataSource' }
+        isDemo: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+
+    FlightListItem:
+      type: object
+      required: [id, number, status, depIcao, arrIcao, stdUtc, staUtc]
+      properties:
+        id: { type: string }
+        number: { type: string }
+        clientId: { type: string }
+        clientName: { type: string }
+        aircraftId: { type: [string, 'null'] }
+        aircraftRegistration: { type: [string, 'null'] }
+        type: { $ref: '#/components/schemas/FlightType' }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        stdUtc: { type: string, format: date-time }
+        staUtc: { type: string, format: date-time }
+        status: { $ref: '#/components/schemas/FlightStatus' }
+        unconfirmedServicesCount: { type: integer }
+        marginPercent:
+          oneOf:
+            - $ref: '#/components/schemas/DecimalString'
+            - type: 'null'
+        hasConflicts: { type: boolean }
+        isDemo: { type: boolean }
+
+    FlightCreate:
+      type: object
+      required: [clientId, type, depIcao, arrIcao, stdUtc]
+      properties:
+        number:
+          type: string
+          description: Если не указан, присваивается системой
+        clientId: { type: string }
+        aircraftId: { type: string }
+        type: { $ref: '#/components/schemas/FlightType' }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        stdUtc: { type: string, format: date-time }
+        staUtc:
+          type: string
+          format: date-time
+          description: Если не указан, рассчитывается по `DOMAIN § 7.8`
+        paxCount: { type: integer }
+        crewIds:
+          type: array
+          items: { type: string }
+        remarks: { type: string }
+        conflictOverrideReason:
+          type: string
+          description: |
+            Обязателен, если есть конфликт расписания. Попадает в аудит
+            (`SPEC § 4.1`).
+
+    FlightUpdate:
+      type: object
+      properties:
+        aircraftId: { type: [string, 'null'] }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        stdUtc: { type: string, format: date-time }
+        staUtc: { type: string, format: date-time }
+        paxCount: { type: integer }
+        crewIds:
+          type: array
+          items: { type: string }
+        remarks: { type: string }
+        conflictOverrideReason: { type: string }
+
+    FlightTransitionRequest:
+      type: object
+      required: [transition]
+      properties:
+        transition: { $ref: '#/components/schemas/FlightTransition' }
+        reasonCode:
+          type: string
+          description: Обязателен для переходов `cancel` и `aog`
+        comment: { type: string }
+        completeWithoutInvoice:
+          type: boolean
+          description: Явный отказ от счёта при завершении, требует причины
+
+    ScheduleConflict:
+      type: object
+      required: [kind, flightId, message]
+      properties:
+        kind:
+          type: string
+          enum: [overlap, turnaround, aircraft_unserviceable, expired_approval, missing_slot]
+        flightId: { type: string }
+        relatedFlightId: { type: [string, 'null'] }
+        aircraftId: { type: [string, 'null'] }
+        message: { type: string }
+        severity:
+          type: string
+          enum: [warning, blocking]
+
+    FlightTemplate:
+      type: object
+      required: [id, name, clientId, aircraftTypeId, depIcao, arrIcao, depTimeLocal, weekdays]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        clientId: { type: string }
+        aircraftTypeId: { type: string }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        depTimeLocal:
+          type: string
+          pattern: '^([01]\d|2[0-3]):[0-5]\d$'
+          description: |
+            Время вылета в локальной зоне аэропорта вылета. В UTC переводится
+            на каждую дату отдельно — с учётом перехода на летнее время.
+        weekdays:
+          type: array
+          items: { type: integer, minimum: 1, maximum: 7 }
+        defaultServices:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceId: { type: string }
+              leg: { $ref: '#/components/schemas/ServiceLeg' }
+              attributes:
+                type: object
+                additionalProperties: true
+
+    FlightTemplateCreate:
+      allOf:
+        - $ref: '#/components/schemas/FlightTemplate'
+
+    GenerateSeriesRequest:
+      type: object
+      required: [from, to]
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        exceptions:
+          type: array
+          items: { type: string, format: date }
+        preview:
+          type: boolean
+          default: true
+          description: Предпросмотр списка будущих рейсов до создания
+
+    FlightRequestStatus:
+      type: string
+      enum: [pending, approved, rejected]
+
+    FlightRequest:
+      type: object
+      required: [id, clientId, depIcao, arrIcao, requestedStdUtc, status]
+      properties:
+        id: { type: string }
+        clientId: { type: string }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        requestedStdUtc: { type: string, format: date-time }
+        paxCount: { type: integer }
+        comment: { type: string }
+        status: { $ref: '#/components/schemas/FlightRequestStatus' }
+        createdFlightId: { type: [string, 'null'] }
+        rejectionReason: { type: [string, 'null'] }
+        createdAt: { type: string, format: date-time }
+
+    FlightRequestCreate:
+      type: object
+      required: [depIcao, arrIcao, requestedStdUtc]
+      properties:
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        requestedStdUtc: { type: string, format: date-time }
+        paxCount: { type: integer }
+        templateId: { type: string }
+        comment: { type: string }
+
+    Slot:
+      type: object
+      required: [id, airportIcao, flightId, kind, status]
+      properties:
+        id: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        flightId: { type: string }
+        kind:
+          type: string
+          enum: [arrival, departure]
+        requestedTimeUtc: { type: string, format: date-time }
+        confirmedTimeUtc: { type: [string, 'null'], format: date-time }
+        status:
+          type: string
+          enum: [requested, confirmed, rejected, cancelled]
+        messageRef:
+          type: [string, 'null']
+          description: Номер сообщения SCR/SIR
+        comment: { type: [string, 'null'] }
+
+    SlotCreate:
+      type: object
+      required: [airportIcao, flightId, kind, requestedTimeUtc]
+      properties:
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        flightId: { type: string }
+        kind:
+          type: string
+          enum: [arrival, departure]
+        requestedTimeUtc: { type: string, format: date-time }
+
+    # ───────────────────────────── ЗАЯВКИ НА УСЛУГИ ─────────────────────────────
+
+    ServiceLeg:
+      type: string
+      enum: [departure, arrival]
+
+    ServiceOrderStatus:
+      type: string
+      enum: [draft, ordered, confirmed, in_progress, completed, rejected, cancelled]
+
+    ServiceOrderTransition:
+      type: string
+      enum: [order, confirm, reject, begin, finish, cancel]
+
+    AttachmentRef:
+      type: object
+      required: [id, fileName, mimeType, sizeBytes, kind, storageKey]
+      properties:
+        id: { type: string }
+        fileName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        kind:
+          type: string
+          enum: [act, receipt, invoice, waybill, contract, other]
+        storageKey:
+          type: string
+          description: Ключ в объектном хранилище S3 (ADR-007)
+        downloadUrl:
+          type: string
+          description: Подписанная ссылка с ограниченным сроком жизни
+        uploadedAt: { type: string, format: date-time }
+        uploadedBy: { type: string }
+
+    ServiceOrder:
+      type: object
+      required: [id, flightId, serviceId, leg, airportIcao, status, quantity]
+      properties:
+        id: { type: string }
+        flightId: { type: string }
+        serviceId: { type: string }
+        service: { $ref: '#/components/schemas/ServiceCatalogItem' }
+        leg: { $ref: '#/components/schemas/ServiceLeg' }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        vendorId: { type: [string, 'null'] }
+        vendorName: { type: [string, 'null'] }
+        contractId: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/ServiceOrderStatus' }
+        availableTransitions:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceOrderTransition' }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        actualQuantity:
+          oneOf:
+            - $ref: '#/components/schemas/DecimalString'
+            - type: 'null'
+          description: |
+            Фактическое количество, идёт в счёт (ADR-020). Для топлива план и факт
+            расходятся на каждом рейсе.
+        attributes:
+          type: object
+          additionalProperties: true
+        purchasePrice:
+          $ref: '#/components/schemas/Money'
+        actualPurchaseUnitPrice:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        purchaseSurcharges:
+          type: array
+          items: { $ref: '#/components/schemas/Surcharge' }
+        purchaseCost:
+          $ref: '#/components/schemas/Money'
+        salePrice:
+          $ref: '#/components/schemas/Money'
+        tariffRuleId:
+          type: [string, 'null']
+          description: Какое правило сработало — для объяснимости
+        contractTermsSnapshot:
+          type: object
+          description: Снимок условий контракта на момент назначения (ADR-025)
+          properties:
+            currency: { $ref: '#/components/schemas/CurrencyCode' }
+            mode: { type: string }
+            deferDays: { type: integer }
+        orderedAt: { type: [string, 'null'], format: date-time }
+        confirmedAt: { type: [string, 'null'], format: date-time }
+        startedAt: { type: [string, 'null'], format: date-time }
+        completedAt: { type: [string, 'null'], format: date-time }
+        actualStartAt: { type: [string, 'null'], format: date-time }
+        actualEndAt: { type: [string, 'null'], format: date-time }
+        slaConfirmDeadline: { type: [string, 'null'], format: date-time }
+        slaBreached: { type: boolean }
+        rejectionReason: { type: [string, 'null'] }
+        replacedOrderId: { type: [string, 'null'] }
+        documents:
+          type: array
+          items: { $ref: '#/components/schemas/AttachmentRef' }
+        dataSource: { $ref: '#/components/schemas/DataSource' }
+        isDemo: { type: boolean }
+
+    ServiceOrderCreate:
+      type: object
+      required: [serviceId, leg, quantity]
+      properties:
+        serviceId: { type: string }
+        leg: { $ref: '#/components/schemas/ServiceLeg' }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        vendorId: { type: string }
+        attributes:
+          type: object
+          additionalProperties: true
+        overrideReason:
+          type: string
+          description: Обязателен при провале неблокирующих проверок (лидтайм, погода)
+
+    ServiceOrderUpdate:
+      type: object
+      properties:
+        vendorId:
+          type: string
+          description: Назначение поставщика фиксирует снимок цены и условий контракта
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        actualQuantity: { $ref: '#/components/schemas/DecimalString' }
+        actualStartAt: { type: string, format: date-time }
+        actualEndAt: { type: string, format: date-time }
+        attributes:
+          type: object
+          additionalProperties: true
+        documentStorageKey:
+          type: string
+          description: Подтверждение загруженного файла
+
+    ServiceOrderTransitionRequest:
+      type: object
+      required: [transition]
+      properties:
+        transition: { $ref: '#/components/schemas/ServiceOrderTransition' }
+        reasonCode: { type: string }
+        comment: { type: string }
+        actualStartAt: { type: string, format: date-time }
+        actualEndAt: { type: string, format: date-time }
+        actualQuantity: { $ref: '#/components/schemas/DecimalString' }
+
+    UploadRequest:
+      type: object
+      required: [fileName, mimeType, sizeBytes, kind]
+      properties:
+        fileName: { type: string }
+        mimeType: { type: string }
+        sizeBytes: { type: integer }
+        kind:
+          type: string
+          enum: [act, receipt, invoice, waybill, contract, other]
+
+    UploadTicket:
+      type: object
+      required: [uploadUrl, storageKey, expiresAt]
+      properties:
+        uploadUrl: { type: string }
+        storageKey: { type: string }
+        expiresAt: { type: string, format: date-time }
+        maxSizeBytes: { type: integer }
+
+    # ───────────────────────────── БИЛЛИНГ ─────────────────────────────
+
+    FxSnapshot:
+      type: object
+      required: [date, base, rates, policy]
+      description: |
+        База — рубль. `rates[c]` — сколько рублей стоит одна единица валюты `c`
+        (ADR-004). Номинал источника нормализован при загрузке.
+      properties:
+        date: { type: string, format: date-time }
+        base:
+          type: string
+          const: RUB
+        rates:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/DecimalString' }
+          examples:
+            - { RUB: '1', USD: '92.4500', EUR: '100.1200' }
+        policy:
+          type: string
+          enum: [document_date, order_date]
+          description: |
+            `payment_date` исключена как нереализуемая: документ выставляется
+            до оплаты (ADR-004).
+        source: { $ref: '#/components/schemas/DataSource' }
+        staleSince:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            Заполнено, если источник недоступен и используется последний известный
+            курс. Показывается пользователю.
+
+    DocumentLine:
+      type: object
+      required: [description, airportIcao, quantity, unitPrice, amount]
+      properties:
+        serviceOrderId: { type: string }
+        description: { type: string }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        amount:
+          $ref: '#/components/schemas/Money'
+        vatRateId: { type: [string, 'null'] }
+        vatAmount: { $ref: '#/components/schemas/Money' }
+
+    DocumentFee:
+      type: object
+      required: [code, kind, value, amount]
+      properties:
+        code:
+          type: string
+          enum: [handling_fee, commission, transport_fee, other]
+        description: { type: string }
+        kind: { type: string, enum: [percent, fixed] }
+        value: { $ref: '#/components/schemas/DecimalString' }
+        amount: { $ref: '#/components/schemas/Money' }
+
+    DocumentTotals:
+      type: object
+      required: [subtotal, discountTotal, feesTotal, vatTotal, grandTotal]
+      description: |
+        Итоги считаются суммой **уже округлённых** строк, чтобы «итого» сходилось
+        с колонкой на экране и в печатной форме (ADR-002).
+      properties:
+        subtotal: { $ref: '#/components/schemas/Money' }
+        discountTotal: { $ref: '#/components/schemas/Money' }
+        feesTotal: { $ref: '#/components/schemas/Money' }
+        vatTotal: { $ref: '#/components/schemas/Money' }
+        grandTotal: { $ref: '#/components/schemas/Money' }
+
+    QuoteStatus:
+      type: string
+      enum: [draft, issued, accepted, declined, expired, voided]
+
+    Quote:
+      type: object
+      required: [id, flightId, clientId, status, currency, lines, totals]
+      properties:
+        id: { type: string }
+        number:
+          type: [string, 'null']
+          description: Присваивается при выставлении, сквозная нумерация без дыр
+        flightId: { type: string }
+        clientId: { type: string }
+        status: { $ref: '#/components/schemas/QuoteStatus' }
+        issuedAt: { type: [string, 'null'], format: date-time }
+        validUntil: { type: [string, 'null'], format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        fx: { $ref: '#/components/schemas/FxSnapshot' }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentLine' }
+        fees:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentFee' }
+        totals: { $ref: '#/components/schemas/DocumentTotals' }
+        voidedByDocId: { type: [string, 'null'] }
+        isDemo: { type: boolean }
+
+    InvoiceStatus:
+      type: string
+      enum: [draft, issued, sent, partially_paid, paid, overdue, voided]
+      description: |
+        Начиная с `issued` статус оплаты **вычисляется** из суммы платежей,
+        а не присваивается (ADR-019).
+
+    Invoice:
+      type: object
+      required: [id, flightId, clientId, status, currency, lines, totals]
+      properties:
+        id: { type: string }
+        number: { type: [string, 'null'] }
+        flightId: { type: string }
+        clientId: { type: string }
+        quoteId: { type: [string, 'null'] }
+        status: { $ref: '#/components/schemas/InvoiceStatus' }
+        issuedAt: { type: [string, 'null'], format: date-time }
+        dueDate: { type: [string, 'null'], format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        fx: { $ref: '#/components/schemas/FxSnapshot' }
+        lines:
+          type: array
+          description: По фактически оказанным услугам и фактическому количеству
+          items: { $ref: '#/components/schemas/DocumentLine' }
+        fees:
+          type: array
+          items: { $ref: '#/components/schemas/DocumentFee' }
+        totals: { $ref: '#/components/schemas/DocumentTotals' }
+        paidAmount: { $ref: '#/components/schemas/Money' }
+        planFactComparison:
+          type: array
+          description: |
+            Сопоставление с котировкой: за счёт чего счёт отличается от плана
+            (`SPEC § 7.2`).
+          items:
+            type: object
+            properties:
+              serviceOrderId: { type: string }
+              kind:
+                type: string
+                enum: [quantity_changed, price_changed, tariff_changed, added, removed]
+              planValue: { $ref: '#/components/schemas/Money' }
+              factValue: { $ref: '#/components/schemas/Money' }
+              comment: { type: string }
+        voidedByDocId: { type: [string, 'null'] }
+        isDemo: { type: boolean }
+
+    PaymentCreate:
+      type: object
+      required: [clientId, amount, receivedAt]
+      properties:
+        clientId: { type: string }
+        amount: { $ref: '#/components/schemas/Money' }
+        receivedAt: { type: string, format: date-time }
+        allocations:
+          type: array
+          description: Распределение платежа по счетам
+          items:
+            type: object
+            required: [invoiceId, amount]
+            properties:
+              invoiceId: { type: string }
+              amount: { $ref: '#/components/schemas/Money' }
+        source:
+          type: string
+          enum: [manual, onec, edo]
+        externalId: { type: string }
+        comment: { type: string }
+
+    Payment:
+      allOf:
+        - $ref: '#/components/schemas/PaymentCreate'
+        - type: object
+          required: [id]
+          properties:
+            id: { type: string }
+            fxRate: { $ref: '#/components/schemas/DecimalString' }
+            createdAt: { type: string, format: date-time }
+
+    PayableStatus:
+      type: string
+      enum: [pending, approved, scheduled, paid, disputed, cancelled]
+
+    PayableItem:
+      type: object
+      required: [id, vendorId, amount, dueDate, status]
+      properties:
+        id: { type: string }
+        number: { type: [string, 'null'] }
+        vendorId: { type: string }
+        vendorName: { type: string }
+        serviceOrderIds:
+          type: array
+          items: { type: string }
+        amount: { $ref: '#/components/schemas/Money' }
+        dueDate:
+          type: string
+          format: date-time
+          description: Дата выполнения плюс отсрочка из снимка условий контракта
+        status: { $ref: '#/components/schemas/PayableStatus' }
+        isOverdue: { type: boolean }
+        vendorInvoiceId: { type: [string, 'null'] }
+
+    VendorInvoiceLine:
+      type: object
+      required: [airportIcao, serviceDate, serviceCode, quantity, unitPrice, amount]
+      properties:
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        serviceDate: { type: string, format: date-time }
+        serviceCode:
+          type: string
+          description: Код в номенклатуре поставщика, сопоставляется по ADR-024
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        unitPrice: { $ref: '#/components/schemas/Money' }
+        amount: { $ref: '#/components/schemas/Money' }
+
+    VendorInvoiceImport:
+      type: object
+      required: [vendorId, number, issuedAt, currency, lines]
+      properties:
+        vendorId: { type: string }
+        number: { type: string }
+        issuedAt: { type: string, format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/VendorInvoiceLine' }
+
+    VendorInvoice:
+      type: object
+      required: [id, vendorId, number, issuedAt, currency, lines]
+      properties:
+        id: { type: string }
+        vendorId: { type: string }
+        number: { type: string }
+        issuedAt: { type: string, format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        lines:
+          type: array
+          items: { $ref: '#/components/schemas/VendorInvoiceLine' }
+        reconciliation: { $ref: '#/components/schemas/ReconciliationResult' }
+        unmappedCodes:
+          type: array
+          description: Коды поставщика, не сопоставленные с каталогом (ADR-024)
+          items: { type: string }
+
+    ReconciliationResult:
+      type: object
+      required: [totalOurs, totalTheirs, delta]
+      properties:
+        matched:
+          type: array
+          items:
+            type: object
+            properties:
+              lineIndex: { type: integer }
+              serviceOrderId: { type: string }
+        discrepancies:
+          type: array
+          items: { $ref: '#/components/schemas/Discrepancy' }
+        totalOurs: { $ref: '#/components/schemas/Money' }
+        totalTheirs: { $ref: '#/components/schemas/Money' }
+        delta: { $ref: '#/components/schemas/Money' }
+        resolvedAt: { type: [string, 'null'], format: date-time }
+
+    Discrepancy:
+      type: object
+      required: [kind]
+      properties:
+        kind:
+          type: string
+          enum: [price_mismatch, quantity_mismatch, missing_on_our_side, missing_on_their_side]
+        lineIndex: { type: [integer, 'null'] }
+        serviceOrderId: { type: [string, 'null'] }
+        ours:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        theirs:
+          oneOf:
+            - $ref: '#/components/schemas/Money'
+            - type: 'null'
+        resolution:
+          type: [string, 'null']
+          enum: [accept_theirs, keep_ours, claim, investigate, null]
+        comment: { type: [string, 'null'] }
+
+    ResolveDiscrepancyRequest:
+      type: object
+      required: [discrepancyIndex, resolution]
+      properties:
+        discrepancyIndex: { type: integer }
+        resolution:
+          type: string
+          enum: [accept_theirs, keep_ours, claim, investigate]
+        comment: { type: string }
+
+    MarginMode:
+      type: string
+      enum: [plan, fact, mixed]
+      default: mixed
+
+    MarginResult:
+      type: object
+      required: [mode, currency, revenue, cost, margin]
+      description: |
+        Отрицательная маржа отображается, а не обнуляется. При нулевой выручке
+        `marginPercent` равен `null`, а не нулю — деления на ноль не происходит.
+      properties:
+        mode: { $ref: '#/components/schemas/MarginMode' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        revenue: { $ref: '#/components/schemas/Money' }
+        cost: { $ref: '#/components/schemas/Money' }
+        margin: { $ref: '#/components/schemas/Money' }
+        marginPercent:
+          oneOf:
+            - $ref: '#/components/schemas/DecimalString'
+            - type: 'null'
+        planPortionPercent:
+          oneOf:
+            - $ref: '#/components/schemas/DecimalString'
+            - type: 'null'
+          description: Для режима `mixed` — какая доля расчёта плановая
+        isBelowThreshold: { type: boolean }
+        thresholdPercent: { $ref: '#/components/schemas/DecimalString' }
+        fx: { $ref: '#/components/schemas/FxSnapshot' }
+        calculatedAt: { type: string, format: date-time }
+
+    ExportFormat:
+      type: string
+      enum: [pdf, xlsx, csv, xml]
+
+    ExportRequest:
+      type: object
+      required: [format]
+      properties:
+        format: { $ref: '#/components/schemas/ExportFormat' }
+        locale: { $ref: '#/components/schemas/Locale' }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+
+    ExportTicket:
+      type: object
+      required: [taskId, status]
+      properties:
+        taskId: { type: string }
+        status:
+          type: string
+          enum: [queued, running, ready, failed]
+        downloadUrl: { type: [string, 'null'] }
+        expiresAt: { type: [string, 'null'], format: date-time }
+
+    # ───────────────────────────── КОММУНИКАЦИИ ─────────────────────────────
+
+    NotificationKind:
+      type: string
+      enum:
+        - flight_status
+        - service_confirmed
+        - service_rejected
+        - deadline
+        - sla_breach
+        - contract_expiry
+        - payment_overdue
+        - low_margin
+
+    Notification:
+      type: object
+      required: [id, kind, severity, title, createdAt]
+      properties:
+        id: { type: string }
+        kind: { $ref: '#/components/schemas/NotificationKind' }
+        severity:
+          type: string
+          enum: [info, warning, critical]
+        title: { type: string }
+        body: { type: string }
+        link: { type: string }
+        readAt: { type: [string, 'null'], format: date-time }
+        createdAt: { type: string, format: date-time }
+
+    MessageChannel:
+      type: string
+      enum: [email, messenger, portal]
+
+    OutboxStatus:
+      type: string
+      enum: [queued, sent, delivered, failed]
+
+    OutboxMessage:
+      type: object
+      required: [id, channel, to, subject, body, status]
+      properties:
+        id: { type: string }
+        channel: { $ref: '#/components/schemas/MessageChannel' }
+        channelMode:
+          $ref: '#/components/schemas/IntegrationMode'
+        to:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              address: { type: string }
+              locale: { $ref: '#/components/schemas/Locale' }
+        templateCode: { type: string }
+        subject: { type: string }
+        body: { type: string }
+        attachments:
+          type: array
+          items: { $ref: '#/components/schemas/AttachmentRef' }
+        relatedTo:
+          type: object
+          properties:
+            entityType: { type: string }
+            entityId: { type: string }
+        status: { $ref: '#/components/schemas/OutboxStatus' }
+        attempts: { type: integer }
+        lastError: { type: [string, 'null'] }
+        sentAt: { type: [string, 'null'], format: date-time }
+        emlUrl:
+          type: [string, 'null']
+          description: Выгрузка сообщения в `.eml` (доступна в режиме `stub`)
+
+    InboxMessage:
+      type: object
+      required: [id, receivedAt, recognized]
+      properties:
+        id: { type: string }
+        channel: { $ref: '#/components/schemas/MessageChannel' }
+        from: { type: string }
+        subject: { type: string }
+        body: { type: string }
+        receivedAt: { type: string, format: date-time }
+        recognized:
+          type: boolean
+          description: |
+            Нераспознанные попадают в очередь ручного разбора — штатный сценарий,
+            а не ошибка (`INTEGRATIONS § 3.3`).
+        serviceOrderId: { type: [string, 'null'] }
+        suggestedAction: { type: [string, 'null'] }
+        appliedAt: { type: [string, 'null'], format: date-time }
+
+    MessageTemplate:
+      type: object
+      required: [code, channel, subject, body]
+      properties:
+        id: { type: string }
+        code:
+          type: string
+          description: |
+            Обязательный набор шаблонов перечислен в `SPEC § 8.2`.
+        channel: { $ref: '#/components/schemas/MessageChannel' }
+        subject: { $ref: '#/components/schemas/LocalizedName' }
+        body: { $ref: '#/components/schemas/LocalizedName' }
+        variables:
+          type: array
+          items: { type: string }
+          examples: [['flight.number', 'client.name']]
+
+    # ───────────────────────────── ОТЧЁТНОСТЬ ─────────────────────────────
+
+    ReportCode:
+      type: string
+      enum:
+        - flights_period
+        - services_rendered
+        - financial
+        - vendors
+        - receivables_payables
+        - sla_breaches
+        - flight_audit
+
+    ReportDefinition:
+      type: object
+      required: [code, name, parameters]
+      properties:
+        code: { $ref: '#/components/schemas/ReportCode' }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        parameters:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              type: { type: string }
+              required: { type: boolean }
+
+    ReportResult:
+      type: object
+      required: [code, generatedAt, columns, rows]
+      properties:
+        code: { $ref: '#/components/schemas/ReportCode' }
+        generatedAt: { type: string, format: date-time }
+        currency: { $ref: '#/components/schemas/CurrencyCode' }
+        isDemo: { type: boolean }
+        columns:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              title: { $ref: '#/components/schemas/LocalizedName' }
+              type:
+                type: string
+                enum: [string, number, money, date, percent]
+        rows:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        totals:
+          type: object
+          additionalProperties: true
+
+    ReportSubscription:
+      type: object
+      required: [code, schedule, format, recipients]
+      properties:
+        id: { type: string }
+        code: { $ref: '#/components/schemas/ReportCode' }
+        schedule:
+          type: string
+          enum: [daily, weekly, monthly]
+        timeUtc: { type: string, pattern: '^([01]\d|2[0-3]):[0-5]\d$' }
+        format: { $ref: '#/components/schemas/ExportFormat' }
+        recipients:
+          type: array
+          items: { type: string, format: email }
+        parameters:
+          type: object
+          additionalProperties: true
+
+    DashboardData:
+      type: object
+      required: [widgets]
+      properties:
+        widgets:
+          type: array
+          items:
+            type: object
+            properties:
+              code: { type: string }
+              title: { $ref: '#/components/schemas/LocalizedName' }
+              data:
+                type: object
+                additionalProperties: true
+        generatedAt: { type: string, format: date-time }
+
+    DashboardLayout:
+      type: object
+      required: [widgets]
+      properties:
+        widgets:
+          type: array
+          items:
+            type: object
+            required: [code, x, y, w, h]
+            properties:
+              code: { type: string }
+              x: { type: integer }
+              y: { type: integer }
+              w: { type: integer }
+              h: { type: integer }
+
+    # ───────────────────────────── ПОРТАЛЫ ─────────────────────────────
+
+    ClientPortalFlight:
+      type: object
+      required: [id, number, depIcao, arrIcao, stdUtc, staUtc, status]
+      description: |
+        Урезанное представление рейса для портала клиента: закупочных цен и данных
+        поставщиков нет по построению, а не по фильтрации на клиенте.
+      properties:
+        id: { type: string }
+        number: { type: string }
+        depIcao: { $ref: '#/components/schemas/IcaoCode' }
+        arrIcao: { $ref: '#/components/schemas/IcaoCode' }
+        stdUtc: { type: string, format: date-time }
+        staUtc: { type: string, format: date-time }
+        status: { $ref: '#/components/schemas/FlightStatus' }
+        services:
+          type: array
+          items:
+            type: object
+            properties:
+              serviceName: { $ref: '#/components/schemas/LocalizedName' }
+              leg: { $ref: '#/components/schemas/ServiceLeg' }
+              status: { $ref: '#/components/schemas/ServiceOrderStatus' }
+
+    ClientPortalDocument:
+      type: object
+      required: [id, kind, number, status, total]
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [quote, invoice] }
+        number: { type: string }
+        issuedAt: { type: [string, 'null'], format: date-time }
+        dueDate: { type: [string, 'null'], format: date-time }
+        status: { type: string }
+        total: { $ref: '#/components/schemas/Money' }
+        downloadUrl: { type: string }
+
+    VendorPortalOrder:
+      type: object
+      required: [id, serviceName, airportIcao, status]
+      description: |
+        Поставщик видит только свои заявки: ни чужих заявок, ни закупочных цен других
+        поставщиков, ни цен продажи клиенту.
+      properties:
+        id: { type: string }
+        serviceName: { $ref: '#/components/schemas/LocalizedName' }
+        airportIcao: { $ref: '#/components/schemas/IcaoCode' }
+        flightNumber: { type: string }
+        scheduledAt: { type: string, format: date-time }
+        quantity: { $ref: '#/components/schemas/DecimalString' }
+        attributes:
+          type: object
+          additionalProperties: true
+        agreedPrice: { $ref: '#/components/schemas/Money' }
+        status: { $ref: '#/components/schemas/ServiceOrderStatus' }
+        slaConfirmDeadline: { type: [string, 'null'], format: date-time }
+        dispatcherContact:
+          type: object
+          properties:
+            name: { type: string }
+            phone: { type: string }
+            email: { type: string }
+
+    # ───────────────────────────── АДМИНИСТРИРОВАНИЕ ─────────────────────────────
+
+    AuditEntityType:
+      type: string
+      enum:
+        - flight
+        - service_order
+        - vendor
+        - contract
+        - tariff
+        - quote
+        - invoice
+        - payable
+        - payment
+        - reconciliation
+        - user
+        - settings
+        - crew
+
+    AuditEntry:
+      type: object
+      required: [id, ts, actorId, actorName, actorRole, source, entityType, entityId, action]
+      description: |
+        Записи неизменяемы. `source: seed` означает демонстрационный генератор —
+        такие записи визуально отличаются и не выдаются за действия людей
+        (`CLAUDE.md § 4`).
+      properties:
+        id: { type: string }
+        ts: { type: string, format: date-time }
+        actorId: { type: string }
+        actorName: { type: string }
+        actorRole: { $ref: '#/components/schemas/Role' }
+        source:
+          type: string
+          enum: [user, seed, system]
+        entityType: { $ref: '#/components/schemas/AuditEntityType' }
+        entityId: { type: string }
+        action: { type: string, examples: ['status_changed', 'vendor_assigned'] }
+        before:
+          type: [object, 'null']
+          additionalProperties: true
+        after:
+          type: [object, 'null']
+          additionalProperties: true
+        comment: { type: [string, 'null'] }
+        clockShifted:
+          type: boolean
+          description: Запись сделана при включённом модельном времени (ADR-014)
+
+    Settings:
+      type: object
+      description: Настройки, влияющие на расчёты.
+      properties:
+        lowMarginThresholdPercent: { $ref: '#/components/schemas/DecimalString' }
+        defaultMarkupPercent: { $ref: '#/components/schemas/DecimalString' }
+        documentNumberMasks:
+          type: object
+          properties:
+            quote: { type: string, examples: ['SOC-Q-{YYYY}-{NNNN}'] }
+            invoice: { type: string }
+            payable: { type: string }
+        fxPolicy:
+          type: string
+          enum: [document_date, order_date]
+        slaWeights:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/DecimalString' }
+        vendorSuggestWeights:
+          type: object
+          additionalProperties: { $ref: '#/components/schemas/DecimalString' }
+        contractExpiryReminders:
+          type: array
+          items: { type: integer }
+          examples: [[30, 15, 7]]
+        deicingRule:
+          type: object
+          description: Правило подсказки о необходимости обработки (ADR-029)
+          properties:
+            tempWithPrecipC: { type: integer, default: 3 }
+            tempAlwaysC: { type: integer, default: 0 }
+        pdRetentionMonths:
+          type: integer
+          description: Срок хранения персональных данных (G-37)
+        clockOffsetSeconds:
+          type: integer
+          description: |
+            Смещение модельного времени. Изменение запрещено при `DEMO_DATA=false`
+            (ADR-014).
+        clockScale:
+          type: integer
+          enum: [1, 60, 600]
+        demoMode:
+          type: boolean
+          readOnly: true
+          description: Управляется переменной окружения, из интерфейса не изменяется
+
+    SlaRule:
+      type: object
+      required: [scope, confirmMinutes]
+      description: |
+        Значения по умолчанию заданы нами до получения реальных сроков из договоров
+        заказчика (G-39).
+      properties:
+        id: { type: string }
+        scope:
+          type: object
+          properties:
+            category:
+              oneOf:
+                - $ref: '#/components/schemas/ServiceCategory'
+                - type: 'null'
+            vendorId: { type: [string, 'null'] }
+        confirmMinutes: { type: integer }
+        completionMinutes: { type: integer }
+        penalty:
+          type: object
+          properties:
+            kind: { type: string, enum: [fixed, percent, none] }
+            value: { $ref: '#/components/schemas/DecimalString' }
+
+    IntegrationCode:
+      type: string
+      enum: [FX, WX, TRACK, APT, SMTP, MSGR, MAILBOT, LDAP, ONEC, EDO, BI, SLOT, VENDOR_API, IATA]
+
+    IntegrationMode:
+      type: string
+      enum: [live, stub]
+
+    IntegrationStatus:
+      type: object
+      required: [code, mode, healthy]
+      description: |
+        Показывает **фактический** режим. Заглушка не изображает живое подключение
+        (`CLAUDE.md § 4`).
+      properties:
+        code: { $ref: '#/components/schemas/IntegrationCode' }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        mode: { $ref: '#/components/schemas/IntegrationMode' }
+        healthy: { type: boolean }
+        lastCheckAt: { type: [string, 'null'], format: date-time }
+        lastSuccessAt: { type: [string, 'null'], format: date-time }
+        errorRate24h: { $ref: '#/components/schemas/DecimalString' }
+        requiredForLive:
+          type: string
+          description: |
+            Что нужно получить от заказчика для перевода в боевой режим
+            (`INTEGRATIONS § 6`).
+
+    IntegrationCheckResult:
+      type: object
+      required: [code, mode, success, durationMs]
+      properties:
+        code: { $ref: '#/components/schemas/IntegrationCode' }
+        mode: { $ref: '#/components/schemas/IntegrationMode' }
+        success: { type: boolean }
+        durationMs: { type: integer }
+        message: { type: string }
+
+    IntegrationLogEntry:
+      type: object
+      required: [id, code, mode, direction, ts, durationMs, status]
+      properties:
+        id: { type: string }
+        code: { $ref: '#/components/schemas/IntegrationCode' }
+        mode: { $ref: '#/components/schemas/IntegrationMode' }
+        direction: { type: string, enum: [outbound, inbound] }
+        endpoint: { type: string }
+        ts: { type: string, format: date-time }
+        durationMs: { type: integer }
+        status: { type: integer }
+        responseSizeBytes: { type: integer }
+        relatedEntityType: { type: [string, 'null'] }
+        relatedEntityId: { type: [string, 'null'] }
+
+    PerformanceReport:
+      type: object
+      required: [from, to, metrics]
+      properties:
+        from: { type: string, format: date-time }
+        to: { type: string, format: date-time }
+        metrics:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string, examples: ['flight_card', 'margin_calc'] }
+              source: { type: string, enum: [server, client] }
+              p50Ms: { type: integer }
+              p95Ms: { type: integer }
+              p99Ms: { type: integer }
+              sampleCount: { type: integer }
+              thresholdMs: { type: integer }
+              withinThreshold: { type: boolean }
+
+    HealthResponse:
+      type: object
+      required: [status, checks]
+      properties:
+        status: { type: string, enum: [ok, degraded, down] }
+        version: { type: string }
+        commit: { type: string }
+        checks:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status: { type: string, enum: [ok, down] }
+              latencyMs: { type: integer }
+
+    ClockResponse:
+      type: object
+      required: [nowUtc, shifted]
+      properties:
+        nowUtc: { type: string, format: date-time }
+        shifted:
+          type: boolean
+          description: Включено модельное время демонстрационного стенда (ADR-014)
+        scale: { type: integer }

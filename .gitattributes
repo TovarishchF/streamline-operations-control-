@@ -1,0 +1,15 @@
+# Нормализация окончаний строк. Разработка идёт под Windows, исполнение —
+# в контейнерах Linux: shell-скрипт с CRLF в Docker не запустится.
+* text=auto eol=lf
+
+# Двоичные файлы не трогать
+*.docx binary
+*.png  binary
+*.jpg  binary
+*.pdf  binary
+*.zip  binary
+*.apk  binary
+
+# Сгенерированные файлы не участвуют в статистике языков и в ревью diff-ов
+shared/api-types.ts linguist-generated=true
+web/package-lock.json linguist-generated=true
