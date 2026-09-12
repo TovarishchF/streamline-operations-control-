@@ -1,0 +1,242 @@
+name: CI
+
+# Merge в main без зелёного пайплайна невозможен (`TESTING.md § 8`).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '22'
+
+jobs:
+
+  lint:
+    name: Линтеры
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Установка зависимостей сервера
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: ruff
+        working-directory: backend
+        run: ruff check .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Установка зависимостей клиента
+        working-directory: web
+        run: npm ci
+
+      - name: eslint
+        working-directory: web
+        run: npm run lint
+
+  types:
+    name: Типы
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Установка зависимостей сервера
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: mypy --strict
+        working-directory: backend
+        run: mypy .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Установка зависимостей клиента
+        working-directory: web
+        run: npm ci
+
+      - name: tsc --noEmit
+        working-directory: web
+        run: npm run typecheck
+
+  test:
+    name: Тесты
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: soc
+          POSTGRES_USER: soc
+          POSTGRES_PASSWORD: soc
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://soc:soc@localhost:5432/soc
+      REDIS_URL: redis://localhost:6379/0
+      SECRET_KEY: ci-only-not-a-real-secret
+      DEMO_DATA: 'false'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Установка зависимостей сервера
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Миграции на чистой базе
+        working-directory: backend
+        run: python manage.py migrate --noinput
+        env:
+          DJANGO_SETTINGS_MODULE: config.settings.test
+
+      - name: pytest
+        working-directory: backend
+        run: pytest -q --cov --cov-report=xml --cov-report=term
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Установка зависимостей клиента
+        working-directory: web
+        run: npm ci
+
+      - name: vitest
+        working-directory: web
+        run: npm run test -- --run
+
+      - name: Сохранение отчёта покрытия
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: backend/coverage.xml
+
+  contract:
+    name: Контракт API
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: soc
+          POSTGRES_USER: soc
+          POSTGRES_PASSWORD: soc
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 10
+
+    env:
+      DATABASE_URL: postgres://soc:soc@localhost:5432/soc
+      SECRET_KEY: ci-only-not-a-real-secret
+      DJANGO_SETTINGS_MODULE: config.settings.test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Установка зависимостей сервера
+        working-directory: backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Контракт валиден по OpenAPI 3.1
+        run: python -c "
+          from openapi_spec_validator import validate;
+          from openapi_spec_validator.readers import read_from_filename;
+          spec, _ = read_from_filename('openapi.yaml');
+          validate(spec);
+          print('openapi.yaml валиден,', spec['openapi'])"
+
+      - name: Генерация схемы из кода
+        working-directory: backend
+        run: |
+          mkdir -p ../artifacts
+          python manage.py spectacular --file ../artifacts/openapi.generated.yaml
+
+      # Расхождение контракта и схемы сервера валит сборку: именно так сервер
+      # и клиенты расходятся молча (`TESTING.md § 3`).
+      - name: Сверка схемы с контрактом
+        run: python scripts/check_schema_drift.py openapi.yaml artifacts/openapi.generated.yaml
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Типы клиентов генерируются, а не пишутся руками (`CLAUDE.md § 3` п. 6).
+      # Если сгенерированный файл отличается от закоммиченного — генерацию забыли.
+      - name: Генерация типов клиента
+        run: npx --yes openapi-typescript openapi.yaml -o shared/api-types.ts
+
+      - name: Сохранение сгенерированной схемы
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: openapi-generated
+          path: artifacts/openapi.generated.yaml
+
+  build:
+    name: Сборка образов
+    runs-on: ubuntu-latest
+    needs: [lint, types, test, contract]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Сборка образа сервера
+        run: docker build -t soc-api:${{ github.sha }} ./backend
+
+      - name: Сборка веб-клиента
+        run: docker build -t soc-web:${{ github.sha }} --target prod ./web

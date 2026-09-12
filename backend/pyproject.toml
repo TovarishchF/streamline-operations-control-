@@ -1,0 +1,146 @@
+[project]
+name = "soc-backend"
+version = "1.0.0"
+description = "SOC — Streamline Operations Control, серверная часть"
+requires-python = ">=3.12"
+
+dependencies = [
+    "Django==5.1.6",
+    "djangorestframework==3.15.2",
+    "djangorestframework-simplejwt==5.4.0",
+    "django-filter==24.3",
+    "drf-spectacular==0.28.0",
+    "django-fsm-2==4.0.0",
+    "psycopg[binary]==3.2.4",
+    "redis==5.2.1",
+    "celery==5.4.0",
+    "django-celery-beat==2.7.0",
+    "django-storages[s3]==1.14.4",
+    "boto3==1.36.11",
+    "pyotp==2.9.0",
+    "qrcode==8.0",
+    "django-auth-ldap==5.1.0",
+    "python-ulid==3.0.0",
+    "PyYAML==6.0.2",
+    "requests==2.32.3",
+    "WeasyPrint==64.0",
+    "openpyxl==3.1.5",
+    "lxml==5.3.0",
+    "django-prometheus==2.3.1",
+    "sentry-sdk==2.20.0",
+    "python-json-logger==3.2.1",
+    "django-environ==0.12.0",
+    "gunicorn==23.0.0",
+    "uvicorn[standard]==0.34.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.9.4",
+    "mypy==1.14.1",
+    "django-stubs[compatible-mypy]==5.1.2",
+    "djangorestframework-stubs[compatible-mypy]==3.15.2",
+    "types-requests==2.32.0.20241016",
+    "types-PyYAML==6.0.12.20241230",
+    "pytest==8.3.4",
+    "pytest-django==4.9.0",
+    "pytest-cov==6.0.0",
+    "pytest-xdist==3.6.1",
+    "factory-boy==3.3.1",
+    "freezegun==1.5.1",
+    "schemathesis==3.39.1",
+    "openapi-spec-validator==0.7.1",
+    "responses==0.25.6",
+]
+
+# ─────────────────────────────── ruff ───────────────────────────────
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",      # pycodestyle
+    "F",           # pyflakes
+    "I",           # isort
+    "N",           # pep8-naming
+    "UP",          # pyupgrade
+    "B",           # bugbear
+    "C4",          # comprehensions
+    "DTZ",         # наивные datetime; сверх того core/tests/test_clock.py
+                   # запрещает datetime.now() в доменном коде (CLAUDE.md § 3 п. 2)
+    "S",           # bandit
+    "RUF",
+    "DJ",          # flake8-django
+    "T20",         # никаких print в рабочем коде
+    "PL",          # pylint
+]
+ignore = [
+    "S101",        # assert допустим в тестах, см. per-file-ignores
+    "N818",        # имена доменных исключений заданы BACKEND.md § 9 (TransitionNotAllowed,
+                   # ContractExpired, PriceNotFound, CurrencyMismatch) — суффикс Error
+                   # исказил бы согласованные с документацией имена
+    "PLR0913",     # много именованных аргументов — стиль сервисного слоя (BACKEND § 3.1)
+    "RUF001",      # кириллица в строках — это рабочий язык проекта
+    "RUF002",
+    "RUF003",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "S105", "S106", "PLR2004"]
+"*/tests/*" = ["S101", "S105", "S106", "PLR2004"]
+"config/settings/*" = ["F403", "F405"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "core", "accounts", "catalog", "counterparties",
+                     "fleet", "flights", "orders", "billing", "comms", "reports",
+                     "integrations", "audit", "demo"]
+
+# ─────────────────────────────── mypy ───────────────────────────────
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+exclude = ['migrations/']
+warn_unreachable = true
+show_error_codes = true
+
+[[tool.mypy.overrides]]
+module = ["*.migrations.*"]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
+# Библиотеки без py.typed. Список ведётся явно: молчаливое
+# ignore_missing_imports = true на весь проект скрыло бы и наши опечатки.
+module = ["environ.*", "celery.*"]
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.dev"
+
+# ─────────────────────────────── pytest ───────────────────────────────
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+addopts = "--strict-markers --disable-warnings"
+markers = [
+    "integration: требует реальную PostgreSQL",
+    "contract: контрактные тесты против openapi.yaml",
+    "adapters: тесты внешних адаптеров в обоих режимах",
+]
+
+[tool.coverage.run]
+source = ["."]
+omit = ["*/migrations/*", "*/tests/*", "config/*", "manage.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]

@@ -1,0 +1,60 @@
+{
+  "app": {
+    "name": "SOC",
+    "fullName": "Streamline Operations Control",
+    "demoBadge": "DEMO STAND",
+    "demoTooltip": "Data in this system is generated. All exported documents are marked DEMO."
+  },
+  "nav": {
+    "schedule": "Daily schedule",
+    "requests": "Client requests",
+    "catalog": "Service catalogue",
+    "vendors": "Vendors",
+    "contracts": "Contracts",
+    "clients": "Clients",
+    "fleet": "Fleet",
+    "billing": "Finance",
+    "communications": "Communications",
+    "reports": "Reports",
+    "admin": "Administration"
+  },
+  "common": {
+    "loading": "Loading…",
+    "empty": "No data",
+    "error": "Failed to load data",
+    "retry": "Retry",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "search": "Search",
+    "language": "Language",
+    "utc": "UTC",
+    "localTime": "local time"
+  },
+  "health": {
+    "title": "System status",
+    "ok": "Operational",
+    "degraded": "Degraded",
+    "down": "Unavailable",
+    "database": "Database",
+    "cache": "Cache"
+  },
+  "clock": {
+    "shifted": "Simulated time",
+    "shiftedHint": "Time shifting is enabled on this stand to demonstrate automatic transitions. The chronology is not real."
+  },
+  "errors": {
+    "VALIDATION_ERROR": "Please check the entered values",
+    "PERMISSION_DENIED": "You do not have permission for this action",
+    "NOT_FOUND": "Record not found",
+    "TRANSITION_NOT_ALLOWED": "This status transition is not possible",
+    "GUARD_NOT_SATISFIED": "Transition conditions are not met",
+    "CONTRACT_EXPIRED": "The vendor contract has expired",
+    "PRICE_NOT_FOUND": "No valid price for this date",
+    "CURRENCY_MISMATCH": "Amounts in different currencies require explicit conversion",
+    "DOCUMENT_IMMUTABLE": "An issued document cannot be edited",
+    "INTEGRATION_UNAVAILABLE": "External system is unavailable",
+    "DEMO_ONLY_OPERATION": "This operation is available on the demo stand only",
+    "INTERNAL_ERROR": "Internal error. Please contact your administrator"
+  }
+}

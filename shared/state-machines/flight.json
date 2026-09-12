@@ -1,0 +1,104 @@
+{
+  "$schema": "./state-machine.schema.json",
+  "id": "flight",
+  "tzRef": "ТЗ 3.1.2",
+  "adr": "ADR-009",
+  "description": "Жизненный цикл рейса. Единое определение для сервера (django-fsm-2) и клиента (XState). Расхождение сторон — ошибка сборки (ADR-015).",
+  "initial": "planned",
+  "states": {
+    "planned": { "nameRu": "Запланирован", "nameEn": "Planned", "token": "neutral" },
+    "in_work": { "nameRu": "В работе", "nameEn": "In work", "token": "progress" },
+    "ready_for_departure": { "nameRu": "Готов к вылету", "nameEn": "Ready for departure", "token": "ready" },
+    "in_flight": { "nameRu": "В полёте", "nameEn": "In flight", "token": "active" },
+    "arrived": { "nameRu": "Прилетел", "nameEn": "Arrived", "token": "active" },
+    "completed": { "nameRu": "Завершён", "nameEn": "Completed", "token": "done", "final": true },
+    "cancelled": { "nameRu": "Отменён", "nameEn": "Cancelled", "token": "cancelled", "final": true },
+    "aog": { "nameRu": "AOG / задержка", "nameEn": "AOG / delay", "token": "critical" }
+  },
+  "transitions": [
+    {
+      "name": "start",
+      "from": ["planned"],
+      "to": "in_work",
+      "guards": ["aircraft_assigned", "has_at_least_one_service_order"],
+      "effects": ["audit", "recalculate_margin"]
+    },
+    {
+      "name": "ready",
+      "from": ["in_work"],
+      "to": "ready_for_departure",
+      "guards": [
+        "all_orders_confirmed_or_completed",
+        "no_rejected_orders",
+        "permit_confirmed_if_international",
+        "slot_confirmed_if_coordinated"
+      ],
+      "effects": ["audit", "notify_client", "recalculate_margin"]
+    },
+    {
+      "name": "depart",
+      "from": ["ready_for_departure"],
+      "to": "in_flight",
+      "guards": ["departure_time_reached_or_manual"],
+      "auto": true,
+      "sets": ["atd_utc"],
+      "effects": ["audit", "notify_client"]
+    },
+    {
+      "name": "arrive",
+      "from": ["in_flight"],
+      "to": "arrived",
+      "guards": ["arrival_time_reached_or_manual"],
+      "auto": true,
+      "sets": ["ata_utc"],
+      "effects": ["audit"]
+    },
+    {
+      "name": "complete",
+      "from": ["arrived"],
+      "to": "completed",
+      "guards": [
+        "all_orders_completed_or_cancelled",
+        "invoice_issued_or_explicitly_waived"
+      ],
+      "effects": ["audit", "recalculate_margin", "notify_client"]
+    },
+    {
+      "name": "cancel",
+      "from": ["planned", "in_work", "ready_for_departure", "aog"],
+      "to": "cancelled",
+      "guards": ["reason_provided"],
+      "requiresReason": true,
+      "effects": ["audit", "cancel_all_orders", "notify_client", "notify_vendors"]
+    },
+    {
+      "name": "aog",
+      "from": ["in_work", "ready_for_departure"],
+      "to": "aog",
+      "guards": ["reason_provided"],
+      "requiresReason": true,
+      "effects": ["audit", "mark_aircraft_aog", "notify_client", "notify_vendors"]
+    },
+    {
+      "name": "resume",
+      "from": ["aog"],
+      "to": "in_work",
+      "guards": ["aircraft_serviceable"],
+      "effects": ["audit", "notify_client"]
+    }
+  ],
+  "guardDescriptions": {
+    "aircraft_assigned": "Назначен борт",
+    "has_at_least_one_service_order": "Создана хотя бы одна заявка на услугу",
+    "all_orders_confirmed_or_completed": "Все заявки подтверждены или выполнены",
+    "no_rejected_orders": "Нет заявок в статусе «Отклонена»",
+    "permit_confirmed_if_international": "Для международного рейса есть подтверждённый пермит (ТЗ 3.1.2)",
+    "slot_confirmed_if_coordinated": "Для координируемого аэропорта есть подтверждённый слот (ADR-026, мягкое условие)",
+    "departure_time_reached_or_manual": "Наступило плановое время вылета либо переход выполнен вручную",
+    "arrival_time_reached_or_manual": "Наступило плановое время прилёта либо переход выполнен вручную",
+    "all_orders_completed_or_cancelled": "Все заявки выполнены или отменены",
+    "invoice_issued_or_explicitly_waived": "Выставлен счёт либо явно выбрано «завершить без счёта» с причиной",
+    "reason_provided": "Указаны код причины и комментарий",
+    "aircraft_serviceable": "Борт исправен"
+  }
+}

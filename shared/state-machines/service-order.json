@@ -1,0 +1,90 @@
+{
+  "$schema": "./state-machine.schema.json",
+  "id": "service_order",
+  "tzRef": "ТЗ 3.2.3",
+  "description": "Жизненный цикл заявки на услугу. Единое определение для сервера и клиента (ADR-015).",
+  "initial": "draft",
+  "states": {
+    "draft": { "nameRu": "Черновик", "nameEn": "Draft", "token": "neutral" },
+    "ordered": { "nameRu": "Заказана", "nameEn": "Ordered", "token": "progress" },
+    "confirmed": { "nameRu": "Подтверждена", "nameEn": "Confirmed", "token": "ready" },
+    "in_progress": { "nameRu": "В процессе", "nameEn": "In progress", "token": "active" },
+    "completed": { "nameRu": "Выполнена", "nameEn": "Completed", "token": "done", "final": true },
+    "rejected": { "nameRu": "Отклонена", "nameEn": "Rejected", "token": "critical" },
+    "cancelled": { "nameRu": "Отменена", "nameEn": "Cancelled", "token": "cancelled", "final": true }
+  },
+  "transitions": [
+    {
+      "name": "order",
+      "from": ["draft"],
+      "to": "ordered",
+      "guards": [
+        "service_available_at_airport",
+        "vendor_contract_valid",
+        "vendor_price_valid",
+        "vendor_assigned",
+        "lead_time_met_or_overridden"
+      ],
+      "sets": ["ordered_at", "sla_confirm_deadline", "purchase_price_snapshot", "contract_terms_snapshot"],
+      "effects": ["audit", "queue_vendor_order_email", "create_vendor_portal_task"]
+    },
+    {
+      "name": "confirm",
+      "from": ["ordered"],
+      "to": "confirmed",
+      "guards": [],
+      "sets": ["confirmed_at"],
+      "effects": ["audit", "mark_sla_breach_if_late", "notify_dispatcher"]
+    },
+    {
+      "name": "reject",
+      "from": ["ordered"],
+      "to": "rejected",
+      "guards": ["reason_provided"],
+      "requiresReason": true,
+      "effects": ["audit", "notify_dispatcher", "suggest_reassignment"]
+    },
+    {
+      "name": "begin",
+      "from": ["confirmed"],
+      "to": "in_progress",
+      "guards": [],
+      "sets": ["started_at"],
+      "effects": ["audit"]
+    },
+    {
+      "name": "finish",
+      "from": ["in_progress"],
+      "to": "completed",
+      "guards": [
+        "actual_time_provided",
+        "actual_quantity_provided",
+        "act_uploaded_if_required"
+      ],
+      "sets": ["completed_at"],
+      "effects": ["audit", "create_payable_item", "recalculate_margin"]
+    },
+    {
+      "name": "cancel",
+      "from": ["draft", "ordered", "confirmed"],
+      "to": "cancelled",
+      "guards": ["reason_provided"],
+      "requiresReason": true,
+      "effects": ["audit", "queue_vendor_cancel_email", "flag_late_cancellation_penalty"]
+    }
+  ],
+  "guardDescriptions": {
+    "service_available_at_airport": "Услуга доступна в аэропорту плеча: есть хотя бы один поставщик с ценой (SPEC § 5.2, блокирующая)",
+    "vendor_contract_valid": "У поставщика действующий контракт на дату оказания (блокирующая)",
+    "vendor_price_valid": "Есть действующая цена на дату оказания (блокирующая)",
+    "vendor_assigned": "Назначен поставщик",
+    "lead_time_met_or_overridden": "Лидтайм соблюдён либо нарушение подтверждено с причиной (неблокирующая)",
+    "actual_time_provided": "Указаны фактические время начала и окончания (ТЗ 3.2.3)",
+    "actual_quantity_provided": "Указано фактическое количество (ADR-020)",
+    "act_uploaded_if_required": "Загружен акт, если он обязателен для категории",
+    "reason_provided": "Указана причина"
+  },
+  "notes": {
+    "reassignment": "Переназначение после отказа создаёт новую заявку в статусе draft со ссылкой replaced_order_id на прежнюю. Это отдельная операция POST /service-orders/{id}/reassign, а не переход автомата."
+  }
+}
