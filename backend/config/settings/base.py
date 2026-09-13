@@ -47,6 +47,9 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    # Список отзыва refresh-токенов: без него выход из системы
+    # не отменяет уже выданный токен (BACKEND.md § 6).
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_spectacular",
     "django_celery_beat",

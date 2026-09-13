@@ -20,6 +20,8 @@ from rest_framework.response import Response
 from rest_framework.views import exception_handler as drf_exception_handler
 
 from core.exceptions import (
+    AccountLocked,
+    AuthenticationFailed,
     ContractExpired,
     DemoOnlyOperation,
     DomainError,
@@ -36,6 +38,8 @@ from core.money import CurrencyMismatch
 # Таблица соответствия доменных исключений кодам ответа.
 # Ни одно доменное исключение не должно превращаться в 500.
 _DOMAIN_STATUS: dict[type[Exception], int] = {
+    AuthenticationFailed: status.HTTP_401_UNAUTHORIZED,
+    AccountLocked: status.HTTP_423_LOCKED,
     TransitionNotAllowed: status.HTTP_409_CONFLICT,
     GuardNotSatisfied: status.HTTP_409_CONFLICT,
     ScheduleConflict: status.HTTP_409_CONFLICT,
