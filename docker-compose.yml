@@ -80,11 +80,23 @@ services:
     <<: *backend-base
     profiles: [dev, demo, prod]
     command: celery -A config worker -l info
+    # Проверка из образа обращается к HTTP, которого у воркера нет.
+    # Живость воркера — это ответ на ping через брокер.
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
 
   beat:
     <<: *backend-base
     profiles: [dev, demo, prod]
     command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    # У планировщика нет ни HTTP, ни очереди, к которой можно обратиться:
+    # состояние видно по журналу. Ложная проверка хуже отсутствующей.
+    healthcheck:
+      disable: true
 
   web:
     # Контекст — корень репозитория: сборке нужен каталог shared/ (см. web/Dockerfile).
