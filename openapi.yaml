@@ -2872,7 +2872,11 @@ components:
         name: { type: string }
         email: { type: string, format: email }
         role: { $ref: '#/components/schemas/Role' }
-        organizationId: { type: string }
+        organizationId:
+          type: [string, 'null']
+          description: |
+            Арендатор пользователя (ADR-003). Пуст у платформенного
+            администратора: он заводится до появления организаций.
         clientId:
           type: [string, 'null']
           description: Обязателен для роли `client`
