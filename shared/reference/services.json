@@ -1,0 +1,179 @@
+{
+  "$comment": [
+    "Каталог услуг. Категории — строго по ТЗ 3.2.1: топливообеспечение, наземное",
+    "обслуживание, кейтеринг, транспорт, разрешительные документы,",
+    "противообледенительная обработка. Седьмой категории быть не может без",
+    "изменения ТЗ.",
+    "",
+    "leadTimeH — минимальный срок подачи заявки. Значения взяты из обычной практики",
+    "и подлежат уточнению заказчиком: нарушение лидтайма — мягкая проверка,",
+    "диспетчер продавливает её с указанием причины (SPEC.md § 5.2).",
+    "",
+    "requiresWeather: true означает, что при заказе подтягивается METAR/TAF",
+    "и работает подсказка по необходимости обработки (ADR-029).",
+    "requiresActToComplete: true — заявка не закрывается без приложенного акта."
+  ],
+  "services": [
+    {
+      "code": "FUEL_JETA1", "category": "fuel",
+      "nameRu": "Заправка Jet A-1", "nameEn": "Jet A-1 refuelling",
+      "unit": "L", "requiresWeather": false, "leadTimeH": 4, "requiresActToComplete": true,
+      "requiredAttributes": [
+        { "key": "fuelGrade", "type": "enum", "options": ["Jet A-1", "TS-1", "RT"], "required": true },
+        { "key": "volumeL", "type": "number", "required": true }
+      ]
+    },
+    {
+      "code": "FUEL_AVGAS", "category": "fuel",
+      "nameRu": "Заправка Avgas 100LL", "nameEn": "Avgas 100LL refuelling",
+      "unit": "L", "requiresWeather": false, "leadTimeH": 6, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "volumeL", "type": "number", "required": true }]
+    },
+    {
+      "code": "FUEL_DEFUEL", "category": "fuel",
+      "nameRu": "Слив топлива", "nameEn": "Defuelling",
+      "unit": "L", "requiresWeather": false, "leadTimeH": 12, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "volumeL", "type": "number", "required": true }]
+    },
+
+    {
+      "code": "HND_BASIC", "category": "handling",
+      "nameRu": "Базовое наземное обслуживание", "nameEn": "Basic ground handling",
+      "unit": "flight", "requiresWeather": false, "leadTimeH": 12, "requiresActToComplete": true,
+      "requiredAttributes": []
+    },
+    {
+      "code": "HND_VIP", "category": "handling",
+      "nameRu": "Обслуживание VIP-терминала", "nameEn": "VIP terminal handling",
+      "unit": "flight", "requiresWeather": false, "leadTimeH": 24, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "paxCount", "type": "number", "required": true }]
+    },
+    {
+      "code": "HND_TOW", "category": "handling",
+      "nameRu": "Буксировка воздушного судна", "nameEn": "Aircraft towing",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 6, "requiresActToComplete": false,
+      "requiredAttributes": []
+    },
+    {
+      "code": "HND_CLEAN", "category": "handling",
+      "nameRu": "Уборка салона", "nameEn": "Cabin cleaning",
+      "unit": "flight", "requiresWeather": false, "leadTimeH": 6, "requiresActToComplete": false,
+      "requiredAttributes": []
+    },
+    {
+      "code": "HND_GPU", "category": "handling",
+      "nameRu": "Наземное электропитание", "nameEn": "Ground power unit",
+      "unit": "hour", "requiresWeather": false, "leadTimeH": 4, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "hours", "type": "number", "required": true }]
+    },
+    {
+      "code": "HND_LAV", "category": "handling",
+      "nameRu": "Обслуживание туалетов и заправка водой", "nameEn": "Lavatory and potable water service",
+      "unit": "flight", "requiresWeather": false, "leadTimeH": 6, "requiresActToComplete": false,
+      "requiredAttributes": []
+    },
+    {
+      "code": "HND_PARK", "category": "handling",
+      "nameRu": "Стоянка воздушного судна", "nameEn": "Aircraft parking",
+      "unit": "hour", "requiresWeather": false, "leadTimeH": 12, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "hours", "type": "number", "required": true }]
+    },
+    {
+      "code": "HND_HANGAR", "category": "handling",
+      "nameRu": "Ангарное хранение", "nameEn": "Hangar storage",
+      "unit": "hour", "requiresWeather": false, "leadTimeH": 48, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "hours", "type": "number", "required": true }]
+    },
+
+    {
+      "code": "CAT_MEAL", "category": "catering",
+      "nameRu": "Бортовое питание", "nameEn": "In-flight catering",
+      "unit": "pax", "requiresWeather": false, "leadTimeH": 24, "requiresActToComplete": true,
+      "requiredAttributes": [
+        { "key": "paxCount", "type": "number", "required": true },
+        { "key": "menuClass", "type": "enum", "options": ["standard", "premium", "halal", "kosher", "vegetarian"], "required": true }
+      ]
+    },
+    {
+      "code": "CAT_CREW", "category": "catering",
+      "nameRu": "Питание экипажа", "nameEn": "Crew catering",
+      "unit": "pax", "requiresWeather": false, "leadTimeH": 12, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "paxCount", "type": "number", "required": true }]
+    },
+    {
+      "code": "CAT_BAR", "category": "catering",
+      "nameRu": "Пополнение бара", "nameEn": "Bar replenishment",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 24, "requiresActToComplete": false,
+      "requiredAttributes": []
+    },
+
+    {
+      "code": "TRN_CREW", "category": "transport",
+      "nameRu": "Транспорт для экипажа", "nameEn": "Crew transport",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 6, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "paxCount", "type": "number", "required": true }]
+    },
+    {
+      "code": "TRN_VIP", "category": "transport",
+      "nameRu": "VIP-трансфер", "nameEn": "VIP transfer",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 12, "requiresActToComplete": true,
+      "requiredAttributes": [
+        { "key": "paxCount", "type": "number", "required": true },
+        { "key": "carClass", "type": "enum", "options": ["business", "minivan", "bus"], "required": false }
+      ]
+    },
+    {
+      "code": "TRN_CARGO", "category": "transport",
+      "nameRu": "Доставка груза к борту", "nameEn": "Cargo delivery to aircraft",
+      "unit": "kg", "requiresWeather": false, "leadTimeH": 24, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "weightKg", "type": "number", "required": true }]
+    },
+    {
+      "code": "TRN_HOTEL", "category": "transport",
+      "nameRu": "Размещение экипажа", "nameEn": "Crew accommodation",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 24, "requiresActToComplete": false,
+      "requiredAttributes": [
+        { "key": "paxCount", "type": "number", "required": true },
+        { "key": "nights", "type": "number", "required": true }
+      ]
+    },
+
+    {
+      "code": "PRM_OVERFLY", "category": "permits",
+      "nameRu": "Разрешение на пролёт", "nameEn": "Overflight permit",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 72, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "country", "type": "string", "required": true }]
+    },
+    {
+      "code": "PRM_LANDING", "category": "permits",
+      "nameRu": "Разрешение на посадку", "nameEn": "Landing permit",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 72, "requiresActToComplete": false,
+      "requiredAttributes": []
+    },
+    {
+      "code": "PRM_SLOT", "category": "permits",
+      "nameRu": "Слот в координируемом аэропорту", "nameEn": "Slot at a coordinated airport",
+      "unit": "ea", "requiresWeather": false, "leadTimeH": 48, "requiresActToComplete": false,
+      "requiredAttributes": [{ "key": "slotType", "type": "enum", "options": ["arrival", "departure"], "required": true }]
+    },
+    {
+      "code": "PRM_CUSTOMS", "category": "permits",
+      "nameRu": "Таможенное оформление", "nameEn": "Customs clearance",
+      "unit": "flight", "requiresWeather": false, "leadTimeH": 48, "requiresActToComplete": true,
+      "requiredAttributes": []
+    },
+
+    {
+      "code": "DEI_TYPE1", "category": "deicing",
+      "nameRu": "Противообледенительная обработка, тип I", "nameEn": "De-icing, type I",
+      "unit": "L", "requiresWeather": true, "leadTimeH": 2, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "volumeL", "type": "number", "required": true }]
+    },
+    {
+      "code": "DEI_TYPE4", "category": "deicing",
+      "nameRu": "Противообледенительная обработка, тип IV", "nameEn": "Anti-icing, type IV",
+      "unit": "L", "requiresWeather": true, "leadTimeH": 2, "requiresActToComplete": true,
+      "requiredAttributes": [{ "key": "volumeL", "type": "number", "required": true }]
+    }
+  ]
+}

@@ -15,6 +15,10 @@ venv/
 .mypy_cache/
 .ruff_cache/
 .pytest_cache/
+
+# Кэш загрузок scripts/build_reference.py: исходные наборы открытых данных,
+# результат сборки лежит в shared/reference/ и в репозиторий попадает он.
+.cache/
 .coverage
 coverage.xml
 htmlcov/

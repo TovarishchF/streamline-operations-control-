@@ -15,6 +15,9 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = BASE_DIR.parent
+# Каталог, общий с клиентами: автоматы состояний и справочники (CLAUDE.md § 6).
+# В контейнере смонтирован в /shared, при локальном запуске — рядом с backend/.
+SHARED_DIR = REPO_ROOT / "shared"
 
 env = environ.Env()
 env_file = REPO_ROOT / ".env"
