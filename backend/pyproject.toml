@@ -129,13 +129,13 @@ warn_unreachable = true
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = ["*.migrations.*"]
+module = ["django_fsm", "*.migrations.*"]
 ignore_errors = true
 
 [[tool.mypy.overrides]]
 # Библиотеки без py.typed. Список ведётся явно: молчаливое
 # ignore_missing_imports = true на весь проект скрыло бы и наши опечатки.
-module = ["environ.*", "celery.*"]
+module = ["environ.*", "celery.*", "django_fsm.*"]
 ignore_missing_imports = true
 
 [tool.django-stubs]
