@@ -135,3 +135,32 @@ body {
     max-width: 96px;
   }
 }
+
+/* Заголовки таблиц при изменении ширины.
+
+   Без этого длинное слово в узкой колонке не переносится, а вылезает
+   на соседнюю: перенос по умолчанию не разрывает слово, а раскладка
+   таблицы фиксированная, и лишнему тексту деваться некуда. */
+.ant-table-thead > tr > th {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+/* Ячейка с сортировкой раскладывается флексом: подпись должна сжиматься,
+   а значок сортировки — нет, иначе он уезжает за границу колонки. */
+.ant-table-thead > tr > th .ant-table-column-sorters {
+  gap: 4px;
+}
+
+.ant-table-thead > tr > th .ant-table-column-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Ручка изменения ширины не должна перекрываться содержимым заголовка. */
+.ant-table-thead > tr > th {
+  padding-inline-end: 12px !important;
+}

@@ -46,7 +46,7 @@ interface RawColumn {
   [extra: string]: unknown;
 }
 
-const MIN_WIDTH = 60;
+const MIN_WIDTH = 80;
 const NUMERIC = /^-?\d+([.,]\d+)?$/;
 
 /** Сравнение по значению поля: число, логическое, дата или строка. */

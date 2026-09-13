@@ -28,6 +28,7 @@ from accounts.api.views import (
     UserViewSet,
 )
 from audit.api.views import AuditViewSet
+from billing.api.views import FxRatesView
 from catalog.api.views import (
     AircraftTypeViewSet,
     AirportViewSet,
@@ -60,6 +61,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("health", HealthView.as_view(), name="health"),
     path("clock", ClockView.as_view(), name="clock"),
     path("auth/", include(auth_urls)),
+    path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
     *router.urls,
 ]
 

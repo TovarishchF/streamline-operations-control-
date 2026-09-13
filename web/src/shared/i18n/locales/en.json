@@ -320,6 +320,7 @@
     "autoConfirmPercent": "Share of orders",
     "generate": "Generate",
     "generation": "Data set generation",
+    "live": "Live source data",
     "markerControl": "Marking control",
     "markerControlHint": "Environment variables only. Marking cannot be disabled from the interface.",
     "markerEnv": "Environment variable",
@@ -535,7 +536,9 @@
     "policy": "Fixing policy",
     "policyHint": "Rate at payment date is excluded: the document is issued before payment.",
     "sourceHint": "If the source is unavailable the system uses the last known rate and shows a staleness marker.",
-    "sourceNotice": "The base is the rouble, rates are normalised by the source nominal"
+    "sourceLive": "Rates are loaded from the Central Bank of Russia",
+    "sourceStub": "Rates are synthetic: the source connection is off",
+    "stale": "There is no rate for the requested date, showing the rate for {{date}}"
   },
   "fxPolicy": {
     "document_date": "Rate at document date",

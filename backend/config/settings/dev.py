@@ -18,4 +18,7 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("SMTP_HOST", default="localhost")
 EMAIL_PORT = env.int("SMTP_PORT", default=1025)
 
-CORS_ALLOW_ALL_ORIGINS = True
+# Настроек CORS здесь нет намеренно. Веб-клиент и API живут на одном
+# происхождении: в разработке запросы на /api/ проксирует Vite, в бою —
+# nginx (INFRA.md § 1). Межсайтовых запросов к API не возникает, а разрешать
+# их «на всякий случай» значит открывать API любому стороннему сайту.
