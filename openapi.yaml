@@ -192,6 +192,35 @@ paths:
               schema: { $ref: '#/components/schemas/MeResponse' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /auth/password:
+    post:
+      tags: [auth]
+      summary: Смена пароля владельцем учётной записи
+      description: |
+        Пароль задаёт и меняет только владелец учётной записи. Администратор
+        заводит пользователя без пароля (`POST /users`) и чужих паролей
+        не знает: иначе по журналу нельзя понять, кто совершил действие.
+
+        Требования к паролю — `BACKEND § 6`: не короче двенадцати символов,
+        не из списка распространённых, не полностью числовой, не совпадающий
+        с данными учётной записи. Нарушение возвращает 400 с перечнем
+        невыполненных условий в `details`.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword: { type: string, format: password }
+      responses:
+        '204': { description: Пароль изменён }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /auth/2fa/setup:
     post:
       tags: [auth]
