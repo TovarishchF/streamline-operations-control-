@@ -10,7 +10,11 @@
     "strict": true,
     "noImplicitAny": true,
     "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
+
+    // exactOptionalPropertyTypes намеренно выключен: в strict он не входит,
+    // а сгенерированные из openapi.yaml типы и пропсы Ant Design объявляют
+    // необязательные поля как `prop?: T`, что с ним несовместимо. Требование
+    // CLAUDE.md § 3 п. 15 — strict и запрет any — выполняется.
     "noImplicitOverride": true,
     "noFallthroughCasesInSwitch": true,
     "noUnusedLocals": true,

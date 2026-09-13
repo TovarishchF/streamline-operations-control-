@@ -28,6 +28,7 @@ export default tseslint.config(
 
       // CLAUDE.md § 3 п. 15: any запрещён, внешние данные валидируются через zod
       '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/restrict-template-expressions': ['error', { allowNumber: true }],
       '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-unsafe-member-access': 'error',
 
@@ -47,13 +48,18 @@ export default tseslint.config(
         },
       ],
 
-      // CLAUDE.md § 3 п. 2: время только из useClock(), не из системных часов браузера
-      'no-restricted-globals': ['error', { name: 'Date', message: 'Используйте useClock().' }],
+      // CLAUDE.md § 3 п. 2: текущее время берётся из useClock(), а не из часов
+      // браузера. Запрещается именно ЧТЕНИЕ текущего момента; разбор строки
+      // даты (new Date(iso)) законен и необходим для отображения.
       'no-restricted-syntax': [
         'error',
         {
           selector: "NewExpression[callee.name='Date'][arguments.length=0]",
-          message: 'new Date() запрещён: время приходит от сервера через useClock() (ADR-014).',
+          message: 'new Date() запрещён: текущее время приходит от сервера через useClock() (ADR-014).',
+        },
+        {
+          selector: "CallExpression[callee.object.name='Date'][callee.property.name='now']",
+          message: 'Date.now() запрещён: текущее время приходит от сервера через useClock() (ADR-014).',
         },
       ],
     },
@@ -66,11 +72,11 @@ export default tseslint.config(
   {
     // Модуль часов — единственное место, где Date создаётся напрямую.
     // Ровно так же на сервере исключён core/clock.py.
-    files: ['src/shared/clock/**/*.ts'],
-    rules: { 'no-restricted-globals': 'off', 'no-restricted-syntax': 'off' },
+    files: ['src/shared/clock/**/*.ts', 'src/mocks/**/*.ts'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
   {
     files: ['**/*.test.{ts,tsx}', 'src/test-setup.ts'],
-    rules: { 'no-restricted-globals': 'off', 'no-restricted-syntax': 'off' },
+    rules: { 'no-restricted-syntax': 'off' },
   },
 );

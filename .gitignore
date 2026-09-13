@@ -45,3 +45,7 @@ Thumbs.db
 
 # Схема, генерируемая из кода для сверки с контрактом
 artifacts/openapi.generated.yaml
+
+# Результаты прогонов Playwright: отчёт и трассировки пересоздаются
+e2e/test-results/
+artifacts/e2e/report/

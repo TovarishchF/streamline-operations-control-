@@ -1,0 +1,76 @@
+/* Глобальные стили.
+   CLAUDE.md § 10: самописного CSS-фреймворка нет, база — тема Ant Design
+   через ConfigProvider. Здесь только то, что темой не выражается. */
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f5f5;
+}
+
+/* Подсветка строк по смыслу статуса, а не по декоративности */
+.soc-row-critical > td {
+  background: #fff1f0 !important;
+}
+
+.soc-row-current > td {
+  background: #e6f4ff !important;
+}
+
+/* Записи демо-генератора визуально отличаются: они не выдаются
+   за действия людей (CLAUDE.md § 4) */
+.soc-row-seed > td {
+  background: #fbf7ff !important;
+  font-style: italic;
+}
+
+/* Адаптив от 360 px: на узких экранах боковая навигация убирается
+   в выдвижную панель, кнопка меню появляется в шапке */
+.soc-burger {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .soc-sider {
+    display: none;
+  }
+
+  .soc-burger {
+    display: inline-flex;
+  }
+}
+
+/* На узком экране из шапки убирается всё, кроме названия, уведомлений
+   и переключателя пользователя: иначе шапка не помещается в 360 px
+   и появляется горизонтальный скролл всей страницы. */
+@media (max-width: 700px) {
+  .soc-hide-sm {
+    display: none !important;
+  }
+
+  .ant-layout-header {
+    padding-inline: 8px !important;
+  }
+
+  .ant-layout-content {
+    padding: 8px !important;
+  }
+}
+
+/* Ни один основной экран не должен давать горизонтальный скролл документа:
+   прокручиваются сами таблицы, а не страница целиком. */
+.ant-layout-content {
+  min-width: 0;
+  overflow-x: clip;
+}
+
+/* Плотные таблицы: диспетчер смотрит в экран по 12 часов */
+.ant-table-tbody > tr > td {
+  padding-block: 5px !important;
+}

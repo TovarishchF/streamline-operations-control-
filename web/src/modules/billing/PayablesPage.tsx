@@ -1,0 +1,141 @@
+import { useMemo, useState, type JSX } from 'react';
+import { Alert, Button, Card, Col, Row, Select, Space, Table, Tag, Typography } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+import type { PayableItem } from '@/api/types';
+import { PAYABLES } from '@/mocks/billing';
+import { VENDORS } from '@/mocks/counterparties';
+import { Can } from '@/shared/auth/Can';
+import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+
+const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
+  pending: 'neutral', approved: 'progress', scheduled: 'ready',
+  paid: 'done', disputed: 'critical', cancelled: 'cancelled',
+};
+
+/**
+ * Заявки на оплату поставщикам `[ТЗ 3.4.2]`.
+ *
+ * Создаются автоматически при переходе услуги в «Выполнена». Срок оплаты —
+ * дата выполнения плюс отсрочка из **снимка** условий контракта (ADR-025):
+ * перезаключение договора не меняет сроки по уже оказанным услугам.
+ */
+export function PayablesPage(): JSX.Element {
+  const { t } = useTranslation();
+  const [vendorId, setVendorId] = useState<string | undefined>();
+  const [status, setStatus] = useState<string | undefined>();
+  const [overdueOnly, setOverdueOnly] = useState(false);
+
+  const filtered = useMemo(
+    () =>
+      PAYABLES.filter((item) => {
+        if (vendorId && item.vendorId !== vendorId) return false;
+        if (status && item.status !== status) return false;
+        if (overdueOnly && !item.isOverdue) return false;
+        return true;
+      }),
+    [vendorId, status, overdueOnly],
+  );
+
+  const overdueCount = PAYABLES.filter((p) => p.isOverdue).length;
+
+  const columns: ColumnsType<PayableItem> = [
+    {
+      title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
+    },
+    {
+      title: t('service.vendor'), dataIndex: 'vendorName', ellipsis: true,
+      render: (value: string, row) => <Link to={`/vendors/${row.vendorId}`}>{value}</Link>,
+    },
+    {
+      title: t('finance.amount'), key: 'amount', width: 160, align: 'right',
+      sorter: (a, b) => Number.parseFloat(a.amount.amount) - Number.parseFloat(b.amount.amount),
+      render: (_, row) => <MoneyText value={row.amount} strong />,
+    },
+    {
+      title: t('finance.dueDate'), dataIndex: 'dueDate', width: 130,
+      sorter: (a, b) => a.dueDate.localeCompare(b.dueDate),
+      render: (value: string, row) => (
+        <Space size={4}>
+          <DateText value={value} />
+          {row.isOverdue ? <Tag color="red" style={{ margin: 0 }}>{t('finance.overdue')}</Tag> : null}
+        </Space>
+      ),
+    },
+    {
+      title: t('finance.status'), dataIndex: 'status', width: 150,
+      render: (value: string) => {
+        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
+        return (
+          <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
+            {t(`payableStatus.${value}`)}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: t('reconciliation.title'), dataIndex: 'vendorInvoiceId', width: 130,
+      render: (value: string | null) =>
+        value ? (
+          <Link to="/billing/reconciliation">{t('reconciliation.linked')}</Link>
+        ) : (
+          <Typography.Text type="secondary">—</Typography.Text>
+        ),
+    },
+    {
+      title: t('common.actions'), key: 'actions', width: 140,
+      render: (_, row) =>
+        row.status === 'pending' ? (
+          <Can permission="billing.payables.edit">
+            <Button size="small" type="primary">{t('finance.approve')}</Button>
+          </Can>
+        ) : null,
+    },
+  ];
+
+  return (
+    <Space direction="vertical" size={12} style={{ width: '100%' }}>
+      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.payables')}</Typography.Title>
+
+      {overdueCount > 0 ? (
+        <Alert type="warning" showIcon message={t('finance.payablesOverdue', { count: overdueCount })} />
+      ) : null}
+
+      <Card size="small" styles={{ body: { padding: 10 } }}>
+        <Row gutter={[8, 8]} align="middle">
+          <Col xs={12} md={8}>
+            <Select
+              allowClear showSearch optionFilterProp="label" style={{ width: '100%' }}
+              placeholder={t('service.vendor')} value={vendorId} onChange={setVendorId}
+              options={VENDORS.map((v) => ({ value: v.id, label: v.name }))}
+            />
+          </Col>
+          <Col xs={12} md={6}>
+            <Select
+              allowClear style={{ width: '100%' }} placeholder={t('finance.status')}
+              value={status} onChange={setStatus}
+              options={Object.keys(TOKEN).map((code) => ({ value: code, label: t(`payableStatus.${code}`) }))}
+            />
+          </Col>
+          <Col xs={24} md={6}>
+            <Tag.CheckableTag checked={overdueOnly} onChange={setOverdueOnly}>
+              {t('finance.overdueOnly')}
+            </Tag.CheckableTag>
+          </Col>
+        </Row>
+      </Card>
+
+      <Card size="small" styles={{ body: { padding: 0 } }}>
+        <Table<PayableItem>
+          size="small" rowKey="id" columns={columns} dataSource={filtered}
+          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1050 }}
+          locale={{ emptyText: <EmptyState /> }}
+        />
+      </Card>
+    </Space>
+  );
+}
