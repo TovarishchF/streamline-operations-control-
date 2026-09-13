@@ -45,10 +45,10 @@ class AircraftViewSet(
     serializer_class = AircraftSerializer
     tenant_client_field = "operator_id"
     required_permissions: ClassVar[dict[str, Any]] = {
-        "list": Permission.FLIGHTS_READ,
-        "retrieve": Permission.FLIGHTS_READ,
-        "update": Permission.FLIGHTS_WRITE,
-        "partial_update": Permission.FLIGHTS_WRITE,
+        "list": Permission.SCHEDULE_VIEW,
+        "retrieve": Permission.SCHEDULE_VIEW,
+        "update": Permission.FLIGHT_EDIT,
+        "partial_update": Permission.FLIGHT_EDIT,
     }
 
     def get_queryset(self) -> QuerySet[Aircraft]:

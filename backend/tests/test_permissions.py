@@ -34,23 +34,23 @@ class TestPermissionMap:
 
     def test_finance_cannot_create_flights(self) -> None:
         """Тот самый критерий приёмки, на уровне карты прав."""
-        assert not has_permission(Role.FINANCE, Permission.FLIGHTS_WRITE)
-        assert not has_permission(Role.FINANCE, Permission.FLIGHTS_STATUS)
+        assert not has_permission(Role.FINANCE, Permission.FLIGHT_CREATE)
+        assert not has_permission(Role.FINANCE, Permission.FLIGHT_STATUS)
 
     def test_dispatcher_cannot_change_prices(self) -> None:
-        assert has_permission(Role.DISPATCHER, Permission.CATALOG_READ)
-        assert not has_permission(Role.DISPATCHER, Permission.CATALOG_WRITE)
+        assert has_permission(Role.DISPATCHER, Permission.CATALOG_VIEW)
+        assert not has_permission(Role.DISPATCHER, Permission.CATALOG_EDIT)
 
     def test_only_admin_and_manager_read_audit(self) -> None:
         allowed = {
-            role for role in Role.values if has_permission(role, Permission.AUDIT_READ)
+            role for role in Role.values if has_permission(role, Permission.AUDIT_VIEW)
         }
         assert allowed == {Role.ADMIN, Role.MANAGER}
 
     def test_client_does_not_create_flights_directly(self) -> None:
         """`SPEC § 2.2`, сноска: клиент подаёт заявку, а не создаёт рейс."""
-        assert not has_permission(Role.CLIENT, Permission.FLIGHTS_WRITE)
-        assert has_permission(Role.CLIENT, Permission.FLIGHT_REQUESTS_CREATE)
+        assert not has_permission(Role.CLIENT, Permission.FLIGHT_CREATE)
+        assert has_permission(Role.CLIENT, Permission.FLIGHT_REQUEST)
 
     def test_map_lists_every_permission(self) -> None:
         """Клиент должен отличать «права нет» от «право неизвестно»."""

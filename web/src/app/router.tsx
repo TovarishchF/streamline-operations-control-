@@ -1,12 +1,19 @@
-import type { JSX } from 'react';
+import { useEffect, type JSX } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
+import { Spin } from 'antd';
 
 import { AppLayout } from './layout/AppLayout';
 import { PortalLayout } from './layout/PortalLayout';
-import { useSession, isPortalRole } from '@/shared/auth/session';
+import {
+  isPortalRole,
+  useCurrentUser,
+  useSession,
+  useTwoFactorSetupRequired,
+} from '@/shared/auth/session';
 import { HOME_BY_ROLE } from './layout/navigation';
 
 import { LoginPage } from '@/modules/auth/LoginPage';
+import { TwoFactorSetupPage } from '@/modules/auth/TwoFactorSetupPage';
 import { SchedulePage } from '@/modules/schedule/SchedulePage';
 import { FlightTemplatesPage } from '@/modules/schedule/FlightTemplatesPage';
 import { FlightCardPage } from '@/modules/flights/FlightCardPage';
@@ -41,17 +48,67 @@ import { NotFoundPage } from '@/modules/misc/NotFoundPage';
 
 /** Редирект на стартовый экран роли: у каждой роли он свой (`SPEC.md § 3`). */
 function RoleHome(): JSX.Element {
-  const role = useSession((s) => s.user.role);
-  return <Navigate to={HOME_BY_ROLE[role] ?? '/schedule'} replace />;
+  const role = useCurrentUser()?.role;
+  return <Navigate to={(role && HOME_BY_ROLE[role]) ?? '/schedule'} replace />;
 }
 
+/**
+ * Маршруты доступны только после входа `[ТЗ 4.3]`.
+ *
+ * Обход аутентификации запрещён (ADR-013): неаутентифицированный
+ * пользователь видит только экран входа. Это видимость, а не разграничение —
+ * данные закрыты на сервере, — но показывать пустые экраны без объяснения
+ * тоже неправильно.
+ */
 export function AppRoutes(): JSX.Element {
-  const role = useSession((s) => s.user.role);
-  const portal = isPortalRole(role);
+  const status = useSession((s) => s.status);
+  const hasStoredToken = useSession((s) => s.refreshToken !== null);
+  const restore = useSession((s) => s.restore);
+  const role = useCurrentUser()?.role;
+  const twoFactorSetupRequired = useTwoFactorSetupRequired();
+
+  useEffect(() => {
+    // Сохранился только refresh (ADR-034): при загрузке страницы по нему
+    // восстанавливается сессия, иначе пользователь входил бы заново
+    // после каждого обновления вкладки.
+    void restore();
+  }, [restore]);
+
+  // Пока сессия восстанавливается — ждём. Уйти на экран входа в этот момент
+  // значит потерять адрес, который открывал пользователь: после входа он
+  // оказался бы на домашнем экране вместо нужного.
+  if (status === 'restoring' || (status === 'anonymous' && hasStoredToken)) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (status !== 'authenticated') {
+    return (
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
+  }
+
+  // Политика требует второй фактор, а приложение не привязано: до привязки
+  // не показывается ничего другого.
+  if (twoFactorSetupRequired) {
+    return (
+      <Routes>
+        <Route path="*" element={<TwoFactorSetupPage />} />
+      </Routes>
+    );
+  }
+
+  const portal = role ? isPortalRole(role) : false;
 
   return (
     <Routes>
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
 
       {portal ? (
         <Route element={<PortalLayout />}>

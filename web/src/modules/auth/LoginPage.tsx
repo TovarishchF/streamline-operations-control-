@@ -1,27 +1,51 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Divider, Form, Input, Layout, Select, Space, Typography } from 'antd';
+import { Alert, Button, Card, Form, Input, Layout, Space, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { DEMO_USERS, useSession } from '@/shared/auth/session';
+import { ApiError } from '@/api/client';
+import { useSession } from '@/shared/auth/session';
 
 /**
  * Вход `[ТЗ 4.3]`.
  *
- * **ADR-013:** аутентификация настоящая всегда — пароль проверяется, второй
- * фактор TOTP, блокировка после 5 неудачных попыток. Упрощённый вход
- * (переключатель «Войти как») существует только при `DEMO_DATA=true`
- * и `DEBUG=true`; в боевой сборке он физически отсутствует, а обнаружение
- * демонстрационного бэкенда аутентификации отказывает в запуске.
+ * **ADR-013:** аутентификация настоящая всегда. Пароль проверяется сервером,
+ * после пяти неудачных попыток учётная запись блокируется на пятнадцать минут,
+ * второй фактор запрашивается, если приложение-аутентификатор привязано.
+ * Переключателя «войти как» не существует ни в какой сборке: обход
+ * аутентификации запрещён.
  *
- * На вехе M2 экран работает на переключателе: сервера ещё нет. Форма пароля
- * и второго фактора нарисована в том виде, в каком заработает на M3.
+ * Сообщение об ошибке приходит с сервера и не уточняет, что именно не подошло:
+ * иначе форма входа превращается в справочник логинов.
  */
 export function LoginPage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const setUser = useSession((s) => s.setUser);
+  const signIn = useSession((s) => s.signIn);
+  const submitTwoFactor = useSession((s) => s.submitTwoFactor);
+
   const [step, setStep] = useState<'credentials' | 'twoFactor'>('credentials');
+  const [error, setError] = useState<string | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  const handle = async (action: () => Promise<void>): Promise<void> => {
+    setBusy(true);
+    setError(null);
+    setLocked(false);
+    try {
+      await action();
+    } catch (cause) {
+      if (cause instanceof ApiError) {
+        setError(cause.message);
+        setLocked(cause.code === 'ACCOUNT_LOCKED');
+      } else {
+        setError(t('auth.serverUnavailable'));
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 16 }}>
@@ -34,11 +58,22 @@ export function LoginPage(): JSX.Element {
             <Typography.Text type="secondary">{t('app.fullName')}</Typography.Text>
           </Space>
 
+          {error ? (
+            <Alert type={locked ? 'warning' : 'error'} showIcon message={error} />
+          ) : null}
+
           {step === 'credentials' ? (
             <Form
               layout="vertical"
-              onFinish={() => {
-                setStep('twoFactor');
+              onFinish={(values: { username: string; password: string }) => {
+                void handle(async () => {
+                  const result = await signIn(values.username, values.password);
+                  if (result === 'two-factor') {
+                    setStep('twoFactor');
+                  } else {
+                    navigate('/');
+                  }
+                });
               }}
             >
               <Form.Item
@@ -55,15 +90,18 @@ export function LoginPage(): JSX.Element {
               >
                 <Input.Password autoComplete="current-password" size="large" />
               </Form.Item>
-              <Button type="primary" htmlType="submit" size="large" block>
+              <Button type="primary" htmlType="submit" size="large" block loading={busy}>
                 {t('auth.signIn')}
               </Button>
             </Form>
           ) : (
             <Form
               layout="vertical"
-              onFinish={() => {
-                navigate('/');
+              onFinish={(values: { code: string }) => {
+                void handle(async () => {
+                  await submitTwoFactor(values.code.trim());
+                  navigate('/');
+                });
               }}
             >
               <Alert type="info" showIcon message={t('auth.twoFactorHint')} />
@@ -71,17 +109,16 @@ export function LoginPage(): JSX.Element {
                 label={t('auth.twoFactorCode')}
                 name="code"
                 style={{ marginTop: 12 }}
-                rules={[{ required: true, len: 6, message: t('auth.twoFactorRequired') }]}
+                rules={[{ required: true, message: t('auth.twoFactorRequired') }]}
               >
                 <Input
                   size="large"
-                  maxLength={6}
-                  inputMode="numeric"
-                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: 6 }}
+                  autoComplete="one-time-code"
+                  style={{ fontFamily: "'JetBrains Mono', monospace", letterSpacing: 4 }}
                 />
               </Form.Item>
               <Space style={{ width: '100%' }} direction="vertical" size={8}>
-                <Button type="primary" htmlType="submit" size="large" block>
+                <Button type="primary" htmlType="submit" size="large" block loading={busy}>
                   {t('auth.confirm')}
                 </Button>
                 <Button
@@ -89,6 +126,7 @@ export function LoginPage(): JSX.Element {
                   block
                   onClick={() => {
                     setStep('credentials');
+                    setError(null);
                   }}
                 >
                   {t('common.cancel')}
@@ -96,29 +134,6 @@ export function LoginPage(): JSX.Element {
               </Space>
             </Form>
           )}
-
-          <Divider style={{ margin: '4px 0' }} plain>
-            {t('auth.demoDivider')}
-          </Divider>
-
-          <Alert type="warning" showIcon message={t('auth.demoWarning')} />
-
-          <Select
-            size="large"
-            placeholder={t('auth.signInAs')}
-            style={{ width: '100%' }}
-            onChange={(id: string) => {
-              const user = DEMO_USERS.find((u) => u.id === id);
-              if (user) {
-                setUser(user);
-                navigate('/');
-              }
-            }}
-            options={DEMO_USERS.map((user) => ({
-              value: user.id,
-              label: `${user.name} — ${t(`roles.${user.role}`)}`,
-            }))}
-          />
         </Space>
       </Card>
     </Layout>

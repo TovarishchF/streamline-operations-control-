@@ -243,6 +243,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_FAILURE_LIMIT = 5
+
+# Куда seed_demo складывает ссылки otpauth демонстрационных пользователей.
+# Пустое значение — не записывать (так работают испытания: секретам
+# вымышленных пользователей нечего делать на диске после прогона).
+DEMO_TWO_FACTOR_FILE = str(REPO_ROOT / "artifacts" / "demo-2fa.json")
 LOGIN_LOCKOUT_MINUTES = 15
 TWO_FACTOR_REQUIRED_ROLES = ["admin", "finance"]
 

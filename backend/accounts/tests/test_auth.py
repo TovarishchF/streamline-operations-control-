@@ -168,11 +168,11 @@ class TestLockout:
 
 @pytest.mark.django_db
 class TestTwoFactor:
-    def test_required_roles_get_a_second_step(
+    def test_second_step_appears_once_the_application_is_bound(
         self, api: APIClient, make_user: Callable[..., User]
     ) -> None:
-        """Для администратора и финансиста второй фактор обязателен."""
-        make_user(Role.FINANCE)
+        user = make_user(Role.FINANCE)
+        services.setup_two_factor(user)
 
         response = api.post(
             reverse("v1:login"),
@@ -184,6 +184,50 @@ class TestTwoFactor:
         assert response.data["twoFactorRequired"] is True
         assert response.data["tokens"] is None
         assert response.data["twoFactorToken"]
+
+    def test_first_login_without_a_bound_application_is_allowed(
+        self, api: APIClient, make_user: Callable[..., User]
+    ) -> None:
+        """Иначе финансист не войдёт никогда: привязать приложение можно
+        только изнутри системы. Требование политики превращается
+        в обязанность привязать его сразу после входа."""
+        make_user(Role.FINANCE)
+
+        response = api.post(
+            reverse("v1:login"),
+            {"username": "finance-1", "password": PASSWORD},
+            format="json",
+        )
+
+        assert response.status_code == 200
+        assert response.data["twoFactorRequired"] is False
+        assert response.data["tokens"]["access"]
+
+    def test_profile_reports_that_binding_is_required(
+        self, as_role: Callable[..., APIClient]
+    ) -> None:
+        api = as_role(Role.FINANCE)
+
+        response = api.get(reverse("v1:me"))
+
+        assert response.data["twoFactorSetupRequired"] is True
+
+    def test_binding_removes_the_requirement(
+        self, as_role: Callable[..., APIClient], make_user: Callable[..., User]
+    ) -> None:
+        api = as_role(Role.FINANCE)
+
+        api.post(reverse("v1:two-factor-setup"))
+
+        assert api.get(reverse("v1:me")).data["twoFactorSetupRequired"] is False
+
+    def test_dispatcher_is_not_forced_to_bind(
+        self, as_role: Callable[..., APIClient]
+    ) -> None:
+        """Политика перечисляет роли явно: диспетчеру привязка не навязывается."""
+        api = as_role(Role.DISPATCHER)
+
+        assert api.get(reverse("v1:me")).data["twoFactorSetupRequired"] is False
 
     def test_code_from_an_authenticator_application_works(
         self, api: APIClient, make_user: Callable[..., User]
@@ -310,8 +354,8 @@ class TestMe:
 
         assert response.status_code == 200
         assert response.data["user"]["role"] == Role.DISPATCHER
-        assert response.data["permissions"]["flights.write"] is True
-        assert response.data["permissions"]["catalog.write"] is False
+        assert response.data["permissions"]["flight.create"] is True
+        assert response.data["permissions"]["catalog.edit"] is False
 
     def test_demo_marker_reflects_the_setting(
         self, as_role: Callable[..., APIClient], settings: object

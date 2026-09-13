@@ -11,6 +11,7 @@ from .base import DATABASES, INTEGRATION_MODES, env
 
 DEBUG = False
 DEMO_DATA = False
+DEMO_TWO_FACTOR_FILE = ""
 
 # Тесты работают с настоящей PostgreSQL: часть проверок — про поведение самой
 # базы (неизменяемость журнала, JSONB, ограничения). Подменять её на SQLite

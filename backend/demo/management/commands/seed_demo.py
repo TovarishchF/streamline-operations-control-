@@ -22,14 +22,17 @@
 
 from __future__ import annotations
 
+import json
 import random
 from datetime import timedelta
+from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from accounts import services as accounts
 from accounts.models import Organization, Role, TimezoneMode, User
 from audit import services as audit
 from audit.models import AuditEntityType, AuditEntry, AuditSource
@@ -174,6 +177,7 @@ class Command(BaseCommand):
 
         organization = self._organization()
         staff = self._staff(organization)
+        self._bind_two_factor(staff)
         clients = self._clients(organization, seed)
         vendors = self._vendors(organization, seed)
         aircraft = self._aircraft(clients, seed)
@@ -186,6 +190,39 @@ class Command(BaseCommand):
         self.stdout.write(
             "Рейсы и заявки появятся вместе с соответствующими модулями (M4, M5)."
         )
+
+    def _bind_two_factor(self, staff: list[User]) -> None:
+        """Привязывает приложение-аутентификатор там, где его требует политика.
+
+        Иначе администратор и финансист на стенде упираются в экран привязки
+        и дальше не проходят: привязать приложение можно только изнутри
+        системы, а приложения у того, кто смотрит стенд, может и не быть.
+
+        Секрет печатается оператору и складывается в `artifacts/demo-2fa.json`
+        — файл не попадает в репозиторий. Это учётные данные вымышленных
+        пользователей демонстрационного стенда, а не боевые.
+        """
+        bound: dict[str, str] = {}
+        for user in staff:
+            if not accounts.two_factor_setup_required(user):
+                continue
+            setup = accounts.setup_two_factor(user)
+            bound[user.username] = setup.otpauth_url
+            self.stdout.write(f"второй фактор для {user.username}: {setup.otpauth_url}")
+
+        if not bound or not settings.DEMO_TWO_FACTOR_FILE:
+            return
+
+        path = Path(settings.DEMO_TWO_FACTOR_FILE)
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(bound, ensure_ascii=False, indent=2), encoding="utf-8")
+        except OSError as error:
+            # Каталог может быть недоступен на запись — ссылки уже напечатаны,
+            # и это главное. Ронять генерацию из-за файла незачем.
+            self.stdout.write(f"не удалось сохранить {path}: {error}")
+            return
+        self.stdout.write(f"ссылки otpauth сохранены в {path}")
 
     def _organization(self) -> Organization:
         organization, _ = Organization.objects.get_or_create(name="ООО «Стримлайн Група»")

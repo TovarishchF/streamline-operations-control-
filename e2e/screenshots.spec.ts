@@ -1,20 +1,33 @@
-import { expect, test, type ConsoleMessage, type Page } from '@playwright/test';
+import { expect, test, type ConsoleMessage } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
+import { signInAs } from './helpers/session';
+
 /**
- * Съёмка макетов вехи M2 и проверка, что экраны отрисовываются без ошибок.
+ * Съёмка экранов и проверка, что они отрисовываются без ошибок.
  *
- * Скриншоты складываются в `artifacts/screenshots/m2/` — приёмочный критерий
- * `TASKS.md` M2 п. 4. Заодно это первая настоящая проверка, что каждый экран
- * из `SPEC.md § 3` существует и открывается: снимок экрана, который не
- * отрисовался, сделать нельзя.
+ * Скриншоты складываются в `artifacts/screenshots/<веха>/` (`CLAUDE.md § 8`
+ * п. 8). Заодно это настоящая проверка, что каждый экран из `SPEC.md § 3`
+ * существует и открывается: снимок экрана, который не отрисовался,
+ * сделать нельзя.
  *
  * Ошибки консоли не игнорируются: приёмка M10 требует их отсутствия,
  * и начинать соблюдать это правило с M2 дешевле, чем чинить потом.
+ *
+ * С M3 экраны справочников работают на настоящем API, а вход — настоящий,
+ * поэтому прогон требует поднятого окружения (`make up`) и наполненного
+ * набора (`make seed-reference`, `make seed-demo`). Снимок экрана,
+ * нарисованного по недоступным данным, никому не нужен.
  */
 
-const OUT = resolve(process.cwd(), '../artifacts/screenshots/m2');
+/**
+ * Снимки складываются по вехам: снимок — это протокол состояния на момент
+ * сдачи вехи, и перезаписывать прошлый нельзя. Веха задаётся переменной
+ * окружения, чтобы пересъёмка не требовала правки кода.
+ */
+const MILESTONE = process.env['SOC_MILESTONE'] ?? 'm3';
+const OUT = resolve(process.cwd(), `../artifacts/screenshots/${MILESTONE}`);
 
 /** Экраны внутреннего интерфейса. Роль подбирается так, чтобы экран был доступен. */
 const INTERNAL_SCREENS: Array<{ name: string; path: string; role?: string }> = [
@@ -69,15 +82,6 @@ const PORTAL_SCREENS: Array<{ name: string; path: string; role: string }> = [
   { name: '46-portal-vendor-payables', path: '/portal/vendor/payables', role: 'usr_vendor' },
 ];
 
-const DEMO_USERS: Record<string, { id: string; name: string; role: string; clientId?: string; vendorId?: string }> = {
-  usr_admin: { id: 'usr_admin', name: 'Волкова Анна', role: 'admin' },
-  usr_disp1: { id: 'usr_disp1', name: 'Карпов Илья', role: 'dispatcher' },
-  usr_fin: { id: 'usr_fin', name: 'Зайцева Ольга', role: 'finance' },
-  usr_mgr: { id: 'usr_mgr', name: 'Соколов Виктор', role: 'manager' },
-  usr_client: { id: 'usr_client', name: 'Нечаев Роман', role: 'client', clientId: 'cli_001' },
-  usr_vendor: { id: 'usr_vendor', name: 'Громов Сергей', role: 'vendor', vendorId: 'ven_003' },
-};
-
 /** Шум сторонних библиотек, не относящийся к нашему коду. */
 function isRelevantError(message: ConsoleMessage): boolean {
   if (message.type() !== 'error') return false;
@@ -87,16 +91,9 @@ function isRelevantError(message: ConsoleMessage): boolean {
   return true;
 }
 
-async function setRole(page: Page, roleId: string): Promise<void> {
-  const user = DEMO_USERS[roleId] ?? DEMO_USERS['usr_disp1'];
-  await page.addInitScript((value: string) => {
-    window.localStorage.setItem('soc.session', value);
-  }, JSON.stringify({ state: { user }, version: 0 }));
-}
-
 mkdirSync(OUT, { recursive: true });
 
-test.describe('Макеты вехи M2', () => {
+test.describe('Экраны', () => {
   for (const screen of [...INTERNAL_SCREENS, ...PORTAL_SCREENS]) {
     test(screen.name, async ({ page }, testInfo) => {
       const errors: string[] = [];
@@ -107,7 +104,7 @@ test.describe('Макеты вехи M2', () => {
         errors.push(error.message);
       });
 
-      await setRole(page, screen.role ?? 'usr_disp1');
+      await signInAs(page, screen.role ?? 'usr_disp1');
       await page.goto(screen.path, { waitUntil: 'networkidle' });
 
       // Экран считается открывшимся, когда появился основной контейнер

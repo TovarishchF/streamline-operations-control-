@@ -1,5 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
+import { signInAs } from './helpers/session';
+
 /**
  * Выбор значения в списке Ant Design.
  *
@@ -22,30 +24,26 @@ async function pickOption(page: Page, select: Locator, index = 0): Promise<void>
  * клиента и сохранение шаблона с подтверждением.
  */
 
-const DISPATCHER = {
-  state: { user: { id: 'usr_disp1', name: 'Карпов Илья', role: 'dispatcher' } },
-  version: 0,
-};
-
 /**
  * Вход под ролью и чистый набор данных.
  *
- * `addInitScript` выполняется при КАЖДОЙ навигации, поэтому безусловная
- * очистка хранилища стирала бы всё, что тест только что создал. Чистим
- * один раз на контекст браузера, отмечая это в sessionStorage.
+ * Вход настоящий, через API (`helpers/session`). Прототипное хранилище
+ * рейсов очищается один раз на контекст браузера: `addInitScript`
+ * выполняется при КАЖДОЙ навигации, и безусловная очистка стирала бы всё,
+ * что тест только что создал.
  */
-async function signIn(page: Page, user: object): Promise<void> {
-  await page.addInitScript((value: string) => {
-    window.localStorage.setItem('soc.session', value);
+async function signIn(page: Page, role: string): Promise<void> {
+  await signInAs(page, role);
+  await page.addInitScript(() => {
     if (!window.sessionStorage.getItem('soc.test.cleared')) {
       window.localStorage.removeItem('soc.prototype');
       window.sessionStorage.setItem('soc.test.cleared', '1');
     }
-  }, JSON.stringify({ state: { user }, version: 0 }));
+  });
 }
 
 async function asDispatcher(page: Page): Promise<void> {
-  await signIn(page, DISPATCHER.state.user);
+  await signIn(page, 'usr_disp1');
 }
 
 test.describe('Операции', () => {
@@ -95,6 +93,9 @@ test.describe('Операции', () => {
     await asDispatcher(page);
     await page.goto('/flights/flt_001/services');
 
+    // Приложение сперва восстанавливает сессию, поэтому таблица появляется
+    // не в первый кадр: без ожидания счёт строк вышел бы нулевым.
+    await expect(page.locator('tbody tr.ant-table-row').first()).toBeVisible();
     const before = await page.locator('tbody tr.ant-table-row').count();
 
     await page.getByRole('button', { name: 'Заказать услугу' }).click();
@@ -132,7 +133,7 @@ test.describe('Операции', () => {
   });
 
   test('шаблон сохраняется только после подтверждения', async ({ page }) => {
-    await signIn(page, { id: 'usr_admin', name: 'Волкова Анна', role: 'admin' });
+    await signIn(page, 'usr_admin');
 
     await page.goto('/communications/templates');
 
@@ -157,18 +158,23 @@ test.describe('Операции', () => {
   test('сортировка и изменение ширины столбца доступны в таблице', async ({ page }) => {
     await asDispatcher(page);
     await page.goto('/airports');
+    await expect(page.locator('tbody tr.ant-table-row').first()).toBeVisible();
 
-    // У каждой колонки с данными есть переключатель сортировки
+    // У каждой колонки с данными есть переключатель сортировки.
+    // Все девять колонок справочника аэропортов сортируются, включая
+    // вычисляемые (наименование, координаты).
     const sorters = page.locator('th.ant-table-column-has-sorters');
-    // Все девять колонок справочника аэропортов сортируются,
-    // включая вычисляемые (наименование, координаты)
     expect(await sorters.count()).toBe(9);
 
-    // Сортировка по ICAO меняет первую строку
+    // Сервер отдаёт справочник по возрастанию кода ИКАО, поэтому первое
+    // нажатие ничего не меняет — порядок проверяется по убыванию.
+    const icao = page.locator('th', { hasText: 'ICAO' }).first();
     const firstBefore = await page.locator('tbody tr.ant-table-row td').first().innerText();
-    await page.locator('th', { hasText: 'ICAO' }).first().click();
-    const firstAfter = await page.locator('tbody tr.ant-table-row td').first().innerText();
-    expect(firstAfter).not.toBe(firstBefore);
+    await icao.click();
+    await icao.click();
+    await expect
+      .poll(async () => page.locator('tbody tr.ant-table-row td').first().innerText())
+      .not.toBe(firstBefore);
 
     // Ручка изменения ширины присутствует в заголовках
     expect(await page.locator('.soc-resize-handle').count()).toBeGreaterThan(0);

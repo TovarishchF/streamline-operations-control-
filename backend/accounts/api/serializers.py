@@ -90,9 +90,21 @@ class MeSerializer(serializers.Serializer):  # type: ignore[type-arg]
     user = UserSerializer(read_only=True)
     permissions = serializers.SerializerMethodField()
     demoMode = serializers.BooleanField(read_only=True)  # noqa: N815
+    twoFactorSetupRequired = serializers.SerializerMethodField()  # noqa: N815
 
     def get_permissions(self, obj: dict[str, Any]) -> dict[str, bool]:
         return permission_map(obj["user"].role)
+
+    def get_twoFactorSetupRequired(self, obj: dict[str, Any]) -> bool:  # noqa: N802
+        """Политика требует второй фактор, а приложение не привязано.
+
+        Клиент по этому признаку не пускает пользователя никуда, кроме
+        экрана привязки. Признак вычисляется на сервере: политика ролей —
+        серверное знание.
+        """
+        from accounts.services import two_factor_setup_required
+
+        return two_factor_setup_required(obj["user"])
 
 
 class PasswordChangeSerializer(serializers.Serializer):  # type: ignore[type-arg]

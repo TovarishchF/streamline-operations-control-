@@ -35,7 +35,7 @@ export function ClientFlightsPage(): JSX.Element {
 
   const allFlights = useSocStore((state) => state.flights);
   const flights: ClientPortalFlight[] = allFlights
-    .filter((f) => f.clientId === user.clientId)
+    .filter((f) => f.clientId === user?.clientId)
     .map(
     (flight) => ({
       id: flight.id,
@@ -152,7 +152,7 @@ export function ClientRequestPage(): JSX.Element {
               comment?: string;
             }) => {
               createRequest({
-                clientId: user.clientId ?? '',
+                clientId: (user?.clientId ?? ''),
                 depIcao: values.dep,
                 arrIcao: values.arr,
                 requestedStdUtc: values.date.toISOString(),
@@ -221,7 +221,7 @@ export function ClientDocumentsPage(): JSX.Element {
   const user = useCurrentUser();
 
   const documents: ClientPortalDocument[] = [
-    ...QUOTES.filter((q) => q.clientId === user.clientId && q.number).map((q) => ({
+    ...QUOTES.filter((q) => q.clientId === user?.clientId && q.number).map((q) => ({
       id: q.id,
       kind: 'quote' as const,
       number: q.number ?? '',
@@ -231,7 +231,7 @@ export function ClientDocumentsPage(): JSX.Element {
       total: q.totals.grandTotal,
       downloadUrl: '#',
     })),
-    ...INVOICES.filter((i) => i.clientId === user.clientId).map((i) => ({
+    ...INVOICES.filter((i) => i.clientId === user?.clientId).map((i) => ({
       id: i.id,
       kind: 'invoice' as const,
       number: i.number ?? '',

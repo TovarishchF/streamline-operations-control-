@@ -39,7 +39,7 @@ class AirportViewSet(ReferenceViewSet):
 
     queryset = Airport.objects.all()
     serializer_class = AirportSerializer
-    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.FLIGHTS_READ}
+    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.SCHEDULE_VIEW}
     filter_backends = (filters.OrderingFilter,)
     ordering_fields = ("icao", "iata", "country", "timezone", "name_ru", "name_en")
     ordering = ("icao",)
@@ -68,7 +68,7 @@ class AircraftTypeViewSet(ReferenceViewSet):
 
     queryset = AircraftType.objects.all()
     serializer_class = AircraftTypeSerializer
-    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.FLIGHTS_READ}
+    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.SCHEDULE_VIEW}
     filter_backends = (filters.OrderingFilter,)
     ordering_fields = ("icao_type", "category", "seats", "cruise_speed_kts")
     ordering = ("icao_type",)
@@ -83,7 +83,7 @@ class VatRateViewSet(ReferenceViewSet):
 
     queryset = VatRate.objects.all()
     serializer_class = VatRateSerializer
-    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.CATALOG_READ}
+    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.CATALOG_VIEW}
     pagination_class = None
 
     def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -116,10 +116,10 @@ class ServiceViewSet(
     serializer_class = ServiceSerializer
     idempotency = "required"
     required_permissions: ClassVar[dict[str, Any]] = {
-        "list": Permission.CATALOG_READ,
-        "create": Permission.CATALOG_WRITE,
-        "update": Permission.CATALOG_WRITE,
-        "partial_update": Permission.CATALOG_WRITE,
+        "list": Permission.CATALOG_VIEW,
+        "create": Permission.CATALOG_EDIT,
+        "update": Permission.CATALOG_EDIT,
+        "partial_update": Permission.CATALOG_EDIT,
     }
     filter_backends = (filters.OrderingFilter,)
     ordering_fields = ("code", "category", "lead_time_h")

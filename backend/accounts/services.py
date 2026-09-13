@@ -65,7 +65,19 @@ class TwoFactorSetup:
 
 
 def two_factor_required_for(role: str) -> bool:
+    """Роль, для которой политика требует второй фактор (`BACKEND.md § 6`)."""
     return role in set(settings.TWO_FACTOR_REQUIRED_ROLES)
+
+
+def two_factor_setup_required(user: User) -> bool:
+    """Политика требует второй фактор, но приложение ещё не привязано.
+
+    Такой пользователь входит по паролю — иначе он не вошёл бы никогда:
+    привязать приложение можно только изнутри системы. Но до привязки
+    интерфейс не даёт ему ничего, кроме экрана привязки, и это состояние
+    видно в `/auth/me`.
+    """
+    return two_factor_required_for(user.role) and not user.two_factor_enabled
 
 
 def login(username: str, password: str) -> LoginResult:
@@ -89,7 +101,10 @@ def login(username: str, password: str) -> LoginResult:
 
     _reset_failed_attempts(user)
 
-    if user.two_factor_enabled or two_factor_required_for(user.role):
+    # Второй фактор спрашивается, только если приложение привязано.
+    # Требование политики без привязки — не повод запереть человека снаружи:
+    # оно превращается в обязанность привязать приложение сразу после входа.
+    if user.two_factor_enabled:
         return LoginResult(
             two_factor_required=True,
             two_factor_token=signing.dumps({"user": user.pk}, salt=TWO_FACTOR_SALT),

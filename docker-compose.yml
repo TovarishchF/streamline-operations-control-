@@ -16,6 +16,8 @@ x-backend-base: &backend-base
     - ./backend:/app
     - ./shared:/shared:ro
     - ./openapi.yaml:/openapi.yaml:ro
+    # Отчёты и выгрузки пишутся сюда и остаются на хосте (CLAUDE.md § 4).
+    - ./artifacts:/artifacts
 
 services:
 

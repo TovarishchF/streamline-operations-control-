@@ -112,3 +112,26 @@ body {
 .ant-table-tbody > tr > td {
   padding-block: 5px !important;
 }
+
+/* Кнопка пользователя в шапке.
+   Имя с отчеством не должно растягивать шапку: на узком экране оно
+   урезается многоточием, полное видно во всплывающей подсказке браузера. */
+.soc-user-button {
+  max-width: 260px;
+  overflow: hidden;
+}
+
+.soc-user-name {
+  display: inline-block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: bottom;
+}
+
+@media (max-width: 700px) {
+  .soc-user-name {
+    max-width: 96px;
+  }
+}

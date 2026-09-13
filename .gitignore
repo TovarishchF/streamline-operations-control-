@@ -19,6 +19,10 @@ venv/
 # Кэш загрузок scripts/build_reference.py: исходные наборы открытых данных,
 # результат сборки лежит в shared/reference/ и в репозиторий попадает он.
 .cache/
+
+# Ссылки otpauth демонстрационного стенда: учётные данные вымышленных
+# пользователей, но в репозитории им всё равно не место (CLAUDE.md § 3 п. 8).
+artifacts/demo-2fa.json
 .coverage
 coverage.xml
 htmlcov/

@@ -42,10 +42,41 @@ export class ApiError extends Error {
   }
 }
 
+/**
+ * Токен доступа живёт только в памяти вкладки (ADR-034): в хранилище
+ * попадает лишь refresh, и обновляется он ротацией с отзывом прежнего.
+ */
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null): void {
   accessToken = token;
+}
+
+/**
+ * Обновление пары токенов. Подставляется модулем аутентификации, чтобы
+ * транспорт не знал ни про хранилище сессии, ни про форму ответа `/auth/refresh`.
+ */
+type RefreshHandler = () => Promise<boolean>;
+
+let refreshTokens: RefreshHandler | null = null;
+
+export function setRefreshHandler(handler: RefreshHandler | null): void {
+  refreshTokens = handler;
+}
+
+/**
+ * Одновременные запросы, наткнувшиеся на истёкший токен, обновляют его
+ * один раз на всех: иначе каждый из них отзовёт refresh следующего
+ * и разлогинит пользователя посреди работы.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+
+async function refreshOnce(): Promise<boolean> {
+  if (!refreshTokens) return false;
+  refreshInFlight ??= refreshTokens().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
 }
 
 interface RequestOptions {
@@ -58,6 +89,11 @@ interface RequestOptions {
    */
   idempotencyKey?: string;
   signal?: AbortSignal;
+  /**
+   * Не пытаться обновить токен при 401. Нужно самим запросам аутентификации:
+   * иначе неверный пароль запускал бы обновление сессии, которой нет.
+   */
+  skipRefresh?: boolean;
 }
 
 export async function request<T>(
@@ -65,19 +101,29 @@ export async function request<T>(
   schema: z.ZodType<T>,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = 'GET', body, idempotencyKey, signal } = options;
+  const { method = 'GET', body, idempotencyKey, signal, skipRefresh = false } = options;
 
-  const headers: Record<string, string> = { Accept: 'application/json' };
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
-  if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-  if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+  const send = async (): Promise<Response> => {
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
 
-  const response = await fetch(`${BASE_URL}${path}`, {
-    method,
-    headers,
-    ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-    ...(signal ? { signal } : {}),
-  });
+    return fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
+      ...(signal ? { signal } : {}),
+    });
+  };
+
+  let response = await send();
+
+  // Токен доступа живёт 15 минут. Истёк — обновляем и повторяем запрос
+  // ровно один раз: второй отказ означает, что сессия кончилась.
+  if (response.status === 401 && !skipRefresh && (await refreshOnce())) {
+    response = await send();
+  }
 
   if (response.status === 204) {
     return schema.parse(undefined);

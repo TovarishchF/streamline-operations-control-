@@ -247,7 +247,7 @@ class UserViewSet(
     queryset = User.objects.select_related("organization", "client", "vendor")
     serializer_class = UserSerializer
     idempotency = "required"
-    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.USERS_MANAGE}
+    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.ADMIN}
 
     def get_queryset(self) -> QuerySet[User]:
         queryset = super().get_queryset()

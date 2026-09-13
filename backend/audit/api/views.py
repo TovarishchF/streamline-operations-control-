@@ -40,7 +40,7 @@ class AuditViewSet(ReferenceViewSet):
 
     queryset = AuditEntry.objects.all()
     serializer_class = AuditEntrySerializer
-    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.AUDIT_READ}
+    required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.AUDIT_VIEW}
 
     def get_queryset(self) -> QuerySet[AuditEntry]:
         queryset = super().get_queryset()

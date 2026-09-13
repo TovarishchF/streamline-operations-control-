@@ -1,11 +1,14 @@
-import { useMemo, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { Alert, Card, Input, Space, Tag, Tooltip, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
+import { useAirports } from '@/api/catalog';
 import type { Airport } from '@/api/types';
-import { AIRPORTS, AIRPORT_UTC_OFFSET } from '@/mocks/reference';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
+import { formatUtcOffset } from '@/shared/format/timezone';
+import { useClock } from '@/shared/clock/useClock';
 
 /**
  * Справочник аэропортов.
@@ -17,20 +20,18 @@ import { EmptyState, Mono } from '@/shared/ui/primitives';
  * Данные по FBO, перронам и рабочим часам служб ведутся вручную в реестре
  * поставщиков — это штатное решение, а не временная мера
  * (`INTEGRATIONS.md § 2.4`).
+ *
+ * Поиск и постраничность выполняет сервер: в справочнике больше тысячи
+ * аэропортов, и фильтровать их в браузере значит каждый раз выкачивать
+ * весь справочник.
  */
 export function AirportsPage(): JSX.Element {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const { nowUtc } = useClock();
 
-  const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    if (!query) return AIRPORTS;
-    return AIRPORTS.filter((airport) =>
-      `${airport.icao} ${airport.iata ?? ''} ${airport.name.ru} ${airport.name.en} ${airport.city}`
-        .toLowerCase()
-        .includes(query),
-    );
-  }, [search]);
+  const query = useAirports({ search, page, perPage: 20 });
 
   const columns: DataColumns<Airport> = [
     {
@@ -62,17 +63,14 @@ export function AirportsPage(): JSX.Element {
     },
     {
       title: t('airport.timezone'), dataIndex: 'timezone', width: 200,
-      render: (value: string, row) => {
-        const offset = AIRPORT_UTC_OFFSET[row.icao] ?? 0;
-        return (
-          <Space direction="vertical" size={0}>
-            <Mono>{value}</Mono>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              <Mono>UTC{offset >= 0 ? '+' : ''}{offset}</Mono>
-            </Typography.Text>
-          </Space>
-        );
-      },
+      render: (value: string) => (
+        <Space direction="vertical" size={0}>
+          <Mono>{value}</Mono>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            <Mono>{formatUtcOffset(value, nowUtc)}</Mono>
+          </Typography.Text>
+        </Space>
+      ),
     },
     {
       title: t('airport.coordinates'), key: 'coords', width: 180,
@@ -115,17 +113,30 @@ export function AirportsPage(): JSX.Element {
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
+            setPage(1);
           }}
           style={{ maxWidth: 420 }}
         />
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<Airport>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1350 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<Airport>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              scroll={{ x: 1350 }}
+              locale={{ emptyText: <EmptyState description={t('airport.nothingFound')} /> }}
+              pagination={{
+                size: 'small',
+                current: paged.meta.page,
+                pageSize: paged.meta.perPage,
+                total: paged.meta.total,
+                showSizeChanger: false,
+                onChange: setPage,
+              }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );

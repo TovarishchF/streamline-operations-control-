@@ -4,22 +4,23 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import type { AuditEntry } from '@/api/types';
-import { AUDIT } from '@/mocks/admin';
+import { useAuditEntries, type AuditEntryRow } from '@/api/admin';
 import { AuditActor, AuditDiff } from '@/modules/flights/FlightHistoryTab';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
 
 const ENTITY_TYPES = [
-  'flight', 'service_order', 'vendor', 'contract', 'tariff', 'quote', 'invoice',
-  'payable', 'payment', 'reconciliation', 'user', 'settings', 'crew',
+  'flight', 'service_order', 'vendor', 'client', 'contract', 'tariff', 'quote',
+  'invoice', 'payable', 'payment', 'reconciliation', 'user', 'settings', 'crew',
+  'aircraft', 'service', 'airport',
 ] as const;
 
 /**
  * Журнал аудита `[ТЗ 4.3]`.
  *
- * Записи неизменяемы: приложение подключается к базе учётной записью без прав
- * `UPDATE` и `DELETE` на эту таблицу (`BACKEND.md § 3.9`). Экран доступен
- * администратору и руководителю.
+ * Записи неизменяемы на уровне базы: изменение и удаление отклоняет триггер
+ * (ADR-033). Экран доступен администратору и руководителю, остальным сервер
+ * отвечает 403.
  *
  * Записи от демонстрационного генератора помечены `seed` и визуально
  * отличаются — они не выдаются за действия людей (`CLAUDE.md § 4`).
@@ -28,18 +29,22 @@ export function AuditPage(): JSX.Element {
   const { t } = useTranslation();
   const [entityType, setEntityType] = useState<string | undefined>();
   const [source, setSource] = useState<string | undefined>();
+  const [page, setPage] = useState(1);
 
-  const filtered = useMemo(
-    () =>
-      AUDIT.filter((entry) => {
-        if (entityType && entry.entityType !== entityType) return false;
-        if (source && entry.source !== source) return false;
-        return true;
-      }),
-    [entityType, source],
-  );
+  // Тип сущности фильтрует сервер, происхождение — клиент: журнал листается
+  // постранично, и добавлять эндпоинту параметр ради трёх значений не нужно.
+  const query = useAuditEntries({
+    ...(entityType ? { entityType } : {}),
+    page,
+    perPage: 25,
+  });
 
-  const columns: DataColumns<AuditEntry> = [
+  const rows = useMemo(() => {
+    const data = query.data?.data ?? [];
+    return source ? data.filter((entry) => entry.source === source) : data;
+  }, [query.data, source]);
+
+  const columns: DataColumns<AuditEntryRow> = [
     {
       title: t('audit.ts'), dataIndex: 'ts', width: 120, fixed: 'left',
       defaultSortOrder: 'descend',
@@ -84,7 +89,11 @@ export function AuditPage(): JSX.Element {
           <Col xs={12} md={8}>
             <Select
               allowClear style={{ width: '100%' }} placeholder={t('audit.entity')}
-              value={entityType} onChange={setEntityType}
+              value={entityType}
+              onChange={(value: string | undefined) => {
+                setEntityType(value);
+                setPage(1);
+              }}
               options={ENTITY_TYPES.map((code) => ({ value: code, label: t(`auditEntity.${code}`) }))}
             />
           </Col>
@@ -101,12 +110,24 @@ export function AuditPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<AuditEntry>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={{ pageSize: 25, size: 'small' }} scroll={{ x: 1200 }}
-          rowClassName={(row) => (row.source === 'seed' ? 'soc-row-seed' : '')}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<AuditEntryRow>
+              size="small" rowKey="id" columns={columns} dataSource={rows}
+              scroll={{ x: 1200 }}
+              rowClassName={(row) => (row.source === 'seed' ? 'soc-row-seed' : '')}
+              locale={{ emptyText: <EmptyState /> }}
+              pagination={{
+                size: 'small',
+                current: paged.meta.page,
+                pageSize: paged.meta.perPage,
+                total: paged.meta.total,
+                showSizeChanger: false,
+                onChange: setPage,
+              }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );
