@@ -135,6 +135,9 @@ CELERY_TASK_ALWAYS_EAGER = False
 CELERY_TIMEZONE = "UTC"
 CELERY_ENABLE_UTC = True
 CELERY_TASK_ACKS_LATE = True
+# Поведение по умолчанию в Celery 6: повторять подключение к брокеру при старте.
+# Задаётся явно, иначе воркер пишет предупреждение при каждом запуске.
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
 
 # ─────────────────────────── Локализация и время ───────────────────────────
