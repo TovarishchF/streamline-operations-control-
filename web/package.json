@@ -7,10 +7,11 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "node --max-old-space-size=6144 ./node_modules/eslint/bin/eslint.js . --max-warnings 0",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
     "typecheck": "tsc --noEmit",
-    "test": "vitest"
+    "test": "vitest",
+    "lint:fix": "node --max-old-space-size=6144 ./node_modules/eslint/bin/eslint.js . --fix --max-warnings 0"
   },
   "dependencies": {
     "@ant-design/icons": "5.5.2",

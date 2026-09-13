@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Alert, Button, Card, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Button, Card, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -26,7 +26,7 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
 export function SlotsPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<Slot> = [
+  const columns: DataColumns<Slot> = [
     {
       title: t('flight.airport'), dataIndex: 'airportIcao', width: 190,
       render: (value: string) => (
@@ -79,7 +79,7 @@ export function SlotsPage(): JSX.Element {
       render: (value: string | null) => value ?? <Typography.Text type="secondary">—</Typography.Text>,
     },
     {
-      title: t('common.actions'), key: 'actions', width: 190, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 190, fixed: 'right',
       render: (_, row) => (
         <Space size={4} wrap>
           <Button size="small">{t('slots.buildScr')}</Button>
@@ -106,7 +106,7 @@ export function SlotsPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Slot>
+        <DataTable<Slot>
           size="small" rowKey="id" columns={columns} dataSource={SLOTS}
           pagination={false} scroll={{ x: 1250 }}
           locale={{ emptyText: <EmptyState description={t('slots.empty')} /> }}

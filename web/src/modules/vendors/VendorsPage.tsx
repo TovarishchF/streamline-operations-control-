@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Card, Col, Input, Progress, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Card, Col, Input, Progress, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -69,7 +69,7 @@ export function VendorsPage(): JSX.Element {
     });
   }, [search, category, airport]);
 
-  const columns: ColumnsType<Vendor> = [
+  const columns: DataColumns<Vendor> = [
     {
       title: t('vendor.name'),
       dataIndex: 'name',
@@ -106,6 +106,7 @@ export function VendorsPage(): JSX.Element {
       title: t('vendor.coverage'),
       key: 'coverage',
       width: 190,
+      sortBy: (row) => row.coverage?.airports?.length ?? 0,
       render: (_, row) => (
         <Space size={4} wrap>
           {(row.coverage?.airports ?? []).slice(0, 4).map((icao) => (
@@ -211,7 +212,7 @@ export function VendorsPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Vendor>
+        <DataTable<Vendor>
           size="small"
           rowKey="id"
           columns={columns}

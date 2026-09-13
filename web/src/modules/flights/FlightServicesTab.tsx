@@ -1,10 +1,11 @@
 import { useState, type JSX } from 'react';
-import { Button, Card, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { App, Button, Card, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { PaperClipOutlined, PlusOutlined, SwapOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight, ServiceOrder } from '@/api/types';
+import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
 import { usePermission } from '@/shared/auth/session';
 import { EmptyState, MoneyText, Mono, ServiceStatusTag, UtcTime } from '@/shared/ui/primitives';
@@ -27,11 +28,13 @@ export function FlightServicesTab({
   orders: ServiceOrder[];
 }): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const transitionOrder = useSocStore((state) => state.transitionOrder);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [suggestFor, setSuggestFor] = useState<ServiceOrder | null>(null);
   const canSeePurchase = usePermission('billing.purchase_price.view');
 
-  const columns: ColumnsType<ServiceOrder> = [
+  const columns: DataColumns<ServiceOrder> = [
     {
       title: t('service.name'), key: 'service', width: 230, fixed: 'left',
       render: (_, row) => (
@@ -85,7 +88,7 @@ export function FlightServicesTab({
             title: t('service.purchaseCost'), key: 'cost', width: 130, align: 'right',
             render: (_, row) => <MoneyText value={row.purchaseCost} />,
           },
-        ] as ColumnsType<ServiceOrder>)
+        ] as DataColumns<ServiceOrder>)
       : []),
     {
       title: t('service.salePrice'), key: 'sale', width: 130, align: 'right',
@@ -128,12 +131,27 @@ export function FlightServicesTab({
         ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 190, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 190, fixed: 'right',
       render: (_, row) => (
         <Space size={4} wrap>
           {row.status === 'ordered' ? (
             <Can permission="service.confirm">
-              <Button size="small">{t('serviceTransition.confirm')}</Button>
+              <Space size={4}>
+                <Button
+                  size="small"
+                  type="primary"
+                  onClick={() => { runTransition(row.id, 'confirm'); }}
+                >
+                  {t('serviceTransition.confirm')}
+                </Button>
+                <Button
+                  size="small"
+                  danger
+                  onClick={() => { runTransition(row.id, 'reject'); }}
+                >
+                  {t('serviceTransition.reject')}
+                </Button>
+              </Space>
             </Can>
           ) : null}
           {row.status === 'rejected' ? (
@@ -148,12 +166,20 @@ export function FlightServicesTab({
           ) : null}
           {row.status === 'confirmed' ? (
             <Can permission="service.confirm">
-              <Button size="small">{t('serviceTransition.begin')}</Button>
+              <Button size="small" onClick={() => { runTransition(row.id, 'begin'); }}>
+                {t('serviceTransition.begin')}
+              </Button>
             </Can>
           ) : null}
           {row.status === 'in_progress' ? (
             <Can permission="service.confirm">
-              <Button size="small" type="primary">{t('serviceTransition.finish')}</Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => { runTransition(row.id, 'finish'); }}
+              >
+                {t('serviceTransition.finish')}
+              </Button>
             </Can>
           ) : null}
           <Can permission="vendor.assign">
@@ -167,6 +193,16 @@ export function FlightServicesTab({
   ];
 
   const rejected = orders.filter((o) => o.status === 'rejected');
+
+  /** Переход заявки. Проверяется против shared/state-machines/service-order.json. */
+  const runTransition = (id: string, transition: 'confirm' | 'begin' | 'finish' | 'reject'): void => {
+    const error = transitionOrder(id, transition);
+    if (error) {
+      void message.error(t('service.transitionFailed'));
+      return;
+    }
+    void message.success(t('service.transitionDone', { transition: t(`serviceTransition.${transition}`) }));
+  };
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -192,7 +228,7 @@ export function FlightServicesTab({
         </Can>
       </Space>
 
-      <Table<ServiceOrder>
+      <DataTable<ServiceOrder>
         size="small"
         rowKey="id"
         columns={columns}

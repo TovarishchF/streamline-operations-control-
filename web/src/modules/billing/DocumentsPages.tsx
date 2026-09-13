@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Button, Card, Col, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -48,7 +48,7 @@ export function QuotesPage(): JSX.Element {
     [clientId, status],
   );
 
-  const columns: ColumnsType<Quote> = [
+  const columns: DataColumns<Quote> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
       render: (value: string | null, row) => (
@@ -79,6 +79,7 @@ export function QuotesPage(): JSX.Element {
     },
     {
       title: t('finance.total'), key: 'total', width: 160, align: 'right',
+      sortBy: (row) => Number.parseFloat(row.totals.grandTotal.amount),
       sorter: (a, b) =>
         Number.parseFloat(a.totals.grandTotal.amount) -
         Number.parseFloat(b.totals.grandTotal.amount),
@@ -125,7 +126,7 @@ export function QuotesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Quote>
+        <DataTable<Quote>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 950 }}
           locale={{ emptyText: <EmptyState /> }}
@@ -153,7 +154,7 @@ export function InvoicesPage(): JSX.Element {
 
   const overdueCount = INVOICES.filter((i) => i.status === 'overdue').length;
 
-  const columns: ColumnsType<Invoice> = [
+  const columns: DataColumns<Invoice> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
       render: (value: string | null, row) => (
@@ -193,6 +194,7 @@ export function InvoicesPage(): JSX.Element {
     },
     {
       title: t('finance.total'), key: 'total', width: 150, align: 'right',
+      sortBy: (row) => Number.parseFloat(row.totals.grandTotal.amount),
       render: (_, row) => <MoneyText value={row.totals.grandTotal} strong />,
     },
     {
@@ -244,7 +246,7 @@ export function InvoicesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Invoice>
+        <DataTable<Invoice>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1100 }}
           locale={{ emptyText: <EmptyState /> }}

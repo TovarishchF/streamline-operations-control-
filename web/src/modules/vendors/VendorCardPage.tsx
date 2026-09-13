@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Card, Col, Descriptions, Progress, Row, Space, Table, Tabs, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Card, Col, Descriptions, Progress, Row, Space, Tabs, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -30,7 +30,7 @@ export function VendorCardPage(): JSX.Element {
     { key: 'qualityScore', weight: '0.20' },
   ] as const;
 
-  const priceColumns: ColumnsType<VendorPrice> = [
+  const priceColumns: DataColumns<VendorPrice> = [
     {
       title: t('service.name'),
       dataIndex: 'serviceId',
@@ -260,7 +260,7 @@ export function VendorCardPage(): JSX.Element {
             key: 'prices',
             label: `${t('vendor.tabs.prices')} (${String(prices.length)})`,
             children: (
-              <Table<VendorPrice>
+              <DataTable<VendorPrice>
                 size="small"
                 rowKey="id"
                 columns={priceColumns}

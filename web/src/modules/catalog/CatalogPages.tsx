@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Card, Col, Input, Row, Select, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Card, Col, Input, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -32,7 +32,7 @@ export function ServicesCatalogPage(): JSX.Element {
     });
   }, [search, category]);
 
-  const columns: ColumnsType<ServiceCatalogItem> = [
+  const columns: DataColumns<ServiceCatalogItem> = [
     {
       title: t('catalog.code'),
       dataIndex: 'code',
@@ -136,7 +136,7 @@ export function ServicesCatalogPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<ServiceCatalogItem>
+        <DataTable<ServiceCatalogItem>
           size="small"
           rowKey="id"
           columns={columns}
@@ -166,7 +166,7 @@ export function VendorPricesPage(): JSX.Element {
     [airport, serviceId],
   );
 
-  const columns: ColumnsType<VendorPrice> = [
+  const columns: DataColumns<VendorPrice> = [
     {
       title: t('flight.airport'),
       dataIndex: 'airportIcao',
@@ -252,7 +252,7 @@ export function VendorPricesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<VendorPrice>
+        <DataTable<VendorPrice>
           size="small"
           rowKey="id"
           columns={columns}

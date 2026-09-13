@@ -1,14 +1,13 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Drawer, Input, List, Row, Segmented, Space, Table, Tabs, Tag,
-  Typography,
+  Alert, Button, Card, Drawer, List, Segmented, Space, Tag, Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { DownloadOutlined, RedoOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import type { InboxMessage, MessageTemplate, OutboxMessage } from '@/api/types';
-import { INBOX, MESSAGE_TEMPLATES, OUTBOX } from '@/mocks/comms';
+import type { InboxMessage, OutboxMessage } from '@/api/types';
+import { INBOX, OUTBOX } from '@/mocks/comms';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
@@ -31,7 +30,7 @@ export function OutboxPage(): JSX.Element {
 
   const filtered = OUTBOX.filter((m) => !status || m.status === status);
 
-  const columns: ColumnsType<OutboxMessage> = [
+  const columns: DataColumns<OutboxMessage> = [
     {
       title: t('comms.channel'), dataIndex: 'channel', width: 150,
       render: (value: string, row) => (
@@ -65,7 +64,7 @@ export function OutboxPage(): JSX.Element {
       render: (value: string | null) => <UtcTime value={value} withDate />,
     },
     {
-      title: t('common.actions'), key: 'actions', width: 170,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 170,
       render: (_, row) => (
         <Space size={4}>
           <Button size="small" onClick={() => { setPreview(row); }}>{t('common.open')}</Button>
@@ -94,7 +93,7 @@ export function OutboxPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<OutboxMessage>
+        <DataTable<OutboxMessage>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1000 }}
           locale={{ emptyText: <EmptyState /> }}
@@ -154,7 +153,7 @@ export function InboxPage(): JSX.Element {
   const filtered = INBOX.filter((m) => !unrecognizedOnly || !m.recognized);
   const unrecognized = INBOX.filter((m) => !m.recognized).length;
 
-  const columns: ColumnsType<InboxMessage> = [
+  const columns: DataColumns<InboxMessage> = [
     {
       title: t('comms.receivedAt'), dataIndex: 'receivedAt', width: 110,
       render: (value: string) => <UtcTime value={value} withDate />,
@@ -175,7 +174,7 @@ export function InboxPage(): JSX.Element {
         ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 150,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 150,
       render: (_, row) =>
         row.appliedAt ? (
           <Typography.Text type="secondary">{t('comms.applied')}</Typography.Text>
@@ -204,7 +203,7 @@ export function InboxPage(): JSX.Element {
       </Tag.CheckableTag>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<InboxMessage>
+        <DataTable<InboxMessage>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={false} scroll={{ x: 950 }}
           locale={{ emptyText: <EmptyState /> }}
@@ -213,94 +212,3 @@ export function InboxPage(): JSX.Element {
     </Space>
   );
 }
-
-/** Шаблоны сообщений `[ТЗ 3.5.2]`, версии ru/en с предпросмотром. */
-export function MessageTemplatesPage(): JSX.Element {
-  const { t } = useTranslation();
-  const [selected, setSelected] = useState<MessageTemplate | null>(MESSAGE_TEMPLATES[0] ?? null);
-  const [locale, setLocale] = useState<'ru' | 'en'>('ru');
-
-  return (
-    <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.messageTemplates')}</Typography.Title>
-
-      <Row gutter={[12, 12]}>
-        <Col xs={24} lg={8}>
-          <Card size="small" styles={{ body: { padding: 0 } }}>
-            <List
-              dataSource={MESSAGE_TEMPLATES}
-              renderItem={(template) => (
-                <List.Item
-                  style={{
-                    cursor: 'pointer', paddingInline: 12,
-                    background: selected?.id === template.id ? STATUS_TOKENS.progress.background : undefined,
-                  }}
-                  onClick={() => { setSelected(template); }}
-                >
-                  <Space direction="vertical" size={0}>
-                    <Mono>{template.code}</Mono>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {template.subject.ru}
-                    </Typography.Text>
-                  </Space>
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} lg={16}>
-          {selected ? (
-            <Card
-              size="small"
-              title={<Mono>{selected.code}</Mono>}
-              extra={
-                <Segmented
-                  size="small"
-                  value={locale}
-                  onChange={(value) => { setLocale(value as 'ru' | 'en'); }}
-                  options={[{ label: 'RU', value: 'ru' }, { label: 'EN', value: 'en' }]}
-                />
-              }
-            >
-              <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {t('comms.subject')}
-                  </Typography.Text>
-                  <Input value={selected.subject[locale]} readOnly />
-                </Space>
-
-                <Space direction="vertical" size={4} style={{ width: '100%' }}>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {t('comms.body')}
-                  </Typography.Text>
-                  <Input.TextArea value={selected.body[locale]} rows={12} readOnly />
-                </Space>
-
-                <Space direction="vertical" size={4}>
-                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                    {t('comms.variables')}
-                  </Typography.Text>
-                  <Space size={4} wrap>
-                    {(selected.variables ?? []).map((variable) => (
-                      <Tag key={variable} style={{ margin: 0 }}>
-                        <Mono>{`{{${variable}}}`}</Mono>
-                      </Tag>
-                    ))}
-                  </Space>
-                </Space>
-
-                <Alert type="info" showIcon message={t('comms.localeHint')} />
-              </Space>
-            </Card>
-          ) : (
-            <Card><EmptyState /></Card>
-          )}
-        </Col>
-      </Row>
-    </Space>
-  );
-}
-
-export { Tabs };

@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Modal, Radio, Slider, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Modal, Radio, Slider, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight, ServiceOrder, VendorCandidate } from '@/api/types';
@@ -87,7 +87,7 @@ export function VendorSuggestModal({
       .sort((a, b) => Number.parseFloat(b.totalScore) - Number.parseFloat(a.totalScore));
   }, [order, weights]);
 
-  const columns: ColumnsType<VendorCandidate> = [
+  const columns: DataColumns<VendorCandidate> = [
     {
       title: t('vendor.name'),
       dataIndex: 'vendorName',
@@ -208,7 +208,7 @@ export function VendorSuggestModal({
         {candidates.length === 0 ? (
           <Alert type="error" showIcon message={t('vendor.noCandidates')} />
         ) : (
-          <Table<VendorCandidate>
+          <DataTable<VendorCandidate>
             size="small"
             rowKey="vendorId"
             columns={columns}

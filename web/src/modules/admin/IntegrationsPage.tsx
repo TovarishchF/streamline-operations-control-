@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Space, Table, Tabs, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Button, Card, Space, Tabs, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { IntegrationLogEntry, IntegrationStatus } from '@/api/types';
@@ -25,7 +25,7 @@ export function IntegrationsPage(): JSX.Element {
   const stubCount = INTEGRATIONS.filter((i) => i.mode === 'stub').length;
   const unhealthy = INTEGRATIONS.filter((i) => !i.healthy);
 
-  const columns: ColumnsType<IntegrationStatus> = [
+  const columns: DataColumns<IntegrationStatus> = [
     {
       title: t('integrations.code'), dataIndex: 'code', width: 120, fixed: 'left',
       render: (value: string) => <Mono>{value}</Mono>,
@@ -83,7 +83,7 @@ export function IntegrationsPage(): JSX.Element {
       ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 130, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 130, fixed: 'right',
       render: (_, row) => (
         <Button
           size="small"
@@ -101,7 +101,7 @@ export function IntegrationsPage(): JSX.Element {
     },
   ];
 
-  const logColumns: ColumnsType<IntegrationLogEntry> = [
+  const logColumns: DataColumns<IntegrationLogEntry> = [
     { title: t('integrations.ts'), dataIndex: 'ts', width: 110,
       render: (value: string) => <UtcTime value={value} withDate /> },
     { title: t('integrations.code'), dataIndex: 'code', width: 100,
@@ -151,7 +151,7 @@ export function IntegrationsPage(): JSX.Element {
             label: t('integrations.tabStatus'),
             children: (
               <Card size="small" styles={{ body: { padding: 0 } }}>
-                <Table<IntegrationStatus>
+                <DataTable<IntegrationStatus>
                   size="small"
                   rowKey="code"
                   columns={columns}
@@ -171,7 +171,7 @@ export function IntegrationsPage(): JSX.Element {
                   {t('integrations.logHint')}
                 </Typography.Text>
                 <Card size="small" styles={{ body: { padding: 0 } }}>
-                  <Table<IntegrationLogEntry>
+                  <DataTable<IntegrationLogEntry>
                     size="small"
                     rowKey="id"
                     columns={logColumns}

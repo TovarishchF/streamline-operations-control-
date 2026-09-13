@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Alert, Card, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Aircraft } from '@/api/types';
@@ -29,7 +29,7 @@ export function FleetPage(): JSX.Element {
 
   const unserviceable = AIRCRAFT.filter((a) => a.status !== 'serviceable');
 
-  const columns: ColumnsType<Aircraft> = [
+  const columns: DataColumns<Aircraft> = [
     {
       title: t('fleet.registration'), dataIndex: 'registration', width: 130, fixed: 'left',
       render: (value: string) => <Mono>{value}</Mono>,
@@ -65,10 +65,12 @@ export function FleetPage(): JSX.Element {
     },
     {
       title: t('fleet.seats'), key: 'seats', width: 90, align: 'right',
+      sortBy: (row) => AIRCRAFT_TYPE_BY_ID.get(row.typeId)?.seats ?? 0,
       render: (_, row) => <Mono>{AIRCRAFT_TYPE_BY_ID.get(row.typeId)?.seats ?? '—'}</Mono>,
     },
     {
       title: t('fleet.turnaround'), key: 'turnaround', width: 130, align: 'right',
+      sortBy: (row) => AIRCRAFT_TYPE_BY_ID.get(row.typeId)?.turnaroundMin ?? 0,
       render: (_, row) => (
         <Tooltip title={t('fleet.turnaroundHint')}>
           <Mono>{AIRCRAFT_TYPE_BY_ID.get(row.typeId)?.turnaroundMin ?? '—'} {t('common.minutesShort')}</Mono>
@@ -85,8 +87,7 @@ export function FleetPage(): JSX.Element {
         return (
           <Space size={4} wrap>
             {approvals.map((approval) => {
-              const expired =
-                nowUtc !== null && new Date(approval.validTo).getTime() < nowUtc.getTime();
+              const expired = new Date(approval.validTo).getTime() < nowUtc.getTime();
               return (
                 <Tooltip
                   key={approval.number}
@@ -112,6 +113,7 @@ export function FleetPage(): JSX.Element {
     },
     {
       title: t('fleet.upcomingFlights'), key: 'flights', width: 120, align: 'right',
+      sortBy: (row) => FLIGHT_LIST.filter((f) => f.aircraftId === row.id).length,
       render: (_, row) => <Mono>{FLIGHT_LIST.filter((f) => f.aircraftId === row.id).length}</Mono>,
     },
     {
@@ -136,7 +138,7 @@ export function FleetPage(): JSX.Element {
       ) : null}
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Aircraft>
+        <DataTable<Aircraft>
           size="small" rowKey="id" columns={columns} dataSource={AIRCRAFT}
           pagination={false} scroll={{ x: 1250 }}
           rowClassName={(row) => (row.status === 'aog' ? 'soc-row-critical' : '')}

@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
-import { Alert, Card, Col, Radio, Row, Space, Statistic, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Col, Radio, Row, Space, Statistic, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight, MarginMode, ServiceOrder } from '@/api/types';
@@ -35,7 +35,7 @@ export function FlightFinanceTab({
     return order.status !== 'cancelled' && order.status !== 'rejected';
   });
 
-  const purchaseColumn: ColumnsType<ServiceOrder> = canSeePurchase
+  const purchaseColumn: DataColumns<ServiceOrder> = canSeePurchase
     ? [
         {
           title: t('service.purchaseCost'),
@@ -47,7 +47,7 @@ export function FlightFinanceTab({
       ]
     : [];
 
-  const columns: ColumnsType<ServiceOrder> = [
+  const columns: DataColumns<ServiceOrder> = [
     {
       title: t('service.name'),
       key: 'name',
@@ -172,7 +172,7 @@ export function FlightFinanceTab({
         </Space>
       </Card>
 
-      <Table<ServiceOrder>
+      <DataTable<ServiceOrder>
         size="small"
         rowKey="id"
         columns={columns}

@@ -1,11 +1,13 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, DatePicker, Descriptions, Form, Input, InputNumber, Modal, Progress,
-  Row, Space, Statistic, Table, Tag, Typography, Upload,
+  Alert, Button, Card, Col, Descriptions, Form, Input, InputNumber, Modal, Progress,
+  Row, Space, Statistic, Tag, Typography, Upload,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { CameraOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+
+import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 
 import type { PayableItem, ServiceOrder } from '@/api/types';
 import { PAYABLES } from '@/mocks/billing';
@@ -41,7 +43,6 @@ export function VendorOrdersPage(): JSX.Element {
 
   const countdown = (iso: string | null | undefined): string => {
     if (!iso) return '—';
-    if (!nowUtc) return '—';
     const diff = new Date(iso).getTime() - nowUtc.getTime();
     if (diff < 0) return t('service.overdue');
     const hours = Math.floor(diff / 3_600_000);
@@ -49,7 +50,7 @@ export function VendorOrdersPage(): JSX.Element {
     return `${String(hours)} ч ${String(minutes)} м`;
   };
 
-  const columns: ColumnsType<ServiceOrder> = [
+  const columns: DataColumns<ServiceOrder> = [
     {
       title: t('service.name'), key: 'service', width: 220,
       render: (_, row) => (
@@ -108,7 +109,7 @@ export function VendorOrdersPage(): JSX.Element {
         ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 230, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 230, fixed: 'right',
       render: (_, row) => (
         <Space size={4} wrap>
           {row.status === 'ordered' ? (
@@ -149,7 +150,7 @@ export function VendorOrdersPage(): JSX.Element {
       </Tag.CheckableTag>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<ServiceOrder>
+        <DataTable<ServiceOrder>
           size="small" rowKey="id" columns={columns} dataSource={orders}
           pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 1050 }}
           locale={{ emptyText: <EmptyState description={t('portal.vendor.noOrders')} /> }}
@@ -170,12 +171,12 @@ export function VendorOrdersPage(): JSX.Element {
             <Row gutter={12}>
               <Col xs={24} md={12}>
                 <Form.Item label={t('service.actualStart')} required>
-                  <DatePicker showTime style={{ width: '100%' }} />
+                  <DateTimePicker style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item label={t('service.actualEnd')} required>
-                  <DatePicker showTime style={{ width: '100%' }} />
+                  <DateTimePicker style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
             </Row>
@@ -295,7 +296,7 @@ export function VendorPayablesPage(): JSX.Element {
 
   const items = PAYABLES.filter((p) => p.vendorId === user.vendorId);
 
-  const columns: ColumnsType<PayableItem> = [
+  const columns: DataColumns<PayableItem> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 180,
       render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
@@ -326,7 +327,7 @@ export function VendorPayablesPage(): JSX.Element {
       </Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<PayableItem>
+        <DataTable<PayableItem>
           size="small" rowKey="id" columns={columns} dataSource={items}
           pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 700 }}
           locale={{ emptyText: <EmptyState /> }}

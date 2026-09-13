@@ -1,9 +1,9 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Descriptions, Input, Modal, Row, Segmented, Select, Space, Table, Tag,
+  Alert, Button, Card, Col, Descriptions, Input, Modal, Row, Segmented, Select, Space, Tag,
   Typography, Upload,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
@@ -41,7 +41,7 @@ export function ReconciliationPage(): JSX.Element {
   const reconciliation = invoice?.reconciliation;
   const discrepancies = reconciliation?.discrepancies ?? [];
 
-  const columns: ColumnsType<Discrepancy> = [
+  const columns: DataColumns<Discrepancy> = [
     {
       title: t('reconciliation.kind'),
       dataIndex: 'kind',
@@ -115,7 +115,7 @@ export function ReconciliationPage(): JSX.Element {
     },
     {
       title: t('common.actions'),
-      key: 'actions',
+      key: 'actions', sortable: false,
       width: 120,
       render: (_, row) => {
         const index = discrepancies.indexOf(row);
@@ -227,7 +227,7 @@ export function ReconciliationPage(): JSX.Element {
           ) : null}
 
           <Card size="small" styles={{ body: { padding: 0 } }}>
-            <Table<Discrepancy>
+            <DataTable<Discrepancy>
               size="small"
               rowKey={(row) => `${row.kind}_${String(row.lineIndex ?? 'x')}_${row.serviceOrderId ?? 'x'}`}
               columns={columns}

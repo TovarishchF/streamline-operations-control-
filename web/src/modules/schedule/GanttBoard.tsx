@@ -74,7 +74,7 @@ export function GanttBoard({
       }
     }
 
-    if (flights.some((f) => !f.aircraftId)) {
+    if (flights.some((flight) => flight.aircraftId === null || flight.aircraftId === undefined)) {
       result.push({ kind: 'group', key: 'g_none', label: t('schedule.noAircraft') });
       result.push({ kind: 'aircraft', key: 'none', id: '', label: '—', status: 'serviceable' });
     }
@@ -91,7 +91,7 @@ export function GanttBoard({
   }, [originMs, pxPerHour, scale, totalHours]);
 
   const nowLeft =
-    nowUtc && nowUtc.getTime() >= originMs && nowUtc.getTime() <= originMs + totalHours * 3_600_000
+    nowUtc.getTime() >= originMs && nowUtc.getTime() <= originMs + totalHours * 3_600_000
       ? ((nowUtc.getTime() - originMs) / 3_600_000) * pxPerHour
       : null;
 

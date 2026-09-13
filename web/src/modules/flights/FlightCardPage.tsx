@@ -1,4 +1,4 @@
-import { useMemo, useState, type JSX } from 'react';
+import { useState, type JSX } from 'react';
 import {
   Alert, Button, Card, Col, Descriptions, Divider, Drawer, Row, Space, Tabs, Tag, Tooltip, Typography,
 } from 'antd';
@@ -7,7 +7,8 @@ import { useTranslation } from 'react-i18next';
 
 import { AIRCRAFT_BY_ID, AIRCRAFT_TYPE_BY_ID, AIRPORT_BY_ICAO, AIRPORT_UTC_OFFSET } from '@/mocks/reference';
 import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { CONFLICTS, FLIGHT_BY_ID, MARGINS, SLOTS, ordersForFlight } from '@/mocks/flights';
+import { CONFLICTS, MARGINS, SLOTS } from '@/mocks/flights';
+import { useFlight, useFlightOrders } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
 import {
   DateText, EmptyState, Field, FlightStatusTag, MoneyText, Mono, PercentText, UtcTime,
@@ -35,8 +36,8 @@ export function FlightCardPage(): JSX.Element {
   const { id, tab } = useParams<{ id: string; tab?: string }>();
   const [contextOpen, setContextOpen] = useState(false);
 
-  const flight = id ? FLIGHT_BY_ID.get(id) : undefined;
-  const orders = useMemo(() => (id ? ordersForFlight(id) : []), [id]);
+  const flight = useFlight(id);
+  const orders = useFlightOrders(id);
   const margin = id ? MARGINS.get(id) : undefined;
 
   if (!flight) return <NotFoundPage />;

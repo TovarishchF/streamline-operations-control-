@@ -1,8 +1,8 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, DatePicker, Form, Modal, Space, Table, Tag, Typography,
+  Alert, Button, Card, DatePicker, Form, Modal, Space, Tag, Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { FlightTemplate } from '@/api/types';
@@ -29,7 +29,7 @@ export function FlightTemplatesPage(): JSX.Element {
   const { t } = useTranslation();
   const [generating, setGenerating] = useState<FlightTemplate | null>(null);
 
-  const columns: ColumnsType<FlightTemplate> = [
+  const columns: DataColumns<FlightTemplate> = [
     { title: t('template.name'), dataIndex: 'name', width: 260, fixed: 'left' },
     {
       title: t('flight.client'), dataIndex: 'clientId', width: 200,
@@ -84,7 +84,7 @@ export function FlightTemplatesPage(): JSX.Element {
       ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 150, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 150, fixed: 'right',
       render: (_, row) => (
         <Can permission="flight.create">
           <Button size="small" type="primary" onClick={() => { setGenerating(row); }}>
@@ -105,7 +105,7 @@ export function FlightTemplatesPage(): JSX.Element {
       </Space>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<FlightTemplate>
+        <DataTable<FlightTemplate>
           size="small" rowKey="id" columns={columns} dataSource={FLIGHT_TEMPLATES}
           pagination={false} scroll={{ x: 1300 }}
           locale={{ emptyText: <EmptyState /> }}

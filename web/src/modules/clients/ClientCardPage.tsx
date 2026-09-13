@@ -1,9 +1,9 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Descriptions, Divider, InputNumber, Row, Select, Space, Table, Tabs,
+  Alert, Button, Card, Col, Descriptions, Divider, InputNumber, Row, Select, Space, Tabs,
   Tag, Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -109,7 +109,7 @@ export function ClientCardPage(): JSX.Element {
 
   if (!client) return <NotFoundPage />;
 
-  const tariffColumns: ColumnsType<TariffRule> = [
+  const tariffColumns: DataColumns<TariffRule> = [
     {
       title: t('tariff.scope'), key: 'scope', width: 280,
       render: (_, row) => (
@@ -241,7 +241,7 @@ export function ClientCardPage(): JSX.Element {
               <Row gutter={[12, 12]}>
                 <Col xs={24} lg={14}>
                   <Card size="small" styles={{ body: { padding: 0 } }}>
-                    <Table<TariffRule>
+                    <DataTable<TariffRule>
                       size="small" rowKey="id" columns={tariffColumns} dataSource={rules}
                       pagination={false} scroll={{ x: 850 }}
                       locale={{ emptyText: <EmptyState description={t('tariff.noRules')} /> }}

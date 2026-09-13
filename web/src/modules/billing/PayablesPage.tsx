@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Button, Card, Col, Row, Select, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -42,7 +42,7 @@ export function PayablesPage(): JSX.Element {
 
   const overdueCount = PAYABLES.filter((p) => p.isOverdue).length;
 
-  const columns: ColumnsType<PayableItem> = [
+  const columns: DataColumns<PayableItem> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
       render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
@@ -53,6 +53,7 @@ export function PayablesPage(): JSX.Element {
     },
     {
       title: t('finance.amount'), key: 'amount', width: 160, align: 'right',
+      sortBy: (row) => Number.parseFloat(row.amount.amount),
       sorter: (a, b) => Number.parseFloat(a.amount.amount) - Number.parseFloat(b.amount.amount),
       render: (_, row) => <MoneyText value={row.amount} strong />,
     },
@@ -87,7 +88,7 @@ export function PayablesPage(): JSX.Element {
         ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 140,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 140,
       render: (_, row) =>
         row.status === 'pending' ? (
           <Can permission="billing.payables.edit">
@@ -130,7 +131,7 @@ export function PayablesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<PayableItem>
+        <DataTable<PayableItem>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1050 }}
           locale={{ emptyText: <EmptyState /> }}

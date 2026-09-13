@@ -1,9 +1,9 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Descriptions, Divider, Input, InputNumber, Row, Select, Space, Table,
+  Alert, Button, Card, Col, Descriptions, Divider, Input, InputNumber, Row, Select, Space,
   Tag, Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { SlaRule, User } from '@/api/types';
@@ -16,7 +16,7 @@ import { EmptyState, Mono } from '@/shared/ui/primitives';
 export function UsersPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<User> = [
+  const columns: DataColumns<User> = [
     { title: t('admin.name'), dataIndex: 'name', width: 200 },
     { title: t('admin.email'), dataIndex: 'email', ellipsis: true,
       render: (value: string) => <Mono>{value}</Mono> },
@@ -63,7 +63,7 @@ export function UsersPage(): JSX.Element {
       <Alert type="info" showIcon message={t('admin.permissionsNotice')} />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<User>
+        <DataTable<User>
           size="small" rowKey="id" columns={columns} dataSource={USERS}
           pagination={false} scroll={{ x: 900 }}
           locale={{ emptyText: <EmptyState /> }}
@@ -83,7 +83,7 @@ export function UsersPage(): JSX.Element {
 export function SlaPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<SlaRule> = [
+  const columns: DataColumns<SlaRule> = [
     {
       title: t('sla.scope'), key: 'scope', width: 280,
       render: (_, row) =>
@@ -130,7 +130,7 @@ export function SlaPage(): JSX.Element {
       <Alert type="warning" showIcon message={t('sla.defaultsNotice')} description={t('sla.defaultsHint')} />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<SlaRule>
+        <DataTable<SlaRule>
           size="small" rowKey="id" columns={columns} dataSource={SLA_RULES}
           pagination={false} scroll={{ x: 800 }}
         />

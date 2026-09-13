@@ -1,15 +1,16 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Input, Radio, Row, Segmented, Select, Space, Table, Tag, Tooltip, Typography,
+  Alert, Button, Card, Col, Input, Radio, Row, Segmented, Select, Space, Tag, Tooltip, Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined, PlusOutlined, WarningOutlined } from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import type { FlightListItem, FlightStatus } from '@/api/types';
 import { CLIENTS } from '@/mocks/counterparties';
-import { CONFLICTS, FLIGHT_LIST } from '@/mocks/flights';
+import { CONFLICTS } from '@/mocks/flights';
+import { useFlightList } from '@/mocks/store';
 import { AIRPORTS } from '@/mocks/reference';
 import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
@@ -47,20 +48,21 @@ export function SchedulePage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { nowUtc } = useClock();
+  const flightList = useFlightList();
 
   const [view, setView] = useState<'gantt' | 'table'>('gantt');
   const [scale, setScale] = useState<ScaleKey>('day');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
 
   const origin = useMemo(() => {
-    const base = new Date(nowUtc ?? 0);
+    const base = new Date(nowUtc);
     base.setUTCHours(base.getUTCHours() - (scale === 'day' ? 4 : scale === 'threeDays' ? 12 : 24), 0, 0, 0);
     return base;
   }, [nowUtc, scale]);
 
   const filtered = useMemo(() => {
     const query = filters.search.trim().toLowerCase();
-    return FLIGHT_LIST.filter((flight) => {
+    return flightList.filter((flight) => {
       if (query) {
         const haystack = `${flight.number} ${flight.clientName ?? ''} ${flight.depIcao} ${flight.arrIcao} ${flight.aircraftRegistration ?? ''}`.toLowerCase();
         if (!haystack.includes(query)) return false;
@@ -77,9 +79,9 @@ export function SchedulePage(): JSX.Element {
       }
       return true;
     });
-  }, [filters]);
+  }, [filters, flightList]);
 
-  const columns: ColumnsType<FlightListItem> = [
+  const columns: DataColumns<FlightListItem> = [
     {
       title: t('flight.number'), dataIndex: 'number', width: 110, fixed: 'left',
       sorter: (a, b) => a.number.localeCompare(b.number),
@@ -108,6 +110,7 @@ export function SchedulePage(): JSX.Element {
     },
     {
       title: t('flight.route'), key: 'route', width: 120,
+      sortBy: (row) => `${row.depIcao}-${row.arrIcao}`,
       render: (_, row) => (
         <Mono>
           {row.depIcao} → {row.arrIcao}
@@ -310,7 +313,7 @@ export function SchedulePage(): JSX.Element {
         </Space>
       ) : (
         <Card size="small" styles={{ body: { padding: 0 } }}>
-          <Table<FlightListItem>
+          <DataTable<FlightListItem>
             size="small"
             rowKey="id"
             columns={columns}

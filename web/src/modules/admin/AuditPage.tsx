@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Table, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Button, Card, Col, Row, Select, Space, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
@@ -39,7 +39,7 @@ export function AuditPage(): JSX.Element {
     [entityType, source],
   );
 
-  const columns: ColumnsType<AuditEntry> = [
+  const columns: DataColumns<AuditEntry> = [
     {
       title: t('audit.ts'), dataIndex: 'ts', width: 120, fixed: 'left',
       defaultSortOrder: 'descend',
@@ -101,7 +101,7 @@ export function AuditPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<AuditEntry>
+        <DataTable<AuditEntry>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 25, size: 'small' }} scroll={{ x: 1200 }}
           rowClassName={(row) => (row.source === 'seed' ? 'soc-row-seed' : '')}

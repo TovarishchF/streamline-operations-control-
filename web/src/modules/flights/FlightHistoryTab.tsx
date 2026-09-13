@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { AuditEntry } from '@/api/types';
@@ -71,7 +71,7 @@ export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Elemen
     (entry) => entry.entityId === flightId || entry.entityId.startsWith(`so_${suffix}`),
   );
 
-  const columns: ColumnsType<AuditEntry> = [
+  const columns: DataColumns<AuditEntry> = [
     {
       title: t('audit.ts'),
       dataIndex: 'ts',
@@ -101,7 +101,7 @@ export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Elemen
   ];
 
   return (
-    <Table<AuditEntry>
+    <DataTable<AuditEntry>
       size="small"
       rowKey="id"
       columns={columns}

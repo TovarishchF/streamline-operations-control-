@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Tag, Typography,
+  Alert, App, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Tag, Typography,
 } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone, WarningTwoTone } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import type { Flight, ServiceCategory, ServiceCheckResult } from '@/api/types';
 import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
 import { SERVICES, SERVICE_CATEGORIES } from '@/mocks/reference';
 import { useClock } from '@/shared/clock/useClock';
+import { useSocStore } from '@/mocks/store';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
@@ -32,6 +33,8 @@ export function ServiceOrderWizard({
   onClose: () => void;
 }): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const createOrder = useSocStore((state) => state.createOrder);
   const { nowUtc } = useClock();
   const [step, setStep] = useState(0);
   const [category, setCategory] = useState<ServiceCategory | null>(null);
@@ -56,8 +59,7 @@ export function ServiceOrderWizard({
 
     const price = candidates.find((c) => c.vendorId === vendorId) ?? candidates[0];
     const contract = vendorId ? CONTRACT_BY_VENDOR.get(vendorId) : undefined;
-    const now = nowUtc ?? new Date(flight.stdUtc);
-    const hoursToDeparture = (new Date(flight.stdUtc).getTime() - now.getTime()) / 3_600_000;
+    const hoursToDeparture = (new Date(flight.stdUtc).getTime() - nowUtc.getTime()) / 3_600_000;
 
     return [
       {
@@ -150,7 +152,23 @@ export function ServiceOrderWizard({
             <Button
               type="primary"
               disabled={!canSubmit}
-              onClick={() => { onClose(); reset(); }}
+              onClick={() => {
+                if (!serviceId || !vendorId) return;
+                const order = createOrder({
+                  flightId: flight.id,
+                  serviceId,
+                  leg,
+                  quantity: String(quantity),
+                  vendorId,
+                });
+                if (!order) {
+                  void message.error(t('service.orderFailed'));
+                  return;
+                }
+                void message.success(t('service.orderCreated'));
+                onClose();
+                reset();
+              }}
             >
               {t('service.submitOrder')}
             </Button>

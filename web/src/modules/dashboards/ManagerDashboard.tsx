@@ -1,7 +1,10 @@
 import { useMemo, type JSX } from 'react';
-import { Card, Col, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
+import { DataTable } from '@/shared/ui/DataTable';
+
+import type { VendorRating } from '@/api/types';
 import { PAYABLES_BUCKETS, RECEIVABLES_BUCKETS } from '@/mocks/billing';
 import { CLIENTS, VENDORS } from '@/mocks/counterparties';
 import { FLIGHT_LIST, MARGINS, SERVICE_ORDERS } from '@/mocks/flights';
@@ -19,6 +22,22 @@ import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
  * `CLAUDE.md § 3` п. 16: все величины приходят посчитанными с сервера.
  * Здесь они только агрегируются по готовым значениям для отображения.
  */
+interface ClientRow {
+  id: string;
+  name: string;
+  revenue: number;
+  margin: number;
+  flights: number;
+  percent: string | null;
+}
+
+interface VendorRow {
+  id: string;
+  name: string;
+  rating: VendorRating | null | undefined;
+  turnover: number;
+}
+
 export function ManagerDashboard(): JSX.Element {
   const { t } = useTranslation();
 
@@ -39,7 +58,7 @@ export function ManagerDashboard(): JSX.Element {
     };
   }, []);
 
-  const topClients = useMemo(() => {
+  const topClients: ClientRow[] = useMemo(() => {
     const byClient = new Map<string, { revenue: number; margin: number; flights: number }>();
     for (const flight of FLIGHT_LIST) {
       const margin = MARGINS.get(flight.id);
@@ -61,7 +80,7 @@ export function ManagerDashboard(): JSX.Element {
       .slice(0, 6);
   }, []);
 
-  const topVendors = useMemo(() => {
+  const topVendors: VendorRow[] = useMemo(() => {
     const byVendor = new Map<string, number>();
     for (const order of SERVICE_ORDERS) {
       if (!order.vendorId) continue;
@@ -169,7 +188,7 @@ export function ManagerDashboard(): JSX.Element {
 
         <Col xs={24} md={8}>
           <Card size="small" title={t('dashboard.receivables')} styles={{ body: { padding: 0 } }}>
-            <Table
+            <DataTable
               size="small" rowKey="bucket" pagination={false}
               dataSource={RECEIVABLES_BUCKETS}
               columns={[
@@ -187,7 +206,7 @@ export function ManagerDashboard(): JSX.Element {
 
         <Col xs={24} md={8}>
           <Card size="small" title={t('dashboard.payables')} styles={{ body: { padding: 0 } }}>
-            <Table
+            <DataTable
               size="small" rowKey="bucket" pagination={false}
               dataSource={PAYABLES_BUCKETS}
               columns={[
@@ -207,7 +226,7 @@ export function ManagerDashboard(): JSX.Element {
       <Row gutter={[12, 12]}>
         <Col xs={24} lg={12}>
           <Card size="small" title={t('dashboard.topClients')} styles={{ body: { padding: 0 } }}>
-            <Table
+            <DataTable<ClientRow>
               size="small" rowKey="id" pagination={false} dataSource={topClients}
               locale={{ emptyText: <EmptyState /> }}
               columns={[
@@ -215,11 +234,13 @@ export function ManagerDashboard(): JSX.Element {
                 { title: t('dashboard.flights'), dataIndex: 'flights', width: 80, align: 'right' },
                 {
                   title: t('finance.revenue'), key: 'revenue', width: 150, align: 'right',
-                  render: (_, row) => <MoneyText value={rub(row.revenue)} />,
+                  render: (_: unknown, row: ClientRow) => <MoneyText value={rub(row.revenue)} />,
                 },
                 {
                   title: t('finance.marginPercent'), key: 'percent', width: 110, align: 'right',
-                  render: (_, row) => <PercentText value={row.percent} colorBySign threshold={12} />,
+                  render: (_: unknown, row: ClientRow) => (
+                    <PercentText value={row.percent} colorBySign threshold={12} />
+                  ),
                 },
               ]}
             />
@@ -228,18 +249,18 @@ export function ManagerDashboard(): JSX.Element {
 
         <Col xs={24} lg={12}>
           <Card size="small" title={t('dashboard.topVendors')} styles={{ body: { padding: 0 } }}>
-            <Table
+            <DataTable<VendorRow>
               size="small" rowKey="id" pagination={false} dataSource={topVendors}
               locale={{ emptyText: <EmptyState /> }}
               columns={[
                 { title: t('service.vendor'), dataIndex: 'name', ellipsis: true },
                 {
                   title: t('dashboard.turnover'), key: 'turnover', width: 160, align: 'right',
-                  render: (_, row) => <MoneyText value={rub(row.turnover)} />,
+                  render: (_: unknown, row: VendorRow) => <MoneyText value={rub(row.turnover)} />,
                 },
                 {
                   title: t('vendor.rating'), key: 'rating', width: 120,
-                  render: (_, row) =>
+                  render: (_: unknown, row: VendorRow) =>
                     row.rating?.sufficientData ? (
                       <Mono>{Number.parseFloat(row.rating.rating ?? '0').toFixed(2)}</Mono>
                     ) : (

@@ -1,10 +1,12 @@
 import { useMemo, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, DatePicker, Form, List, Row, Select, Space, Table, Tag, Typography,
+  Alert, Button, Card, Col, DatePicker, Form, List, Row, Select, Space, Tag, Typography,
 } from 'antd';
 import { FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+
+import { DataTable } from '@/shared/ui/DataTable';
 
 import { REPORT_DEFINITIONS } from '@/mocks/admin';
 import { RECEIVABLES_BUCKETS, PAYABLES_BUCKETS } from '@/mocks/billing';
@@ -240,7 +242,7 @@ export function ReportViewPage(): JSX.Element {
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
         {data ? (
-          <Table
+          <DataTable
             size="small"
             rowKey={data.rowKey}
             columns={data.columns as never}

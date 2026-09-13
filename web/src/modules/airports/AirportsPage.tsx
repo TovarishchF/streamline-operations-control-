@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Card, Input, Space, Table, Tag, Tooltip, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Input, Space, Tag, Tooltip, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Airport } from '@/api/types';
@@ -32,7 +32,7 @@ export function AirportsPage(): JSX.Element {
     );
   }, [search]);
 
-  const columns: ColumnsType<Airport> = [
+  const columns: DataColumns<Airport> = [
     {
       title: 'ICAO', dataIndex: 'icao', width: 90, fixed: 'left',
       sorter: (a, b) => a.icao.localeCompare(b.icao),
@@ -45,6 +45,7 @@ export function AirportsPage(): JSX.Element {
     },
     {
       title: t('airport.name'), key: 'name', width: 260,
+      sortBy: (row) => row.name.ru,
       render: (_, row) => (
         <Space direction="vertical" size={0}>
           <span>{row.name.ru}</span>
@@ -75,6 +76,7 @@ export function AirportsPage(): JSX.Element {
     },
     {
       title: t('airport.coordinates'), key: 'coords', width: 180,
+      sortBy: (row) => row.lat,
       render: (_, row) => (
         <Tooltip title={t('airport.coordinatesHint')}>
           <Mono>
@@ -119,7 +121,7 @@ export function AirportsPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Airport>
+        <DataTable<Airport>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1350 }}
           locale={{ emptyText: <EmptyState /> }}

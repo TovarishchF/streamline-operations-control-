@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Card, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Card, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -13,7 +13,7 @@ import { EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
 export function ClientsPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<Client> = [
+  const columns: DataColumns<Client> = [
     {
       title: t('client.name'), dataIndex: 'name', width: 230, fixed: 'left',
       render: (value: string, row) => (
@@ -85,7 +85,7 @@ export function ClientsPage(): JSX.Element {
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.clients')}</Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Client>
+        <DataTable<Client>
           size="small" rowKey="id" columns={columns} dataSource={CLIENTS}
           pagination={false} scroll={{ x: 1100 }}
           locale={{ emptyText: <EmptyState /> }}

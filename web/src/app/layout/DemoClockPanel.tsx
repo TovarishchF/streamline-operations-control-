@@ -20,12 +20,11 @@ export function DemoClockPanel(): JSX.Element {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const scale = useClockStore((s) => s.scale);
-  const nowUtc = useClockStore((s) => s.nowUtc);
-  const sync = useClockStore((s) => s.sync);
+  const setScale = useClockStore((s) => s.setScale);
+  const shiftBy = useClockStore((s) => s.shiftBy);
 
   const shift = (hours: number): void => {
-    const base = nowUtc ?? new Date(0);
-    sync(new Date(base.getTime() + hours * 3_600_000).toISOString(), true, scale);
+    shiftBy(hours * 3_600_000);
   };
 
   const content = (
@@ -41,7 +40,7 @@ export function DemoClockPanel(): JSX.Element {
           value={scale}
           onChange={(e) => {
             const next = e.target.value as number;
-            sync((nowUtc ?? new Date(0)).toISOString(), next !== 1, next);
+            setScale(next);
           }}
           optionType="button"
           options={[

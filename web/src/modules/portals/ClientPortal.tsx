@@ -1,15 +1,18 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, DatePicker, Form, Input, InputNumber, Row, Select, Space, Table, Tag,
+  Alert, App, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Tag,
   Typography,
 } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
+
+import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 
 import type { ClientPortalDocument, ClientPortalFlight } from '@/api/types';
 import { INVOICES, QUOTES } from '@/mocks/billing';
-import { FLIGHTS, ordersForFlight } from '@/mocks/flights';
+import { ordersForFlight } from '@/mocks/flights';
 import { AIRPORTS } from '@/mocks/reference';
+import { useSocStore } from '@/mocks/store';
 import { useCurrentUser } from '@/shared/auth/session';
 import {
   DateText, EmptyState, FlightStatusTag, MoneyText, Mono, ServiceStatusTag, UtcTime,
@@ -30,7 +33,10 @@ export function ClientFlightsPage(): JSX.Element {
   const { t } = useTranslation();
   const user = useCurrentUser();
 
-  const flights: ClientPortalFlight[] = FLIGHTS.filter((f) => f.clientId === user.clientId).map(
+  const allFlights = useSocStore((state) => state.flights);
+  const flights: ClientPortalFlight[] = allFlights
+    .filter((f) => f.clientId === user.clientId)
+    .map(
     (flight) => ({
       id: flight.id,
       number: flight.number,
@@ -47,7 +53,7 @@ export function ClientFlightsPage(): JSX.Element {
     }),
   );
 
-  const columns: ColumnsType<ClientPortalFlight> = [
+  const columns: DataColumns<ClientPortalFlight> = [
     {
       title: t('flight.number'), dataIndex: 'number', width: 110,
       render: (value: string) => <Mono>{value}</Mono>,
@@ -97,7 +103,7 @@ export function ClientFlightsPage(): JSX.Element {
       <Alert type="info" showIcon message={t('portal.client.noPurchasePrices')} />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<ClientPortalFlight>
+        <DataTable<ClientPortalFlight>
           size="small" rowKey="id" columns={columns} dataSource={flights}
           pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 900 }}
           locale={{ emptyText: <EmptyState description={t('portal.client.noFlights')} /> }}
@@ -110,6 +116,9 @@ export function ClientFlightsPage(): JSX.Element {
 /** Заявка клиента на рейс. Становится рейсом только после подтверждения диспетчером. */
 export function ClientRequestPage(): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const user = useCurrentUser();
+  const createRequest = useSocStore((state) => state.createRequest);
   const [submitted, setSubmitted] = useState(false);
 
   return (
@@ -135,7 +144,24 @@ export function ClientRequestPage(): JSX.Element {
           <Form
             layout="vertical"
             style={{ maxWidth: 620 }}
-            onFinish={() => { setSubmitted(true); }}
+            onFinish={(values: {
+              dep: string;
+              arr: string;
+              date: { toISOString: () => string };
+              pax: number;
+              comment?: string;
+            }) => {
+              createRequest({
+                clientId: user.clientId ?? '',
+                depIcao: values.dep,
+                arrIcao: values.arr,
+                requestedStdUtc: values.date.toISOString(),
+                paxCount: values.pax,
+                comment: values.comment ?? '',
+              });
+              setSubmitted(true);
+              void message.success(t('portal.client.requestSubmitted'));
+            }}
           >
             <Row gutter={12}>
               <Col xs={24} md={12}>
@@ -165,7 +191,7 @@ export function ClientRequestPage(): JSX.Element {
                   label={t('portal.client.requestedDate')} name="date"
                   rules={[{ required: true, message: t('common.required') }]}
                 >
-                  <DatePicker showTime style={{ width: '100%' }} />
+                  <DateTimePicker style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
@@ -217,7 +243,7 @@ export function ClientDocumentsPage(): JSX.Element {
     })),
   ];
 
-  const columns: ColumnsType<ClientPortalDocument> = [
+  const columns: DataColumns<ClientPortalDocument> = [
     {
       title: t('finance.kind'), dataIndex: 'kind', width: 130,
       render: (value: string) => <Tag>{t(`finance.${value}`)}</Tag>,
@@ -245,7 +271,7 @@ export function ClientDocumentsPage(): JSX.Element {
       ),
     },
     {
-      title: t('common.actions'), key: 'actions', width: 210,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 210,
       render: (_, row) => (
         <Space size={4}>
           <Button size="small">PDF</Button>
@@ -267,7 +293,7 @@ export function ClientDocumentsPage(): JSX.Element {
       </Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<ClientPortalDocument>
+        <DataTable<ClientPortalDocument>
           size="small" rowKey="id" columns={columns} dataSource={documents}
           pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 1050 }}
           locale={{ emptyText: <EmptyState /> }}

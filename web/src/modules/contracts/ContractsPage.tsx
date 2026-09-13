@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Card, Segmented, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Segmented, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -41,12 +41,10 @@ export function ContractsPage(): JSX.Element {
   const expiring = CONTRACTS.filter((c) => c.status === 'expiring').length;
   const expired = CONTRACTS.filter((c) => c.status === 'expired').length;
 
-  const daysLeft = (validTo: string): number | null =>
-    nowUtc === null
-      ? null
-      : Math.round((new Date(validTo).getTime() - nowUtc.getTime()) / 86_400_000);
+  const daysLeft = (validTo: string): number =>
+    Math.round((new Date(validTo).getTime() - nowUtc.getTime()) / 86_400_000);
 
-  const columns: ColumnsType<VendorContract> = [
+  const columns: DataColumns<VendorContract> = [
     {
       title: t('contract.number'), dataIndex: 'number', width: 150, fixed: 'left',
       render: (value: string) => <Mono>{value}</Mono>,
@@ -70,7 +68,7 @@ export function ContractsPage(): JSX.Element {
         return (
           <Space size={6}>
             <DateText value={value} />
-            {row.status !== 'active' && days !== null ? (
+            {row.status !== 'active' ? (
               <Typography.Text
                 style={{
                   fontSize: 12,
@@ -131,7 +129,7 @@ export function ContractsPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<VendorContract>
+        <DataTable<VendorContract>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1000 }}
           locale={{ emptyText: <EmptyState description={t('contract.noneNeedAttention')} /> }}

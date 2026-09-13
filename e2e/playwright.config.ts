@@ -29,8 +29,11 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], viewport: { width: 1600, height: 1000 } },
     },
     {
-      // Адаптив от 360 px — приёмочный критерий M10, проверяется с M2
+      // Адаптив от 360 px — приёмочный критерий M10, проверяется с M2.
+      // Операции проверяются один раз в настольном профиле: поведение
+      // кнопок от ширины экрана не зависит, а прогон вдвое дольше.
       name: 'mobile',
+      testIgnore: /operations\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 800 } },
     },
   ],

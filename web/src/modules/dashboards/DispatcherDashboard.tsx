@@ -1,8 +1,11 @@
 import { useMemo, type JSX } from 'react';
-import { Card, Col, List, Progress, Row, Space, Statistic, Table, Tag, Typography } from 'antd';
+import { Card, Col, List, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { DataTable } from '@/shared/ui/DataTable';
+
+import type { ServiceOrder } from '@/api/types';
 import { CONFLICTS, FLIGHT_LIST, SERVICE_ORDERS } from '@/mocks/flights';
 import { AIRCRAFT } from '@/mocks/reference';
 import { useClock } from '@/shared/clock/useClock';
@@ -23,7 +26,7 @@ export function DispatcherDashboard(): JSX.Element {
   const { nowUtc } = useClock();
   // Пока часы не синхронизированы с сервером, точка отсчёта — эпоха:
   // лучше пустой список, чем список, посчитанный по часам браузера.
-  const now = useMemo(() => new Date(nowUtc ?? 0), [nowUtc]);
+  const now = nowUtc;
 
   const todayFlights = useMemo(
     () =>
@@ -219,7 +222,7 @@ export function DispatcherDashboard(): JSX.Element {
       </Row>
 
       <Card size="small" title={t('dashboard.slaBreachRegister')} styles={{ body: { padding: 0 } }}>
-        <Table
+        <DataTable<ServiceOrder>
           size="small"
           rowKey="id"
           dataSource={slaBreaches}
@@ -237,7 +240,7 @@ export function DispatcherDashboard(): JSX.Element {
             },
             {
               title: t('service.name'), key: 'service',
-              render: (_, row) => row.service?.name.ru ?? row.serviceId,
+              render: (_: unknown, row: ServiceOrder) => row.service?.name.ru ?? row.serviceId,
             },
             { title: t('service.vendor'), dataIndex: 'vendorName', width: 200, ellipsis: true },
             {

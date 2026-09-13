@@ -1,13 +1,17 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, DatePicker, Descriptions, Form, Input, InputNumber, Row, Select, Space,
+  Alert, App, Button, Card, Col, Descriptions, Form, Input, InputNumber, Row, Select, Space,
   Typography,
 } from 'antd';
+import type { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { CLIENTS } from '@/mocks/counterparties';
 import { AIRCRAFT, AIRCRAFT_TYPE_BY_ID, AIRPORTS, AIRPORT_BY_ICAO } from '@/mocks/reference';
+import { useSocStore } from '@/mocks/store';
+import { useClock } from '@/shared/clock/useClock';
+import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 import { Mono } from '@/shared/ui/primitives';
 
 const FLIGHT_TYPES = ['charter', 'ferry', 'ambulance', 'cargo', 'technical'] as const;
@@ -23,21 +27,36 @@ function haversineNm(a: [number, number], b: [number, number]): number {
   return (6371 * 2 * Math.asin(Math.sqrt(h))) / 1.852;
 }
 
+interface FormValues {
+  clientId: string;
+  type: (typeof FLIGHT_TYPES)[number];
+  dep: string;
+  arr: string;
+  std: Dayjs;
+  aircraftId?: string;
+  pax: number;
+  remarks?: string;
+}
+
 /**
  * Создание рейса `[ТЗ 3.1.1]`.
  *
- * Расстояние, блок-тайм, плановое топливо и время прилёта считает **сервер**
- * (`CLAUDE.md § 3` п. 16). Показанная здесь оценка — предварительный расчёт
- * для формы, чтобы диспетчер видел порядок величин до отправки; окончательные
- * значения приходят в ответе.
+ * Форма действительно создаёт рейс: он появляется в суточном плане и в таблице,
+ * открывается его карточка. На M10 вызов хранилища заменяется на
+ * `POST /flights`, форма и проверки остаются теми же.
  *
- * Ветер, эшелоны и запасные аэродромы не учитываются: расчёт плановый
- * и оценочный, и это написано рядом.
+ * Расстояние, блок-тайм и плановое топливо считает сервер
+ * (`CLAUDE.md § 3` п. 16). Показанная оценка — предварительная, для формы.
+ * Ветер, эшелоны и запасные аэродромы не учитываются, и это написано рядом.
  */
 export function FlightCreatePage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { message } = App.useApp();
+  const createFlight = useSocStore((state) => state.createFlight);
+  const { nowUtc } = useClock();
 
+  const [form] = Form.useForm<FormValues>();
   const [dep, setDep] = useState<string>('UUWW');
   const [arr, setArr] = useState<string>('ULLI');
   const [aircraftId, setAircraftId] = useState<string | undefined>();
@@ -54,37 +73,67 @@ export function FlightCreatePage(): JSX.Element {
 
     const distanceNm = Math.round(haversineNm([from.lat, from.lon], [to.lat, to.lon]));
     const blockTimeMin = Math.round((distanceNm / speed) * 60 + 20);
-    const fuelPlanKg = Math.round((blockTimeMin / 60) * burn * 1.1);
 
-    return { distanceNm, blockTimeMin, fuelPlanKg };
+    return { distanceNm, blockTimeMin, fuelPlanKg: Math.round((blockTimeMin / 60) * burn * 1.1) };
   }, [dep, arr, aircraftId]);
+
+  const sameAirport = dep === arr;
+
+  const handleFinish = (values: FormValues): void => {
+    const flight = createFlight({
+      clientId: values.clientId,
+      aircraftId: values.aircraftId,
+      type: values.type,
+      depIcao: dep,
+      arrIcao: arr,
+      stdUtc: values.std.toISOString(),
+      paxCount: values.pax,
+      remarks: values.remarks,
+    });
+
+    void message.success(t('flight.created', { number: flight.number }));
+    navigate(`/flights/${flight.id}`);
+  };
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('schedule.newFlight')}</Typography.Title>
+      <Typography.Title level={4} style={{ margin: 0 }}>
+        {t('schedule.newFlight')}
+      </Typography.Title>
 
       <Row gutter={[12, 12]}>
         <Col xs={24} lg={14}>
           <Card size="small">
-            <Form
+            <Form<FormValues>
+              form={form}
               layout="vertical"
-              onFinish={() => {
-                navigate('/schedule');
-              }}
+              onFinish={handleFinish}
+              initialValues={{ type: 'charter', pax: 4 }}
             >
               <Row gutter={12}>
                 <Col xs={24} md={12}>
-                  <Form.Item label={t('flight.client')} name="clientId" rules={[{ required: true, message: t('common.required') }]}>
+                  <Form.Item
+                    label={t('flight.client')}
+                    name="clientId"
+                    rules={[{ required: true, message: t('common.required') }]}
+                  >
                     <Select
-                      showSearch optionFilterProp="label"
-                      options={CLIENTS.filter((c) => c.isActive).map((c) => ({ value: c.id, label: c.name }))}
+                      showSearch
+                      optionFilterProp="label"
+                      options={CLIENTS.filter((c) => c.isActive).map((c) => ({
+                        value: c.id,
+                        label: `${c.name} (${c.settlementCurrency})`,
+                      }))}
                     />
                   </Form.Item>
                 </Col>
                 <Col xs={24} md={12}>
-                  <Form.Item label={t('flight.type')} name="type" initialValue="charter">
+                  <Form.Item label={t('flight.type')} name="type">
                     <Select
-                      options={FLIGHT_TYPES.map((code) => ({ value: code, label: t(`flightType.${code}`) }))}
+                      options={FLIGHT_TYPES.map((code) => ({
+                        value: code,
+                        label: t(`flightType.${code}`),
+                      }))}
                     />
                   </Form.Item>
                 </Col>
@@ -92,44 +141,72 @@ export function FlightCreatePage(): JSX.Element {
                 <Col xs={24} md={12}>
                   <Form.Item label={t('flight.departure')} required>
                     <Select
-                      showSearch optionFilterProp="label" value={dep} onChange={setDep}
-                      options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
+                      showSearch
+                      optionFilterProp="label"
+                      value={dep}
+                      onChange={setDep}
+                      options={AIRPORTS.map((a) => ({
+                        value: a.icao,
+                        label: `${a.icao} — ${a.city}`,
+                      }))}
                     />
                   </Form.Item>
                 </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item label={t('flight.arrival')} required>
-                    <Select
-                      showSearch optionFilterProp="label" value={arr} onChange={setArr}
-                      options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
-                    />
-                  </Form.Item>
-                </Col>
-
                 <Col xs={24} md={12}>
                   <Form.Item
-                    label={t('flight.std')} name="std"
-                    rules={[{ required: true, message: t('common.required') }]}
-                    extra={t('flight.stdHint')}
+                    label={t('flight.arrival')}
+                    required
+                    validateStatus={sameAirport ? 'error' : undefined}
+                    help={sameAirport ? t('flight.sameAirport') : undefined}
                   >
-                    <DatePicker showTime style={{ width: '100%' }} />
-                  </Form.Item>
-                </Col>
-                <Col xs={24} md={12}>
-                  <Form.Item label={t('flight.aircraft')} extra={t('flight.aircraftOptionalHint')}>
                     <Select
-                      allowClear showSearch optionFilterProp="label"
-                      value={aircraftId} onChange={setAircraftId}
-                      options={AIRCRAFT.map((a) => ({
-                        value: a.id,
-                        label: `${a.registration} — ${AIRCRAFT_TYPE_BY_ID.get(a.typeId)?.icaoType ?? ''}${a.status !== 'serviceable' ? ` (${t(`aircraftStatus.${a.status}`)})` : ''}`,
+                      showSearch
+                      optionFilterProp="label"
+                      value={arr}
+                      onChange={setArr}
+                      options={AIRPORTS.map((a) => ({
+                        value: a.icao,
+                        label: `${a.icao} — ${a.city}`,
                       }))}
                     />
                   </Form.Item>
                 </Col>
 
                 <Col xs={24} md={12}>
-                  <Form.Item label={t('flight.pax')} name="pax" initialValue={4}>
+                  <Form.Item
+                    label={t('flight.std')}
+                    name="std"
+                    rules={[{ required: true, message: t('common.required') }]}
+                    extra={t('flight.stdHint')}
+                  >
+                    <DateTimePicker style={{ width: '100%' }} />
+                  </Form.Item>
+                </Col>
+                <Col xs={24} md={12}>
+                  <Form.Item
+                    label={t('flight.aircraft')}
+                    name="aircraftId"
+                    extra={t('flight.aircraftOptionalHint')}
+                  >
+                    <Select
+                      allowClear
+                      showSearch
+                      optionFilterProp="label"
+                      onChange={(value: string | undefined) => {
+                        setAircraftId(value);
+                      }}
+                      options={AIRCRAFT.map((a) => ({
+                        value: a.id,
+                        label: `${a.registration} — ${AIRCRAFT_TYPE_BY_ID.get(a.typeId)?.icaoType ?? ''}${
+                          a.status === 'serviceable' ? '' : ` (${t(`aircraftStatus.${a.status}`)})`
+                        }`,
+                      }))}
+                    />
+                  </Form.Item>
+                </Col>
+
+                <Col xs={24} md={12}>
+                  <Form.Item label={t('flight.pax')} name="pax">
                     <InputNumber min={0} style={{ width: '100%' }} />
                   </Form.Item>
                 </Col>
@@ -140,8 +217,16 @@ export function FlightCreatePage(): JSX.Element {
               </Form.Item>
 
               <Space>
-                <Button type="primary" htmlType="submit">{t('common.save')}</Button>
-                <Button onClick={() => { navigate('/schedule'); }}>{t('common.cancel')}</Button>
+                <Button type="primary" htmlType="submit" disabled={sameAirport}>
+                  {t('flight.create')}
+                </Button>
+                <Button
+                  onClick={() => {
+                    navigate('/schedule');
+                  }}
+                >
+                  {t('common.cancel')}
+                </Button>
               </Space>
             </Form>
           </Card>
@@ -165,12 +250,21 @@ export function FlightCreatePage(): JSX.Element {
                   </Descriptions.Item>
                 </Descriptions>
               ) : null}
-              <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginTop: 8 }}>
+              <Typography.Text
+                type="secondary"
+                style={{ fontSize: 12, display: 'block', marginTop: 8 }}
+              >
                 {t('flight.estimateHint')}
               </Typography.Text>
             </Card>
 
             <Alert type="info" showIcon message={t('flight.conflictCheckNotice')} />
+
+            <Card size="small" styles={{ body: { padding: 10 } }}>
+              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                {t('flight.nowHint', { time: `${String(nowUtc.getUTCHours()).padStart(2, '0')}:${String(nowUtc.getUTCMinutes()).padStart(2, '0')}Z` })}
+              </Typography.Text>
+            </Card>
           </Space>
         </Col>
       </Row>

@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Alert, Card, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import { PERFORMANCE } from '@/mocks/admin';
@@ -32,7 +32,7 @@ interface Metric {
 export function PerformancePage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<Metric> = [
+  const columns: DataColumns<Metric> = [
     {
       title: t('performance.metric'), dataIndex: 'name', width: 220,
       render: (value: string) => (
@@ -121,7 +121,7 @@ export function PerformancePage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Metric>
+        <DataTable<Metric>
           size="small"
           rowKey={(row) => `${row.name}_${row.source}`}
           columns={columns}

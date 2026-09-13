@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { ConfigProvider } from 'antd';
+import { App as AntApp, ConfigProvider } from 'antd';
 import ruRU from 'antd/locale/ru_RU';
 import enUS from 'antd/locale/en_US';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -23,9 +23,11 @@ export function App(): JSX.Element {
   return (
     <QueryClientProvider client={queryClient}>
       <ConfigProvider theme={socTheme} locale={isEnglish ? enUS : ruRU}>
-        <BrowserRouter>
-          <AppRoutes />
-        </BrowserRouter>
+        <AntApp>
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
+        </AntApp>
       </ConfigProvider>
     </QueryClientProvider>
   );

@@ -1,6 +1,6 @@
 import type { JSX } from 'react';
-import { Alert, Card, Col, Descriptions, Row, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
+import { Alert, Card, Col, Descriptions, Row, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import { FX_HISTORY, FX_TODAY } from '@/mocks/billing';
@@ -46,7 +46,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }): JSX.
 export function FxPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: ColumnsType<Rate> = [
+  const columns: DataColumns<Rate> = [
     {
       title: t('fx.date'), dataIndex: 'date', width: 140,
       render: (value: string) => <DateText value={value} />,
@@ -123,7 +123,7 @@ export function FxPage(): JSX.Element {
       </Row>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<Rate>
+        <DataTable<Rate>
           size="small" rowKey="date" columns={columns}
           dataSource={[...FX_HISTORY].reverse()}
           pagination={{ pageSize: 10, size: 'small' }}

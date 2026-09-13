@@ -1,12 +1,12 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Input, Modal, Segmented, Space, Table, Tag, Typography } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { Link } from 'react-router-dom';
+import { Alert, App, Button, Card, Input, Modal, Segmented, Space, Tag, Typography } from 'antd';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
+import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import type { FlightRequest } from '@/api/types';
 import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { FLIGHT_BY_ID, FLIGHT_REQUESTS } from '@/mocks/flights';
+import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -25,15 +25,22 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
  */
 export function RequestsPage(): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
+  const navigate = useNavigate();
+  const [rejectReason, setRejectReason] = useState('');
   const [filter, setFilter] = useState<'pending' | 'all'>('pending');
+  const requests = useSocStore((state) => state.requests);
+  const flights = useSocStore((state) => state.flights);
+  const approveRequest = useSocStore((state) => state.approveRequest);
+  const rejectRequest = useSocStore((state) => state.rejectRequest);
   const [rejecting, setRejecting] = useState<FlightRequest | null>(null);
 
-  const filtered = FLIGHT_REQUESTS.filter((request) =>
+  const filtered = requests.filter((request) =>
     filter === 'all' ? true : request.status === 'pending',
   );
-  const pending = FLIGHT_REQUESTS.filter((r) => r.status === 'pending').length;
+  const pending = requests.filter((r) => r.status === 'pending').length;
 
-  const columns: ColumnsType<FlightRequest> = [
+  const columns: DataColumns<FlightRequest> = [
     {
       title: t('request.createdAt'), dataIndex: 'createdAt', width: 120,
       defaultSortOrder: 'descend',
@@ -73,7 +80,7 @@ export function RequestsPage(): JSX.Element {
             </Tag>
             {row.createdFlightId ? (
               <Link to={`/flights/${row.createdFlightId}`} style={{ fontSize: 12 }}>
-                {FLIGHT_BY_ID.get(row.createdFlightId)?.number ?? row.createdFlightId}
+                {flights.find((f) => f.id === row.createdFlightId)?.number ?? row.createdFlightId}
               </Link>
             ) : null}
             {row.rejectionReason ? (
@@ -86,12 +93,26 @@ export function RequestsPage(): JSX.Element {
       },
     },
     {
-      title: t('common.actions'), key: 'actions', width: 210, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 210, fixed: 'right',
       render: (_, row) =>
         row.status === 'pending' ? (
           <Can permission="request.approve">
             <Space size={4}>
-              <Button size="small" type="primary">{t('request.approve')}</Button>
+              <Button
+                size="small"
+                type="primary"
+                onClick={() => {
+                  const flight = approveRequest(row.id);
+                  if (!flight) {
+                    void message.error(t('request.approveFailed'));
+                    return;
+                  }
+                  void message.success(t('request.approved', { number: flight.number }));
+                  navigate(`/flights/${flight.id}`);
+                }}
+              >
+                {t('request.approve')}
+              </Button>
               <Button
                 size="small" danger
                 onClick={() => { setRejecting(row); }}
@@ -127,7 +148,7 @@ export function RequestsPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <Table<FlightRequest>
+        <DataTable<FlightRequest>
           size="small" rowKey="id" columns={columns} dataSource={filtered}
           pagination={false} scroll={{ x: 1150 }}
           locale={{ emptyText: <EmptyState description={t('request.empty')} /> }}
@@ -139,12 +160,24 @@ export function RequestsPage(): JSX.Element {
         title={t('request.rejectTitle')}
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
-        onCancel={() => { setRejecting(null); }}
-        onOk={() => { setRejecting(null); }}
+        onCancel={() => { setRejecting(null); setRejectReason(''); }}
+        okButtonProps={{ disabled: rejectReason.trim().length === 0 }}
+        onOk={() => {
+          if (!rejecting) return;
+          rejectRequest(rejecting.id, rejectReason.trim());
+          void message.success(t('request.rejected'));
+          setRejecting(null);
+          setRejectReason('');
+        }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           <Typography.Text type="secondary">{t('request.rejectHint')}</Typography.Text>
-          <Input.TextArea rows={3} placeholder={t('request.rejectPlaceholder')} />
+          <Input.TextArea
+            rows={3}
+            placeholder={t('request.rejectPlaceholder')}
+            value={rejectReason}
+            onChange={(event) => { setRejectReason(event.target.value); }}
+          />
         </Space>
       </Modal>
     </Space>
