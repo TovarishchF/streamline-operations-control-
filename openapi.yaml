@@ -4538,11 +4538,16 @@ components:
     # ───────────────────────────── АДМИНИСТРИРОВАНИЕ ─────────────────────────────
 
     AuditEntityType:
+      description: |
+        Типы сущностей, действия над которыми попадают в журнал.
+        Справочники (`aircraft`, `service`, `airport`) добавлены на M3:
+        изменение справочника меняет расчёты, и его автор должен быть виден.
       type: string
       enum:
         - flight
         - service_order
         - vendor
+        - client
         - contract
         - tariff
         - quote
@@ -4553,6 +4558,9 @@ components:
         - user
         - settings
         - crew
+        - aircraft
+        - service
+        - airport
 
     AuditEntry:
       type: object
