@@ -1,0 +1,1352 @@
+icao,iata,name_ru,name_en,city_ru,city_en,country,timezone,lat,lon,elevation_ft,is_coordinated
+AGGH,HIR,Honiara International Airport,Honiara International Airport,Honiara,Honiara,SB,Pacific/Guadalcanal,-9.428000,160.054993,28,false
+AYNZ,LAE,Nadzab Tomodachi International Airport,Nadzab Tomodachi International Airport,Lae,Lae,PG,Pacific/Port_Moresby,-6.567995,146.726544,239,false
+AYPY,POM,Port Moresby Jacksons International Airport,Port Moresby Jacksons International Airport,Port Moresby,Port Moresby,PG,Pacific/Port_Moresby,-9.443380,147.220001,146,false
+BGGH,GOH,Nuuk International Airport,Nuuk International Airport,Nuuk,Nuuk,GL,America/Godthab,64.191066,-51.679140,283,false
+BIAR,AEY,Akureyri International Airport,Akureyri International Airport,Akureyri,Akureyri,IS,Atlantic/Reykjavik,65.656573,-18.072018,6,false
+BIKF,KEF,Keflavik International Airport,Keflavik International Airport,Reykjavík,Reykjavík,IS,Atlantic/Reykjavik,63.985001,-22.605600,171,false
+BKPR,PRN,Priština Adem Jashari International Airport,Priština Adem Jashari International Airport,Prishtina,Prishtina,XK,Europe/Belgrade,42.572800,21.035801,1789,false
+CYEG,YEG,Edmonton International Airport,Edmonton International Airport,Edmonton,Edmonton,CA,America/Edmonton,53.309700,-113.580002,2373,false
+CYHM,YHM,John C. Munro Hamilton International Airport,John C. Munro Hamilton International Airport,Hamilton,Hamilton,CA,America/Toronto,43.171308,-79.929416,780,false
+CYHZ,YHZ,Halifax / Stanfield International Airport,Halifax / Stanfield International Airport,Halifax,Halifax,CA,America/Halifax,44.880798,-63.508598,477,false
+CYLW,YLW,Kelowna International Airport,Kelowna International Airport,Kelowna,Kelowna,CA,America/Vancouver,49.956100,-119.377998,1421,false
+CYOW,YOW,Ottawa Macdonald-Cartier International Airport,Ottawa Macdonald-Cartier International Airport,Ottawa,Ottawa,CA,America/Toronto,45.322498,-75.669197,374,false
+CYQB,YQB,Quebec Jean Lesage International Airport,Quebec Jean Lesage International Airport,Quebec,Quebec,CA,America/Toronto,46.791100,-71.393303,244,false
+CYQG,YQG,Windsor International Airport,Windsor International Airport,Windsor,Windsor,CA,America/Toronto,42.275600,-82.955597,622,false
+CYUL,YUL,Montreal / Pierre Elliott Trudeau International Airport,Montreal / Pierre Elliott Trudeau International Airport,Montréal,Montréal,CA,America/Toronto,45.467837,-73.742294,118,false
+CYVR,YVR,Vancouver International Airport,Vancouver International Airport,Vancouver,Vancouver,CA,America/Vancouver,49.193901,-123.183998,14,false
+CYWG,YWG,Winnipeg / James Armstrong Richardson International Airport,Winnipeg / James Armstrong Richardson International Airport,Winnipeg,Winnipeg,CA,America/Winnipeg,49.910000,-97.239899,783,false
+CYXE,YXE,Saskatoon John G. Diefenbaker International Airport,Saskatoon John G. Diefenbaker International Airport,Saskatoon,Saskatoon,CA,America/Regina,52.170723,-106.700793,1653,false
+CYYC,YYC,Calgary International Airport,Calgary International Airport,Calgary,Calgary,CA,America/Edmonton,51.118822,-114.009933,3557,false
+CYYJ,YYJ,Victoria International Airport,Victoria International Airport,Victoria,Victoria,CA,America/Vancouver,48.647201,-123.427792,63,false
+CYYT,YYT,St. John's International Airport,St. John's International Airport,St. John's,St. John's,CA,America/St_Johns,47.618599,-52.751900,461,false
+CYYZ,YYZ,Toronto Pearson International Airport,Toronto Pearson International Airport,Toronto,Toronto,CA,America/Toronto,43.675935,-79.629421,569,false
+DAAE,BJA,Soummam–Abane Ramdane Airport,Soummam–Abane Ramdane Airport,Béjaïa,Béjaïa,DZ,Africa/Algiers,36.712547,5.069909,20,false
+DAAG,ALG,Houari Boumediene Airport,Houari Boumediene Airport,Algiers,Algiers,DZ,Africa/Algiers,36.693886,3.214531,82,true
+DAAJ,DJG,Tiska Djanet Airport,Tiska Djanet Airport,Djanet,Djanet,DZ,Africa/Algiers,24.285448,9.463652,3176,false
+DAAT,TMR,Aguenar – Hadj Bey Akhamok Airport,Aguenar – Hadj Bey Akhamok Airport,Tamanrasset,Tamanrasset,DZ,Africa/Algiers,22.810992,5.450832,4518,false
+DAAV,GJL,Jijel Ferhat Abbas Airport,Jijel Ferhat Abbas Airport,Tahir,Tahir,DZ,Africa/Algiers,36.794125,5.873652,36,false
+DABB,AAE,Annaba Rabah Bitat Airport,Annaba Rabah Bitat Airport,Annaba,Annaba,DZ,Africa/Algiers,36.826781,7.813340,16,false
+DABC,CZL,Mohamed Boudiaf International Airport,Mohamed Boudiaf International Airport,Constantine,Constantine,DZ,Africa/Algiers,36.276001,6.620390,2265,false
+DABT,BLJ,Batna Mostefa Ben Boulaid Airport,Batna Mostefa Ben Boulaid Airport,Batna,Batna,DZ,Africa/Algiers,35.752102,6.308590,2697,false
+DAOI,CFK,Chlef Aboubakr Belkaid International Airport,Chlef Aboubakr Belkaid International Airport,Chlef,Chlef,DZ,Africa/Algiers,36.216614,1.341114,463,false
+DAON,TLM,Zenata – Messali El Hadj Airport,Zenata – Messali El Hadj Airport,Zenata,Zenata,DZ,Africa/Algiers,35.012732,-1.457117,814,false
+DAOO,ORN,Oran Es-Sénia (Ahmed Ben Bella) International Airport,Oran Es-Sénia (Ahmed Ben Bella) International Airport,Es-Sénia,Es-Sénia,DZ,Africa/Algiers,35.620648,-0.622486,295,false
+DAUB,BSK,Biskra - Mohamed Khider Airport,Biskra - Mohamed Khider Airport,Biskra,Biskra,DZ,Africa/Algiers,34.793180,5.738899,289,false
+DBBB,COO,Cotonou Cadjehoun International Airport,Cotonou Cadjehoun International Airport,Cotonou,Cotonou,BJ,Africa/Porto-Novo,6.357230,2.384350,19,false
+DFFD,OUA,Ouagadougou Thomas Sankara International Airport,Ouagadougou Thomas Sankara International Airport,Ouagadougou,Ouagadougou,BF,Africa/Ouagadougou,12.353200,-1.512420,1037,false
+DFOO,BOY,Bobo Dioulasso Airport,Bobo Dioulasso Airport,Bobo Dioulasso,Bobo Dioulasso,BF,Africa/Ouagadougou,11.160100,-4.330970,1511,false
+DGAA,ACC,Kotoka International Airport,Kotoka International Airport,Accra,Accra,GH,Africa/Accra,5.605190,-0.166786,205,false
+DGLE,TML,Yakubu Tali International Airport,Yakubu Tali International Airport,Tamale,Tamale,GH,Africa/Accra,9.553909,-0.866060,553,false
+DGSI,KMS,Prempeh I International Airport,Prempeh I International Airport,Kumasi,Kumasi,GH,Africa/Accra,6.714560,-1.590820,942,false
+DIAP,ABJ,Félix-Houphouët-Boigny International Airport,Félix-Houphouët-Boigny International Airport,Abidjan,Abidjan,CI,Africa/Abidjan,5.261390,-3.926290,21,false
+DIYO,ASK,Yamoussoukro International Airport,Yamoussoukro International Airport,Yamoussoukro,Yamoussoukro,CI,Africa/Abidjan,6.903170,-5.365580,699,false
+DNAA,ABV,Nnamdi Azikiwe International Airport,Nnamdi Azikiwe International Airport,Abuja,Abuja,NG,Africa/Lagos,9.006790,7.263170,1123,false
+DNAS,ABB,Asaba International Airport,Asaba International Airport,Asaba,Asaba,NG,Africa/Lagos,6.204167,6.665278,305,false
+DNBC,BCU,Sir Abubakar Tafawa Balewa Bauchi State International Airport,Sir Abubakar Tafawa Balewa Bauchi State International Airport,Bauchi,Bauchi,NG,Africa/Lagos,10.482833,9.744000,1965,false
+DNBK,,Sir Ahmadu Bello International Airport,Sir Ahmadu Bello International Airport,Birinin Kebbi,Birinin Kebbi,NG,Africa/Lagos,12.479048,4.369132,775,false
+DNEN,ENU,Akanu Ibiam International Airport,Akanu Ibiam International Airport,Enegu,Enegu,NG,Africa/Lagos,6.473718,7.560463,466,false
+DNIL,ILR,General Tunde Idiagbon International Airport,General Tunde Idiagbon International Airport,Ilorin/Ogbomosho,Ilorin/Ogbomosho,NG,Africa/Lagos,8.440210,4.493920,1126,false
+DNKA,KAD,Kaduna International Airport,Kaduna International Airport,Kaduna,Kaduna,NG,Africa/Lagos,10.696000,7.320110,2073,false
+DNKN,KAN,Mallam Aminu Kano International Airport,Mallam Aminu Kano International Airport,Kano,Kano,NG,Africa/Lagos,12.045613,8.523566,1562,false
+DNMA,MIU,Maiduguri International Airport,Maiduguri International Airport,Maiduguri,Maiduguri,NG,Africa/Lagos,11.854163,13.080702,1099,false
+DNMM,LOS,Murtala Muhammed International Airport,Murtala Muhammed International Airport,Lagos,Lagos,NG,Africa/Lagos,6.577370,3.321160,135,false
+DNPO,PHC,Port Harcourt International Airport,Port Harcourt International Airport,Port Harcourt,Port Harcourt,NG,Africa/Lagos,5.015490,6.949590,87,false
+DNSO,SKO,Sadiq Abubakar III International Airport,Sadiq Abubakar III International Airport,Sokoto,Sokoto,NG,Africa/Lagos,12.915729,5.207547,1010,false
+DRRN,NIM,Diori Hamani International Airport,Diori Hamani International Airport,Niamey,Niamey,NE,Africa/Niamey,13.481500,2.183610,732,false
+DTTA,TUN,Tunis Carthage International Airport,Tunis Carthage International Airport,Tunis,Tunis,TN,Africa/Tunis,36.851002,10.227200,22,true
+DTTJ,DJE,Djerba Zarzis International Airport,Djerba Zarzis International Airport,Mellita,Mellita,TN,Africa/Tunis,33.873719,10.777300,19,false
+DXNG,LRL,Niamtougou International Airport,Niamtougou International Airport,Niamtougou,Niamtougou,TG,Africa/Lome,9.766675,1.090944,1515,false
+DXXX,LFW,Lomé–Tokoin International Airport,Lomé–Tokoin International Airport,Lomé,Lomé,TG,Africa/Lome,6.165610,1.254510,72,false
+EBBR,BRU,Brussels Airport,Brussels Airport,Zaventem,Zaventem,BE,Europe/Brussels,50.901402,4.484440,175,true
+EBCI,CRL,Brussels South Charleroi Airport,Brussels South Charleroi Airport,Charleroi,Charleroi,BE,Europe/Brussels,50.461963,4.459562,614,false
+EBOS,OST,Ostend-Bruges International Airport,Ostend-Bruges International Airport,Oostende,Oostende,BE,Europe/Brussels,51.199800,2.874673,13,false
+EDDB,BER,Berlin Brandenburg Airport,Berlin Brandenburg Airport,Berlin,Berlin,DE,Europe/Berlin,52.361738,13.502341,157,true
+EDDC,DRS,Dresden Airport,Dresden Airport,Dresden,Dresden,DE,Europe/Berlin,51.134123,13.767831,755,false
+EDDE,ERF,Erfurt-Weimar Airport,Erfurt-Weimar Airport,Erfurt,Erfurt,DE,Europe/Berlin,50.978281,10.960713,1036,false
+EDDF,FRA,Frankfurt Main Airport,Frankfurt Main Airport,Frankfurt am Main,Frankfurt am Main,DE,Europe/Berlin,50.026706,8.558350,364,true
+EDDG,FMO,Münster Osnabrück Airport,Münster Osnabrück Airport,Greven,Greven,DE,Europe/Berlin,52.133816,7.688482,160,false
+EDDH,HAM,Hamburg Helmut Schmidt Airport,Hamburg Helmut Schmidt Airport,Hamburg,Hamburg,DE,Europe/Berlin,53.630402,9.988230,53,true
+EDDK,CGN,Cologne Bonn Airport,Cologne Bonn Airport,Köln (Cologne),Köln (Cologne),DE,Europe/Berlin,50.865898,7.142740,302,true
+EDDL,DUS,Düsseldorf Airport,Düsseldorf Airport,Düsseldorf,Düsseldorf,DE,Europe/Berlin,51.289501,6.766780,147,true
+EDDM,MUC,Munich Airport,Munich Airport,Munich,Munich,DE,Europe/Berlin,48.353802,11.786100,1487,true
+EDDN,NUE,Nuremberg Airport,Nuremberg Airport,Nuremberg,Nuremberg,DE,Europe/Berlin,49.498699,11.078056,1046,false
+EDDP,LEJ,Leipzig/Halle Airport,Leipzig/Halle Airport,Schkeuditz,Schkeuditz,DE,Europe/Berlin,51.420657,12.232705,465,false
+EDDS,STR,Stuttgart Airport,Stuttgart Airport,Stuttgart,Stuttgart,DE,Europe/Berlin,48.689899,9.221960,1276,true
+EDDV,HAJ,Hannover Airport,Hannover Airport,Hannover,Hannover,DE,Europe/Berlin,52.461102,9.685080,183,false
+EDDW,BRE,Bremen Airport,Bremen Airport,Bremen,Bremen,DE,Europe/Berlin,53.046786,8.789320,14,false
+EDFH,HHN,Frankfurt-Hahn Airport,Frankfurt-Hahn Airport,Frankfurt am Main (Lautzenhausen),Frankfurt am Main (Lautzenhausen),DE,Europe/Berlin,49.946353,7.261734,1649,false
+EDJA,FMM,Memmingen Allgau Airport,Memmingen Allgau Airport,Memmingen,Memmingen,DE,Europe/Berlin,47.988092,10.238248,2077,false
+EDLP,PAD,Paderborn Lippstadt Airport,Paderborn Lippstadt Airport,Büren,Büren,DE,Europe/Berlin,51.612527,8.617459,699,false
+EDLV,NRN,Weeze (Niederrhein) Airport,Weeze (Niederrhein) Airport,Weeze,Weeze,DE,Europe/Berlin,51.601362,6.141228,106,false
+EDLW,DTM,Dortmund Airport,Dortmund Airport,Dortmund,Dortmund,DE,Europe/Berlin,51.518299,7.612240,425,false
+EDMO,OBF,Oberpfaffenhofen Airport,Oberpfaffenhofen Airport,Weßling,Weßling,DE,Europe/Berlin,48.081402,11.283100,1947,false
+EDNY,FDH,Bodensee Airport Friedrichshafen,Bodensee Airport Friedrichshafen,Friedrichshafen,Friedrichshafen,DE,Europe/Berlin,47.671299,9.511490,1367,false
+EDSB,FKB,Karlsruhe Baden-Baden Airport,Karlsruhe Baden-Baden Airport,Rheinmünster,Rheinmünster,DE,Europe/Berlin,48.779400,8.080500,408,false
+EDVK,KSF,Kassel Airport,Kassel Airport,Calden,Calden,DE,Europe/Berlin,51.418395,9.391638,820,false
+EETN,TLL,Lennart Meri Tallinn Airport,Lennart Meri Tallinn Airport,Tallinn,Tallinn,EE,Europe/Tallinn,59.413246,24.832640,131,false
+EFHK,HEL,Helsinki Vantaa Airport,Helsinki Vantaa Airport,Helsinki (Vantaa),Helsinki (Vantaa),FI,Europe/Helsinki,60.318363,24.963341,179,true
+EFIV,IVL,Ivalo Airport,Ivalo Airport,Ivalo,Ivalo,FI,Europe/Helsinki,68.607300,27.405300,481,false
+EFKT,KTT,Kittilä International Airport,Kittilä International Airport,Kittilä,Kittilä,FI,Europe/Helsinki,67.700996,24.846800,644,false
+EFKU,KUO,Kuopio Airport,Kuopio Airport,Kuopio / Siilinjärvi,Kuopio / Siilinjärvi,FI,Europe/Helsinki,63.007099,27.797800,323,false
+EFLP,LPP,Lappeenranta Airport,Lappeenranta Airport,Lappeenranta,Lappeenranta,FI,Europe/Helsinki,61.044601,28.144743,349,false
+EFOU,OUL,Oulu Airport,Oulu Airport,Oulu / Oulunsalo,Oulu / Oulunsalo,FI,Europe/Helsinki,64.930099,25.354601,47,false
+EFRO,RVN,Rovaniemi Airport,Rovaniemi Airport,Rovaniemi,Rovaniemi,FI,Europe/Helsinki,66.563327,25.829751,642,false
+EFTP,TMP,Tampere-Pirkkala Airport,Tampere-Pirkkala Airport,Tampere / Pirkkala,Tampere / Pirkkala,FI,Europe/Helsinki,61.414101,23.604401,390,false
+EFTU,TKU,Turku Airport,Turku Airport,Turku,Turku,FI,Europe/Helsinki,60.514099,22.262800,161,false
+EFVA,VAA,Vaasa Airport,Vaasa Airport,Vaasa,Vaasa,FI,Europe/Helsinki,63.050230,21.762543,19,false
+EGAA,BFS,Belfast International Airport,Belfast International Airport,Belfast,Belfast,GB,Europe/London,54.657501,-6.215830,268,false
+EGBB,BHX,Birmingham Airport,Birmingham Airport,"Birmingham, West Midlands","Birmingham, West Midlands",GB,Europe/London,52.453899,-1.748030,327,false
+EGCC,MAN,Manchester Airport,Manchester Airport,"Manchester, Greater Manchester","Manchester, Greater Manchester",GB,Europe/London,53.349375,-2.279521,257,true
+EGFF,CWL,Cardiff International Airport,Cardiff International Airport,Cardiff,Cardiff,GB,Europe/London,51.396702,-3.343330,220,false
+EGGD,BRS,Bristol Airport,Bristol Airport,Bristol,Bristol,GB,Europe/London,51.382326,-2.716453,622,false
+EGGP,LPL,Liverpool John Lennon Airport,Liverpool John Lennon Airport,Liverpool,Liverpool,GB,Europe/London,53.334863,-2.849637,80,false
+EGGW,LTN,London Luton Airport,London Luton Airport,"Luton, Luton","Luton, Luton",GB,Europe/London,51.874699,-0.368333,526,true
+EGKA,ESH,Brighton City Airport,Brighton City Airport,"Brighton, East Sussex","Brighton, East Sussex",GB,Europe/London,50.835602,-0.297222,7,false
+EGKB,BQH,London Biggin Hill Airport,London Biggin Hill Airport,London,London,GB,Europe/London,51.330799,0.032500,598,false
+EGKK,LGW,London Gatwick Airport,London Gatwick Airport,London,London,GB,Europe/London,51.148744,-0.185739,202,true
+EGLF,FAB,Farnborough Airport,Farnborough Airport,"Farnborough, Hampshire","Farnborough, Hampshire",GB,Europe/London,51.275799,-0.776333,238,false
+EGLL,LHR,London Heathrow Airport,London Heathrow Airport,London,London,GB,Europe/London,51.470748,-0.459909,83,true
+EGNM,LBA,Leeds Bradford Airport,Leeds Bradford Airport,"Leeds, West Yorkshire","Leeds, West Yorkshire",GB,Europe/London,53.865898,-1.660570,681,false
+EGNS,IOM,Isle of Man Airport,Isle of Man Airport,Castletown,Castletown,IM,Europe/Isle_of_Man,54.083081,-4.623871,52,false
+EGNT,NCL,Newcastle International Airport,Newcastle International Airport,"Newcastle upon Tyne, Tyne and Wear","Newcastle upon Tyne, Tyne and Wear",GB,Europe/London,55.037958,-1.689577,266,false
+EGNX,EMA,East Midlands Airport,East Midlands Airport,"Nottingham, Leicestershire","Nottingham, Leicestershire",GB,Europe/London,52.831100,-1.328060,306,false
+EGPD,ABZ,Aberdeen International Airport,Aberdeen International Airport,Aberdeen,Aberdeen,GB,Europe/London,57.201900,-2.197780,215,false
+EGPF,GLA,Glasgow Airport,Glasgow Airport,Glasgow,Glasgow,GB,Europe/London,55.871899,-4.433060,26,false
+EGPH,EDI,Edinburgh Airport,Edinburgh Airport,"Ingliston, Edinburgh","Ingliston, Edinburgh",GB,Europe/London,55.950145,-3.372288,135,true
+EGPK,PIK,Glasgow Prestwick Airport,Glasgow Prestwick Airport,"Prestwick, South Ayrshire","Prestwick, South Ayrshire",GB,Europe/London,55.501499,-4.577182,65,false
+EGSS,STN,London Stansted Airport,London Stansted Airport,"London, Essex","London, Essex",GB,Europe/London,51.884998,0.235000,348,true
+EGTK,OXF,London Oxford Airport,London Oxford Airport,"Kidlington, Oxfordshire","Kidlington, Oxfordshire",GB,Europe/London,51.836899,-1.320000,270,false
+EHAM,AMS,Amsterdam Airport Schiphol,Amsterdam Airport Schiphol,Amsterdam,Amsterdam,NL,Europe/Amsterdam,52.308601,4.763890,-11,true
+EHBK,MST,Maastricht Aachen Airport,Maastricht Aachen Airport,Maastricht,Maastricht,NL,Europe/Amsterdam,50.911087,5.769401,375,false
+EHEH,EIN,Eindhoven Airport,Eindhoven Airport,Eindhoven,Eindhoven,NL,Europe/Amsterdam,51.450100,5.374530,74,false
+EHGG,GRQ,Groningen Airport Eelde,Groningen Airport Eelde,Groningen,Groningen,NL,Europe/Amsterdam,53.119107,6.577652,17,false
+EHRD,RTM,Rotterdam The Hague Airport,Rotterdam The Hague Airport,Rotterdam,Rotterdam,NL,Europe/Amsterdam,51.956902,4.437220,-15,false
+EICK,ORK,Cork International Airport,Cork International Airport,Cork,Cork,IE,Europe/Dublin,51.841301,-8.491110,502,false
+EIDW,DUB,Dublin Airport,Dublin Airport,Dublin,Dublin,IE,Europe/Dublin,53.428713,-6.262121,242,false
+EIKN,NOC,Ireland West Airport Knock,Ireland West Airport Knock,Charlestown,Charlestown,IE,Europe/Dublin,53.910439,-8.817002,665,false
+EINN,SNN,Shannon Airport,Shannon Airport,Shannon,Shannon,IE,Europe/Dublin,52.702000,-8.924820,46,false
+EKAH,AAR,Aarhus Airport,Aarhus Airport,Aarhus,Aarhus,DK,Europe/Copenhagen,56.303331,10.618286,82,false
+EKBI,BLL,Billund Airport,Billund Airport,Billund,Billund,DK,Europe/Copenhagen,55.740335,9.157019,247,false
+EKCH,CPH,Copenhagen Kastrup Airport,Copenhagen Kastrup Airport,Copenhagen,Copenhagen,DK,Europe/Copenhagen,55.617901,12.656000,17,true
+EKOD,ODE,Odense Hans Christian Andersen Airport,Odense Hans Christian Andersen Airport,Odense,Odense,DK,Europe/Copenhagen,55.475307,10.327206,56,false
+EKVG,FAE,Vágar Airport,Vágar Airport,Vágar,Vágar,FO,Atlantic/Faeroe,62.063256,-7.275782,280,false
+EKYT,AAL,Aalborg Airport,Aalborg Airport,Aalborg,Aalborg,DK,Europe/Copenhagen,57.094763,9.849930,10,false
+ELLX,LUX,Luxembourg-Findel International Airport,Luxembourg-Findel International Airport,Luxembourg,Luxembourg,LU,Europe/Luxembourg,49.626845,6.212134,1234,true
+ENAL,AES,Ålesund Airport,Ålesund Airport,Ålesund,Ålesund,NO,Europe/Oslo,62.560443,6.110845,69,false
+ENBO,BOO,Bodø Airport,Bodø Airport,Bodø,Bodø,NO,Europe/Oslo,67.269203,14.365300,42,false
+ENBR,BGO,"Bergen Airport, Flesland","Bergen Airport, Flesland",Bergen,Bergen,NO,Europe/Oslo,60.293400,5.218140,170,false
+ENCN,KRS,Kristiansand Airport,Kristiansand Airport,Kristiansand(Kjevik),Kristiansand(Kjevik),NO,Europe/Oslo,58.204201,8.085370,57,false
+ENEV,EVE,Harstad/Narvik Airport,Harstad/Narvik Airport,Evenes,Evenes,NO,Europe/Oslo,68.491302,16.678101,84,false
+ENGM,OSL,Oslo-Gardermoen International Airport,Oslo-Gardermoen International Airport,Oslo (Gardermoen),Oslo (Gardermoen),NO,Europe/Oslo,60.193901,11.100400,681,true
+ENTC,TOS,Tromsø Airport,Tromsø Airport,Tromsø,Tromsø,NO,Europe/Oslo,69.683296,18.918900,31,false
+ENTO,TRF,"Sandefjord Airport, Torp","Sandefjord Airport, Torp",Sandefjord(Torp),Sandefjord(Torp),NO,Europe/Oslo,59.186699,10.258600,286,false
+ENVA,TRD,"Trondheim Airport, Værnes","Trondheim Airport, Værnes",Trondheim,Trondheim,NO,Europe/Oslo,63.457802,10.924000,56,false
+ENZV,SVG,"Stavanger Airport, Sola","Stavanger Airport, Sola",Stavanger,Stavanger,NO,Europe/Oslo,58.876701,5.637780,29,false
+EPGD,GDN,Gdańsk Lech Wałęsa Airport,Gdańsk Lech Wałęsa Airport,Gdańsk,Gdańsk,PL,Europe/Warsaw,54.377602,18.466200,489,false
+EPKK,KRK,Kraków John Paul II International Airport,Kraków John Paul II International Airport,Balice,Balice,PL,Europe/Warsaw,50.077702,19.784800,791,false
+EPKT,KTW,Katowice Wojciech Korfanty International Airport,Katowice Wojciech Korfanty International Airport,Katowice,Katowice,PL,Europe/Warsaw,50.476015,19.080705,995,false
+EPLB,LUZ,Lublin Airport,Lublin Airport,Lublin,Lublin,PL,Europe/Warsaw,51.240157,22.713461,633,false
+EPLL,LCJ,Łódź Władysław Reymont Airport,Łódź Władysław Reymont Airport,Łódź,Łódź,PL,Europe/Warsaw,51.721901,19.398100,604,false
+EPMO,WMI,Warsaw Modlin Airport,Warsaw Modlin Airport,Nowy Dwór Mazowiecki,Nowy Dwór Mazowiecki,PL,Europe/Warsaw,52.451099,20.651800,341,false
+EPPO,POZ,Poznań-Ławica Airport,Poznań-Ławica Airport,Poznań,Poznań,PL,Europe/Warsaw,52.421598,16.823359,308,false
+EPRZ,RZE,Rzeszów-Jasionka Airport,Rzeszów-Jasionka Airport,Jasionka,Jasionka,PL,Europe/Warsaw,50.109791,22.024155,693,false
+EPSC,SZZ,Solidarity Szczecin–Goleniów Airport,Solidarity Szczecin–Goleniów Airport,Szczecin(Glewice),Szczecin(Glewice),PL,Europe/Warsaw,53.584702,14.902200,154,false
+EPWA,WAW,Warsaw Chopin Airport,Warsaw Chopin Airport,Warsaw,Warsaw,PL,Europe/Warsaw,52.165699,20.967100,362,false
+EPWR,WRO,Copernicus Wrocław Airport,Copernicus Wrocław Airport,Wrocław,Wrocław,PL,Europe/Warsaw,51.103719,16.882096,404,false
+ESGG,GOT,Göteborg Landvetter Airport,Göteborg Landvetter Airport,Göteborg,Göteborg,SE,Europe/Stockholm,57.662800,12.279800,506,false
+ESKN,NYO,Stockholm Skavsta Airport,Stockholm Skavsta Airport,Nyköping,Nyköping,SE,Europe/Stockholm,58.789656,16.911479,140,false
+ESKS,SCR,Scandinavian Mountains Airport,Scandinavian Mountains Airport,Malung-Sälen,Malung-Sälen,SE,Europe/Stockholm,61.165080,12.833520,1608,false
+ESMS,MMX,Malmö Sturup Airport,Malmö Sturup Airport,Malmö,Malmö,SE,Europe/Stockholm,55.535564,13.376327,236,false
+ESNQ,KRN,Kiruna Airport,Kiruna Airport,Kiruna,Kiruna,SE,Europe/Stockholm,67.821999,20.336800,1508,false
+ESNU,UME,Umeå Airport,Umeå Airport,Umeå,Umeå,SE,Europe/Stockholm,63.791801,20.282801,24,false
+ESOW,VST,Stockholm Västerås Airport,Stockholm Västerås Airport,Stockholm / Västerås,Stockholm / Västerås,SE,Europe/Stockholm,59.589401,16.633600,21,false
+ESPA,LLA,Luleå Airport,Luleå Airport,Luleå,Luleå,SE,Europe/Stockholm,65.543800,22.122000,65,false
+ESSA,ARN,Stockholm-Arlanda Airport,Stockholm-Arlanda Airport,Stockholm,Stockholm,SE,Europe/Stockholm,59.648490,17.928829,137,true
+ESSL,LPI,Linköping City Airport,Linköping City Airport,Linköping,Linköping,SE,Europe/Stockholm,58.404909,15.684499,172,false
+ESSV,VBY,Visby Airport,Visby Airport,Visby,Visby,SE,Europe/Stockholm,57.662800,18.346201,164,false
+EVLA,LPX,Liepāja International Airport,Liepāja International Airport,Liepāja,Liepāja,LV,Europe/Riga,56.517502,21.096901,16,false
+EVRA,RIX,Riga International Airport,Riga International Airport,Riga,Riga,LV,Europe/Riga,56.920752,23.970711,36,false
+EYKA,KUN,Kaunas International Airport,Kaunas International Airport,Kaunas,Kaunas,LT,Europe/Vilnius,54.963965,24.085820,256,false
+EYPA,PLQ,Palanga International Airport,Palanga International Airport,Palanga,Palanga,LT,Europe/Vilnius,55.973202,21.093901,33,false
+EYVI,VNO,Vilnius International Airport,Vilnius International Airport,Vilnius,Vilnius,LT,Europe/Vilnius,54.634102,25.285801,648,false
+FABL,BFN,Bram Fischer International Airport,Bram Fischer International Airport,Bloemfontein,Bloemfontein,ZA,Africa/Johannesburg,-29.092699,26.302401,4457,false
+FACT,CPT,Cape Town International Airport,Cape Town International Airport,Cape Town,Cape Town,ZA,Africa/Johannesburg,-33.974030,18.604333,151,true
+FAEL,ELS,King Phalo Airport,King Phalo Airport,East London,East London,ZA,Africa/Johannesburg,-33.035599,27.825899,435,false
+FAGG,GRJ,George Airport,George Airport,George,George,ZA,Africa/Johannesburg,-34.005600,22.378902,648,false
+FAKM,KIM,Kimberley Airport,Kimberley Airport,Kimberley,Kimberley,ZA,Africa/Johannesburg,-28.805401,24.764872,3950,false
+FAKN,MQP,Kruger Mpumalanga International Airport,Kruger Mpumalanga International Airport,Mbombela,Mbombela,ZA,Africa/Johannesburg,-25.383327,31.105325,2829,false
+FALA,HLA,Lanseria International Airport,Lanseria International Airport,Johannesburg,Johannesburg,ZA,Africa/Johannesburg,-25.938964,27.926642,4517,false
+FALE,DUR,King Shaka International Airport,King Shaka International Airport,Durban,Durban,ZA,Africa/Johannesburg,-29.614444,31.119722,295,false
+FAOR,JNB,O.R. Tambo International Airport,O.R. Tambo International Airport,Johannesburg,Johannesburg,ZA,Africa/Johannesburg,-26.140081,28.246801,5558,true
+FAPE,PLZ,Chief Dawid Stuurman International Airport,Chief Dawid Stuurman International Airport,Gqeberha (Port Elizabeth),Gqeberha (Port Elizabeth),ZA,Africa/Johannesburg,-33.989715,25.617353,226,false
+FAPP,PTG,Polokwane International Airport,Polokwane International Airport,Polokwane,Polokwane,ZA,Africa/Johannesburg,-23.845269,29.458615,4076,false
+FBKE,BBK,Kasane International Airport,Kasane International Airport,Kasane,Kasane,BW,Africa/Gaborone,-17.831653,25.166195,3289,false
+FBMN,MUB,Maun International Airport,Maun International Airport,Maun,Maun,BW,Africa/Gaborone,-19.970491,23.431409,3093,false
+FBPM,FRW,Phillip Gaonwe Matante International Airport,Phillip Gaonwe Matante International Airport,Francistown,Francistown,BW,Africa/Gaborone,-21.159183,27.468826,3283,false
+FBSK,GBE,Sir Seretse Khama International Airport,Sir Seretse Khama International Airport,Gaborone,Gaborone,BW,Africa/Gaborone,-24.555201,25.918200,3299,false
+FCBB,BZV,Maya-Maya International Airport,Maya-Maya International Airport,Brazzaville,Brazzaville,CG,Africa/Brazzaville,-4.251700,15.253000,1048,false
+FCPP,PNR,Antonio Agostinho-Neto International Airport,Antonio Agostinho-Neto International Airport,Pointe Noire,Pointe Noire,CG,Africa/Brazzaville,-4.816030,11.886600,55,false
+FDSK,SHO,King Mswati III International Airport,King Mswati III International Airport,Mpaka,Mpaka,SZ,Africa/Mbabane,-26.358611,31.716944,1092,false
+FEFF,BGF,Bangui M'Poko International Airport,Bangui M'Poko International Airport,Bangui,Bangui,CF,Africa/Bangui,4.398480,18.518801,1208,false
+FGBT,BSG,Bata International Airport,Bata International Airport,Bata,Bata,GQ,Africa/Malabo,1.905470,9.805680,13,false
+FGCO,OCS,Corisco International Airport,Corisco International Airport,Corisco Island,Corisco Island,GQ,Africa/Malabo,0.910937,9.330270,55,false
+FGSL,SSG,Malabo International Airport,Malabo International Airport,Malabo,Malabo,GQ,Africa/Malabo,3.755270,8.708720,76,false
+FIMP,MRU,Sir Seewoosagur Ramgoolam International Airport,Sir Seewoosagur Ramgoolam International Airport,Plaine Magnien,Plaine Magnien,MU,Indian/Mauritius,-20.430201,57.683601,186,false
+FKKD,DLA,Douala International Airport,Douala International Airport,Douala,Douala,CM,Africa/Douala,4.006080,9.719480,33,false
+FKKR,GOU,Garoua International Airport,Garoua International Airport,Garoua,Garoua,CM,Africa/Douala,9.334785,13.372129,794,false
+FKYS,NSI,Yaoundé Nsimalen International Airport,Yaoundé Nsimalen International Airport,Yaoundé,Yaoundé,CM,Africa/Douala,3.722560,11.553300,2278,false
+FLHN,LVI,Harry Mwanga Nkumbula International Airport,Harry Mwanga Nkumbula International Airport,Livingstone,Livingstone,ZM,Africa/Lusaka,-17.821524,25.819642,3302,false
+FLKK,LUN,Kenneth Kaunda International Airport,Kenneth Kaunda International Airport,Lusaka,Lusaka,ZM,Africa/Lusaka,-15.330833,28.452722,3779,false
+FLMF,MFU,Mfuwe International Airport,Mfuwe International Airport,Mfuwe,Mfuwe,ZM,Africa/Lusaka,-13.258900,31.936600,1853,false
+FLSK,NLA,Simon Mwansa Kapwepwe International Airport,Simon Mwansa Kapwepwe International Airport,Ndola,Ndola,ZM,Africa/Lusaka,-12.965130,28.515624,4308,false
+FMCH,HAH,Prince Said Ibrahim International Airport,Prince Said Ibrahim International Airport,Moroni,Moroni,KM,Indian/Comoro,-11.533700,43.271900,93,false
+FMCZ,DZA,Dzaoudzi Pamandzi International Airport,Dzaoudzi Pamandzi International Airport,Dzaoudzi,Dzaoudzi,YT,Indian/Mayotte,-12.809319,45.281815,23,false
+FMEE,RUN,Roland Garros Airport,Roland Garros Airport,Sainte-Marie,Sainte-Marie,RE,Indian/Reunion,-20.890087,55.518894,66,false
+FMEP,ZSE,Saint-Pierre Pierrefonds Airport,Saint-Pierre Pierrefonds Airport,Saint-Pierre,Saint-Pierre,RE,Indian/Reunion,-21.319362,55.422506,59,false
+FMMI,TNR,Ivato International Airport,Ivato International Airport,Antananarivo,Antananarivo,MG,Indian/Antananarivo,-18.796900,47.478802,4198,false
+FMMT,TMM,Toamasina Ambalamanasy Airport,Toamasina Ambalamanasy Airport,Toamasina,Toamasina,MG,Indian/Antananarivo,-18.113537,49.392262,22,false
+FMNM,MJN,Amborovy Airport,Amborovy Airport,Mahajanga,Mahajanga,MG,Indian/Antananarivo,-15.666842,46.351233,87,false
+FMNN,NOS,Nosy Be International Airport,Nosy Be International Airport,Nosy Be,Nosy Be,MG,Indian/Antananarivo,-13.312100,48.314800,36,false
+FNBJ,NBJ,Dr. Antonio Agostinho Neto International Airport,Dr. Antonio Agostinho Neto International Airport,Luanda (Ícolo e Bengo),Luanda (Ícolo e Bengo),AO,Africa/Luanda,-9.050734,13.499078,550,false
+FNLU,LAD,Quatro de Fevereiro International Airport,Quatro de Fevereiro International Airport,Luanda,Luanda,AO,Africa/Luanda,-8.858370,13.231200,243,false
+FOOG,POG,Port Gentil International Airport,Port Gentil International Airport,Port Gentil,Port Gentil,GA,Africa/Libreville,-0.711739,8.754380,13,false
+FOOL,LBV,Libreville Leon M'ba International Airport,Libreville Leon M'ba International Airport,Libreville,Libreville,GA,Africa/Libreville,0.458951,9.412140,39,false
+FPST,TMS,São Tomé International Airport,São Tomé International Airport,São Tomé,São Tomé,ST,Africa/Sao_Tome,0.378175,6.712150,33,false
+FQBR,BEW,Beira International Airport,Beira International Airport,Beira,Beira,MZ,Africa/Maputo,-19.796400,34.907600,33,false
+FQMA,MPM,Maputo Airport,Maputo Airport,Maputo,Maputo,MZ,Africa/Maputo,-25.920799,32.572601,145,false
+FQNP,APL,Nampula Airport,Nampula Airport,Nampula,Nampula,MZ,Africa/Maputo,-15.105600,39.281799,1444,false
+FQTT,TET,Tete Airport,Tete Airport,Tete,Tete,MZ,Africa/Maputo,-16.104799,33.640202,525,false
+FSIA,SEZ,Seychelles International Airport,Seychelles International Airport,Victoria,Victoria,SC,Indian/Mahe,-4.674340,55.521801,10,false
+FTTJ,NDJ,N'Djamena International Airport,N'Djamena International Airport,N'Djamena,N'Djamena,TD,Africa/Ndjamena,12.133700,15.034000,968,false
+FVFA,VFA,Victoria Falls International Airport,Victoria Falls International Airport,Victoria Falls,Victoria Falls,ZW,Africa/Harare,-18.097437,25.836867,3490,false
+FVJN,BUQ,Joshua Mqabuko Nkomo International Airport,Joshua Mqabuko Nkomo International Airport,Bulawayo,Bulawayo,ZW,Africa/Harare,-20.016284,28.622897,4359,false
+FVRG,HRE,Robert Gabriel Mugabe International Airport,Robert Gabriel Mugabe International Airport,Harare,Harare,ZW,Africa/Harare,-17.931801,31.092800,4887,false
+FWCL,BLZ,Chileka International Airport,Chileka International Airport,Blantyre,Blantyre,MW,Africa/Blantyre,-15.677189,34.972319,2555,false
+FWKI,LLW,Kamuzu International Airport,Kamuzu International Airport,Lumbadzi,Lumbadzi,MW,Africa/Blantyre,-13.789400,33.780998,4035,false
+FXMM,MSU,Moshoeshoe I International Airport,Moshoeshoe I International Airport,Maseru(Mazenod),Maseru(Mazenod),LS,Africa/Maseru,-29.456277,27.554456,5348,false
+FYWB,WVB,Walvis Bay International Airport,Walvis Bay International Airport,Walvis Bay(Rooikop),Walvis Bay(Rooikop),NA,Africa/Windhoek,-22.979332,14.647102,299,false
+FYWH,WDH,Hosea Kutako International Airport,Hosea Kutako International Airport,Windhoek,Windhoek,NA,Africa/Windhoek,-22.479900,17.470900,5640,false
+FZAA,FIH,Ndjili International Airport,Ndjili International Airport,Kinshasa,Kinshasa,CD,Africa/Kinshasa,-4.385750,15.444600,1027,false
+FZIC,FKI,Bangoka International Airport,Bangoka International Airport,Kisangani,Kisangani,CD,Africa/Lubumbashi,0.481639,25.337999,1417,false
+FZNA,GOM,Goma International Airport,Goma International Airport,Goma,Goma,CD,Africa/Kigali,-1.666758,29.238037,5089,false
+FZQA,FBM,Lubumbashi International Airport,Lubumbashi International Airport,Lubumbashi,Lubumbashi,CD,Africa/Lubumbashi,-11.591494,27.530753,4295,false
+GABS,BKO,Modibo Keita International Airport,Modibo Keita International Airport,Bamako,Bamako,ML,Africa/Bamako,12.533500,-7.949940,1247,false
+GATB,TOM,Tombouktou Airport,Tombouktou Airport,Timbuktu,Timbuktu,ML,Africa/Bamako,16.730499,-3.007580,863,false
+GBYD,BJL,Banjul International Airport,Banjul International Airport,Banjul (Yundum),Banjul (Yundum),GM,Africa/Banjul,13.338000,-16.652201,95,false
+GCFV,FUE,Fuerteventura Airport,Fuerteventura Airport,El Matorral,El Matorral,ES,Atlantic/Canary,28.452700,-13.863800,85,false
+GCLP,LPA,Gran Canaria Airport,Gran Canaria Airport,Gran Canaria Island,Gran Canaria Island,ES,Atlantic/Canary,27.931900,-15.386600,78,false
+GCRR,ACE,César Manrique-Lanzarote Airport,César Manrique-Lanzarote Airport,San Bartolomé,San Bartolomé,ES,Atlantic/Canary,28.945499,-13.605200,46,false
+GCTS,TFS,Tenerife Sur Airport,Tenerife Sur Airport,Tenerife,Tenerife,ES,Atlantic/Canary,28.044500,-16.572500,209,false
+GCXO,TFN,Tenerife Norte-Ciudad de La Laguna Airport,Tenerife Norte-Ciudad de La Laguna Airport,Tenerife,Tenerife,ES,Atlantic/Canary,28.482752,-16.341707,2076,false
+GFLL,FNA,Lungi International Airport,Lungi International Airport,Freetown (Lungi-Town),Freetown (Lungi-Town),SL,Africa/Freetown,8.616440,-13.195500,84,false
+GGOV,OXB,Osvaldo Vieira International Airport,Osvaldo Vieira International Airport,Bissau,Bissau,GW,Africa/Bissau,11.894262,-15.653596,129,false
+GLRB,ROB,Roberts International Airport,Roberts International Airport,Monrovia,Monrovia,LR,Africa/Monrovia,6.233790,-10.362300,31,false
+GMAD,AGA,Al Massira Airport,Al Massira Airport,Agadir (Temsia),Agadir (Temsia),MA,Africa/Casablanca,30.322478,-9.412003,250,false
+GMAZ,OZG,Zagora Airport,Zagora Airport,Zagora,Zagora,MA,Africa/Casablanca,30.265788,-5.860808,2414,false
+GMFF,FEZ,Fes Saïss International Airport,Fes Saïss International Airport,Saïss,Saïss,MA,Africa/Casablanca,33.927299,-4.977960,1900,false
+GMFO,OUD,Oujda Angads Airport,Oujda Angads Airport,Ahl Angad,Ahl Angad,MA,Africa/Casablanca,34.789558,-1.926041,1535,false
+GMMD,BEM,Beni Mellal Airport,Beni Mellal Airport,Oulad Yaich,Oulad Yaich,MA,Africa/Casablanca,32.401895,-6.315905,1694,false
+GMME,RBA,Rabat-Salé Airport,Rabat-Salé Airport,Rabat,Rabat,MA,Africa/Casablanca,34.051498,-6.751520,276,false
+GMMH,VIL,Dakhla Airport,Dakhla Airport,Dakhla,Dakhla,EH,Africa/El_Aaiun,23.718300,-15.932000,36,false
+GMML,EUN,Laayoune Hassan I International Airport,Laayoune Hassan I International Airport,El Aaiún,El Aaiún,EH,Africa/El_Aaiun,27.142467,-13.224947,207,false
+GMMN,CMN,Mohammed V International Airport,Mohammed V International Airport,Casablanca,Casablanca,MA,Africa/Casablanca,33.367500,-7.589970,656,true
+GMMW,NDR,Nador Al Aaroui International Airport,Nador Al Aaroui International Airport,Al Aaroui,Al Aaroui,MA,Africa/Casablanca,34.988800,-3.028210,574,false
+GMMX,RAK,Marrakesh Menara Airport,Marrakesh Menara Airport,Marrakesh,Marrakesh,MA,Africa/Casablanca,31.604807,-8.035788,1545,false
+GMMZ,OZZ,Ouarzazate International Airport,Ouarzazate International Airport,Ouarzazate,Ouarzazate,MA,Africa/Casablanca,30.939100,-6.909430,3782,false
+GMTN,TTU,Sania Ramel Airport,Sania Ramel Airport,Tétouan,Tétouan,MA,Africa/Casablanca,35.594299,-5.320020,10,false
+GMTT,TNG,Tangier Ibn Battuta Airport,Tangier Ibn Battuta Airport,Tangier,Tangier,MA,Africa/Casablanca,35.731741,-5.921459,62,false
+GOBD,DSS,Blaise Diagne International Airport,Blaise Diagne International Airport,Dakar,Dakar,SN,Africa/Dakar,14.670878,-17.072829,290,false
+GOOY,DKR,Léopold Sédar Senghor International Airport,Léopold Sédar Senghor International Airport,Dakar,Dakar,SN,Africa/Dakar,14.742337,-17.479222,85,false
+GQNO,NKC,Nouakchott–Oumtounsy International Airport,Nouakchott–Oumtounsy International Airport,Nouakchott,Nouakchott,MR,Africa/Nouakchott,18.310000,-15.969722,9,false
+GQPP,NDB,Nouadhibou International Airport,Nouadhibou International Airport,Nouadhibou,Nouadhibou,MR,Africa/Nouakchott,20.932404,-17.030199,24,false
+GUCY,CKY,Ahmed Sékou Touré International Airport,Ahmed Sékou Touré International Airport,Conakry,Conakry,GN,Africa/Conakry,9.576890,-13.612000,72,false
+GVAC,SID,Amílcar Cabral International Airport,Amílcar Cabral International Airport,Espargos,Espargos,CV,Atlantic/Cape_Verde,16.741400,-22.949400,177,false
+GVBA,BVC,Aristides Pereira International Airport,Aristides Pereira International Airport,Rabil,Rabil,CV,Atlantic/Cape_Verde,16.136499,-22.888901,69,false
+GVNP,RAI,Nelson Mandela International Airport,Nelson Mandela International Airport,Praia,Praia,CV,Atlantic/Cape_Verde,14.941126,-23.484728,230,false
+GVSV,VXE,Cesaria Evora International Airport,Cesaria Evora International Airport,São Pedro,São Pedro,CV,Atlantic/Cape_Verde,16.833363,-25.055308,66,false
+HAAB,ADD,Addis Ababa Bole International Airport,Addis Ababa Bole International Airport,Addis Ababa,Addis Ababa,ET,Africa/Addis_Ababa,8.977890,38.799301,7630,false
+HADR,DIR,Aba Tenna Dejazmach Yilma International Airport,Aba Tenna Dejazmach Yilma International Airport,Dire Dawa,Dire Dawa,ET,Africa/Addis_Ababa,9.623549,41.855027,3827,false
+HAJJ,JIJ,Gerad Wilwal International Airport,Gerad Wilwal International Airport,Jijiga,Jijiga,ET,Africa/Addis_Ababa,9.331907,42.911811,5954,false
+HALA,AWA,Hawassa International Airport,Hawassa International Airport,Hawassa,Hawassa,ET,Africa/Addis_Ababa,7.100611,38.396455,5450,false
+HBBA,BJM,Bujumbura Melchior Ndadaye International Airport,Bujumbura Melchior Ndadaye International Airport,Bujumbura,Bujumbura,BI,Africa/Bujumbura,-3.324020,29.318501,2582,false
+HCMF,BSA,Bender Qassim International Airport,Bender Qassim International Airport,Bosaso,Bosaso,SO,Africa/Mogadishu,11.275235,49.139231,3,false
+HCMH,HGA,Egal International Airport,Egal International Airport,Hargeisa,Hargeisa,SO,Africa/Mogadishu,9.514082,44.083469,4471,false
+HCMM,MGQ,Aden Adde International Airport,Aden Adde International Airport,Mogadishu,Mogadishu,SO,Africa/Mogadishu,2.014440,45.304699,29,false
+HDAM,JIB,Djibouti-Ambouli Airport,Djibouti-Ambouli Airport,Djibouti City,Djibouti City,DJ,Africa/Djibouti,11.547300,43.159500,49,false
+HEAL,DBB,El Alamein International Airport,El Alamein International Airport,El Alamein,El Alamein,EG,Africa/Cairo,30.924324,28.461610,154,false
+HEAR,AAC,El Arish International Airport,El Arish International Airport,El Arish,El Arish,EG,Africa/Cairo,31.055324,33.827964,118,false
+HEAT,ATZ,Asyut International Airport,Asyut International Airport,Asyut,Asyut,EG,Africa/Cairo,27.045962,31.012760,748,false
+HEAX,HBE,Alexandria International Airport,Alexandria International Airport,Alexandria,Alexandria,EG,Africa/Cairo,30.932490,29.696437,171,false
+HEBR,EES,Berenice International Airport / Banas Cape Air Base,Berenice International Airport / Banas Cape Air Base,Berenice Troglodytica,Berenice Troglodytica,EG,Africa/Cairo,23.980437,35.460277,108,false
+HECA,CAI,Cairo International Airport,Cairo International Airport,Cairo,Cairo,EG,Africa/Cairo,30.111534,31.396694,322,true
+HEGN,HRG,Hurghada International Airport,Hurghada International Airport,Hurghada,Hurghada,EG,Africa/Cairo,27.176776,33.796692,32,false
+HELX,LXR,Luxor International Airport,Luxor International Airport,Luxor,Luxor,EG,Africa/Cairo,25.671018,32.706446,276,false
+HEMA,RMF,Marsa Alam International Airport,Marsa Alam International Airport,Marsa Alam,Marsa Alam,EG,Africa/Cairo,25.555548,34.592450,213,false
+HEMM,MUH,Mersa Matruh International Airport,Mersa Matruh International Airport,Marsa Matruh,Marsa Matruh,EG,Africa/Cairo,31.324313,27.222270,75,false
+HEPS,PSD,Port Said International Airport,Port Said International Airport,Port Said,Port Said,EG,Africa/Cairo,31.279285,32.240582,10,false
+HESG,HMB,Suhaj International Airport,Suhaj International Airport,Suhaj,Suhaj,EG,Africa/Cairo,26.342515,31.743017,322,false
+HESH,SSH,Sharm El Sheikh International Airport,Sharm El Sheikh International Airport,Sharm El Sheikh,Sharm El Sheikh,EG,Africa/Cairo,27.977272,34.394717,191,false
+HESN,ASW,Aswan International Airport,Aswan International Airport,Aswan,Aswan,EG,Africa/Cairo,23.961075,32.820382,650,false
+HESX,SPX,Sphinx International Airport,Sphinx International Airport,Al Jiza,Al Jiza,EG,Africa/Cairo,30.108179,30.895728,510,false
+HJJJ,JUB,Juba International Airport,Juba International Airport,Juba,Juba,SS,Africa/Juba,4.872010,31.601101,1513,false
+HKEL,EDL,Eldoret International Airport,Eldoret International Airport,Eldoret,Eldoret,KE,Africa/Nairobi,0.404458,35.238899,6941,false
+HKJK,NBO,Jomo Kenyatta International Airport,Jomo Kenyatta International Airport,Nairobi,Nairobi,KE,Africa/Nairobi,-1.318886,36.928233,5330,false
+HKKI,KIS,Kisumu International Airport,Kisumu International Airport,Kisumu,Kisumu,KE,Africa/Nairobi,-0.086139,34.728901,3734,false
+HKMO,MBA,Moi International Airport,Moi International Airport,Mombasa,Mombasa,KE,Africa/Nairobi,-4.034830,39.594200,200,false
+HLGD,SRX,Sirt International Airport / Ghardabiya Airbase,Sirt International Airport / Ghardabiya Airbase,Sirt,Sirt,LY,Africa/Tripoli,31.058578,16.597095,267,false
+HLLB,BEN,Benina International Airport,Benina International Airport,Benina,Benina,LY,Africa/Tripoli,32.096802,20.269501,433,false
+HLLM,MJI,Mitiga International Airport,Mitiga International Airport,Tripoli,Tripoli,LY,Africa/Tripoli,32.891770,13.287878,36,false
+HLLQ,LAQ,Al Abraq International Airport,Al Abraq International Airport,Al Albraq,Al Albraq,LY,Africa/Tripoli,32.789036,21.954864,2157,false
+HRYR,KGL,Kigali International Airport,Kigali International Airport,Kigali,Kigali,RW,Africa/Kigali,-1.968630,30.139500,4859,false
+HSPN,PZU,Port Sudan New International Airport,Port Sudan New International Airport,Port Sudan,Port Sudan,SD,Africa/Khartoum,19.434558,37.234125,135,false
+HSSK,KRT,Khartoum International Airport,Khartoum International Airport,Khartoum,Khartoum,SD,Africa/Khartoum,15.589500,32.553200,1265,false
+HTDA,DAR,Julius Nyerere International Airport,Julius Nyerere International Airport,Dar es Salaam,Dar es Salaam,TZ,Africa/Dar_es_Salaam,-6.873499,39.207288,182,false
+HTKJ,JRO,Kilimanjaro International Airport,Kilimanjaro International Airport,Arusha,Arusha,TZ,Africa/Dar_es_Salaam,-3.427049,37.073530,2932,false
+HTMW,MWZ,Mwanza International Airport,Mwanza International Airport,Mwanza,Mwanza,TZ,Africa/Dar_es_Salaam,-2.446563,32.936049,3763,false
+HTZA,ZNZ,Abeid Amani Karume International Airport,Abeid Amani Karume International Airport,Zanzibar,Zanzibar,TZ,Africa/Dar_es_Salaam,-6.222020,39.224899,54,false
+HUEN,EBB,Entebbe International Airport,Entebbe International Airport,Entebbe,Entebbe,UG,Africa/Kampala,0.042386,32.443501,3782,false
+KABQ,ABQ,Albuquerque International Sunport,Albuquerque International Sunport,Albuquerque,Albuquerque,US,America/Denver,35.039976,-106.608925,5355,false
+KALB,ALB,Albany International Airport,Albany International Airport,Albany,Albany,US,America/New_York,42.748299,-73.801697,285,false
+KATL,ATL,Hartsfield Jackson Atlanta International Airport,Hartsfield Jackson Atlanta International Airport,Atlanta,Atlanta,US,America/New_York,33.636700,-84.428101,1026,false
+KAUS,AUS,Austin Bergstrom International Airport,Austin Bergstrom International Airport,Austin,Austin,US,America/Chicago,30.197535,-97.662015,542,false
+KBDL,BDL,Bradley International Airport,Bradley International Airport,Hartford,Hartford,US,America/New_York,41.938555,-72.688016,173,false
+KBED,BED,Laurence G Hanscom Field,Laurence G Hanscom Field,Bedford,Bedford,US,America/New_York,42.470001,-71.289001,133,false
+KBHM,BHM,Birmingham-Shuttlesworth International Airport,Birmingham-Shuttlesworth International Airport,Birmingham,Birmingham,US,America/Chicago,33.562877,-86.750712,650,false
+KBNA,BNA,Nashville International Airport,Nashville International Airport,Nashville,Nashville,US,America/Chicago,36.124500,-86.678200,599,false
+KBOI,BOI,Boise Air Terminal/Gowen Field,Boise Air Terminal/Gowen Field,Boise,Boise,US,America/Denver,43.564400,-116.223000,2871,false
+KBOS,BOS,Boston Logan International Airport,Boston Logan International Airport,Boston,Boston,US,America/New_York,42.361970,-71.007900,20,false
+KBUF,BUF,Buffalo Niagara International Airport,Buffalo Niagara International Airport,Buffalo,Buffalo,US,America/New_York,42.940498,-78.732201,728,false
+KBUR,BUR,Hollywood Burbank/Bob Hope Airport,Hollywood Burbank/Bob Hope Airport,Burbank,Burbank,US,America/Los_Angeles,34.202834,-118.358050,778,false
+KBWI,BWI,Baltimore/Washington International Thurgood Marshall Airport,Baltimore/Washington International Thurgood Marshall Airport,Baltimore,Baltimore,US,America/New_York,39.175400,-76.668297,146,false
+KCHS,CHS,Charleston International Airport,Charleston International Airport,Charleston,Charleston,US,America/New_York,32.896159,-80.038151,46,false
+KCLE,CLE,Cleveland Hopkins International Airport,Cleveland Hopkins International Airport,Cleveland,Cleveland,US,America/New_York,41.411701,-81.849800,791,false
+KCLT,CLT,Charlotte Douglas International Airport,Charlotte Douglas International Airport,Charlotte,Charlotte,US,America/New_York,35.214001,-80.943100,748,false
+KCMH,CMH,John Glenn Columbus International Airport,John Glenn Columbus International Airport,Columbus,Columbus,US,America/New_York,39.998001,-82.891899,815,false
+KCOS,COS,City of Colorado Springs Municipal Airport,City of Colorado Springs Municipal Airport,Colorado Springs,Colorado Springs,US,America/Denver,38.805801,-104.700996,6187,false
+KCVG,CVG,Cincinnati Northern Kentucky International Airport,Cincinnati Northern Kentucky International Airport,Cincinnati / Covington,Cincinnati / Covington,US,America/New_York,39.048801,-84.667801,896,false
+KDAL,DAL,Dallas Love Field,Dallas Love Field,Dallas,Dallas,US,America/Chicago,32.844776,-96.847653,487,false
+KDCA,DCA,Ronald Reagan Washington National Airport,Ronald Reagan Washington National Airport,Washington,Washington,US,America/New_York,38.852100,-77.037697,15,false
+KDEN,DEN,Denver International Airport,Denver International Airport,Denver,Denver,US,America/Denver,39.860027,-104.673792,5431,false
+KDFW,DFW,Dallas Fort Worth International Airport,Dallas Fort Worth International Airport,Dallas-Fort Worth,Dallas-Fort Worth,US,America/Chicago,32.896801,-97.038002,607,false
+KDJT,DJT,President Donald J. Trump International Airport,President Donald J. Trump International Airport,West Palm Beach,West Palm Beach,US,America/New_York,26.683201,-80.095596,19,false
+KDSM,DSM,Des Moines International Airport,Des Moines International Airport,Des Moines,Des Moines,US,America/Chicago,41.534027,-93.656719,958,false
+KDTW,DTW,Detroit Metropolitan Wayne County Airport,Detroit Metropolitan Wayne County Airport,Detroit,Detroit,US,America/New_York,42.213770,-83.353786,645,false
+KELP,ELP,El Paso International Airport,El Paso International Airport,El Paso,El Paso,US,America/Denver,31.809908,-106.375607,3959,false
+KEWR,EWR,Newark Liberty International Airport,Newark Liberty International Airport,Newark,Newark,US,America/New_York,40.689400,-74.170545,18,false
+KFAT,FAT,Fresno Yosemite International Airport,Fresno Yosemite International Airport,Fresno,Fresno,US,America/Los_Angeles,36.775767,-119.718018,336,false
+KFLL,FLL,Fort Lauderdale Hollywood International Airport,Fort Lauderdale Hollywood International Airport,Fort Lauderdale,Fort Lauderdale,US,America/New_York,26.072599,-80.152702,9,false
+KGEG,GEG,Spokane International Airport,Spokane International Airport,Spokane,Spokane,US,America/Los_Angeles,47.619900,-117.533997,2376,false
+KGRR,GRR,Gerald R. Ford International Airport,Gerald R. Ford International Airport,Grand Rapids,Grand Rapids,US,America/New_York,42.880798,-85.522797,794,false
+KGSO,GSO,Piedmont Triad International Airport,Piedmont Triad International Airport,Greensboro,Greensboro,US,America/New_York,36.099370,-79.937262,925,false
+KHOU,HOU,William P. Hobby Airport,William P. Hobby Airport,Houston,Houston,US,America/Chicago,29.645336,-95.276812,46,false
+KHPN,HPN,Westchester County Airport,Westchester County Airport,White Plains,White Plains,US,America/New_York,41.067001,-73.707603,439,false
+KIAD,IAD,Washington Dulles International Airport,Washington Dulles International Airport,Dulles,Dulles,US,America/New_York,38.944500,-77.455803,312,false
+KIAH,IAH,George Bush Intercontinental Airport,George Bush Intercontinental Airport,Houston,Houston,US,America/Chicago,29.984400,-95.341400,97,false
+KIND,IND,Indianapolis International Airport,Indianapolis International Airport,Indianapolis,Indianapolis,US,America/New_York,39.717300,-86.294403,797,false
+KJAX,JAX,Jacksonville International Airport,Jacksonville International Airport,Jacksonville,Jacksonville,US,America/New_York,30.492469,-81.687813,30,false
+KJFK,JFK,John F. Kennedy International Airport,John F. Kennedy International Airport,New York,New York,US,America/New_York,40.639447,-73.779317,13,false
+KLAS,LAS,Harry Reid International Airport,Harry Reid International Airport,Las Vegas,Las Vegas,US,America/Los_Angeles,36.083361,-115.151817,2181,false
+KLAX,LAX,Los Angeles International Airport,Los Angeles International Airport,Los Angeles,Los Angeles,US,America/Los_Angeles,33.942501,-118.407997,125,false
+KLGA,LGA,LaGuardia Airport,LaGuardia Airport,New York,New York,US,America/New_York,40.777199,-73.872597,21,false
+KLGB,LGB,Long Beach International Airport,Long Beach International Airport,Long Beach,Long Beach,US,America/Los_Angeles,33.816523,-118.149891,60,false
+KMCI,MCI,Kansas City International Airport,Kansas City International Airport,Kansas City,Kansas City,US,America/Chicago,39.301699,-94.713893,1026,false
+KMCO,MCO,Orlando International Airport,Orlando International Airport,Orlando,Orlando,US,America/New_York,28.429399,-81.308998,96,false
+KMDW,MDW,Chicago Midway International Airport,Chicago Midway International Airport,Chicago,Chicago,US,America/Chicago,41.785999,-87.752403,620,false
+KMEM,MEM,Frederick W. Smith International Airport,Frederick W. Smith International Airport,Memphis,Memphis,US,America/Chicago,35.043845,-89.976340,341,false
+KMIA,MIA,Miami International Airport,Miami International Airport,Miami,Miami,US,America/New_York,25.796011,-80.289751,8,false
+KMKE,MKE,General Mitchell International Airport,General Mitchell International Airport,Milwaukee,Milwaukee,US,America/Chicago,42.947201,-87.896599,723,false
+KMSP,MSP,Minneapolis–Saint Paul International Airport / Wold–Chamberlain Field,Minneapolis–Saint Paul International Airport / Wold–Chamberlain Field,Minneapolis,Minneapolis,US,America/Chicago,44.880081,-93.221741,841,false
+KMSY,MSY,Louis Armstrong New Orleans International Airport,Louis Armstrong New Orleans International Airport,New Orleans,New Orleans,US,America/Chicago,29.993401,-90.264673,4,false
+KMYR,MYR,Myrtle Beach International Airport,Myrtle Beach International Airport,Myrtle Beach,Myrtle Beach,US,America/New_York,33.679699,-78.928299,25,false
+KOAK,OAK,Oakland San Francisco Bay Airport,Oakland San Francisco Bay Airport,Oakland,Oakland,US,America/Los_Angeles,37.720085,-122.221184,9,false
+KOKC,OKC,OKC Will Rogers World Airport,OKC Will Rogers World Airport,Oklahoma City,Oklahoma City,US,America/Chicago,35.393388,-97.598248,1295,false
+KOMA,OMA,Eppley Airfield,Eppley Airfield,Omaha,Omaha,US,America/Chicago,41.303200,-95.894096,984,false
+KONT,ONT,Ontario International Airport,Ontario International Airport,Ontario,Ontario,US,America/Los_Angeles,34.056000,-117.600998,944,false
+KOPF,OPF,Miami-Opa Locka Executive Airport,Miami-Opa Locka Executive Airport,Miami,Miami,US,America/New_York,25.907000,-80.278397,8,false
+KORD,ORD,Chicago O'Hare International Airport,Chicago O'Hare International Airport,Chicago,Chicago,US,America/Chicago,41.978600,-87.904800,680,false
+KORF,ORF,Norfolk International Airport,Norfolk International Airport,Norfolk,Norfolk,US,America/New_York,36.895341,-76.201000,26,false
+KPDX,PDX,Portland International Airport,Portland International Airport,Portland,Portland,US,America/Los_Angeles,45.588699,-122.598000,31,false
+KPHL,PHL,Philadelphia International Airport,Philadelphia International Airport,Philadelphia,Philadelphia,US,America/New_York,39.871899,-75.241096,36,false
+KPHX,PHX,Phoenix Sky Harbor International Airport,Phoenix Sky Harbor International Airport,Phoenix,Phoenix,US,America/Phoenix,33.435302,-112.005905,1135,false
+KPIE,PIE,St. Petersburg Clearwater International Airport,St. Petersburg Clearwater International Airport,Pinellas Park,Pinellas Park,US,America/New_York,27.910200,-82.687401,11,false
+KPIT,PIT,Pittsburgh International Airport,Pittsburgh International Airport,Pittsburgh,Pittsburgh,US,America/New_York,40.491501,-80.232903,1203,false
+KPNS,PNS,Pensacola International Airport,Pensacola International Airport,Pensacola,Pensacola,US,America/Chicago,30.472718,-87.186639,121,false
+KPSP,PSP,Palm Springs International Airport,Palm Springs International Airport,Palm Springs,Palm Springs,US,America/Los_Angeles,33.829700,-116.507004,477,false
+KPVD,PVD,Rhode Island T. F. Green International Airport,Rhode Island T. F. Green International Airport,Providence/Warwick,Providence/Warwick,US,America/New_York,41.725038,-71.425668,55,false
+KPWM,PWM,Portland International Jetport,Portland International Jetport,Portland,Portland,US,America/New_York,43.646198,-70.309303,76,false
+KRDU,RDU,Raleigh-Durham International Airport,Raleigh-Durham International Airport,Raleigh/Durham,Raleigh/Durham,US,America/New_York,35.878659,-78.787300,435,false
+KRIC,RIC,Richmond International Airport,Richmond International Airport,Richmond,Richmond,US,America/New_York,37.505199,-77.319702,167,false
+KRNO,RNO,Reno Tahoe International Airport,Reno Tahoe International Airport,Reno,Reno,US,America/Los_Angeles,39.499100,-119.767998,4415,false
+KROC,ROC,Frederick Douglass Greater Rochester International Airport,Frederick Douglass Greater Rochester International Airport,Rochester,Rochester,US,America/New_York,43.118900,-77.672401,559,false
+KRSW,RSW,Southwest Florida International Airport,Southwest Florida International Airport,Fort Myers,Fort Myers,US,America/New_York,26.534685,-81.752816,30,false
+KSAN,SAN,San Diego International Airport,San Diego International Airport,San Diego,San Diego,US,America/Los_Angeles,32.733601,-117.190002,17,false
+KSAT,SAT,San Antonio International Airport,San Antonio International Airport,San Antonio,San Antonio,US,America/Chicago,29.533701,-98.469803,809,false
+KSAV,SAV,Savannah Hilton Head International Airport,Savannah Hilton Head International Airport,Savannah,Savannah,US,America/New_York,32.126591,-81.199980,50,false
+KSBD,SBD,San Bernardino International Airport,San Bernardino International Airport,San Bernardino,San Bernardino,US,America/Los_Angeles,34.096717,-117.236596,1159,false
+KSDF,SDF,Louisville Muhammad Ali International Airport,Louisville Muhammad Ali International Airport,Louisville,Louisville,US,America/New_York,38.170600,-85.735076,501,false
+KSEA,SEA,Seattle–Tacoma International Airport,Seattle–Tacoma International Airport,Seattle,Seattle,US,America/Los_Angeles,47.447943,-122.310276,433,false
+KSFB,SFB,Orlando Sanford International Airport,Orlando Sanford International Airport,Orlando,Orlando,US,America/New_York,28.774277,-81.234626,55,false
+KSFO,SFO,San Francisco International Airport,San Francisco International Airport,San Francisco,San Francisco,US,America/Los_Angeles,37.619806,-122.374821,13,false
+KSJC,SJC,Mineta San Jose International Airport,Mineta San Jose International Airport,San Jose,San Jose,US,America/Los_Angeles,37.362452,-121.929188,62,false
+KSLC,SLC,Salt Lake City International Airport,Salt Lake City International Airport,Salt Lake City,Salt Lake City,US,America/Denver,40.788860,-111.979866,4227,false
+KSMF,SMF,Sacramento International Airport,Sacramento International Airport,Sacramento,Sacramento,US,America/Los_Angeles,38.695400,-121.591003,27,false
+KSNA,SNA,John Wayne Orange County International Airport,John Wayne Orange County International Airport,Santa Ana,Santa Ana,US,America/Los_Angeles,33.675063,-117.869281,56,false
+KSRQ,SRQ,Sarasota Bradenton International Airport,Sarasota Bradenton International Airport,Sarasota/Bradenton,Sarasota/Bradenton,US,America/New_York,27.394631,-82.554359,30,false
+KSTL,STL,St. Louis Lambert International Airport,St. Louis Lambert International Airport,St Louis,St Louis,US,America/Chicago,38.748697,-90.370003,618,false
+KSYR,SYR,Syracuse Hancock International Airport,Syracuse Hancock International Airport,Syracuse,Syracuse,US,America/New_York,43.111198,-76.106300,421,false
+KTEB,TEB,Teterboro Airport,Teterboro Airport,Teterboro,Teterboro,US,America/New_York,40.850101,-74.060799,9,false
+KTPA,TPA,Tampa International Airport,Tampa International Airport,Tampa,Tampa,US,America/New_York,27.975500,-82.533203,26,false
+KTUL,TUL,Tulsa International Airport,Tulsa International Airport,Tulsa,Tulsa,US,America/Chicago,36.197084,-95.886225,677,false
+KTUS,TUS,Tucson International Airport,Tucson International Airport,Tucson,Tucson,US,America/Phoenix,32.115004,-110.938053,2643,false
+KTYS,TYS,McGhee Tyson Airport,McGhee Tyson Airport,Knoxville/Maryville,Knoxville/Maryville,US,America/New_York,35.811001,-83.994003,981,false
+KVNY,VNY,Van Nuys Airport,Van Nuys Airport,Van Nuys,Van Nuys,US,America/Los_Angeles,34.209801,-118.489998,802,false
+LATI,TIA,Tirana International Airport Mother Teresa,Tirana International Airport Mother Teresa,Rinas,Rinas,AL,Europe/Tirane,41.414700,19.720600,126,false
+LBBG,BOJ,Burgas Airport,Burgas Airport,Burgas,Burgas,BG,Europe/Sofia,42.569917,27.515173,135,false
+LBPD,PDV,Plovdiv International Airport,Plovdiv International Airport,Plovdiv,Plovdiv,BG,Europe/Sofia,42.067799,24.850800,597,false
+LBSF,SOF,Sofia Airport,Sofia Airport,Sofia,Sofia,BG,Europe/Sofia,42.696357,23.417671,1742,false
+LBWN,VAR,Varna Airport,Varna Airport,Varna,Varna,BG,Europe/Sofia,43.232101,27.825100,230,false
+LCEN,ECN,Ercan International Airport,Ercan International Airport,Tymbou (Kirklar),Tymbou (Kirklar),CY,Asia/Nicosia,35.153064,33.507352,404,false
+LCLK,LCA,Larnaca International Airport,Larnaca International Airport,Larnaca,Larnaca,CY,Asia/Nicosia,34.875099,33.624901,8,true
+LCPH,PFO,Paphos International Airport,Paphos International Airport,Paphos,Paphos,CY,Asia/Nicosia,34.717999,32.485699,41,false
+LDDU,DBV,Dubrovnik Ruđer Bošković Airport,Dubrovnik Ruđer Bošković Airport,Dubrovnik,Dubrovnik,HR,Europe/Zagreb,42.562247,18.265543,527,false
+LDPL,PUY,Pula Airport,Pula Airport,Pula,Pula,HR,Europe/Zagreb,44.893501,13.922200,274,false
+LDRI,RJK,Rijeka Airport,Rijeka Airport,Rijeka(Omišalj),Rijeka(Omišalj),HR,Europe/Zagreb,45.216376,14.570850,278,false
+LDSP,SPU,Split Saint Jerome Airport,Split Saint Jerome Airport,Split,Split,HR,Europe/Zagreb,43.538898,16.298000,79,false
+LDZA,ZAG,Zagreb Franjo Tuđman International Airport,Zagreb Franjo Tuđman International Airport,Velika Gorica,Velika Gorica,HR,Europe/Zagreb,45.742901,16.068800,353,true
+LDZD,ZAD,Zadar Airport,Zadar Airport,Zadar,Zadar,HR,Europe/Zagreb,44.096986,15.353565,289,false
+LEAL,ALC,Alicante-Elche Miguel Hernández Airport,Alicante-Elche Miguel Hernández Airport,Alicante,Alicante,ES,Europe/Madrid,38.282200,-0.558156,142,true
+LEAS,OVD,Asturias Airport,Asturias Airport,Ranón,Ranón,ES,Europe/Madrid,43.563599,-6.034620,416,false
+LEBB,BIO,Bilbao Airport,Bilbao Airport,Bilbao,Bilbao,ES,Europe/Madrid,43.301102,-2.910610,138,false
+LEBL,BCN,Josep Tarradellas Barcelona-El Prat Airport,Josep Tarradellas Barcelona-El Prat Airport,Barcelona,Barcelona,ES,Europe/Madrid,41.297100,2.078460,12,true
+LEGE,GRO,Girona-Costa Brava Airport,Girona-Costa Brava Airport,Girona,Girona,ES,Europe/Madrid,41.904639,2.761774,468,false
+LEIB,IBZ,Ibiza Airport,Ibiza Airport,Ibiza (Eivissa),Ibiza (Eivissa),ES,Europe/Madrid,38.872898,1.373120,24,true
+LEMD,MAD,Adolfo Suárez Madrid–Barajas Airport,Adolfo Suárez Madrid–Barajas Airport,Madrid,Madrid,ES,Europe/Madrid,40.493407,-3.572249,1998,true
+LEMG,AGP,Málaga-Costa del Sol Airport,Málaga-Costa del Sol Airport,Málaga,Málaga,ES,Europe/Madrid,36.674900,-4.499110,53,true
+LEMH,MAH,Menorca Airport,Menorca Airport,Mahón (Maó),Mahón (Maó),ES,Europe/Madrid,39.862598,4.218650,302,false
+LEMI,RMU,Region of Murcia International Airport,Region of Murcia International Airport,Corvera,Corvera,ES,Europe/Madrid,37.802852,-1.124884,644,false
+LEPA,PMI,Palma de Mallorca Airport,Palma de Mallorca Airport,Palma de Mallorca,Palma de Mallorca,ES,Europe/Madrid,39.551701,2.738810,27,true
+LERS,REU,Reus Airport,Reus Airport,Reus,Reus,ES,Europe/Madrid,41.147509,1.168354,233,false
+LEST,SCQ,Santiago-Rosalía de Castro Airport,Santiago-Rosalía de Castro Airport,Santiago de Compostela,Santiago de Compostela,ES,Europe/Madrid,42.896301,-8.415140,1213,false
+LEVC,VLC,Valencia Airport,Valencia Airport,Valencia,Valencia,ES,Europe/Madrid,39.489162,-0.480961,240,false
+LEZG,ZAZ,Zaragoza Airport,Zaragoza Airport,Zaragoza,Zaragoza,ES,Europe/Madrid,41.666199,-1.041550,863,false
+LEZL,SVQ,Seville Airport,Seville Airport,Seville,Seville,ES,Europe/Madrid,37.417999,-5.893110,112,false
+LFBD,BOD,Bordeaux–Mérignac Airport,Bordeaux–Mérignac Airport,Bordeaux,Bordeaux,FR,Europe/Paris,44.828650,-0.715356,162,false
+LFBO,TLS,Toulouse-Blagnac Airport,Toulouse-Blagnac Airport,Toulouse/Blagnac,Toulouse/Blagnac,FR,Europe/Paris,43.629101,1.363820,499,false
+LFKB,BIA,Bastia-Poretta International airport,Bastia-Poretta International airport,Bastia,Bastia,FR,Europe/Paris,42.552700,9.483730,26,false
+LFKF,FSC,Figari Sud-Corse Airport,Figari Sud-Corse Airport,Figari,Figari,FR,Europe/Paris,41.501850,9.097092,85,false
+LFLC,CFE,Clermont-Ferrand Auvergne airport,Clermont-Ferrand Auvergne airport,Clermont-Ferrand,Clermont-Ferrand,FR,Europe/Paris,45.786701,3.169170,1090,false
+LFLL,LYS,Lyon Saint-Exupéry Airport,Lyon Saint-Exupéry Airport,"Colombier-Saugnieu, Rhône","Colombier-Saugnieu, Rhône",FR,Europe/Paris,45.725996,5.090139,821,true
+LFMD,CEQ,Cannes Mandelieu Airport,Cannes Mandelieu Airport,Cannes,Cannes,FR,Europe/Paris,43.547998,6.955176,13,false
+LFML,MRS,Marseille Provence Airport,Marseille Provence Airport,"Marignane, Bouches-du-Rhône","Marignane, Bouches-du-Rhône",FR,Europe/Paris,43.438088,5.212500,74,true
+LFMN,NCE,Nice-Côte d'Azur Airport,Nice-Côte d'Azur Airport,"Nice, Alpes-Maritimes","Nice, Alpes-Maritimes",FR,Europe/Paris,43.658401,7.215870,12,true
+LFMT,MPL,Montpellier-Méditerranée Airport,Montpellier-Méditerranée Airport,Montpellier/Méditerranée,Montpellier/Méditerranée,FR,Europe/Paris,43.576199,3.963010,17,false
+LFOB,BVA,Beauvais-Tillé airport,Beauvais-Tillé airport,Beauvais,Beauvais,FR,Europe/Paris,49.454399,2.112780,359,false
+LFPB,LBG,Paris-Le Bourget International Airport,Paris-Le Bourget International Airport,Paris,Paris,FR,Europe/Paris,48.962276,2.436539,218,false
+LFPG,CDG,Charles de Gaulle International Airport,Charles de Gaulle International Airport,"Paris (Roissy-en-France, Val-d'Oise)","Paris (Roissy-en-France, Val-d'Oise)",FR,Europe/Paris,49.008960,2.554117,392,true
+LFPO,ORY,Paris-Orly Airport,Paris-Orly Airport,"Paris (Orly, Val-de-Marne)","Paris (Orly, Val-de-Marne)",FR,Europe/Paris,48.729499,2.358963,291,true
+LFQQ,LIL,Lille Airport,Lille Airport,Lesquin,Lesquin,FR,Europe/Paris,50.566564,3.102429,157,false
+LFRB,BES,Brest Bretagne airport,Brest Bretagne airport,Brest,Brest,FR,Europe/Paris,48.447899,-4.418540,325,false
+LFRS,NTE,Nantes Atlantique Airport,Nantes Atlantique Airport,Nantes,Nantes,FR,Europe/Paris,47.153198,-1.610730,90,false
+LFSB,BSL,EuroAirport Basel–Mulhouse–Freiburg,EuroAirport Basel–Mulhouse–Freiburg,Bâle / Mulhouse,Bâle / Mulhouse,FR,Europe/Paris,47.600680,7.521117,885,false
+LFST,SXB,Strasbourg Airport,Strasbourg Airport,Strasbourg,Strasbourg,FR,Europe/Paris,48.538300,7.628230,505,false
+LGAV,ATH,Athens Eleftherios Venizelos International Airport,Athens Eleftherios Venizelos International Airport,Spata-Artemida,Spata-Artemida,GR,Europe/Athens,37.936401,23.944500,308,true
+LGIR,HER,Heraklion International Nikos Kazantzakis Airport,Heraklion International Nikos Kazantzakis Airport,Heraklion,Heraklion,GR,Europe/Athens,35.339699,25.180300,115,true
+LGKO,KGS,"Kos International Airport ""Ippokratis""","Kos International Airport ""Ippokratis""",Kos Island,Kos Island,GR,Europe/Athens,36.794523,27.091150,412,true
+LGKR,CFU,Corfu Ioannis Kapodistrias International Airport,Corfu Ioannis Kapodistrias International Airport,Kerkyra (Corfu),Kerkyra (Corfu),GR,Europe/Athens,39.601450,19.912179,6,false
+LGKV,KVA,Kavala Alexander the Great International Airport,Kavala Alexander the Great International Airport,Kavala,Kavala,GR,Europe/Athens,40.913300,24.619200,18,false
+LGMK,JMK,Mykonos Island National Airport,Mykonos Island National Airport,Mykonos,Mykonos,GR,Europe/Athens,37.435101,25.348101,405,false
+LGRP,RHO,"Rhodes International Airport ""Diagoras""","Rhodes International Airport ""Diagoras""",Rhodes,Rhodes,GR,Europe/Athens,36.405399,28.086201,17,true
+LGSA,CHQ,Chania International Airport,Chania International Airport,Souda,Souda,GR,Europe/Athens,35.531207,24.150673,490,false
+LGSR,JTR,Santorini International Airport,Santorini International Airport,Santorini Island,Santorini Island,GR,Europe/Athens,36.400045,25.478638,127,true
+LGTS,SKG,Thessaloniki Macedonia International Airport,Thessaloniki Macedonia International Airport,Thessaloniki,Thessaloniki,GR,Europe/Athens,40.519280,22.970009,22,true
+LHBP,BUD,Budapest Liszt Ferenc International Airport,Budapest Liszt Ferenc International Airport,Budapest,Budapest,HU,Europe/Budapest,47.430180,19.262393,495,false
+LHDC,DEB,Debrecen International Airport,Debrecen International Airport,Debrecen,Debrecen,HU,Europe/Budapest,47.489469,21.616278,359,false
+LHPP,PEV,Pécs-Pogány International Airport,Pécs-Pogány International Airport,Pécs,Pécs,HU,Europe/Budapest,45.988891,18.242044,651,false
+LIBD,BRI,Bari Karol Wojtyła International Airport,Bari Karol Wojtyła International Airport,Bari,Bari,IT,Europe/Rome,41.138901,16.760599,193,false
+LIBP,PSR,Abruzzo Airport,Abruzzo Airport,Pescara,Pescara,IT,Europe/Rome,42.431079,14.182981,48,false
+LIBR,BDS,Brindisi Airport,Brindisi Airport,Brindisi,Brindisi,IT,Europe/Rome,40.657600,17.947001,47,false
+LICA,SUF,Lamezia Terme Sant'Eufemia International Airport,Lamezia Terme Sant'Eufemia International Airport,Lamezia Terme (CZ),Lamezia Terme (CZ),IT,Europe/Rome,38.906214,16.246007,39,false
+LICC,CTA,Catania-Fontanarossa Airport,Catania-Fontanarossa Airport,Catania,Catania,IT,Europe/Rome,37.466801,15.066400,39,true
+LICJ,PMO,Falcone–Borsellino Airport,Falcone–Borsellino Airport,Palermo,Palermo,IT,Europe/Rome,38.175999,13.091000,65,true
+LIEE,CAG,Cagliari Elmas Airport,Cagliari Elmas Airport,Cagliari,Cagliari,IT,Europe/Rome,39.251499,9.054280,13,false
+LIEO,OLB,Olbia Costa Smeralda Airport,Olbia Costa Smeralda Airport,Olbia (SS),Olbia (SS),IT,Europe/Rome,40.898953,9.518457,37,false
+LIMC,MXP,Milan Malpensa International Airport,Milan Malpensa International Airport,Ferno (VA),Ferno (VA),IT,Europe/Rome,45.630600,8.728110,768,true
+LIME,BGY,Il Caravaggio International Airport,Il Caravaggio International Airport,Orio al Serio (BG),Orio al Serio (BG),IT,Europe/Rome,45.669362,9.708851,782,false
+LIMF,TRN,Turin Airport,Turin Airport,Caselle Torinese (TO),Caselle Torinese (TO),IT,Europe/Rome,45.200802,7.649630,989,false
+LIMJ,GOA,Genoa Cristoforo Colombo Airport,Genoa Cristoforo Colombo Airport,Genova (GE),Genova (GE),IT,Europe/Rome,44.412039,8.840732,13,false
+LIML,LIN,Milano Linate Airport,Milano Linate Airport,Segrate (MI),Segrate (MI),IT,Europe/Rome,45.445099,9.276740,353,true
+LIPE,BLQ,Bologna Guglielmo Marconi Airport,Bologna Guglielmo Marconi Airport,Bologna,Bologna,IT,Europe/Rome,44.535400,11.288700,123,false
+LIPH,TSF,Treviso Airport,Treviso Airport,Treviso (TV),Treviso (TV),IT,Europe/Rome,45.648399,12.194400,59,false
+LIPQ,TRS,Trieste Airport,Trieste Airport,Ronchi dei Legionari/Trieste,Ronchi dei Legionari/Trieste,IT,Europe/Rome,45.827862,13.466672,39,false
+LIPR,RMI,Federico Fellini International Airport,Federico Fellini International Airport,Rimini (RN),Rimini (RN),IT,Europe/Rome,44.020024,12.612198,40,false
+LIPX,VRN,Verona Villafranca Valerio Catullo Airport,Verona Villafranca Valerio Catullo Airport,Caselle (VR),Caselle (VR),IT,Europe/Rome,45.394955,10.887303,239,false
+LIPZ,VCE,Venice Marco Polo Airport,Venice Marco Polo Airport,Venezia (VE),Venezia (VE),IT,Europe/Rome,45.505299,12.351900,7,true
+LIRA,CIA,Ciampino–G. B. Pastine International Airport,Ciampino–G. B. Pastine International Airport,Rome,Rome,IT,Europe/Rome,41.798769,12.595331,427,false
+LIRF,FCO,Rome–Fiumicino Leonardo da Vinci International Airport,Rome–Fiumicino Leonardo da Vinci International Airport,Rome,Rome,IT,Europe/Rome,41.804532,12.251998,13,true
+LIRN,NAP,Naples International Airport,Naples International Airport,Napoli,Napoli,IT,Europe/Rome,40.886002,14.290800,294,true
+LIRP,PSA,Pisa International Airport,Pisa International Airport,Pisa (PI),Pisa (PI),IT,Europe/Rome,43.683899,10.392700,6,false
+LIRQ,FLR,"Florence Airport, Peretola","Florence Airport, Peretola",Firenze (FI),Firenze (FI),IT,Europe/Rome,43.808558,11.202822,142,false
+LIRZ,PEG,Perugia San Francesco d'Assisi – Umbria International Airport,Perugia San Francesco d'Assisi – Umbria International Airport,Perugia (PG),Perugia (PG),IT,Europe/Rome,43.095901,12.513200,697,false
+LJLJ,LJU,Ljubljana Jože Pučnik Airport,Ljubljana Jože Pučnik Airport,Zgornji Brnik,Zgornji Brnik,SI,Europe/Ljubljana,46.223701,14.457600,1273,false
+LKCS,JCL,České Budějovice South Bohemian Airport,České Budějovice South Bohemian Airport,České Budějovice,České Budějovice,CZ,Europe/Prague,48.948171,14.428320,1417,false
+LKKV,KLV,Karlovy Vary Airport,Karlovy Vary Airport,Karlovy Vary,Karlovy Vary,CZ,Europe/Prague,50.202999,12.915000,1989,false
+LKMT,OSR,Leoš Janáček Airport Ostrava,Leoš Janáček Airport Ostrava,Mošnov,Mošnov,CZ,Europe/Prague,49.696301,18.111099,844,false
+LKPD,PED,Pardubice Airport,Pardubice Airport,Pardubice,Pardubice,CZ,Europe/Prague,50.015049,15.739810,741,false
+LKPR,PRG,Václav Havel Airport Prague,Václav Havel Airport Prague,Prague,Prague,CZ,Europe/Prague,50.100874,14.259911,1247,false
+LLBG,TLV,Ben Gurion International Airport,Ben Gurion International Airport,Tel Aviv,Tel Aviv,IL,Asia/Jerusalem,32.011398,34.886700,135,true
+LLER,ETM,Ramon International Airport,Ramon International Airport,Eilat,Eilat,IL,Asia/Jerusalem,29.727009,35.014116,288,false
+LMML,MLA,Malta International Airport,Malta International Airport,Valletta,Valletta,MT,Europe/Malta,35.845932,14.491546,300,true
+LOWG,GRZ,Graz Airport,Graz Airport,Feldkirchen bei Graz,Feldkirchen bei Graz,AT,Europe/Vienna,46.991100,15.439600,1115,false
+LOWI,INN,Innsbruck Airport,Innsbruck Airport,Innsbruck,Innsbruck,AT,Europe/Vienna,47.260201,11.344000,1907,false
+LOWK,KLU,Klagenfurt Airport,Klagenfurt Airport,Klagenfurt am Wörthersee,Klagenfurt am Wörthersee,AT,Europe/Vienna,46.642502,14.337700,1472,false
+LOWL,LNZ,Linz-Hörsching Airport,Linz-Hörsching Airport,Linz,Linz,AT,Europe/Vienna,48.235362,14.188128,980,false
+LOWS,SZG,Salzburg Airport,Salzburg Airport,Salzburg,Salzburg,AT,Europe/Vienna,47.793301,13.004300,1411,false
+LOWW,VIE,Vienna International Airport,Vienna International Airport,Vienna,Vienna,AT,Europe/Vienna,48.110298,16.569700,600,true
+LPFR,FAO,Faro - Gago Coutinho International Airport,Faro - Gago Coutinho International Airport,Faro,Faro,PT,Europe/Lisbon,37.015909,-7.970939,24,true
+LPMA,FNC,Cristiano Ronaldo International Airport,Cristiano Ronaldo International Airport,Funchal,Funchal,PT,Europe/Lisbon,32.697812,-16.774613,192,false
+LPPD,PDL,João Paulo II Airport,João Paulo II Airport,Ponta Delgada,Ponta Delgada,PT,Atlantic/Azores,37.741199,-25.697901,259,false
+LPPR,OPO,Francisco de Sá Carneiro Airport,Francisco de Sá Carneiro Airport,Porto,Porto,PT,Europe/Lisbon,41.248100,-8.681390,228,true
+LPPT,LIS,Lisbon Humberto Delgado Airport,Lisbon Humberto Delgado Airport,Lisbon,Lisbon,PT,Europe/Lisbon,38.781300,-9.135920,374,true
+LQBK,BNX,Banja Luka International Airport,Banja Luka International Airport,Mahovljani,Mahovljani,BA,Europe/Sarajevo,44.941399,17.297501,400,false
+LQMO,OMO,Mostar International Airport,Mostar International Airport,Mostar,Mostar,BA,Europe/Sarajevo,43.282489,17.846101,156,false
+LQSA,SJJ,Sarajevo International Airport,Sarajevo International Airport,Sarajevo,Sarajevo,BA,Europe/Sarajevo,43.824600,18.331499,1708,false
+LQTZ,TZL,Tuzla International Airport,Tuzla International Airport,Dubrave Gornje,Dubrave Gornje,BA,Europe/Sarajevo,44.459858,18.723627,784,false
+LRBC,BCM,Bacău George Enescu International  Airport,Bacău George Enescu International  Airport,Bacău,Bacău,RO,Europe/Bucharest,46.521900,26.910299,607,false
+LRBS,BBU,Bucharest Băneasa Aurel Vlaicu International Airport,Bucharest Băneasa Aurel Vlaicu International Airport,Bucharest,Bucharest,RO,Europe/Bucharest,44.503133,26.102944,297,false
+LRBV,GHV,Brașov-Ghimbav International Airport,Brașov-Ghimbav International Airport,Brașov (Ghimbav),Brașov (Ghimbav),RO,Europe/Bucharest,45.705580,25.522871,1740,false
+LRCK,CND,Mihail Kogălniceanu International Airport,Mihail Kogălniceanu International Airport,Constanța,Constanța,RO,Europe/Bucharest,44.362202,28.488300,353,false
+LRCL,CLJ,Avram Iancu Cluj International Airport,Avram Iancu Cluj International Airport,Cluj-Napoca,Cluj-Napoca,RO,Europe/Bucharest,46.786042,23.685733,1039,false
+LRCV,CRA,Craiova International Airport,Craiova International Airport,Craiova,Craiova,RO,Europe/Bucharest,44.318100,23.888599,626,false
+LRIA,IAS,Iaşi International Airport,Iaşi International Airport,Iaşi,Iaşi,RO,Europe/Bucharest,47.179633,27.621431,411,false
+LROD,OMR,Oradea International Airport,Oradea International Airport,Oradea,Oradea,RO,Europe/Bucharest,47.025299,21.902500,465,false
+LROP,OTP,Bucharest Henri Coandă International Airport,Bucharest Henri Coandă International Airport,Otopeni,Otopeni,RO,Europe/Bucharest,44.571792,26.103285,314,false
+LRSB,SBZ,Sibiu International Airport,Sibiu International Airport,Sibiu,Sibiu,RO,Europe/Bucharest,45.785841,24.086666,1496,false
+LRSV,SCV,Suceava Ștefan cel Mare International Airport,Suceava Ștefan cel Mare International Airport,Suceava,Suceava,RO,Europe/Bucharest,47.687500,26.354099,1375,false
+LRTR,TSR,Timișoara Traian Vuia International Airport,Timișoara Traian Vuia International Airport,Timişoara,Timişoara,RO,Europe/Bucharest,45.809898,21.337900,348,false
+LSGG,GVA,Geneva International Airport,Geneva International Airport,Geneva,Geneva,CH,Europe/Paris,46.238098,6.108950,1411,true
+LSGS,SIR,Sion Airport,Sion Airport,Sion,Sion,CH,Europe/Zurich,46.219166,7.326944,1582,false
+LSZH,ZRH,Zürich Airport,Zürich Airport,Zurich,Zurich,CH,Europe/Zurich,47.458056,8.548056,1417,true
+LSZS,SMV,Engadin Airport,Engadin Airport,Samedan,Samedan,CH,Europe/Zurich,46.534100,9.884110,5600,false
+LTAC,ESB,Esenboğa International Airport,Esenboğa International Airport,Ankara,Ankara,TR,Europe/Istanbul,40.128101,32.995098,3125,false
+LTAI,AYT,Antalya International Airport,Antalya International Airport,Antalya,Antalya,TR,Europe/Istanbul,36.898701,30.800501,177,true
+LTAJ,GZT,Gaziantep Oğuzeli International Airport,Gaziantep Oğuzeli International Airport,Gaziantep,Gaziantep,TR,Europe/Istanbul,36.947201,37.478699,2315,false
+LTAN,KYA,Konya Airport,Konya Airport,Konya,Konya,TR,Europe/Istanbul,37.979000,32.561901,3392,false
+LTAU,ASR,Kayseri Erkilet International Airport,Kayseri Erkilet International Airport,Kayseri,Kayseri,TR,Europe/Istanbul,38.770401,35.495399,3463,false
+LTAZ,NAV,Nevşehir Kapadokya Airport,Nevşehir Kapadokya Airport,Nevşehir,Nevşehir,TR,Europe/Istanbul,38.771900,34.534500,3100,false
+LTBA,ISL,İstanbul Atatürk Airport,İstanbul Atatürk Airport,Istanbul(Bakırköy),Istanbul(Bakırköy),TR,Europe/Istanbul,40.971913,28.823714,163,false
+LTBJ,ADB,Adnan Menderes International Airport,Adnan Menderes International Airport,Gaziemir,Gaziemir,TR,Europe/Istanbul,38.292400,27.157000,412,true
+LTBS,DLM,Dalaman International Airport,Dalaman International Airport,Dalaman,Dalaman,TR,Europe/Istanbul,36.713100,28.792500,20,false
+LTBY,AOE,Hasan Polatkan Airport,Hasan Polatkan Airport,Eskişehir,Eskişehir,TR,Europe/Istanbul,39.811644,30.519268,2588,false
+LTCS,GNY,Şanlıurfa GAP Airport,Şanlıurfa GAP Airport,Şanlıurfa,Şanlıurfa,TR,Europe/Istanbul,37.445663,38.895592,2708,false
+LTDB,COV,Çukurova International Airport,Çukurova International Airport,Tarsus,Tarsus,TR,Europe/Istanbul,36.891478,35.071235,35,false
+LTFD,EDO,Balıkesir Koca Seyit Airport,Balıkesir Koca Seyit Airport,Edremit,Edremit,TR,Europe/Istanbul,39.552533,27.010192,50,false
+LTFE,BJV,Milas Bodrum International Airport,Milas Bodrum International Airport,Bodrum,Bodrum,TR,Europe/Istanbul,37.249314,27.664010,21,false
+LTFJ,SAW,Istanbul Sabiha Gökçen International Airport,Istanbul Sabiha Gökçen International Airport,"Pendik, Istanbul","Pendik, Istanbul",TR,Europe/Istanbul,40.898602,29.309200,312,true
+LTFM,IST,İstanbul Airport,İstanbul Airport,Istanbul,Istanbul,TR,Europe/Istanbul,41.274874,28.732136,325,true
+LUBL,BZY,Bălți-Leadoveni International Airport,Bălți-Leadoveni International Airport,Bălți,Bălți,MD,Europe/Chisinau,47.837666,27.781108,758,false
+LUBM,,Mărculești Air Base,Mărculești Air Base,Mărculeşti,Mărculeşti,MD,Europe/Chisinau,47.862701,28.212799,312,false
+LUCH,,Cahul International Airport,Cahul International Airport,Cahul,Cahul,MD,Europe/Chisinau,45.843800,28.263700,652,false
+LUKK,RMO,Кишинёв,Chişinău International Airport,Кишинёв,Chişinău,MD,Europe/Chisinau,46.927740,28.931704,399,false
+LUTR,,Tiraspol Airfield,Tiraspol Airfield,Tiraspol,Tiraspol,MD,Europe/Chisinau,46.868099,29.590599,141,false
+LWOH,OHD,Ohrid St. Paul the Apostle Airport,Ohrid St. Paul the Apostle Airport,Ohrid,Ohrid,MK,Europe/Skopje,41.180000,20.742300,2313,false
+LWSK,SKP,Skopje International Airport,Skopje International Airport,Ilinden,Ilinden,MK,Europe/Skopje,41.958087,21.622581,781,false
+LXGB,GIB,Gibraltar Airport,Gibraltar Airport,Gibraltar,Gibraltar,GI,Europe/Gibraltar,36.151679,-5.349780,12,false
+LYBE,BEG,Belgrade Nikola Tesla Airport,Belgrade Nikola Tesla Airport,Belgrade,Belgrade,RS,Europe/Belgrade,44.818401,20.309099,335,false
+LYNI,INI,Niš Constantine the Great Airport,Niš Constantine the Great Airport,Niš,Niš,RS,Europe/Belgrade,43.336538,21.856242,648,false
+LYPG,TGD,Podgorica Airport / Podgorica Golubovci Airbase,Podgorica Airport / Podgorica Golubovci Airbase,Podgorica,Podgorica,ME,Europe/Podgorica,42.359402,19.251900,141,false
+LZIB,BTS,M. R. Štefánik Airport,M. R. Štefánik Airport,Bratislava,Bratislava,SK,Europe/Bratislava,48.170200,17.212700,436,false
+MBPV,PLS,Providenciales International Airport,Providenciales International Airport,Providenciales,Providenciales,TC,America/Grand_Turk,21.773697,-72.268321,15,false
+MDLR,LRM,Casa De Campo International Airport,Casa De Campo International Airport,La Romana,La Romana,DO,America/Santo_Domingo,18.452222,-68.911111,213,false
+MDPC,PUJ,Punta Cana International Airport,Punta Cana International Airport,Punta Cana,Punta Cana,DO,America/Santo_Domingo,18.567093,-68.364558,47,false
+MDSD,SDQ,Las Américas International Airport,Las Américas International Airport,Santo Domingo,Santo Domingo,DO,America/Santo_Domingo,18.429701,-69.668900,59,false
+MDST,STI,Cibao International Airport,Cibao International Airport,Santiago,Santiago,DO,America/Santo_Domingo,19.404060,-70.604431,565,false
+MGGT,GUA,La Aurora International Airport,La Aurora International Airport,Guatemala City,Guatemala City,GT,America/Guatemala,14.582896,-90.527515,4952,false
+MHLM,SAP,Ramón Villeda Morales International Airport,Ramón Villeda Morales International Airport,San Pedro Sula,San Pedro Sula,HN,America/Tegucigalpa,15.452600,-87.923599,91,false
+MHPR,XPL,Palmerola International Airport,Palmerola International Airport,Palmerola,Palmerola,HN,America/Tegucigalpa,14.382400,-87.621201,2061,false
+MHRO,RTB,Juan Manuel Gálvez International Airport,Juan Manuel Gálvez International Airport,Coxen Hole,Coxen Hole,HN,America/Tegucigalpa,16.316799,-86.523003,39,false
+MKJP,KIN,Norman Manley International Airport,Norman Manley International Airport,Kingston,Kingston,JM,America/Jamaica,17.935699,-76.787498,10,false
+MKJS,MBJ,Sangster International Airport,Sangster International Airport,Montego Bay,Montego Bay,JM,America/Jamaica,18.503420,-77.913230,4,false
+MMAA,ACA,General Juan N. Álvarez International Airport,General Juan N. Álvarez International Airport,Acapulco,Acapulco,MX,America/Mexico_City,16.757126,-99.753113,16,false
+MMAS,AGU,Aguascalientes International Airport,Aguascalientes International Airport,Aguascalientes,Aguascalientes,MX,America/Mexico_City,21.699589,-102.318372,6112,false
+MMBT,HUX,Bahías de Huatulco International Airport,Bahías de Huatulco International Airport,Huatulco,Huatulco,MX,America/Mexico_City,15.775437,-96.260456,464,false
+MMCL,CUL,Bachigualato Federal International Airport,Bachigualato Federal International Airport,Culiacán,Culiacán,MX,America/Mazatlan,24.765040,-107.475228,108,false
+MMCS,CJS,Abraham González International Airport,Abraham González International Airport,Ciudad Juárez,Ciudad Juárez,MX,America/Mazatlan,31.636673,-106.428533,3904,false
+MMCU,CUU,General Roberto Fierro Villalobos International Airport,General Roberto Fierro Villalobos International Airport,Chihuahua,Chihuahua,MX,America/Mazatlan,28.702649,-105.963764,4462,false
+MMCZ,CZM,Cozumel International Airport,Cozumel International Airport,Cozumel,Cozumel,MX,America/Cancun,20.514922,-86.928538,15,false
+MMGL,GDL,Guadalajara International Airport,Guadalajara International Airport,Guadalajara,Guadalajara,MX,America/Mexico_City,20.523342,-103.310108,5016,false
+MMHO,HMO,General Ignacio L. Pesqueira International Airport,General Ignacio L. Pesqueira International Airport,Hermosillo,Hermosillo,MX,America/Hermosillo,29.092811,-111.053015,627,false
+MMLO,BJX,Guanajuato International Airport,Guanajuato International Airport,Silao,Silao,MX,America/Mexico_City,20.992695,-101.480284,5956,false
+MMLT,LTO,Loreto International Airport,Loreto International Airport,Loreto,Loreto,MX,America/Mazatlan,25.989549,-111.348408,34,false
+MMMD,MID,Manuel Crescencio Rejón International Airport,Manuel Crescencio Rejón International Airport,Mérida,Mérida,MX,America/Mexico_City,20.930485,-89.645462,38,false
+MMMM,MLM,General Francisco J. Mujica International Airport,General Francisco J. Mujica International Airport,Morelia,Morelia,MX,America/Mexico_City,19.849899,-101.025002,6033,false
+MMMX,MEX,Mexico City Benito Juárez International Airport,Mexico City Benito Juárez International Airport,Mexico City,Mexico City,MX,America/Mexico_City,19.435822,-99.070330,7316,true
+MMMY,MTY,Monterrey International Airport,Monterrey International Airport,Monterrey,Monterrey,MX,America/Mexico_City,25.778521,-100.106989,1278,false
+MMMZ,MZT,General Rafael Buelna International Airport,General Rafael Buelna International Airport,Mazatlàn,Mazatlàn,MX,America/Mazatlan,23.162823,-106.264517,38,false
+MMOX,OAX,Xoxocotlán International Airport,Xoxocotlán International Airport,Oaxaca,Oaxaca,MX,America/Mexico_City,16.998773,-96.726092,4989,false
+MMPB,PBC,Hermanos Serdán International Airport,Hermanos Serdán International Airport,Puebla,Puebla,MX,America/Mexico_City,19.158465,-98.371582,7361,false
+MMPR,PVR,Puerto Vallarta International Airport,Puerto Vallarta International Airport,Puerto Vallarta,Puerto Vallarta,MX,America/Mexico_City,20.679913,-105.254391,23,false
+MMQT,QRO,Querétaro Intercontinental Airport,Querétaro Intercontinental Airport,Querétaro,Querétaro,MX,America/Mexico_City,20.618779,-100.186449,6296,false
+MMSD,SJD,Los Cabos International Airport,Los Cabos International Airport,San José del Cabo,San José del Cabo,MX,America/Mazatlan,23.151919,-109.720731,374,false
+MMSM,NLU,Felipe Ángeles International Airport,Felipe Ángeles International Airport,Mexico City,Mexico City,MX,America/Mexico_City,19.743824,-99.015070,7369,false
+MMTJ,TIJ,General Abelardo L. Rodriguez International Airport,General Abelardo L. Rodriguez International Airport,Tijuana,Tijuana,MX,America/Tijuana,32.541043,-116.969976,489,false
+MMTL,TQO,Felipe Carrillo Puerto International Airport Tulum,Felipe Carrillo Puerto International Airport Tulum,Tulum,Tulum,MX,America/Cancun,20.172098,-87.660272,66,false
+MMTO,TLC,Adolfo López Mateos International Airport,Adolfo López Mateos International Airport,Toluca,Toluca,MX,America/Mexico_City,19.336900,-99.565830,8466,false
+MMUN,CUN,Cancún International Airport,Cancún International Airport,Cancún,Cancún,MX,America/Cancun,21.040817,-86.873470,22,false
+MMVA,VSA,Carlos Rovirosa Pérez International Airport,Carlos Rovirosa Pérez International Airport,Villahermosa,Villahermosa,MX,America/Mexico_City,17.994283,-92.818199,46,false
+MMVR,VER,General Heriberto Jara International Airport,General Heriberto Jara International Airport,Veracruz,Veracruz,MX,America/Mexico_City,19.139589,-96.188602,90,false
+MMZH,ZIH,Ixtapa-Zihuatanejo International Airport,Ixtapa-Zihuatanejo International Airport,Ixtapa,Ixtapa,MX,America/Mexico_City,17.601771,-101.460629,26,false
+MNMG,MGA,Augusto C. Sandino (Managua) International Airport,Augusto C. Sandino (Managua) International Airport,Managua,Managua,NI,America/Managua,12.141500,-86.168198,194,false
+MPTO,PTY,Tocumen International Airport,Tocumen International Airport,Tocumen,Tocumen,PA,America/Panama,9.071360,-79.383499,135,false
+MRLB,LIR,Daniel Oduber Quirós International Airport,Daniel Oduber Quirós International Airport,Liberia,Liberia,CR,America/Costa_Rica,10.593300,-85.544403,270,false
+MROC,SJO,Juan Santamaría International Airport,Juan Santamaría International Airport,San José (Alajuela),San José (Alajuela),CR,America/Costa_Rica,9.993860,-84.208801,3021,false
+MSLP,SAL,El Salvador International Airport Saint Óscar Arnulfo Romero y Galdámez,El Salvador International Airport Saint Óscar Arnulfo Romero y Galdámez,San Salvador (San Luis Talpa),San Salvador (San Luis Talpa),SV,America/El_Salvador,13.444470,-89.055784,101,false
+MTCH,CAP,Cap Haitien International Airport,Cap Haitien International Airport,Cap Haitien,Cap Haitien,HT,America/Port-au-Prince,19.725547,-72.200710,10,false
+MTPP,PAP,Toussaint Louverture International Airport,Toussaint Louverture International Airport,Port-au-Prince,Port-au-Prince,HT,America/Port-au-Prince,18.580023,-72.292596,122,false
+MUCM,CMW,Ignacio Agramonte International Airport,Ignacio Agramonte International Airport,Camaguey,Camaguey,CU,America/Havana,21.419909,-77.848039,413,false
+MUCU,SCU,Antonio Maceo International Airport,Antonio Maceo International Airport,Santiago,Santiago,CU,America/Havana,19.974740,-75.835504,249,false
+MUHA,HAV,José Martí International Airport,José Martí International Airport,Havana,Havana,CU,America/Havana,22.989201,-82.409103,210,false
+MUHG,HOG,Frank Pais International Airport,Frank Pais International Airport,Holguin,Holguin,CU,America/Havana,20.785148,-76.315526,361,false
+MUSC,SNU,Abel Santamaria International Airport,Abel Santamaria International Airport,Santa Clara,Santa Clara,CU,America/Havana,22.492215,-79.943119,338,false
+MUVR,VRA,Juan Gualberto Gomez International Airport,Juan Gualberto Gomez International Airport,Matanzas,Matanzas,CU,America/Havana,23.034401,-81.435303,210,false
+MWCR,GCM,Owen Roberts International Airport,Owen Roberts International Airport,George Town,George Town,KY,America/Cayman,19.292801,-81.357697,8,false
+MYGF,FPO,Grand Bahama International Airport,Grand Bahama International Airport,Freeport,Freeport,BS,America/Nassau,26.557996,-78.695583,7,false
+MYNN,NAS,Lynden Pindling International Airport,Lynden Pindling International Airport,Nassau,Nassau,BS,America/Nassau,25.039000,-77.466202,16,false
+MYSM,ZSA,San Salvador International Airport,San Salvador International Airport,San Salvador,San Salvador,BS,America/Nassau,24.063041,-74.523233,24,false
+MZBZ,BZE,Philip S. W. Goldson International Airport,Philip S. W. Goldson International Airport,Belize City,Belize City,BZ,America/Belize,17.539951,-88.303556,15,false
+NCRG,RAR,Rarotonga International Airport,Rarotonga International Airport,Avarua,Avarua,CK,Pacific/Rarotonga,-21.202700,-159.806000,19,false
+NFFN,NAN,Nadi International Airport,Nadi International Airport,Nadi,Nadi,FJ,Pacific/Fiji,-17.761822,177.437843,59,false
+NFNA,SUV,Nausori International Airport,Nausori International Airport,Nausori,Nausori,FJ,Pacific/Fiji,-18.044226,178.561486,17,false
+NFTF,TBU,Fua'amotu International Airport,Fua'amotu International Airport,Nuku'alofa,Nuku'alofa,TO,Pacific/Tongatapu,-21.241438,-175.149164,126,false
+NFTV,VAV,Vava'u International Airport,Vava'u International Airport,Vava'u Island,Vava'u Island,TO,Pacific/Tongatapu,-18.585300,-173.962006,236,false
+NGTA,TRW,Bonriki International Airport,Bonriki International Airport,South Tarawa,South Tarawa,KI,Pacific/Tarawa,1.381640,173.147003,9,false
+NLWW,WLS,Hihifo Airport,Hihifo Airport,Wallis Island,Wallis Island,WF,Pacific/Wallis,-13.239445,-176.198650,79,false
+NSFA,APW,Faleolo International Airport,Faleolo International Airport,Apia,Apia,WS,Pacific/Apia,-13.830000,-172.007996,58,false
+NSTU,PPG,Pago Pago International Airport,Pago Pago International Airport,Pago Pago,Pago Pago,AS,Pacific/Pago_Pago,-14.331000,-170.710007,32,false
+NTAA,PPT,Fa'a'ā International Airport,Fa'a'ā International Airport,Papeete,Papeete,PF,Pacific/Tahiti,-17.553472,-149.606936,5,false
+NVVV,VLI,Bauerfield International Airport,Bauerfield International Airport,Port Vila,Port Vila,VU,Pacific/Efate,-17.699301,168.320007,70,false
+NWWW,NOU,La Tontouta International Airport,La Tontouta International Airport,Nouméa (La Tontouta),Nouméa (La Tontouta),NC,Pacific/Noumea,-22.014601,166.212997,52,false
+NZAA,AKL,Auckland International Airport,Auckland International Airport,Auckland,Auckland,NZ,Pacific/Auckland,-37.011990,174.786331,23,true
+NZCH,CHC,Christchurch International Airport,Christchurch International Airport,Christchurch,Christchurch,NZ,Pacific/Auckland,-43.489029,172.532065,123,false
+NZQN,ZQN,Queenstown Airport,Queenstown Airport,Queenstown,Queenstown,NZ,Pacific/Auckland,-45.019205,168.746379,1171,false
+NZWN,WLG,Wellington International Airport,Wellington International Airport,Wellington,Wellington,NZ,Pacific/Auckland,-41.326839,174.806862,41,false
+OAHR,HEA,Herat - Khwaja Abdullah Ansari International Airport,Herat - Khwaja Abdullah Ansari International Airport,Guzara,Guzara,AF,Asia/Kabul,34.209999,62.228298,3206,false
+OAKB,KBL,Kabul International Airport,Kabul International Airport,Kabul,Kabul,AF,Asia/Kabul,34.565899,69.212303,5877,false
+OAKN,KDH,Ahmad Shah Baba International Airport,Ahmad Shah Baba International Airport,Kandahar,Kandahar,AF,Asia/Kabul,31.505769,65.847963,3337,false
+OAMS,MZR,Mazar-i-Sharif International Airport,Mazar-i-Sharif International Airport,Mazar-i-Sharif,Mazar-i-Sharif,AF,Asia/Kabul,36.704120,67.210459,1284,false
+OBBI,BAH,Bahrain International Airport,Bahrain International Airport,Manama,Manama,BH,Asia/Bahrain,26.267295,50.637640,6,false
+OEAB,AHB,Abha International Airport,Abha International Airport,Abha,Abha,SA,Asia/Riyadh,18.240400,42.656601,6858,false
+OEAH,HOF,Al-Ahsa International Airport,Al-Ahsa International Airport,Hofuf,Hofuf,SA,Asia/Riyadh,25.285299,49.485199,588,false
+OEAO,ULH,Al-Ula International Airport,Al-Ula International Airport,Al-Ula,Al-Ula,SA,Asia/Riyadh,26.483634,38.117048,2050,false
+OEDF,DMM,King Fahd International Airport,King Fahd International Airport,Ad Dammam,Ad Dammam,SA,Asia/Riyadh,26.469100,49.798209,72,false
+OEDR,DHA,King Abdulaziz Air Base,King Abdulaziz Air Base,Dhahran,Dhahran,SA,Asia/Riyadh,26.265400,50.152000,84,false
+OEGS,ELQ,Prince Naif bin Abdulaziz International Airport,Prince Naif bin Abdulaziz International Airport,Qassim,Qassim,SA,Asia/Riyadh,26.302799,43.774399,2126,false
+OEHL,HAS,Hail International Airport,Hail International Airport,Hail,Hail,SA,Asia/Riyadh,27.437901,41.686298,3331,false
+OEJN,JED,King Abdulaziz International Airport,King Abdulaziz International Airport,Jeddah,Jeddah,SA,Asia/Riyadh,21.680241,39.157436,48,true
+OEMA,MED,Prince Mohammad Bin Abdulaziz Airport,Prince Mohammad Bin Abdulaziz Airport,Medina,Medina,SA,Asia/Riyadh,24.553400,39.705101,2151,false
+OENN,NUM,Neom Bay Airport,Neom Bay Airport,Sharma,Sharma,SA,Asia/Riyadh,27.924261,35.293580,29,false
+OEPA,AQI,Qaisumah–Hafar Al-Batin International Airport,Qaisumah–Hafar Al-Batin International Airport,Qaisumah,Qaisumah,SA,Asia/Riyadh,28.335726,46.127108,1174,false
+OERK,RUH,King Khalid International Airport,King Khalid International Airport,Riyadh,Riyadh,SA,Asia/Riyadh,24.957600,46.698799,2049,true
+OERS,RSI,Red Sea International Airport,Red Sea International Airport,Hanak,Hanak,SA,Asia/Riyadh,25.627975,37.088914,140,false
+OESK,AJF,Al-Jawf International Airport,Al-Jawf International Airport,Al-Jawf,Al-Jawf,SA,Asia/Riyadh,29.783301,40.100905,2261,false
+OETB,TUU,Prince Sultan bin Abdulaziz International Airport,Prince Sultan bin Abdulaziz International Airport,Tabuk,Tabuk,SA,Asia/Riyadh,28.371100,36.624865,2551,false
+OETF,TIF,Taif International Airport,Taif International Airport,Taif,Taif,SA,Asia/Riyadh,21.484739,40.544074,4848,false
+OEYN,YNB,Prince Abdulmohsen Bin Abdulaziz International Airport,Prince Abdulmohsen Bin Abdulaziz International Airport,Yanbu,Yanbu,SA,Asia/Riyadh,24.144199,38.063400,26,false
+OIAA,ABD,Abadan Ayatollah Jami International Airport,Abadan Ayatollah Jami International Airport,Abadan,Abadan,IR,Asia/Tehran,30.367887,48.230075,10,false
+OIAW,AWZ,Qasem Soleimani International Airport,Qasem Soleimani International Airport,Ahvaz,Ahvaz,IR,Asia/Tehran,31.336400,48.763789,66,false
+OIBK,KIH,Kish International Airport,Kish International Airport,Kish Island,Kish Island,IR,Asia/Tehran,26.525427,53.980462,101,false
+OIFM,IFN,Isfahan Shahid Beheshti International Airport,Isfahan Shahid Beheshti International Airport,Isfahan,Isfahan,IR,Asia/Tehran,32.755142,51.883877,5059,false
+OIIE,IKA,Imam Khomeini International Airport,Imam Khomeini International Airport,Tehran,Tehran,IR,Asia/Tehran,35.416100,51.152199,3305,false
+OIII,THR,Mehrabad International Airport,Mehrabad International Airport,Tehran,Tehran,IR,Asia/Tehran,35.689175,51.314392,3962,false
+OIIP,PYK,Payam International Airport,Payam International Airport,Karaj,Karaj,IR,Asia/Tehran,35.776100,50.826698,4170,false
+OIKB,BND,Bandar Abbas International Airport,Bandar Abbas International Airport,Bandar Abbas,Bandar Abbas,IR,Asia/Tehran,27.218300,56.377800,22,false
+OIKK,KER,Ayatollah Hashemi Rafsanjani International Airport,Ayatollah Hashemi Rafsanjani International Airport,Kerman,Kerman,IR,Asia/Tehran,30.271276,56.949692,5741,false
+OIKQ,GSM,Qeshm International Airport,Qeshm International Airport,Qeshm(Dayrestan),Qeshm(Dayrestan),IR,Asia/Tehran,26.754639,55.902353,45,false
+OIMB,XBJ,Birjand International Airport,Birjand International Airport,Birjand,Birjand,IR,Asia/Tehran,32.896525,59.281258,4952,false
+OIMM,MHD,Mashhad International Airport,Mashhad International Airport,Mashhad,Mashhad,IR,Asia/Tehran,36.234821,59.642949,3263,false
+OISS,SYZ,Shiraz Shahid Dastghaib International Airport,Shiraz Shahid Dastghaib International Airport,Shiraz,Shiraz,IR,Asia/Tehran,29.539200,52.589802,4927,false
+OITT,TBZ,Tabriz International Airport,Tabriz International Airport,Tabriz,Tabriz,IR,Asia/Tehran,38.133900,46.235001,4459,false
+OIZH,ZAH,Zahedan International Airport,Zahedan International Airport,Zahedan,Zahedan,IR,Asia/Tehran,29.475700,60.906200,4564,false
+OJAI,AMM,Queen Alia International Airport,Queen Alia International Airport,Amman,Amman,JO,Asia/Amman,31.722601,35.993198,2395,false
+OJAM,ADJ,Marka International (Amman Civil) Airport,Marka International (Amman Civil) Airport,Amman,Amman,JO,Asia/Amman,31.972700,35.991600,2555,false
+OJAQ,AQJ,King Hussein International Airport,King Hussein International Airport,Aqaba,Aqaba,JO,Asia/Amman,29.611601,35.018101,175,false
+OKKK,KWI,Kuwait International Airport,Kuwait International Airport,Kuwait City,Kuwait City,KW,Asia/Kuwait,29.224487,47.969813,206,false
+OLBA,BEY,Beirut Rafic Hariri International Airport,Beirut Rafic Hariri International Airport,Beirut,Beirut,LB,Asia/Beirut,33.819833,35.487443,87,false
+OMAA,AUH,Zayed International Airport,Zayed International Airport,Abu Dhabi,Abu Dhabi,AE,Asia/Dubai,24.440966,54.649237,88,true
+OMAD,AZI,Al Bateen Executive Airport,Al Bateen Executive Airport,Abu Dhabi,Abu Dhabi,AE,Asia/Dubai,24.427062,54.459866,16,false
+OMAL,AAN,Al Ain International Airport,Al Ain International Airport,Al Ain,Al Ain,AE,Asia/Dubai,24.261700,55.609200,869,false
+OMDB,DXB,Dubai International Airport,Dubai International Airport,Dubai,Dubai,AE,Asia/Dubai,25.249790,55.370992,62,true
+OMDW,DWC,Al Maktoum International Airport,Al Maktoum International Airport,Dubai(Jebel Ali),Dubai(Jebel Ali),AE,Asia/Dubai,24.896171,55.162350,114,false
+OMFJ,FJR,Fujairah International Airport,Fujairah International Airport,Fujairah,Fujairah,AE,Asia/Dubai,25.108411,56.328061,152,false
+OMRK,RKT,Ras Al Khaimah International Airport,Ras Al Khaimah International Airport,Ras Al Khaimah,Ras Al Khaimah,AE,Asia/Dubai,25.613501,55.938801,102,false
+OMSJ,SHJ,Sharjah International Airport,Sharjah International Airport,Sharjah,Sharjah,AE,Asia/Dubai,25.328600,55.517200,111,false
+OODQ,DQM,Duqm International Airport,Duqm International Airport,Duqm,Duqm,OM,Asia/Muscat,19.501944,57.634167,364,false
+OOMS,MCT,Muscat International Airport,Muscat International Airport,Muscat/Seeb,Muscat/Seeb,OM,Asia/Muscat,23.600218,58.285268,48,false
+OOSA,SLL,Salalah International Airport,Salalah International Airport,Salalah,Salalah,OM,Asia/Muscat,17.038700,54.091301,73,false
+OOSH,OHS,Suhar International Airport,Suhar International Airport,Suhar,Suhar,OM,Asia/Muscat,24.386040,56.625410,20,false
+OPFA,LYP,Faisalabad International Airport,Faisalabad International Airport,Faisalabad,Faisalabad,PK,Asia/Karachi,31.364923,72.995319,591,false
+OPGW,GWD,New Gwadar International Airport,New Gwadar International Airport,Gurandani,Gurandani,PK,Asia/Karachi,25.296733,62.498822,61,false
+OPIS,ISB,Islamabad International Airport,Islamabad International Airport,Attock,Attock,PK,Asia/Karachi,33.549000,72.825660,1761,false
+OPKC,KHI,Jinnah International Airport,Jinnah International Airport,Karachi,Karachi,PK,Asia/Karachi,24.906500,67.160797,100,false
+OPLA,LHE,Allama Iqbal International Airport,Allama Iqbal International Airport,Lahore,Lahore,PK,Asia/Karachi,31.521601,74.403603,712,false
+OPMT,MUX,Multan International Airport,Multan International Airport,Multan,Multan,PK,Asia/Karachi,30.203199,71.419098,403,false
+OPPS,PEW,Bacha Khan International Airport,Bacha Khan International Airport,Peshawar,Peshawar,PK,Asia/Karachi,33.993900,71.514603,1158,false
+OPQT,UET,Quetta International Airport,Quetta International Airport,Quetta,Quetta,PK,Asia/Karachi,30.251400,66.937798,5267,false
+OPSD,KDU,Skardu International Airport,Skardu International Airport,Skardu,Skardu,PK,Asia/Karachi,35.338660,75.538648,7316,false
+OPST,SKT,Sialkot International Airport,Sialkot International Airport,Sialkot,Sialkot,PK,Asia/Karachi,32.535941,74.364623,837,false
+OPTU,TUK,Turbat International Airport,Turbat International Airport,Turbat,Turbat,PK,Asia/Karachi,25.984767,63.028856,498,false
+ORBI,BGW,Baghdad International Airport / New Al Muthana Air Base,Baghdad International Airport / New Al Muthana Air Base,Baghdad,Baghdad,IQ,Asia/Baghdad,33.262501,44.234600,114,false
+ORBM,OSM,Mosul International Airport,Mosul International Airport,Mosul,Mosul,IQ,Asia/Baghdad,36.305801,43.147400,719,false
+ORER,EBL,Erbil International Airport,Erbil International Airport,Arbil,Arbil,IQ,Asia/Baghdad,36.236047,43.946615,1341,false
+ORKK,KIK,Kirkuk International Airport,Kirkuk International Airport,Kirkuk,Kirkuk,IQ,Asia/Baghdad,35.469501,44.348900,1061,false
+ORMM,BSR,Basra International Airport,Basra International Airport,Basra,Basra,IQ,Asia/Baghdad,30.549101,47.662102,11,false
+ORNI,NJF,Al Najaf International Airport,Al Najaf International Airport,Najaf,Najaf,IQ,Asia/Baghdad,31.991116,44.405019,103,false
+OSAP,ALP,Aleppo International Airport,Aleppo International Airport,Aleppo,Aleppo,SY,Asia/Damascus,36.181262,37.226869,1276,false
+OSDI,DAM,Damascus International Airport,Damascus International Airport,Damascus,Damascus,SY,Asia/Damascus,33.411499,36.515598,2020,false
+OTBD,DIA,Doha International Airport,Doha International Airport,Doha,Doha,QA,Asia/Qatar,25.259431,51.565528,35,false
+OTHH,DOH,Hamad International Airport,Hamad International Airport,Doha,Doha,QA,Asia/Qatar,25.273056,51.608056,13,true
+OYAA,ADE,Aden International Airport,Aden International Airport,Aden,Aden,YE,Asia/Aden,12.829564,45.029976,7,false
+OYRN,RIY,Riyan International Airport,Riyan International Airport,Mukalla(Riyan),Mukalla(Riyan),YE,Asia/Aden,14.662241,49.375289,54,false
+OYSN,SAH,Sanaa International Airport,Sanaa International Airport,Sanaa,Sanaa,YE,Asia/Aden,15.476300,44.219700,7216,false
+OYSY,GXF,Seiyun Hadhramaut International Airport,Seiyun Hadhramaut International Airport,Seiyun,Seiyun,YE,Asia/Aden,15.965887,48.788146,2097,false
+PANC,ANC,Ted Stevens Anchorage International Airport,Ted Stevens Anchorage International Airport,Anchorage,Anchorage,US,America/Anchorage,61.179004,-149.992561,152,false
+PGRO,ROP,Rota International Airport,Rota International Airport,Rota Island,Rota Island,MP,Pacific/Saipan,14.173267,145.241103,607,false
+PGUM,GUM,Antonio B. Won Pat International Airport,Antonio B. Won Pat International Airport,Hagåtña,Hagåtña,GU,Pacific/Guam,13.485000,144.797282,298,false
+PHKO,KOA,Ellison Onizuka Kona International Airport at Keāhole,Ellison Onizuka Kona International Airport at Keāhole,Kailua-Kona,Kailua-Kona,US,Pacific/Honolulu,19.738783,-156.045603,47,false
+PHLI,LIH,Lihue Airport,Lihue Airport,"Lihue, Kauai","Lihue, Kauai",US,Pacific/Honolulu,21.974393,-159.337146,153,false
+PHNL,HNL,Daniel K. Inouye International Airport,Daniel K. Inouye International Airport,"Honolulu, Oahu","Honolulu, Oahu",US,Pacific/Honolulu,21.318387,-157.925670,13,false
+PHOG,OGG,Kahului International Airport,Kahului International Airport,Kahului,Kahului,US,Pacific/Honolulu,20.896263,-156.431837,54,false
+PKMJ,MAJ,Marshall Islands International Airport,Marshall Islands International Airport,Majuro Atoll,Majuro Atoll,MH,Pacific/Majuro,7.065110,171.271656,6,false
+PLCH,CXI,Cassidy International Airport,Cassidy International Airport,Kiritimati,Kiritimati,KI,Pacific/Enderbury,1.986278,-157.350011,5,false
+PTKK,TKK,Chuuk International Airport,Chuuk International Airport,Weno Island,Weno Island,FM,Pacific/Truk,7.461870,151.843002,11,false
+PTRO,ROR,Roman Tmetuchl International Airport,Roman Tmetuchl International Airport,Babelthuap Island,Babelthuap Island,PW,Pacific/Palau,7.366965,134.544085,176,false
+PTSA,KSA,Kosrae International Airport,Kosrae International Airport,Okat,Okat,FM,Pacific/Kosrae,5.356980,162.957993,11,false
+PTYA,YAP,Yap International Airport,Yap International Airport,Yap Island,Yap Island,FM,Pacific/Truk,9.498910,138.082993,91,false
+RCKH,KHH,Kaohsiung International Airport,Kaohsiung International Airport,Kaohsiung (Xiaogang),Kaohsiung (Xiaogang),TW,Asia/Taipei,22.577101,120.349998,31,false
+RCMQ,RMQ,Taichung International Airport / Ching Chuang Kang Air Base,Taichung International Airport / Ching Chuang Kang Air Base,Taichung (Qingshui),Taichung (Qingshui),TW,Asia/Taipei,24.264700,120.621002,663,false
+RCNN,TNN,Tainan International Airport / Tainan Air Base,Tainan International Airport / Tainan Air Base,Tainan (Rende),Tainan (Rende),TW,Asia/Taipei,22.950399,120.206001,63,false
+RCQC,MZG,Penghu Magong Airport,Penghu Magong Airport,Huxi,Huxi,TW,Asia/Taipei,23.568701,119.627998,103,false
+RCSS,TSA,Taipei Songshan International Airport,Taipei Songshan International Airport,Taipei (Songshan),Taipei (Songshan),TW,Asia/Taipei,25.067244,121.552822,18,false
+RCTP,TPE,Taiwan Taoyuan International Airport,Taiwan Taoyuan International Airport,Taoyuan,Taoyuan,TW,Asia/Taipei,25.077700,121.233002,106,false
+RCYU,HUN,Hualien Chiashan Airport,Hualien Chiashan Airport,Hualien City,Hualien City,TW,Asia/Taipei,24.023163,121.617991,52,false
+RJAA,NRT,Narita International Airport,Narita International Airport,Narita,Narita,JP,Asia/Tokyo,35.768580,140.388714,141,true
+RJAH,IBR,Ibaraki Airport,Ibaraki Airport,Omitama,Omitama,JP,Asia/Tokyo,36.181456,140.414434,105,false
+RJBB,KIX,Kansai International Airport,Kansai International Airport,Osaka,Osaka,JP,Asia/Tokyo,34.427299,135.244003,26,true
+RJBE,UKB,Kobe Airport,Kobe Airport,Kobe,Kobe,JP,Asia/Tokyo,34.632801,135.223999,22,false
+RJCC,CTS,New Chitose Airport,New Chitose Airport,Sapporo,Sapporo,JP,Asia/Tokyo,42.774753,141.690414,82,false
+RJCH,HKD,Hakodate Airport,Hakodate Airport,Hakodate,Hakodate,JP,Asia/Tokyo,41.770000,140.822006,151,false
+RJFF,FUK,Fukuoka Airport,Fukuoka Airport,Fukuoka,Fukuoka,JP,Asia/Tokyo,33.585899,130.451004,32,false
+RJFK,KOJ,Kagoshima Airport,Kagoshima Airport,Kagoshima,Kagoshima,JP,Asia/Tokyo,31.803400,130.718994,906,false
+RJFM,KMI,Miyazaki Airport,Miyazaki Airport,Miyazaki,Miyazaki,JP,Asia/Tokyo,31.877199,131.449005,20,false
+RJFR,KKJ,Kitakyushu Airport,Kitakyushu Airport,Kitakyushu,Kitakyushu,JP,Asia/Tokyo,33.845901,131.035004,21,false
+RJFS,HSG,Kyushu Saga International Airport,Kyushu Saga International Airport,Saga,Saga,JP,Asia/Tokyo,33.149700,130.302002,6,false
+RJFT,KMJ,Kumamoto Airport,Kumamoto Airport,Kumamoto,Kumamoto,JP,Asia/Tokyo,32.837299,130.854996,642,false
+RJFU,NGS,Nagasaki Airport,Nagasaki Airport,Nagasaki,Nagasaki,JP,Asia/Tokyo,32.916901,129.914001,15,false
+RJGG,NGO,Chubu Centrair International Airport,Chubu Centrair International Airport,Tokoname,Tokoname,JP,Asia/Tokyo,34.858398,136.804993,15,false
+RJNK,KMQ,Komatsu Airport / JASDF Komatsu Air Base,Komatsu Airport / JASDF Komatsu Air Base,Kanazawa,Kanazawa,JP,Asia/Tokyo,36.393407,136.406895,36,false
+RJNS,FSZ,Mount Fuji Shizuoka Airport,Mount Fuji Shizuoka Airport,Makinohara / Shimada,Makinohara / Shimada,JP,Asia/Tokyo,34.795022,138.190976,433,false
+RJOA,HIJ,Hiroshima Airport,Hiroshima Airport,Hiroshima,Hiroshima,JP,Asia/Tokyo,34.436100,132.919006,1088,false
+RJOB,OKJ,Okayama Momotaro Airport,Okayama Momotaro Airport,Okayama,Okayama,JP,Asia/Tokyo,34.756901,133.854996,806,false
+RJOK,KCZ,Kochi Ryoma Airport,Kochi Ryoma Airport,Nankoku,Nankoku,JP,Asia/Tokyo,33.545217,133.670166,42,false
+RJOM,MYJ,Matsuyama Airport,Matsuyama Airport,Matsuyama,Matsuyama,JP,Asia/Tokyo,33.826893,132.700114,25,false
+RJOO,ITM,Osaka Itami International Airport,Osaka Itami International Airport,Osaka,Osaka,JP,Asia/Tokyo,34.780853,135.440829,50,false
+RJOS,TKS,Tokushima Awaodori Airport / JMSDF Tokushima Air Base,Tokushima Awaodori Airport / JMSDF Tokushima Air Base,Tokushima,Tokushima,JP,Asia/Tokyo,34.132559,134.607816,26,false
+RJOT,TAK,Takamatsu Airport,Takamatsu Airport,Takamatsu,Takamatsu,JP,Asia/Tokyo,34.214963,134.015454,607,false
+RJSA,AOJ,Aomori Airport,Aomori Airport,Aomori,Aomori,JP,Asia/Tokyo,40.733777,140.689477,664,false
+RJSN,KIJ,Niigata Airport,Niigata Airport,Niigata,Niigata,JP,Asia/Tokyo,37.954166,139.112189,29,false
+RJSS,SDJ,Sendai Airport,Sendai Airport,Natori,Natori,JP,Asia/Tokyo,38.139702,140.917007,15,false
+RJTT,HND,Tokyo Haneda International Airport,Tokyo Haneda International Airport,Tokyo,Tokyo,JP,Asia/Tokyo,35.549678,139.786958,35,true
+RKJB,MWX,Muan International Airport,Muan International Airport,Muan (Piseo-ri),Muan (Piseo-ri),KR,Asia/Seoul,34.991406,126.382814,35,false
+RKNY,YNY,Yangyang International Airport,Yangyang International Airport,Gonghang-ro,Gonghang-ro,KR,Asia/Seoul,38.060481,128.669822,241,false
+RKPC,CJU,Jeju International Airport,Jeju International Airport,Jeju City,Jeju City,KR,Asia/Seoul,33.512058,126.492548,118,false
+RKPK,PUS,Gimhae International Airport,Gimhae International Airport,Busan,Busan,KR,Asia/Seoul,35.179501,128.938004,6,false
+RKSI,ICN,Incheon International Airport,Incheon International Airport,Seoul,Seoul,KR,Asia/Seoul,37.469101,126.450996,23,true
+RKSS,GMP,Seoul Gimpo International Airport,Seoul Gimpo International Airport,Seoul,Seoul,KR,Asia/Seoul,37.558300,126.791000,59,false
+RKTN,TAE,Daegu International Airport,Daegu International Airport,Daegu,Daegu,KR,Asia/Seoul,35.894394,128.656989,116,false
+RKTU,CJJ,Cheongju International Airport/Cheongju Air Base (K-59/G-513),Cheongju International Airport/Cheongju Air Base (K-59/G-513),Cheongju,Cheongju,KR,Asia/Seoul,36.715560,127.500289,191,false
+ROAH,OKA,Naha International Airport,Naha International Airport,Naha,Naha,JP,Asia/Tokyo,26.192437,127.639804,12,false
+RODN,DNA,Kadena Air Base,Kadena Air Base,Okinawa,Okinawa,JP,Asia/Tokyo,26.351667,127.769444,143,false
+RPLB,SFS,Subic Bay International Airport / Naval Air Station Cubi Point,Subic Bay International Airport / Naval Air Station Cubi Point,Olongapo,Olongapo,PH,Asia/Manila,14.794833,120.271883,64,false
+RPLC,CRK,Clark International Airport / Clark Air Base,Clark International Airport / Clark Air Base,Mabalacat,Mabalacat,PH,Asia/Manila,15.186000,120.559998,484,false
+RPLI,LAO,Laoag International Airport,Laoag International Airport,Laoag City,Laoag City,PH,Asia/Manila,18.175089,120.531006,25,false
+RPLK,DRP,Bicol International Airport,Bicol International Airport,Legazpi,Legazpi,PH,Asia/Manila,13.111915,123.676829,319,false
+RPLL,MNL,Ninoy Aquino International Airport,Ninoy Aquino International Airport,Manila (Pasay),Manila (Pasay),PH,Asia/Manila,14.508600,121.019997,75,false
+RPMD,DVO,Francisco Bangoy International Airport,Francisco Bangoy International Airport,Davao,Davao,PH,Asia/Manila,7.125520,125.646004,96,false
+RPMR,GES,General Santos International Airport,General Santos International Airport,General Santos,General Santos,PH,Asia/Manila,6.057208,125.096243,505,false
+RPMY,CGY,Laguindingan International Airport,Laguindingan International Airport,Laguindingan,Laguindingan,PH,Asia/Manila,8.612203,124.456496,190,false
+RPMZ,ZAM,Zamboanga International Airport,Zamboanga International Airport,Zamboanga,Zamboanga,PH,Asia/Manila,6.922420,122.059998,33,false
+RPSP,TAG,Bohol-Panglao International Airport,Bohol-Panglao International Airport,Panglao,Panglao,PH,Asia/Manila,9.573045,123.770143,42,false
+RPVB,BCD,Bacolod-Silay International Airport,Bacolod-Silay International Airport,Bacolod City,Bacolod City,PH,Asia/Manila,10.776237,123.018879,82,false
+RPVI,ILO,Iloilo International Airport,Iloilo International Airport,Cabatuan,Cabatuan,PH,Asia/Manila,10.833017,122.493358,27,false
+RPVK,KLO,Kalibo International Airport,Kalibo International Airport,Kalibo,Kalibo,PH,Asia/Manila,11.679400,122.375999,14,false
+RPVM,CEB,Mactan Cebu International Airport,Mactan Cebu International Airport,Cebu City/Lapu-Lapu City,Cebu City/Lapu-Lapu City,PH,Asia/Manila,10.309261,123.979740,31,false
+RPVP,PPS,Puerto Princesa International Airport / PAF Antonio Bautista Air Base,Puerto Princesa International Airport / PAF Antonio Bautista Air Base,Puerto Princesa,Puerto Princesa,PH,Asia/Manila,9.742044,118.759110,71,false
+SAAR,ROS,Rosario Islas Malvinas International Airport,Rosario Islas Malvinas International Airport,Rosario,Rosario,AR,America/Cordoba,-32.903600,-60.785000,85,false
+SABE,AEP,Aeroparque Jorge Newbery,Aeroparque Jorge Newbery,Buenos Aires,Buenos Aires,AR,America/Buenos_Aires,-34.559419,-58.415536,18,false
+SACO,COR,Ingeniero Aeronáutico Ambrosio L.V. Taravella International Airport,Ingeniero Aeronáutico Ambrosio L.V. Taravella International Airport,Cordoba,Cordoba,AR,America/Cordoba,-31.312346,-64.208329,1604,false
+SAEZ,EZE,Ezeiza International Airport - Ministro Pistarini,Ezeiza International Airport - Ministro Pistarini,Buenos Aires (Ezeiza),Buenos Aires (Ezeiza),AR,America/Buenos_Aires,-34.822200,-58.535800,67,true
+SAME,MDZ,Governor Francisco Gabrielli International Airport,Governor Francisco Gabrielli International Airport,Mendoza,Mendoza,AR,America/Mendoza,-32.831699,-68.792900,2310,false
+SANT,TUC,Teniente Benjamín Matienzo International Airport,Teniente Benjamín Matienzo International Airport,San Miguel de Tucumán,San Miguel de Tucumán,AR,America/Argentina/Tucuman,-26.837397,-65.104195,1493,false
+SARE,RES,Resistencia International Airport,Resistencia International Airport,Resistencia,Resistencia,AR,America/Cordoba,-27.449910,-59.056125,173,false
+SASA,SLA,Martín Miguel de Güemes International Airport,Martín Miguel de Güemes International Airport,Salta,Salta,AR,America/Argentina/Salta,-24.856001,-65.486198,4088,false
+SASJ,JUJ,Gobernador Horacio Guzman International Airport,Gobernador Horacio Guzman International Airport,San Salvador de Jujuy,San Salvador de Jujuy,AR,America/Jujuy,-24.392799,-65.097801,3019,false
+SAVC,CRD,General Enrique Mosconi International Airport,General Enrique Mosconi International Airport,Comodoro Rivadavia,Comodoro Rivadavia,AR,America/Catamarca,-45.786941,-67.463355,189,false
+SAWG,RGL,Piloto Civil Norberto Fernández International Airport,Piloto Civil Norberto Fernández International Airport,Rio Gallegos,Rio Gallegos,AR,America/Argentina/Rio_Gallegos,-51.608791,-69.308948,61,false
+SAZN,NQN,Presidente Perón International Airport,Presidente Perón International Airport,Neuquén,Neuquén,AR,America/Argentina/Salta,-38.949001,-68.155701,895,false
+SAZS,BRC,Teniente Luis Candelaria International Airport,Teniente Luis Candelaria International Airport,San Carlos de Bariloche,San Carlos de Bariloche,AR,America/Argentina/Salta,-41.151199,-71.157501,2774,false
+SBBE,BEL,Val de Cans/Júlio Cezar Ribeiro International Airport,Val de Cans/Júlio Cezar Ribeiro International Airport,Belém,Belém,BR,America/Belem,-1.379279,-48.476207,54,false
+SBBR,BSB,Presidente Juscelino Kubitschek International Airport,Presidente Juscelino Kubitschek International Airport,Brasília,Brasília,BR,America/Sao_Paulo,-15.869167,-47.920834,3497,false
+SBBV,BVB,Atlas Brasil Cantanhede International Airport,Atlas Brasil Cantanhede International Airport,Boa Vista,Boa Vista,BR,America/Boa_Vista,2.846150,-60.690648,276,false
+SBCF,CNF,Tancredo Neves International Airport,Tancredo Neves International Airport,Belo Horizonte,Belo Horizonte,BR,America/Sao_Paulo,-19.635710,-43.966928,2721,false
+SBCT,CWB,Curitiba-Afonso Pena International Airport,Curitiba-Afonso Pena International Airport,Curitiba,Curitiba,BR,America/Sao_Paulo,-25.528500,-49.175800,2988,false
+SBCY,CGB,Várzea Grande–Marechal Rondon International Airport,Várzea Grande–Marechal Rondon International Airport,Cuiabá,Cuiabá,BR,America/Campo_Grande,-15.652900,-56.116699,617,false
+SBEG,MAO,Eduardo Gomes International Airport,Eduardo Gomes International Airport,Manaus,Manaus,BR,America/Boa_Vista,-3.038610,-60.049702,264,false
+SBFI,IGU,Cataratas International Airport,Cataratas International Airport,Foz do Iguaçu,Foz do Iguaçu,BR,America/Sao_Paulo,-25.594167,-54.489444,786,false
+SBFL,FLN,Hercílio Luz International Airport,Hercílio Luz International Airport,Florianópolis,Florianópolis,BR,America/Sao_Paulo,-27.670279,-48.552502,16,false
+SBFZ,FOR,Pinto Martins International Airport,Pinto Martins International Airport,Fortaleza,Fortaleza,BR,America/Fortaleza,-3.775833,-38.532222,83,false
+SBGL,GIG,Rio de Janeiro Galeão – Tom Jobim International Airport,Rio de Janeiro Galeão – Tom Jobim International Airport,Rio De Janeiro,Rio De Janeiro,BR,America/Sao_Paulo,-22.809999,-43.250557,28,true
+SBGO,GYN,Santa Genoveva International Airport,Santa Genoveva International Airport,Goiânia,Goiânia,BR,America/Sao_Paulo,-16.632000,-49.220699,2450,false
+SBGR,GRU,São Paulo/Guarulhos–Governor André Franco Montoro International Airport,São Paulo/Guarulhos–Governor André Franco Montoro International Airport,São Paulo,São Paulo,BR,America/Sao_Paulo,-23.431274,-46.469954,2461,true
+SBJP,JPA,Presidente Castro Pinto International Airport,Presidente Castro Pinto International Airport,João Pessoa,João Pessoa,BR,America/Fortaleza,-7.148691,-34.950554,217,false
+SBKP,VCP,Viracopos International Airport,Viracopos International Airport,Campinas,Campinas,BR,America/Sao_Paulo,-23.007404,-47.134502,2170,false
+SBMO,MCZ,Zumbi dos Palmares International Airport,Zumbi dos Palmares International Airport,Maceió,Maceió,BR,America/Fortaleza,-9.512559,-35.791839,387,false
+SBNF,NVT,Ministro Victor Konder International Airport,Ministro Victor Konder International Airport,Navegantes,Navegantes,BR,America/Sao_Paulo,-26.879431,-48.650979,18,false
+SBPA,POA,Porto Alegre-Salgado Filho International Airport,Porto Alegre-Salgado Filho International Airport,Porto Alegre,Porto Alegre,BR,America/Sao_Paulo,-29.993984,-51.167482,11,false
+SBPS,BPS,Porto Seguro International Airport,Porto Seguro International Airport,Porto Seguro,Porto Seguro,BR,America/Fortaleza,-16.438426,-39.080584,169,false
+SBPV,PVH,Governador Jorge Teixeira de Oliveira International Airport,Governador Jorge Teixeira de Oliveira International Airport,Porto Velho,Porto Velho,BR,America/Boa_Vista,-8.708491,-63.902338,295,false
+SBRB,RBR,Rio Branco-Plácido de Castro International Airport,Rio Branco-Plácido de Castro International Airport,Rio Branco,Rio Branco,BR,America/Rio_Branco,-9.869031,-67.893984,633,false
+SBRF,REC,Recife/Guararapes - Gilberto Freyre International Airport,Recife/Guararapes - Gilberto Freyre International Airport,Recife,Recife,BR,America/Fortaleza,-8.127470,-34.922961,33,false
+SBRJ,SDU,Santos Dumont Airport,Santos Dumont Airport,Rio de Janeiro,Rio de Janeiro,BR,America/Sao_Paulo,-22.910397,-43.162820,11,false
+SBSG,NAT,Rio Grande do Norte/São Gonçalo do Amarante–Governador Aluízio Alves International Airport,Rio Grande do Norte/São Gonçalo do Amarante–Governador Aluízio Alves International Airport,Natal,Natal,BR,America/Fortaleza,-5.769822,-35.366610,273,false
+SBSL,SLZ,Marechal Cunha Machado International Airport,Marechal Cunha Machado International Airport,São Luís,São Luís,BR,America/Fortaleza,-2.586386,-44.235008,178,false
+SBSP,CGH,Congonhas–Deputado Freitas Nobre Airport,Congonhas–Deputado Freitas Nobre Airport,São Paulo,São Paulo,BR,America/Sao_Paulo,-23.627657,-46.654601,2631,false
+SBSV,SSA,Deputado Luiz Eduardo Magalhães International Airport,Deputado Luiz Eduardo Magalhães International Airport,Salvador,Salvador,BR,America/Fortaleza,-12.908611,-38.322498,64,false
+SBVT,VIX,Eurico de Aguiar Salles International Airport,Eurico de Aguiar Salles International Airport,Vitória,Vitória,BR,America/Sao_Paulo,-20.258000,-40.285000,34,false
+SCCI,PUQ,President Carlos Ibáñez International Airport,President Carlos Ibáñez International Airport,Punta Arenas,Punta Arenas,CL,America/Santiago,-53.002602,-70.854599,139,false
+SCDA,IQQ,Diego Aracena International Airport,Diego Aracena International Airport,Iquique,Iquique,CL,America/Santiago,-20.536273,-70.181373,155,false
+SCEL,SCL,Comodoro Arturo Merino Benítez International Airport,Comodoro Arturo Merino Benítez International Airport,Santiago,Santiago,CL,America/Santiago,-33.393002,-70.785797,1555,true
+SCFA,ANF,Andrés Sabella Gálvez International Airport,Andrés Sabella Gálvez International Airport,Antofagasta,Antofagasta,CL,America/Santiago,-23.445274,-70.445232,455,false
+SCIE,CCP,Carriel Sur International Airport,Carriel Sur International Airport,Concepcion,Concepcion,CL,America/Santiago,-36.772350,-73.062828,26,false
+SCIP,IPC,Mataveri International Airport,Mataveri International Airport,Isla De Pascua,Isla De Pascua,CL,Pacific/Easter,-27.165411,-109.421027,227,false
+SCQP,ZCO,La Araucanía International Airport,La Araucanía International Airport,Temuco,Temuco,CL,America/Santiago,-38.925900,-72.651500,333,false
+SCTE,PMC,El Tepual International Airport,El Tepual International Airport,Puerto Montt,Puerto Montt,CL,America/Santiago,-41.443093,-73.094065,294,false
+SEGU,GYE,José Joaquín de Olmedo International Airport,José Joaquín de Olmedo International Airport,Guayaquil,Guayaquil,EC,America/Guayaquil,-2.157420,-79.883598,19,false
+SEQM,UIO,Mariscal Sucre International Airport,Mariscal Sucre International Airport,Quito,Quito,EC,America/Guayaquil,-0.125399,-78.354306,7841,false
+SESA,SNC,General Ulpiano Paez International Airport,General Ulpiano Paez International Airport,Salinas/La Libertad,Salinas/La Libertad,EC,America/Guayaquil,-2.210057,-80.985067,18,false
+SETN,ESM,Carlos Concha Torres International Airport,Carlos Concha Torres International Airport,Tachina,Tachina,EC,America/Guayaquil,0.978519,-79.626602,32,false
+SGAS,ASU,Silvio Pettirossi International Airport,Silvio Pettirossi International Airport,Asunción,Asunción,PY,America/Asuncion,-25.240156,-57.519227,292,false
+SGEN,ENO,Teniente Ramon A. Ayub Gonzalez International Airport,Teniente Ramon A. Ayub Gonzalez International Airport,Encarnación,Encarnación,PY,America/Asuncion,-27.227537,-55.837584,659,false
+SGES,AGT,Guaraní International Airport,Guaraní International Airport,Ciudad del Este,Ciudad del Este,PY,America/Asuncion,-25.457186,-54.839544,846,false
+SKBO,BOG,El Dorado International Airport,El Dorado International Airport,Bogota,Bogota,CO,America/Bogota,4.701590,-74.146900,8361,false
+SKBQ,BAQ,Ernesto Cortissoz International Airport,Ernesto Cortissoz International Airport,Barranquilla,Barranquilla,CO,America/Bogota,10.889600,-74.780800,98,false
+SKCG,CTG,Rafael Nuñez International Airport,Rafael Nuñez International Airport,Cartagena,Cartagena,CO,America/Bogota,10.442400,-75.513000,4,false
+SKCL,CLO,Alfonso Bonilla Aragon International Airport,Alfonso Bonilla Aragon International Airport,Cali,Cali,CO,America/Bogota,3.542717,-76.381898,3162,false
+SKRG,MDE,Jose Maria Córdova International Airport,Jose Maria Córdova International Airport,Medellín,Medellín,CO,America/Bogota,6.164540,-75.423100,6955,false
+SKSP,ADZ,Gustavo Rojas Pinilla International Airport,Gustavo Rojas Pinilla International Airport,San Andrés,San Andrés,CO,America/Bogota,12.583600,-81.711200,19,false
+SLAL,SRE,Alcantarí International Airport,Alcantarí International Airport,Sucre,Sucre,BO,America/La_Paz,-19.246835,-65.149611,10184,false
+SLCB,CBB,Jorge Wilsterman International Airport,Jorge Wilsterman International Airport,Cochabamba,Cochabamba,BO,America/La_Paz,-17.421105,-66.177102,8360,false
+SLLP,LPB,El Alto International Airport,El Alto International Airport,La Paz / El Alto,La Paz / El Alto,BO,America/La_Paz,-16.510272,-68.189416,13355,false
+SLOR,ORU,Juan Mendoza International Airport,Juan Mendoza International Airport,Oruro,Oruro,BO,America/La_Paz,-17.956151,-67.075829,12152,false
+SLUY,UYU,Joya Andina International Airport,Joya Andina International Airport,Quijarro,Quijarro,BO,America/La_Paz,-20.441304,-66.857553,11136,false
+SLVR,VVI,Viru Viru International Airport,Viru Viru International Airport,Santa Cruz,Santa Cruz,BO,America/La_Paz,-17.644800,-63.135399,1224,false
+SMJP,PBM,Johan Adolf Pengel International Airport,Johan Adolf Pengel International Airport,Paramaribo,Paramaribo,SR,America/Paramaribo,5.452830,-55.187801,59,false
+SOCA,CAY,Cayenne – Félix Eboué Airport,Cayenne – Félix Eboué Airport,Matoury,Matoury,GF,America/Cayenne,4.819964,-52.361326,26,false
+SPCL,PCL,Cap FAP David Abenzur Rengifo International Airport,Cap FAP David Abenzur Rengifo International Airport,Pucallpa,Pucallpa,PE,America/Lima,-8.378064,-74.574495,513,false
+SPHI,CIX,Capitán FAP José A. Quiñones González International Airport,Capitán FAP José A. Quiñones González International Airport,Chiclayo,Chiclayo,PE,America/Lima,-6.789223,-79.828254,97,false
+SPJC,LIM,Jorge Chávez International Airport,Jorge Chávez International Airport,Lima,Lima,PE,America/Lima,-12.021900,-77.114305,113,false
+SPJL,JUL,Inca Manco Capac International Airport,Inca Manco Capac International Airport,Juliaca,Juliaca,PE,America/Lima,-15.467689,-70.156530,12552,false
+SPQT,IQT,Coronel FAP Francisco Secada Vignetta International Airport,Coronel FAP Francisco Secada Vignetta International Airport,Iquitos,Iquitos,PE,America/Lima,-3.784740,-73.308800,306,false
+SPQU,AQP,Rodríguez Ballón International Airport,Rodríguez Ballón International Airport,Arequipa,Arequipa,PE,America/Lima,-16.340786,-71.569485,8405,false
+SPRU,TRU,Capitán FAP Carlos Martínez de Pinillos International Airport,Capitán FAP Carlos Martínez de Pinillos International Airport,Trujillo,Trujillo,PE,America/Lima,-8.082382,-79.108821,106,false
+SPSO,PIO,Captain Renán Elías Olivera International Airport,Captain Renán Elías Olivera International Airport,Pisco,Pisco,PE,America/Lima,-13.744900,-76.220299,39,false
+SPZO,CUZ,Alejandro Velasco Astete International Airport,Alejandro Velasco Astete International Airport,Cusco,Cusco,PE,America/Lima,-13.535700,-71.938797,10860,false
+SUMU,MVD,Carrasco General Cesáreo L. Berisso International Airport,Carrasco General Cesáreo L. Berisso International Airport,Ciudad de la Costa,Ciudad de la Costa,UY,America/Montevideo,-34.835647,-56.026497,105,false
+SVBC,BLA,General José Antonio Anzoategui International Airport,General José Antonio Anzoategui International Airport,Barcelona,Barcelona,VE,America/Caracas,10.111111,-64.692222,30,false
+SVBM,BRM,Jacinto Lara International Airport,Jacinto Lara International Airport,Barquisimeto,Barquisimeto,VE,America/Caracas,10.042747,-69.358620,2042,false
+SVMC,MAR,La Chinita International Airport,La Chinita International Airport,Maracaibo,Maracaibo,VE,America/Caracas,10.557542,-71.729307,239,false
+SVMG,PMV,Del Caribe Santiago Mariño International Airport,Del Caribe Santiago Mariño International Airport,Isla Margarita,Isla Margarita,VE,America/Caracas,10.912603,-63.966599,74,false
+SVMI,CCS,Maiquetía Simón Bolívar International Airport,Maiquetía Simón Bolívar International Airport,Maiquetía,Maiquetía,VE,America/Caracas,10.602214,-66.991174,234,false
+SVPR,PZO,General Manuel Carlos Piar International Airport,General Manuel Carlos Piar International Airport,Guyana City,Guyana City,VE,America/Caracas,8.288530,-62.760399,472,false
+SVVA,VLN,Arturo Michelena International Airport,Arturo Michelena International Airport,Valencia,Valencia,VE,America/Caracas,10.149733,-67.928398,1411,false
+SYCJ,GEO,Cheddi Jagan International Airport,Cheddi Jagan International Airport,Georgetown,Georgetown,GY,America/Guyana,6.498550,-58.254101,95,false
+TAPA,ANU,V. C. Bird International Airport,V. C. Bird International Airport,Osbourn,Osbourn,AG,America/Antigua,17.136700,-61.792702,62,false
+TBPB,BGI,Grantley Adams International Airport,Grantley Adams International Airport,Bridgetown,Bridgetown,BB,America/Barbados,13.074667,-59.491034,169,false
+TFFF,FDF,Martinique Aimé Césaire International Airport,Martinique Aimé Césaire International Airport,Fort-de-France,Fort-de-France,MQ,America/Martinique,14.591000,-61.003201,16,false
+TFFR,PTP,Maryse Condé International Airport,Maryse Condé International Airport,Pointe-à-Pitre,Pointe-à-Pitre,GP,America/Guadeloupe,16.265443,-61.532754,36,false
+TGPY,GND,Maurice Bishop International Airport,Maurice Bishop International Airport,Saint George's,Saint George's,GD,America/Grenada,12.003996,-61.785302,41,false
+TIST,STT,Cyril E. King Airport,Cyril E. King Airport,Charlotte Amalie,Charlotte Amalie,VI,America/St_Thomas,18.337091,-64.977251,23,false
+TJSJ,SJU,Luis Munoz Marin International Airport,Luis Munoz Marin International Airport,San Juan,San Juan,PR,America/Puerto_Rico,18.439400,-66.001801,9,false
+TKPK,SKB,Robert L. Bradshaw International Airport,Robert L. Bradshaw International Airport,Basseterre,Basseterre,KN,America/St_Kitts,17.310845,-62.719117,170,false
+TLPL,UVF,Hewanorra International Airport,Hewanorra International Airport,Vieux Fort,Vieux Fort,LC,America/St_Lucia,13.733200,-60.952599,14,false
+TNCA,AUA,Queen Beatrix International Airport,Queen Beatrix International Airport,Oranjestad,Oranjestad,AW,America/Aruba,12.501056,-70.014281,60,false
+TNCB,BON,Flamingo International Airport,Flamingo International Airport,Kralendijk,Kralendijk,BQ,America/Curacao,12.131000,-68.268501,20,false
+TNCC,CUR,Hato International Airport,Hato International Airport,Willemstad,Willemstad,CW,America/Curacao,12.188900,-68.959801,29,false
+TNCM,SXM,Princess Juliana International Airport,Princess Juliana International Airport,Sint Maarten,Sint Maarten,SX,America/Curacao,18.041000,-63.108898,13,false
+TRPG,MNI,John A. Osborne Airport,John A. Osborne Airport,Gerald's Park,Gerald's Park,MS,America/Montserrat,16.791835,-62.193204,550,false
+TTCP,TAB,A.N.R. Robinson International Airport,A.N.R. Robinson International Airport,Scarborough,Scarborough,TT,America/Port_of_Spain,11.149571,-60.831298,38,false
+TTPP,POS,Piarco International Airport,Piarco International Airport,Port of Spain,Port of Spain,TT,America/Port_of_Spain,10.595350,-61.337568,58,false
+TUPJ,EIS,Terrance B. Lettsome International Airport,Terrance B. Lettsome International Airport,Beef Island,Beef Island,VG,America/Tortola,18.445492,-64.541707,15,false
+TVSA,SVD,Argyle International Airport,Argyle International Airport,Kingstown,Kingstown,VC,America/St_Vincent,13.159725,-61.148801,136,false
+TXKF,BDA,L.F. Wade International Airport,L.F. Wade International Airport,Hamilton,Hamilton,BM,Atlantic/Bermuda,32.363802,-64.678240,12,false
+UAAA,ALA,Алматы,Almaty International Airport,Алматы,Almaty,KZ,Asia/Almaty,43.354267,77.042828,2234,false
+UAAH,BXH,Balkhash Airport,Balkhash Airport,Balkhash,Balkhash,KZ,Asia/Qyzylorda,46.894246,75.004533,1446,false
+UAAT,TDK,Taldykorgan Airport,Taldykorgan Airport,Taldykorgan,Taldykorgan,KZ,Asia/Bishkek,45.122550,78.442758,1925,false
+UACC,NQZ,Нурсултан Назарбаев,Nursultan Nazarbayev International Airport,Астана,Astana,KZ,Asia/Almaty,51.027035,71.467094,1165,false
+UACK,KOV,Сары-Арка,Kokshetau International Airport,Караганда,Kokshetau,KZ,Asia/Almaty,53.329102,69.594597,900,false
+UACP,PPK,Petropavl International Airport,Petropavl International Airport,Petropavl,Petropavl,KZ,Asia/Qyzylorda,54.775622,69.187415,453,false
+UADD,DMB,Taraz International Airport,Taraz International Airport,Taraz,Taraz,KZ,Asia/Qyzylorda,42.853600,71.303596,2184,false
+UAII,CIT,Shymkent International Airport,Shymkent International Airport,Shymkent,Shymkent,KZ,Asia/Qyzylorda,42.365021,69.475640,1385,false
+UAIT,HSA,Hazrat Sultan International Airport,Hazrat Sultan International Airport,Turkıstan,Turkıstan,KZ,Asia/Qyzylorda,43.311087,68.550352,951,false
+UAKD,DZN,Zhezkazgan National Airport,Zhezkazgan National Airport,Zhezkazgan,Zhezkazgan,KZ,Asia/Qyzylorda,47.708953,67.738094,1250,false
+UAKK,KGF,Sary-Arka Airport,Sary-Arka Airport,Karaganda,Karaganda,KZ,Asia/Qyzylorda,49.670799,73.334396,1765,false
+UAOL,BXY,Baikonur Krayniy International Airport,Baikonur Krayniy International Airport,Baikonur,Baikonur,KZ,Asia/Qyzylorda,45.621994,63.210773,317,false
+UAON,,Yubileyniy Airfield,Yubileyniy Airfield,Töretam,Töretam,KZ,Asia/Qyzylorda,46.052421,63.249185,328,false
+UAOO,KZO,Korkyt Ata International Airport,Korkyt Ata International Airport,Kyzylorda,Kyzylorda,KZ,Asia/Qyzylorda,44.706902,65.592499,433,false
+UARR,URA,Manshuk Mametova International Airport,Manshuk Mametova International Airport,Uralsk,Uralsk,KZ,Asia/Oral,51.151976,51.543652,125,false
+UASB,EKB,Ekibastuz Airport,Ekibastuz Airport,Ekibastuz,Ekibastuz,KZ,Asia/Qyzylorda,51.591000,75.214996,621,false
+UASK,UKK,Oskemen International Airport,Oskemen International Airport,Ust-Kamenogorsk (Oskemen),Ust-Kamenogorsk (Oskemen),KZ,Asia/Qyzylorda,50.035033,82.496057,939,false
+UASP,PWQ,Pavlodar International Airport,Pavlodar International Airport,Pavlodar,Pavlodar,KZ,Asia/Qyzylorda,52.194982,77.073088,410,false
+UASS,PLX,Semei International Airport,Semei International Airport,Semey,Semey,KZ,Asia/Qyzylorda,50.351295,80.234398,761,false
+UATE,SCO,Актау,Aktau International Airport,Актау,Aktau,KZ,Asia/Aqtau,43.860093,51.090860,73,false
+UATG,GUW,Atyrau International Airport,Atyrau International Airport,Atyrau,Atyrau,KZ,Asia/Oral,47.121318,51.820343,-72,false
+UATT,AKX,Актобе,Aktobe International Airport,Актобе,Aktobe,KZ,Asia/Aqtobe,50.248116,57.204144,738,false
+UAUU,KSN,Kostanay International Airport,Kostanay International Airport,Kostanay,Kostanay,KZ,Asia/Qyzylorda,53.206902,63.550301,595,false
+UBBB,GYD,Гейдар Алиев,Heydar Aliyev International Airport,Баку,Baku,AZ,Asia/Baku,40.472780,50.050931,10,false
+UBBG,GNJ,Ganja International Airport,Ganja International Airport,Ganja,Ganja,AZ,Asia/Baku,40.738692,46.320383,1083,false
+UBBI,,Nasosnaya Air Base,Nasosnaya Air Base,Sumqayit,Sumqayit,AZ,Asia/Baku,40.591599,49.557400,-13,false
+UBBN,NAJ,Nakhchivan International Airport,Nakhchivan International Airport,Nakhchivan,Nakhchivan,AZ,Asia/Baku,39.188801,45.458401,2863,false
+UBBQ,GBB,Gabala International Airport,Gabala International Airport,Gabala,Gabala,AZ,Asia/Baku,40.808617,47.725389,935,false
+UBBS,,Khojaly Airport,Khojaly Airport,Khojaly,Khojaly,AZ,Asia/Baku,39.901402,46.786999,2001,false
+UBBY,ZTU,Zaqatala International Airport,Zaqatala International Airport,Zaqatala,Zaqatala,AZ,Asia/Baku,41.557823,46.669464,1279,false
+UBLC,LHL,Lachin International Airport,Lachin International Airport,Lachin,Lachin,AZ,Asia/Baku,39.883787,46.363137,5577,false
+UBTT,ZXT,Zabrat Airport,Zabrat Airport,Zabrat,Zabrat,AZ,Asia/Baku,40.494884,49.977065,36,false
+UCFB,,Batken Airport,Batken Airport,Batken,Batken,KG,Asia/Bishkek,40.042899,70.837840,3602,false
+UCFD,,Jalal-Abad Airport,Jalal-Abad Airport,Jalal-Abad,Jalal-Abad,KG,Asia/Bishkek,40.944401,72.977798,2591,false
+UCFK,IKG,Karakol International Airport,Karakol International Airport,Karakol,Karakol,KG,Asia/Bishkek,42.508099,78.407799,5590,false
+UCFL,IKU,Issyk-Kul International Airport,Issyk-Kul International Airport,Tamchy,Tamchy,KG,Asia/Bishkek,42.585584,76.701181,5425,false
+UCFM,BSZ,Манас,Manas International Airport,Бишкек,Bishkek,KG,Asia/Bishkek,43.061298,74.477600,2058,false
+UCFO,OSS,Osh International Airport,Osh International Airport,Osh,Osh,KG,Asia/Bishkek,40.609001,72.793297,2927,false
+UDSG,LWN,Shirak International Airport,Shirak International Airport,Gyumri,Gyumri,AM,Asia/Yerevan,40.750401,43.859299,5000,false
+UDYZ,EVN,Звартноц,Zvartnots International Airport,Ереван,Yerevan,AM,Asia/Yerevan,40.148941,44.397887,2838,false
+UEEE,YKS,Якутск,Platon Oyunsky Yakutsk International Airport,Якутск,Yakutsk,RU,Asia/Yakutsk,62.093300,129.770996,325,false
+UELL,NER,Chulman Airport,Chulman Airport,Neryungri,Neryungri,RU,Asia/Yakutsk,56.913898,124.914001,2812,false
+UEMA,MQJ,Moma Airport,Moma Airport,Khonuu,Khonuu,RU,Asia/Srednekolymsk,66.450861,143.261551,656,false
+UEMM,GYG,Magan Airport,Magan Airport,Magan,Magan,RU,Asia/Yakutsk,62.103484,129.545288,577,false
+UEMO,OLZ,Olyokminsk Airport,Olyokminsk Airport,Olyokminsk,Olyokminsk,RU,Asia/Yakutsk,60.401833,120.476094,656,false
+UEMT,USR,Ust-Nera Airport,Ust-Nera Airport,Ust-Nera,Ust-Nera,RU,Asia/Vladivostok,64.550003,143.115005,1805,false
+UENW,VYI,Vilyuisk Airport,Vilyuisk Airport,Vilyuisk,Vilyuisk,RU,Asia/Yakutsk,63.756668,121.693336,361,false
+UERL,ULK,Lensk Airport,Lensk Airport,Lensk,Lensk,RU,Asia/Yakutsk,60.723594,114.825319,801,false
+UERP,PYJ,Polyarny Airport,Polyarny Airport,Yakutia,Yakutia,RU,Asia/Yakutsk,66.400398,112.029999,1660,false
+UERR,MJZ,Мирный,Mirny Airport,Мирный,Mirny,RU,Asia/Yakutsk,62.534698,114.039001,1156,false
+UERS,SYS,Saskylakh Airport,Saskylakh Airport,Saskylakh,Saskylakh,RU,Asia/Yakutsk,71.927902,114.080002,0,false
+UESG,BGN,Belaya Gora Airport,Belaya Gora Airport,Belaya Gora,Belaya Gora,RU,Asia/Srednekolymsk,68.556227,146.227840,118,false
+UESO,CKH,Chokurdakh Airport,Chokurdakh Airport,Chokurdah,Chokurdah,RU,Asia/Srednekolymsk,70.623100,147.901993,151,false
+UESS,CYX,Cherskiy Airport,Cherskiy Airport,Cherskiy,Cherskiy,RU,Asia/Srednekolymsk,68.740601,161.337997,20,false
+UEST,IKS,Tiksi Airport,Tiksi Airport,Tiksi,Tiksi,RU,Asia/Yakutsk,71.697701,128.903000,26,false
+UESU,ZKP,Zyryanka Airport,Zyryanka Airport,Zyryanka,Zyryanka,RU,Asia/Srednekolymsk,65.748500,150.888900,140,false
+UEVV,ZIX,Zhigansk Airport,Zhigansk Airport,Zhigansk,Zhigansk,RU,Asia/Vladivostok,66.796501,123.361000,292,false
+UGAM,,Ambrolauri Airport,Ambrolauri Airport,Ambrolauri,Ambrolauri,GE,Asia/Tbilisi,42.526870,43.135380,1784,false
+UGKO,KUT,David the Builder Kutaisi International Airport,David the Builder Kutaisi International Airport,Kopitnari,Kopitnari,GE,Asia/Tbilisi,42.177448,42.485353,223,false
+UGSB,BUS,Батуми,Alexander Kartveli Batumi International Airport,Батуми,Batumi,GE,Asia/Tbilisi,41.609390,41.600315,105,false
+UGSS,SUI,Vladislav Ardzinba Sukhum International Airport,Vladislav Ardzinba Sukhum International Airport,Sukhumi,Sukhumi,GE,Asia/Tbilisi,42.858200,41.128101,53,false
+UGTB,TBS,Тбилиси,Tbilisi International Airport,Тбилиси,Tbilisi,GE,Asia/Tbilisi,41.669201,44.954700,1624,false
+UHBB,BQS,Ignatyevo Airport,Ignatyevo Airport,Blagoveschensk,Blagoveschensk,RU,Asia/Yakutsk,50.426723,127.415502,638,false
+UHHH,KHV,Новый,Khabarovsk Novy Airport,Хабаровск,Khabarovsk,RU,Asia/Vladivostok,48.528338,135.188588,244,false
+UHKG,,Kamenny Ruchey Naval Air Base,Kamenny Ruchey Naval Air Base,Sovetskaya Gavan,Sovetskaya Gavan,RU,Asia/Vladivostok,49.235703,140.193100,659,false
+UHKK,KXK,Komsomolsk-on-Amur Airport,Komsomolsk-on-Amur Airport,Komsomolsk-on-Amur,Komsomolsk-on-Amur,RU,Asia/Vladivostok,50.409000,136.934006,92,false
+UHKM,GVN,Sovetskaya Gavan (Maygatka) Airport,Sovetskaya Gavan (Maygatka) Airport,Sovetskaya Gavan,Sovetskaya Gavan,RU,Asia/Vladivostok,48.925067,140.035348,768,false
+UHMA,DYR,Угольный,Ugolny Yuri Ryktheu Airport,Анадырь,Anadyr,RU,Asia/Anadyr,64.734902,177.740997,194,false
+UHMD,PVS,Provideniya Bay Airport,Provideniya Bay Airport,Chukotka,Chukotka,RU,Asia/Anadyr,64.378098,-173.242996,72,false
+UHMF,,Omsukchan Airport,Omsukchan Airport,Omsukchan,Omsukchan,RU,Asia/Srednekolymsk,62.457001,155.744995,1732,false
+UHMG,,Chaybukha Airport,Chaybukha Airport,Chaybukha,Chaybukha,RU,Asia/Srednekolymsk,61.834999,160.548004,207,false
+UHMK,KPW,Keperveem Airport,Keperveem Airport,Keperveem,Keperveem,RU,Asia/Srednekolymsk,67.845001,166.139999,623,false
+UHMM,GDX,Сокол,Sokol Airport,Магадан,Magadan,RU,Asia/Magadan,59.910999,150.720001,574,false
+UHMP,PWE,Pevek Airport,Pevek Airport,Apapelgino,Apapelgino,RU,Asia/Srednekolymsk,69.783302,170.597000,11,false
+UHMS,,Seymchan Airport,Seymchan Airport,Seymchan,Seymchan,RU,Asia/Srednekolymsk,62.920780,152.422775,679,false
+UHMW,SWV,Severo-Evensk Airport,Severo-Evensk Airport,Evensk,Evensk,RU,Asia/Srednekolymsk,61.921786,159.229059,32,false
+UHNN,NLI,Nikolayevsk-na-Amure Airport,Nikolayevsk-na-Amure Airport,Nikolayevsk-na-Amure Airport,Nikolayevsk-na-Amure Airport,RU,Asia/Vladivostok,53.154999,140.649994,170,false
+UHOO,OHO,Okhotsk Airport,Okhotsk Airport,Okhotsk,Okhotsk,RU,Asia/Vladivostok,59.410065,143.056503,45,false
+UHPP,PKC,Елизово,Yelizovo Airport,Петропавловск-Камчатский,Petropavlovsk-Kamchatsky,RU,Asia/Kamchatka,53.168716,158.451068,131,false
+UHSS,UUS,Хомутово,Yuzhno-Sakhalinsk International Airport,Южно-Сахалинск,Yuzhno-Sakhalinsk,RU,Asia/Sakhalin,46.885461,142.717466,59,false
+UHWW,VVO,Кневичи,Vladivostok International Airport,Владивосток,Artyom,RU,Asia/Vladivostok,43.396256,132.148155,59,false
+UIAA,HTA,Кадала,Chita-Kadala International Airport,Чита,Chita,RU,Asia/Chita,52.024841,113.305839,2272,false
+UIBB,BTK,Bratsk Airport,Bratsk Airport,Bratsk,Bratsk,RU,Asia/Irkutsk,56.369600,101.701822,1610,false
+UIII,IKT,Иркутск,Irkutsk International Airport,Иркутск,Irkutsk,RU,Asia/Irkutsk,52.266707,104.395563,1675,false
+UITT,UKX,Ust-Kut Airport,Ust-Kut Airport,Ust-Kut,Ust-Kut,RU,Asia/Irkutsk,56.856701,105.730003,2188,false
+UIUU,UUD,Байкал,Baikal International Airport,Улан-Удэ,Ulan Ude,RU,Asia/Irkutsk,51.808614,107.439652,1690,false
+UKBB,KBP,Борисполь,Boryspil International Airport,Киев,Boryspil,UA,Europe/Kyiv,50.345001,30.894699,427,false
+UKCM,MPW,Mariupol International Airport,Mariupol International Airport,Mariupol,Mariupol,UA,Europe/Kiev,47.076099,37.449600,251,false
+UKDB,ERD,Berdyansk Airport,Berdyansk Airport,Berdyansk,Berdyansk,UA,Europe/Kiev,46.814999,36.758099,171,false
+UKDD,DNK,Dnipro International Airport,Dnipro International Airport,Dnipro,Dnipro,UA,Europe/Kiev,48.357201,35.100601,481,false
+UKDE,OZH,Zaporizhzhia International Airport,Zaporizhzhia International Airport,Zaporizhia,Zaporizhia,UA,Europe/Kiev,47.866962,35.314723,373,false
+UKDR,KWG,Kryvyi Rih International Airport,Kryvyi Rih International Airport,Kryvyi Rih,Kryvyi Rih,UA,Europe/Kiev,48.043301,33.209999,408,false
+UKFB,UKS,Sevastopol International Airport / Belbek Air Base,Sevastopol International Airport / Belbek Air Base,Sevastopol,Sevastopol,UA,Europe/Simferopol,44.691822,33.574620,344,false
+UKFF,SIP,Simferopol International Airport,Simferopol International Airport,Simferopol,Simferopol,UA,Europe/Simferopol,45.052200,33.975101,639,false
+UKHH,HRK,Kharkiv International Airport,Kharkiv International Airport,Kharkiv,Kharkiv,UA,Europe/Kiev,49.926943,36.290814,508,false
+UKHP,PLV,Suprunovka Airport,Suprunovka Airport,Poltava,Poltava,UA,Europe/Kiev,49.568600,34.397202,505,false
+UKKA,,Kacha Air Base,Kacha Air Base,Kacha,Kacha,UA,Europe/Simferopol,44.779764,33.572245,403,false
+UKKE,CKC,Cherkasy International Airport,Cherkasy International Airport,Cherkasy,Cherkasy,UA,Europe/Kiev,49.415600,31.995300,375,false
+UKKK,IEV,Igor Sikorsky Kyiv International Airport (Zhuliany),Igor Sikorsky Kyiv International Airport (Zhuliany),Kyiv,Kyiv,UA,Europe/Kiev,50.401940,30.451940,587,false
+UKKV,ZTR,Zhytomyr Airport,Zhytomyr Airport,Zhytomyr,Zhytomyr,UA,Europe/Kiev,50.270556,28.738611,0,false
+UKLH,HMJ,Khmelnytskyi Airport,Khmelnytskyi Airport,Khmelnytskyi,Khmelnytskyi,UA,Europe/Kiev,49.359699,26.933399,1150,false
+UKLI,IFO,Ivano-Frankivsk International Airport,Ivano-Frankivsk International Airport,Ivano-Frankivsk,Ivano-Frankivsk,UA,Europe/Kiev,48.884201,24.686100,919,false
+UKLL,LWO,Lviv International Airport,Lviv International Airport,Lviv,Lviv,UA,Europe/Kiev,49.812500,23.956100,1071,false
+UKLN,CWC,Chernivtsi International Airport,Chernivtsi International Airport,Chernivtsi,Chernivtsi,UA,Europe/Kiev,48.259300,25.980801,826,false
+UKLR,RWN,Rivne International Airport,Rivne International Airport,Rivne,Rivne,UA,Europe/Kiev,50.607101,26.141600,755,false
+UKLU,UDJ,Uzhhorod International Airport,Uzhhorod International Airport,Uzhhorod,Uzhhorod,UA,Europe/Kiev,48.634300,22.263399,383,false
+UKOH,KHE,Kherson International Airport,Kherson International Airport,Kherson,Kherson,UA,Europe/Kiev,46.675800,32.506401,148,false
+UKON,NLV,Mykolaiv International Airport [CLOSED],Mykolaiv International Airport [CLOSED],Mykolaiv,Mykolaiv,UA,Europe/Kiev,47.057899,31.919800,184,false
+UKOO,ODS,Odesa International Airport,Odesa International Airport,Odesa,Odesa,UA,Europe/Kiev,46.427196,30.672649,172,false
+UKWW,VIN,Vinnytsia/Gavyryshivka International Airport,Vinnytsia/Gavyryshivka International Airport,Vinnitsa,Vinnitsa,UA,Europe/Kiev,49.242531,28.613778,961,false
+ULAA,ARH,Талаги,Talagi Airport,Архангельск,Archangelsk,RU,Europe/Moscow,64.600304,40.716702,62,false
+ULAM,NNM,Naryan Mar Airport,Naryan Mar Airport,Naryan Mar,Naryan Mar,RU,Europe/Moscow,67.639999,53.121899,36,false
+ULDD,AMV,Amderma Airport,Amderma Airport,Amderma,Amderma,RU,Europe/Moscow,69.763712,61.556711,13,false
+ULKK,KSZ,Kotlas Airport,Kotlas Airport,Kotlas,Kotlas,RU,Europe/Moscow,61.235802,46.697498,184,false
+ULLI,LED,Пулково,Pulkovo Airport,Санкт-Петербург,St. Petersburg,RU,Europe/Moscow,59.800301,30.262501,78,true
+ULLK,,Krechevitsy Air Base,Krechevitsy Air Base,Novgorod,Novgorod,RU,Europe/Moscow,58.625000,31.385000,100,false
+ULMM,MMK,Мурманск,Emperor Nicholas II Murmansk Airport,Мурманск,Murmansk,RU,Europe/Moscow,68.781700,32.750801,266,false
+ULOL,VLU,Velikiye Luki Airport,Velikiye Luki Airport,Velikiye Luki,Velikiye Luki,RU,Europe/Moscow,56.381066,30.607846,328,false
+ULOO,PKV,Princess Olga Pskov International Airport,Princess Olga Pskov International Airport,Pskov,Pskov,RU,Europe/Moscow,57.781316,28.393840,154,false
+ULPB,PES,Petrozavodsk Airport,Petrozavodsk Airport,Petrozavodsk,Petrozavodsk,RU,Europe/Moscow,61.885201,34.154701,151,false
+ULPP,,Peski Airfield,Peski Airfield,Petrozavodsk,Petrozavodsk,RU,Europe/Moscow,61.831944,34.295555,154,false
+ULWC,CEE,Cherepovets Airport,Cherepovets Airport,Cherepovets,Cherepovets,RU,Europe/Moscow,59.273602,38.015800,377,false
+ULWU,VUS,Velikiy Ustyug Airport,Velikiy Ustyug Airport,Velikiy Ustyug,Velikiy Ustyug,RU,Europe/Moscow,60.788300,46.259998,331,false
+ULWW,VGD,Вологда,Vologda Airport,Вологда,Vologda,RU,Europe/Moscow,59.282501,39.944401,387,false
+UMBB,BQT,Brest International Airport,Brest International Airport,Brest,Brest,BY,Europe/Minsk,52.108138,23.896760,468,false
+UMGG,GME,Gomel Airport,Gomel Airport,Gomel,Gomel,BY,Europe/Minsk,52.527000,31.016701,472,false
+UMII,VTB,Vitebsk Vostochny Airport,Vitebsk Vostochny Airport,Vitebsk,Vitebsk,BY,Europe/Minsk,55.126499,30.349600,682,false
+UMKK,KGD,Храброво,Khrabrovo Airport,Калининград,Kaliningrad,RU,Europe/Kaliningrad,54.891610,20.598559,42,false
+UMMG,GNA,Hrodna Airport,Hrodna Airport,Hrodna,Hrodna,BY,Europe/Minsk,53.602001,24.053801,443,false
+UMMS,MSQ,Национальный,Minsk National Airport,Минск,Minsk,BY,Europe/Minsk,53.888071,28.039964,670,false
+UMOO,MVQ,Mogilev Airport,Mogilev Airport,Mogilev,Mogilev,BY,Europe/Minsk,53.954899,30.095100,637,false
+UNAA,ABA,Абакан,Abakan International Airport,Абакан,Abakan,RU,Asia/Krasnoyarsk,53.740002,91.385002,831,false
+UNBB,BAX,Барнаул,Barnaul Gherman Titov International Airport,Барнаул,Barnaul,RU,Asia/Barnaul,53.361285,83.539701,837,false
+UNBG,RGK,Gorno-Altaysk Airport,Gorno-Altaysk Airport,Gorno-Altaysk,Gorno-Altaysk,RU,Asia/Krasnoyarsk,51.969204,85.836539,965,false
+UNEE,KEJ,Кемерово,Alexei Leonov Kemerovo International Airport,Кемерово,Kemerovo,RU,Asia/Novokuznetsk,55.270100,86.107201,863,false
+UNII,EIE,Yeniseysk Airport,Yeniseysk Airport,Yeniseysk,Yeniseysk,RU,Asia/Krasnoyarsk,58.474201,92.112503,253,false
+UNIP,TGP,Podkamennaya Tunguska Airport,Podkamennaya Tunguska Airport,Bor,Bor,RU,Asia/Krasnoyarsk,61.589699,89.994003,213,false
+UNIS,VEO,Severo-Yeniseysk Airport,Severo-Yeniseysk Airport,Severo-Yeniseysk,Severo-Yeniseysk,RU,Asia/Krasnoyarsk,60.373299,93.011703,1706,false
+UNIW,VAQ,Vanavara Airport,Vanavara Airport,Vanavara,Vanavara,RU,Asia/Krasnoyarsk,60.356229,102.309641,892,false
+UNKL,KJA,Емельяново,Krasnoyarsk International Airport,Красноярск,Krasnoyarsk,RU,Asia/Krasnoyarsk,56.175743,92.485788,942,false
+UNKM,KCY,Krasnoyarsk Cheremshanka Airport,Krasnoyarsk Cheremshanka Airport,Krasnoyarsk,Krasnoyarsk,RU,Asia/Krasnoyarsk,56.177584,92.545881,833,false
+UNKS,ACS,Achinsk Airport,Achinsk Airport,Achinsk,Achinsk,RU,Asia/Krasnoyarsk,56.269185,90.575110,1033,false
+UNKY,KYZ,Kyzyl Airport,Kyzyl Airport,Kyzyl,Kyzyl,RU,Asia/Krasnoyarsk,51.669399,94.400597,2123,false
+UNNT,OVB,Толмачёво,Novosibirsk Tolmachevo Airport,Новосибирск,Novosibirsk,RU,Asia/Novosibirsk,55.019756,82.618675,365,false
+UNOO,OMS,Омск-Центральный,Omsk Central Airport,Омск,Omsk,RU,Asia/Omsk,54.963124,73.312418,311,false
+UNSS,SWT,Strezhevoy Airport,Strezhevoy Airport,Strezhevoy,Strezhevoy,RU,Asia/Krasnoyarsk,60.709400,77.660004,164,false
+UNTT,TOF,Богашёво,Tomsk Kamov Airport,Томск,Tomsk,RU,Asia/Tomsk,56.380299,85.208298,597,false
+UNWW,NOZ,Спиченково,Spichenkovo Airport,Новокузнецк,Novokuznetsk,RU,Asia/Novokuznetsk,53.811401,86.877197,1024,false
+UODD,DKS,Dikson Airport,Dikson Airport,Dikson,Dikson,RU,Asia/Krasnoyarsk,73.517807,80.379669,47,false
+UODN,,Нагурское,Nagurskoye Airfield,Земля Александры,Alexandra Land,RU,Europe/Moscow,80.803207,47.663586,59,false
+UOHH,HTG,Khatanga Airport,Khatanga Airport,Khatanga,Khatanga,RU,Asia/Krasnoyarsk,71.978104,102.490997,95,false
+UOII,IAA,Igarka Airport,Igarka Airport,Igarka,Igarka,RU,Asia/Krasnoyarsk,67.437202,86.621902,82,false
+UOOO,NSK,Alykel International Airport,Alykel International Airport,Norilsk,Norilsk,RU,Asia/Krasnoyarsk,69.307951,87.325906,574,false
+URKA,AAQ,Витязево,Anapa Vityazevo Airport,Анапа,Krasnyi Kurgan,RU,Europe/Moscow,45.002102,37.347301,174,false
+URKG,GDZ,Геленджик,Gelendzhik Airport,Геленджик,Gelendzhik,RU,Europe/Moscow,44.582093,38.012481,98,false
+URKK,KRR,Пашковский,Krasnodar Pashkovsky International Airport,Краснодар,Krasnodar,RU,Europe/Moscow,45.034465,39.174215,118,false
+URMG,GRV,Северный,Akhmat Kadyrov Grozny International Airport,Грозный,Grozny,RU,Europe/Moscow,43.388106,45.699772,548,false
+URML,MCX,Уйташ,Makhachkala Uytash International Airport,Махачкала,Makhachkala,RU,Europe/Moscow,42.816799,47.652302,12,false
+URMM,MRV,Минеральные Воды,Mineralnye Vody Airport,Минеральные Воды,Mineralnyye Vody,RU,Europe/Moscow,44.225101,43.081902,1054,false
+URMN,NAL,Нальчик,Nalchik Airport,Нальчик,Nalchik,RU,Europe/Moscow,43.512901,43.636600,1461,false
+URMO,OGZ,Беслан,Vladikavkaz Beslan International Airport,Владикавказ,Beslan,RU,Europe/Moscow,43.205101,44.606602,1673,false
+URMS,IGT,Magas Airport,Magas Airport,Sunzha,Sunzha,RU,Europe/Moscow,43.323268,45.012568,1165,false
+URMT,STW,Шпаковское,Stavropol Shpakovskoye Airport,Ставрополь,Stavropol,RU,Europe/Moscow,45.109200,42.112801,1486,false
+URRP,ROV,Платов,Platov International Airport,Ростов-на-Дону,Rostov-on-Don,RU,Europe/Moscow,47.493888,39.924722,213,false
+URSS,AER,Сочи,Sochi International Airport,Сочи,Sochi,RU,Europe/Moscow,43.449902,39.956600,89,false
+URWA,ASF,Гагарин,Astrakhan Narimanovo Boris M. Kustodiev International Airport,Саратов,Astrakhan,RU,Europe/Saratov,46.282843,48.010511,-65,false
+URWI,ESL,Нариманово,Elista Airport,Астрахань,Elista,RU,Europe/Astrakhan,46.373901,44.330898,501,false
+URWW,VOG,Гумрак,Volgograd International Airport,Волгоград,Volgograd,RU,Europe/Volgograd,48.781340,44.339194,482,false
+USCC,CEK,Челябинск,Kurchatov Chelyabinsk International Airport,Челябинск,Chelyabinsk,RU,Asia/Yekaterinburg,55.303141,61.504927,769,false
+USCM,MQF,Magnitogorsk International Airport,Magnitogorsk International Airport,Magnitogorsk,Magnitogorsk,RU,Asia/Yekaterinburg,53.391991,58.755235,1430,false
+USDA,SBT,Sabetta International Airport,Sabetta International Airport,Sabetta,Sabetta,RU,Asia/Krasnoyarsk,71.219167,72.052222,46,false
+USDB,BVJ,Bovanenkovo Airport,Bovanenkovo Airport,Bovanenkovo,Bovanenkovo,RU,Europe/Moscow,70.315278,68.333611,24,false
+USDD,SLY,Салехард,Salekhard Airport,Салехард,Salekhard,RU,Asia/Yekaterinburg,66.590797,66.611000,218,false
+USHH,HMA,Ханты-Мансийск,Khanty Mansiysk Airport,Ханты-Мансийск,Khanty-Mansiysk,RU,Asia/Yekaterinburg,61.028500,69.086098,76,false
+USHN,NYA,Nyagan Airport,Nyagan Airport,Nyagan,Nyagan,RU,Asia/Yekaterinburg,62.110001,65.614998,361,false
+USHQ,EYK,Beloyarskiy Airport,Beloyarskiy Airport,,,RU,Asia/Yekaterinburg,63.686901,66.698601,82,false
+USHS,OVS,Sovetskiy Airport,Sovetskiy Airport,Sovetskiy,Sovetskiy,RU,Asia/Yekaterinburg,61.326622,63.601913,351,false
+USHU,URJ,Uray Airport,Uray Airport,Uray,Uray,RU,Asia/Yekaterinburg,60.103298,64.826698,190,false
+USII,IJK,Izhevsk Airport,Izhevsk Airport,Izhevsk,Izhevsk,RU,Europe/Samara,56.834524,53.462172,531,false
+USKK,KVX,Pobedilovo Airport,Pobedilovo Airport,Kirov,Kirov,RU,Europe/Moscow,58.503883,49.347831,479,false
+USMM,NYM,Новый Уренгой,Nadym Airport,Новый Уренгой,Nadym,RU,Asia/Yekaterinburg,65.480904,72.698898,49,false
+USMU,NUX,Novy Urengoy Airport,Novy Urengoy Airport,Novy Urengoy,Novy Urengoy,RU,Asia/Yekaterinburg,66.069397,76.520302,210,false
+USNN,NJC,Нижневартовск,Nizhnevartovsk Airport,Нижневартовск,Nizhnevartovsk,RU,Asia/Yekaterinburg,60.949299,76.483597,177,false
+USPP,PEE,Большое Савино,Perm International Airport,Пермь,Perm,RU,Asia/Yekaterinburg,57.914501,56.021198,404,false
+USRK,KGP,Kogalym International Airport,Kogalym International Airport,Kogalym,Kogalym,RU,Asia/Yekaterinburg,62.190399,74.533798,220,false
+USRO,NOJ,Noyabrsk Airport,Noyabrsk Airport,Noyabrsk,Noyabrsk,RU,Asia/Yekaterinburg,63.183300,75.269997,446,false
+USRR,SGC,Сургут,Surgut International Airport,Сургут,Surgut,RU,Asia/Yekaterinburg,61.340501,73.405782,200,false
+USSS,SVX,Кольцово,Koltsovo Airport,Екатеринбург,Yekaterinburg,RU,Asia/Yekaterinburg,56.743099,60.802700,764,false
+USTJ,RMZ,Tobolsk Remezov Airport,Tobolsk Remezov Airport,Tobolsk,Tobolsk,RU,Asia/Yekaterinburg,58.059712,68.347997,167,false
+USTR,TJM,Рощино,Roshchino International Airport,Тюмень,Tyumen,RU,Asia/Yekaterinburg,57.178984,65.327696,378,false
+USUU,KRO,Kurgan Airport,Kurgan Airport,Kurgan,Kurgan,RU,Asia/Yekaterinburg,55.475300,65.415604,240,false
+UTAA,ASB,Ашхабад,Ashgabat International Airport,Ашхабад,Ashgabat,TM,Asia/Ashgabat,37.986801,58.361000,692,false
+UTAK,KRW,Turkmenbaşy International Airport,Turkmenbaşy International Airport,Turkmenbaşy,Turkmenbaşy,TM,Asia/Ashgabat,40.062833,53.005085,279,false
+UTAM,MYP,Mary International Airport,Mary International Airport,Mary,Mary,TM,Asia/Ashgabat,37.623530,61.895668,728,false
+UTAN,BKN,Balkanabat International Airport,Balkanabat International Airport,Balkanabat,Balkanabat,TM,Asia/Ashgabat,39.681052,54.206008,-26,false
+UTAT,TAZ,Dashoguz International Airport,Dashoguz International Airport,Daşoguz,Daşoguz,TM,Asia/Ashgabat,41.759853,59.836149,272,false
+UTAV,CRZ,Türkmenabat International Airport,Türkmenabat International Airport,Türkmenabat,Türkmenabat,TM,Asia/Ashgabat,38.930662,63.563982,649,false
+UTDD,DYU,Душанбе,Dushanbe International Airport,Душанбе,Dushanbe,TJ,Asia/Dushanbe,38.543746,68.822977,2575,false
+UTDK,TJU,Kulob International Airport,Kulob International Airport,Kulob,Kulob,TJ,Asia/Dushanbe,37.988098,69.805000,2293,false
+UTDL,LBD,Khujand International Airport,Khujand International Airport,Khujand,Khujand,TJ,Asia/Dushanbe,40.215401,69.694702,1450,false
+UTDT,KQT,Bokhtar International Airport,Bokhtar International Airport,Bokhtar,Bokhtar,TJ,Asia/Dushanbe,37.866315,68.864475,1473,false
+UUBA,KMW,Kostroma Sokerkino Airport,Kostroma Sokerkino Airport,Kostroma,Kostroma,RU,Europe/Moscow,57.796902,41.019402,446,false
+UUBC,KLF,Grabtsevo Airport,Grabtsevo Airport,Kaluga,Kaluga,RU,Europe/Moscow,54.549999,36.366669,656,false
+UUBI,IWA,Ivanovo South Airport,Ivanovo South Airport,Ivanovo,Ivanovo,RU,Europe/Moscow,56.939400,40.940800,410,false
+UUBP,BZK,Брянск,Bryansk International Airport,Брянск,Bryansk,RU,Europe/Moscow,53.214403,34.175965,663,false
+UUBW,ZIA,Жуковский,Zhukovsky International Airport,Москва,Moscow,RU,Europe/Moscow,55.553299,38.150002,377,false
+UUDD,DME,Домодедово,Domodedovo International Airport,Москва,Moscow,RU,Europe/Moscow,55.408798,37.906300,588,true
+UUDL,IAR,Южный,Golden Ring Yaroslavl International Airport,Иваново,Tunoshna,RU,Europe/Moscow,57.560699,40.157398,287,false
+UUEE,SVO,Шереметьево,Sheremetyevo International Airport,Москва,Moscow,RU,Europe/Moscow,55.976858,37.411210,622,true
+UUEM,KLD,Migalovo Air Base,Migalovo Air Base,Tver,Tver,RU,Europe/Moscow,56.824699,35.757702,469,false
+UUMB,,Kubinka Air Base,Kubinka Air Base,Kubinka,Kubinka,RU,Europe/Moscow,55.611695,36.650002,614,false
+UUMU,CKL,Chkalovskiy Air Base,Chkalovskiy Air Base,Moscow,Moscow,RU,Europe/Moscow,55.878300,38.061699,499,false
+UUOB,EGO,Belgorod International Airport,Belgorod International Airport,Belgorod,Belgorod,RU,Europe/Moscow,50.643799,36.590099,735,false
+UUOK,URS,Kursk East Airport,Kursk East Airport,Kursk,Kursk,RU,Europe/Moscow,51.750599,36.295601,686,false
+UUOL,LPK,Lipetsk Airport,Lipetsk Airport,Lipetsk,Lipetsk,RU,Europe/Moscow,52.702801,39.537800,584,false
+UUOO,VOZ,Чертовицкое,Voronezh International Airport,Воронеж,Voronezh,RU,Europe/Moscow,51.814324,39.230948,514,false
+UUOT,TBW,Donskoye Airport,Donskoye Airport,Tambov,Tambov,RU,Europe/Moscow,52.806099,41.482800,413,false
+UUWW,VKO,Внуково,Vnukovo International Airport,Москва,Moscow,RU,Europe/Moscow,55.591499,37.261501,685,true
+UUYH,UCT,Ukhta Airport,Ukhta Airport,Ukhta,Ukhta,RU,Europe/Moscow,63.566898,53.804699,482,false
+UUYI,INA,Inta Airport,Inta Airport,Inta,Inta,RU,Europe/Moscow,66.053372,60.105786,184,false
+UUYP,PEX,Pechora Airport,Pechora Airport,Pechora,Pechora,RU,Europe/Moscow,65.121101,57.130798,98,false
+UUYS,USK,Usinsk Airport,Usinsk Airport,Usinsk,Usinsk,RU,Europe/Moscow,66.004700,57.367199,262,false
+UUYW,VKT,Vorkuta Airport,Vorkuta Airport,Vorkuta,Vorkuta,RU,Europe/Moscow,67.488602,63.993099,604,false
+UUYX,UTS,Ust-Tsylma Airport,Ust-Tsylma Airport,Ust-Tsylma,Ust-Tsylma,RU,Europe/Moscow,65.437294,52.200336,262,false
+UUYY,SCW,Сыктывкар,Syktyvkar Airport,Сыктывкар,Syktyvkar,RU,Europe/Moscow,61.646999,50.845100,342,false
+UWGG,GOJ,Стригино,Nizhny Novgorod / Strigino International Airport,Нижний Новгород,Nizhny Novgorod,RU,Europe/Moscow,56.227351,43.785152,256,false
+UWKB,UUA,Bugulma Airport,Bugulma Airport,Bugulma,Bugulma,RU,Europe/Moscow,54.641184,52.800229,991,false
+UWKD,KZN,Казань,Kazan International Airport,Казань,Kazan,RU,Europe/Moscow,55.606201,49.278702,411,false
+UWKE,NBC,Бегишево,Begishevo Airport,Нижнекамск,Nizhnekamsk,RU,Europe/Moscow,55.564701,52.092499,643,false
+UWKJ,JOK,Yoshkar-Ola Airport,Yoshkar-Ola Airport,Yoshkar-Ola,Yoshkar-Ola,RU,Europe/Moscow,56.700600,47.904701,348,false
+UWKS,CSY,Cheboksary Airport,Cheboksary Airport,Cheboksary,Cheboksary,RU,Europe/Moscow,56.090302,47.347301,558,false
+UWLL,ULV,Ulyanovsk Baratayevka Airport,Ulyanovsk Baratayevka Airport,Ulyanovsk,Ulyanovsk,RU,Europe/Samara,54.270160,48.225569,449,false
+UWLW,ULY,Баратаевка,Ulyanovsk Vostochny Airport,Ульяновск,Cherdakly,RU,Europe/Ulyanovsk,54.401001,48.802700,252,false
+UWOO,REN,Оренбург,Orenburg Central Airport,Оренбург,Orenburg,RU,Asia/Yekaterinburg,51.792668,55.457229,387,false
+UWOR,OSW,Orsk Airport,Orsk Airport,Orsk,Orsk,RU,Asia/Yekaterinburg,51.072498,58.595600,909,false
+UWPP,PEZ,Пенза,Penza Airport,Пенза,Penza,RU,Europe/Moscow,53.110600,45.021099,614,false
+UWPS,SKX,Saransk International Airport,Saransk International Airport,Saransk,Saransk,RU,Europe/Moscow,54.125130,45.212257,676,false
+UWSB,BWO,Balakovo Airport,Balakovo Airport,Balakovo,Balakovo,RU,Europe/Moscow,51.858299,47.745602,95,false
+UWSG,GSV,Gagarin International Airport,Gagarin International Airport,Saratov,Saratov,RU,Europe/Moscow,51.712778,46.171111,103,false
+UWUU,UFA,Уфа,Ufa International Airport,Уфа,Ufa,RU,Asia/Yekaterinburg,54.557499,55.874401,449,false
+UWWW,KUF,Курумоч,Kurumoch International Airport,Самара,Samara,RU,Europe/Samara,53.504902,50.164299,477,false
+UZFA,AZN,Andijan International Airport,Andijan International Airport,Andijan,Andijan,UZ,Asia/Tashkent,40.727699,72.293999,1515,false
+UZFF,FEG,Fergana International Airport,Fergana International Airport,Fergana,Fergana,UZ,Asia/Tashkent,40.358799,71.745003,1980,false
+UZFN,NMA,Namangan International Airport,Namangan International Airport,Namangan,Namangan,UZ,Asia/Tashkent,40.984622,71.557800,1555,false
+UZNN,NCU,Nukus International Airport,Nukus International Airport,Nukus,Nukus,UZ,Asia/Tashkent,42.488400,59.623299,246,false
+UZNU,UGC,Urgench International Airport,Urgench International Airport,Urgench,Urgench,UZ,Asia/Tashkent,41.582740,60.643380,320,false
+UZSA,NVI,Navoi International Airport,Navoi International Airport,Navoi,Navoi,UZ,Asia/Tashkent,40.117599,65.172658,1140,false
+UZSB,BHK,Бухара,Bukhara International Airport,Бухара,Bukhara,UZ,Asia/Samarkand,39.775319,64.482279,751,false
+UZSS,SKD,Самарканд,Samarkand International Airport,Самарканд,Samarkand,UZ,Asia/Samarkand,39.701842,66.981467,2224,false
+UZST,TMJ,Termez Airport,Termez Airport,Termez,Termez,UZ,Asia/Tashkent,37.287261,67.311869,1027,false
+UZTP,TVT,Tashkent-Khumo International Airport,Tashkent-Khumo International Airport,Tashkent,Tashkent,UZ,Asia/Tashkent,41.312889,69.395535,1574,false
+UZTT,TAS,Ташкент,Tashkent International Airport,Ташкент,Tashkent,UZ,Asia/Tashkent,41.257900,69.281197,1417,false
+UZTZ,OMN,Zomin Airport,Zomin Airport,Zomin,Zomin,UZ,Asia/Tashkent,40.014020,68.411030,1760,false
+VAAH,AMD,Sardar Vallabh Patel International Airport,Sardar Vallabh Patel International Airport,Ahmedabad,Ahmedabad,IN,Asia/Calcutta,23.077200,72.634697,189,false
+VABB,BOM,Chhatrapati Shivaji Maharaj International Airport,Chhatrapati Shivaji Maharaj International Airport,Mumbai,Mumbai,IN,Asia/Calcutta,19.088699,72.867897,39,true
+VABO,BDQ,Vadodara International Airport,Vadodara International Airport,Vadodara,Vadodara,IN,Asia/Calcutta,22.336201,73.226303,129,false
+VABP,BHO,Raja Bhoj International Airport,Raja Bhoj International Airport,Bhopal,Bhopal,IN,Asia/Calcutta,23.287500,77.337402,1711,false
+VAHS,HSR,Rajkot International Airport,Rajkot International Airport,Rajkot,Rajkot,IN,Asia/Calcutta,22.378824,71.039391,647,false
+VAID,IDR,Devi Ahilya Bai Holkar International Airport,Devi Ahilya Bai Holkar International Airport,Indore,Indore,IN,Asia/Calcutta,22.721404,75.800510,1850,false
+VANM,NMI,Navi Mumbai International Airport,Navi Mumbai International Airport,Navi Mumbai,Navi Mumbai,IN,Asia/Calcutta,18.984597,73.065253,184,false
+VANP,NAG,Dr. Babasaheb Ambedkar International Airport,Dr. Babasaheb Ambedkar International Airport,Nagpur,Nagpur,IN,Asia/Calcutta,21.092199,79.047203,1033,false
+VAOZ,ISK,Nashik International Airport,Nashik International Airport,Nashik,Nashik,IN,Asia/Calcutta,20.119101,73.912903,1900,false
+VAPO,PNQ,Pune International Airport,Pune International Airport,Pune,Pune,IN,Asia/Calcutta,18.582100,73.919701,1942,false
+VASD,SAG,Shirdi International Airport,Shirdi International Airport,Kakadi,Kakadi,IN,Asia/Calcutta,19.689211,74.373655,1926,false
+VASU,STV,Surat International Airport,Surat International Airport,Surat,Surat,IN,Asia/Calcutta,21.115531,72.743251,16,false
+VCBI,CMB,Bandaranaike International Colombo Airport,Bandaranaike International Colombo Airport,Colombo,Colombo,LK,Asia/Colombo,7.180760,79.884102,30,false
+VCCC,RML,Colombo Ratmalana International Airport,Colombo Ratmalana International Airport,Colombo,Colombo,LK,Asia/Colombo,6.821638,79.885859,22,false
+VCCJ,JAF,Jaffna International Airport,Jaffna International Airport,Jaffna,Jaffna,LK,Asia/Colombo,9.792330,80.070099,33,false
+VDDS,DSY,Dara Sakor International Airport,Dara Sakor International Airport,Ta Noun,Ta Noun,KH,Asia/Phnom_Penh,10.914244,103.226652,60,false
+VDPP,PNH,Phnom Penh International Airport,Phnom Penh International Airport,Phnom Penh (Pou Senchey),Phnom Penh (Pou Senchey),KH,Asia/Phnom_Penh,11.547155,104.844699,40,false
+VDSA,SAI,Siem Reap-Angkor International Airport,Siem Reap-Angkor International Airport,Siem Reap,Siem Reap,KH,Asia/Phnom_Penh,13.369740,104.223831,191,false
+VDSV,KOS,Sihanouk International Airport,Sihanouk International Airport,Preah Sihanouk,Preah Sihanouk,KH,Asia/Phnom_Penh,10.570557,103.632067,33,false
+VDTI,KTI,Techo International Airport,Techo International Airport,Phnom Penh (Boeng Khyang),Phnom Penh (Boeng Khyang),KH,Asia/Phnom_Penh,11.359987,104.921272,20,false
+VEBD,IXB,Bagdogra Airport,Bagdogra Airport,Siliguri,Siliguri,IN,Asia/Calcutta,26.681200,88.328598,412,false
+VEBN,VNS,Lal Bahadur Shastri International Airport,Lal Bahadur Shastri International Airport,Varanasi,Varanasi,IN,Asia/Calcutta,25.452171,82.862549,266,false
+VEBS,BBI,Biju Patnaik International Airport,Biju Patnaik International Airport,Bhubaneswar,Bhubaneswar,IN,Asia/Calcutta,20.251021,85.814747,138,false
+VECC,CCU,Netaji Subhash Chandra Bose International Airport,Netaji Subhash Chandra Bose International Airport,Kolkata,Kolkata,IN,Asia/Calcutta,22.654012,88.447650,16,false
+VEGT,GAU,Lokpriya Gopinath Bordoloi International Airport,Lokpriya Gopinath Bordoloi International Airport,Guwahati,Guwahati,IN,Asia/Calcutta,26.106654,91.585226,162,false
+VEIM,IMF,Bir Tikendrajit International Airport,Bir Tikendrajit International Airport,Imphal,Imphal,IN,Asia/Calcutta,24.760000,93.896698,2540,false
+VGEG,CGP,Shah Amanat International Airport,Shah Amanat International Airport,Chattogram (Chittagong),Chattogram (Chittagong),BD,Asia/Dhaka,22.249599,91.813301,12,false
+VGHS,DAC,Hazrat Shahjalal International Airport,Hazrat Shahjalal International Airport,Dhaka,Dhaka,BD,Asia/Dhaka,23.843347,90.397783,30,false
+VGSY,ZYL,Osmany International Airport,Osmany International Airport,Sylhet,Sylhet,BD,Asia/Dhaka,24.963993,91.864749,50,false
+VHHH,HKG,Hong Kong International Airport,Hong Kong International Airport,Hong Kong,Hong Kong,HK,Asia/Hong_Kong,22.311840,113.914862,28,true
+VIAR,ATQ,Sri Guru Ram Das Ji International Airport,Sri Guru Ram Das Ji International Airport,Amritsar,Amritsar,IN,Asia/Calcutta,31.709600,74.797302,756,false
+VICG,IXC,Shaheed Bhagat Singh International Airport,Shaheed Bhagat Singh International Airport,Chandigarh,Chandigarh,IN,Asia/Calcutta,30.673500,76.788498,1012,false
+VIDP,DEL,Indira Gandhi International Airport,Indira Gandhi International Airport,New Delhi,New Delhi,IN,Asia/Calcutta,28.555630,77.095190,777,true
+VIHR,HSS,Maharaja Agrasen International Airport,Maharaja Agrasen International Airport,Hisar,Hisar,IN,Asia/Calcutta,29.186065,75.741420,700,false
+VIHX,HWR,Halwara International Airport,Halwara International Airport,Halwara,Halwara,IN,Asia/Calcutta,30.748501,75.629799,790,false
+VIJP,JAI,Jaipur International Airport,Jaipur International Airport,Jaipur,Jaipur,IN,Asia/Calcutta,26.824200,75.812202,1263,false
+VILK,LKO,Chaudhary Charan Singh International Airport,Chaudhary Charan Singh International Airport,Lucknow,Lucknow,IN,Asia/Calcutta,26.760599,80.889297,410,false
+VIND,DXN,Noida International Airport,Noida International Airport,Gautam Buddha Nagar,Gautam Buddha Nagar,IN,Asia/Calcutta,28.179868,77.611843,644,false
+VISR,SXR,Srinagar International Airport,Srinagar International Airport,Srinagar,Srinagar,IN,Asia/Calcutta,33.987099,74.774200,5429,false
+VLLB,LPQ,Luang Phabang International Airport,Luang Phabang International Airport,Luang Phabang,Luang Phabang,LA,Asia/Vientiane,19.904273,102.167191,955,false
+VLPS,PKZ,Pakse International Airport,Pakse International Airport,Pakse,Pakse,LA,Asia/Vientiane,15.133973,105.779871,351,false
+VLVT,VTE,Wattay International Airport,Wattay International Airport,Vientiane,Vientiane,LA,Asia/Vientiane,17.985052,102.566692,564,false
+VMMC,MFM,Macau International Airport,Macau International Airport,Nossa Senhora do Carmo,Nossa Senhora do Carmo,MO,Asia/Macau,22.149599,113.592003,20,false
+VNBW,BWA,Gautam Buddha International Airport,Gautam Buddha International Airport,Siddharthanagar (Bhairahawa),Siddharthanagar (Bhairahawa),NP,Asia/Katmandu,27.504636,83.410381,358,false
+VNKT,KTM,Tribhuvan International Airport,Tribhuvan International Airport,Kathmandu,Kathmandu,NP,Asia/Katmandu,27.696600,85.359100,4390,false
+VNPR,PHH,Pokhara International Airport,Pokhara International Airport,Pokhara,Pokhara,NP,Asia/Katmandu,28.183800,84.014700,2595,false
+VOBL,BLR,Kempegowda International Airport Bengaluru,Kempegowda International Airport Bengaluru,Bengaluru,Bengaluru,IN,Asia/Calcutta,13.197900,77.706299,3000,false
+VOBZ,VGA,Vijayawada International Airport,Vijayawada International Airport,Vijayawada,Vijayawada,IN,Asia/Calcutta,16.530011,80.804888,82,false
+VOCB,CJB,Coimbatore International Airport,Coimbatore International Airport,Coimbatore,Coimbatore,IN,Asia/Calcutta,11.030000,77.043404,1324,false
+VOCI,COK,Cochin International Airport,Cochin International Airport,Kochi,Kochi,IN,Asia/Calcutta,10.151047,76.400838,30,false
+VOCL,CCJ,Calicut International Airport,Calicut International Airport,Calicut,Calicut,IN,Asia/Calcutta,11.135996,75.955152,342,false
+VOGA,GOX,Manohar International Airport,Manohar International Airport,Mopa,Mopa,IN,Asia/Calcutta,15.744257,73.860625,552,false
+VOGO,GOI,Goa Dabolim International Airport,Goa Dabolim International Airport,Vasco da Gama,Vasco da Gama,IN,Asia/Calcutta,15.380062,73.833328,150,false
+VOHS,HYD,Rajiv Gandhi International Airport,Rajiv Gandhi International Airport,Hyderabad,Hyderabad,IN,Asia/Calcutta,17.231318,78.429855,2024,false
+VOKN,CNN,Kannur International Airport,Kannur International Airport,Kannur,Kannur,IN,Asia/Calcutta,11.916343,75.544979,330,false
+VOML,IXE,Mangaluru International Airport,Mangaluru International Airport,Mangaluru,Mangaluru,IN,Asia/Calcutta,12.954710,74.886812,337,false
+VOMM,MAA,Chennai International Airport,Chennai International Airport,Chennai,Chennai,IN,Asia/Calcutta,12.990005,80.169296,52,false
+VOPB,IXZ,Veer Savarkar International Airport / INS Utkrosh,Veer Savarkar International Airport / INS Utkrosh,Port Blair,Port Blair,IN,Asia/Calcutta,11.640194,92.729020,13,false
+VOTP,TIR,Tirupati International Airport,Tirupati International Airport,Tirupati,Tirupati,IN,Asia/Calcutta,13.631988,79.539869,350,false
+VOTR,TRZ,Tiruchirappalli International Airport,Tiruchirappalli International Airport,Tiruchirappalli,Tiruchirappalli,IN,Asia/Calcutta,10.762915,78.717741,288,false
+VOTV,TRV,Thiruvananthapuram International Airport,Thiruvananthapuram International Airport,Thiruvananthapuram,Thiruvananthapuram,IN,Asia/Calcutta,8.481889,76.920029,15,false
+VOVI,VTZ,Alluri Sitarama Raju International Airport (Vizag),Alluri Sitarama Raju International Airport (Vizag),Visakhapatnam,Visakhapatnam,IN,Asia/Calcutta,17.971512,83.503617,188,false
+VQPR,PBH,Paro International Airport,Paro International Airport,Paro,Paro,BT,Asia/Thimphu,27.403200,89.424599,7364,false
+VRMG,GAN,Gan International Airport,Gan International Airport,Gan,Gan,MV,Indian/Maldives,-0.692975,73.152627,6,false
+VRMH,HAQ,Hanimaadhoo International Airport,Hanimaadhoo International Airport,Haa Dhaalu Atoll,Haa Dhaalu Atoll,MV,Indian/Maldives,6.743235,73.167072,4,false
+VRMM,MLE,Velana International Airport,Velana International Airport,Malé,Malé,MV,Indian/Maldives,4.191830,73.529099,6,false
+VTBD,DMK,Don Mueang International Airport,Don Mueang International Airport,Bangkok,Bangkok,TH,Asia/Bangkok,13.912600,100.607002,9,false
+VTBS,BKK,Suvarnabhumi Airport,Suvarnabhumi Airport,Bangkok,Bangkok,TH,Asia/Bangkok,13.681100,100.747002,5,true
+VTBU,UTP,U-Tapao–Rayong–Pattaya International Airport,U-Tapao–Rayong–Pattaya International Airport,Rayong,Rayong,TH,Asia/Bangkok,12.679900,101.004997,42,false
+VTCC,CNX,Chiang Mai International Airport,Chiang Mai International Airport,Chiang Mai,Chiang Mai,TH,Asia/Bangkok,18.766800,98.962601,1036,false
+VTCT,CEI,Mae Fah Luang - Chiang Rai International Airport,Mae Fah Luang - Chiang Rai International Airport,Chiang Rai,Chiang Rai,TH,Asia/Bangkok,19.952299,99.882896,1280,false
+VTSG,KBV,Krabi International Airport,Krabi International Airport,Krabi,Krabi,TH,Asia/Bangkok,8.095591,98.988955,82,false
+VTSM,USM,Samui International Airport,Samui International Airport,Na Thon (Ko Samui Island),Na Thon (Ko Samui Island),TH,Asia/Bangkok,9.547790,100.061996,64,false
+VTSP,HKT,Phuket International Airport,Phuket International Airport,Phuket,Phuket,TH,Asia/Bangkok,8.113257,98.317400,82,false
+VTSS,HDY,Hat Yai International Airport,Hat Yai International Airport,Hat Yai,Hat Yai,TH,Asia/Bangkok,6.933210,100.392998,90,false
+VTUD,UTH,Udon Thani International Airport,Udon Thani International Airport,Udon Thani,Udon Thani,TH,Asia/Bangkok,17.386186,102.788577,579,false
+VVCI,HPH,Cat Bi International Airport,Cat Bi International Airport,Haiphong (Hai An),Haiphong (Hai An),VN,Asia/Saigon,20.817428,106.724315,6,false
+VVCR,CXR,Cam Ranh International Airport / Cam Ranh Air Base,Cam Ranh International Airport / Cam Ranh Air Base,Nha Trang/nha Trang aiurportCam Ranh,Nha Trang/nha Trang aiurportCam Ranh,VN,Asia/Saigon,11.998200,109.219002,40,false
+VVCT,VCA,Can Tho International Airport,Can Tho International Airport,Can Tho,Can Tho,VN,Asia/Saigon,10.083397,105.709371,9,false
+VVDN,DAD,Da Nang International Airport,Da Nang International Airport,Da Nang,Da Nang,VN,Asia/Saigon,16.043900,108.198997,33,false
+VVLT,LTH,Long Thanh International Airport (Under Construction),Long Thanh International Airport (Under Construction),Ho Chi Minh City (Long Thanh),Ho Chi Minh City (Long Thanh),VN,Asia/Saigon,10.772842,107.040596,249,false
+VVNB,HAN,Noi Bai International Airport,Noi Bai International Airport,Hanoi (Soc Son),Hanoi (Soc Son),VN,Asia/Saigon,21.221201,105.806999,39,false
+VVPB,HUI,Phu Bai International Airport,Phu Bai International Airport,Huế,Huế,VN,Asia/Saigon,16.400581,107.704094,48,false
+VVPQ,PQC,Phú Quốc International Airport,Phú Quốc International Airport,Phu Quoc Island,Phu Quoc Island,VN,Asia/Saigon,10.169783,103.993530,37,false
+VVTS,SGN,Tan Son Nhat International Airport,Tan Son Nhat International Airport,Ho Chi Minh City,Ho Chi Minh City,VN,Asia/Saigon,10.818800,106.652000,33,false
+VYMD,MDL,Mandalay International Airport,Mandalay International Airport,Mandalay,Mandalay,MM,Asia/Rangoon,21.702200,95.977898,300,false
+VYNT,NYT,Nay Pyi Taw International Airport,Nay Pyi Taw International Airport,Naypyitaw,Naypyitaw,MM,Asia/Rangoon,19.623501,96.200996,302,false
+VYYY,RGN,Yangon International Airport,Yangon International Airport,Yangon,Yangon,MM,Asia/Rangoon,16.907301,96.133202,109,false
+WAAA,UPG,Sultan Hasanuddin International Airport,Sultan Hasanuddin International Airport,Makassar,Makassar,ID,Asia/Makassar,-5.075539,119.553702,47,false
+WADD,DPS,Denpasar I Gusti Ngurah Rai International Airport,Denpasar I Gusti Ngurah Rai International Airport,"Kuta, Badung","Kuta, Badung",ID,Asia/Makassar,-8.748409,115.167123,14,false
+WADL,LOP,Lombok International Airport,Lombok International Airport,"Mataram (Pujut, Lombok Tengah)","Mataram (Pujut, Lombok Tengah)",ID,Asia/Makassar,-8.759962,116.278169,319,false
+WAHI,YIA,Yogyakarta International Airport,Yogyakarta International Airport,Yogyakarta,Yogyakarta,ID,Asia/Jakarta,-7.905338,110.057264,24,false
+WAHQ,SOC,Adisoemarmo International Airport,Adisoemarmo International Airport,Surakarta,Surakarta,ID,Asia/Jakarta,-7.516044,110.757492,421,false
+WAHS,SRG,Jenderal Ahmad Yani Airport,Jenderal Ahmad Yani Airport,Semarang,Semarang,ID,Asia/Jakarta,-6.970732,110.373244,10,false
+WAJJ,DJJ,Dortheys Hiyo Eluay International Airport,Dortheys Hiyo Eluay International Airport,Sentani,Sentani,ID,Asia/Jayapura,-2.579627,140.519857,289,false
+WALL,BPN,Sultan Aji Muhammad Sulaiman Sepinggan International Airport,Sultan Aji Muhammad Sulaiman Sepinggan International Airport,Balikpapan,Balikpapan,ID,Asia/Makassar,-1.268342,116.894520,12,false
+WAMM,MDC,Sam Ratulangi International Airport,Sam Ratulangi International Airport,Manado,Manado,ID,Asia/Makassar,1.548591,124.926250,264,false
+WAOO,BDJ,Syamsudin Noor International Airport,Syamsudin Noor International Airport,Banjarbaru,Banjarbaru,ID,Asia/Makassar,-3.440112,114.761209,66,false
+WAPP,AMQ,Pattimura International Airport,Pattimura International Airport,Ambon,Ambon,ID,Asia/Jayapura,-3.710260,128.089005,33,false
+WARR,SUB,Juanda International Airport,Juanda International Airport,Surabaya,Surabaya,ID,Asia/Jakarta,-7.379830,112.787003,9,false
+WBGG,KCH,Kuching International Airport,Kuching International Airport,Kuching,Kuching,MY,Asia/Kuala_Lumpur,1.487364,110.352859,89,false
+WBKK,BKI,Kota Kinabalu International Airport,Kota Kinabalu International Airport,Kota Kinabalu,Kota Kinabalu,MY,Asia/Kuala_Lumpur,5.932743,116.049324,10,false
+WBSB,BWN,Brunei International Airport,Brunei International Airport,Bandar Seri Begawan,Bandar Seri Begawan,BN,Asia/Brunei,4.944200,114.928001,73,false
+WIDD,BTH,Hang Nadim International Airport,Hang Nadim International Airport,Batam,Batam,ID,Asia/Jakarta,1.121030,104.119003,126,false
+WIEE,PDG,Minangkabau International Airport,Minangkabau International Airport,Padang (Katapiang),Padang (Katapiang),ID,Asia/Jakarta,-0.785964,100.280384,18,false
+WIHH,HLP,Halim Perdanakusuma International Airport,Halim Perdanakusuma International Airport,Jakarta,Jakarta,ID,Asia/Jakarta,-6.266989,106.890318,84,false
+WIII,CGK,Soekarno-Hatta International Airport,Soekarno-Hatta International Airport,Jakarta,Jakarta,ID,Asia/Jakarta,-6.125570,106.655998,34,true
+WIMM,KNO,Kualanamu International Airport,Kualanamu International Airport,Beringin,Beringin,ID,Asia/Jakarta,3.637847,98.870566,23,false
+WIOO,PNK,Supadio International Airport,Supadio International Airport,Pontianak,Pontianak,ID,Asia/Jakarta,-0.152258,109.404493,10,false
+WITT,BTJ,Sultan Iskandar Muda International Airport,Sultan Iskandar Muda International Airport,Banda Aceh,Banda Aceh,ID,Asia/Jakarta,5.525087,95.419970,65,false
+WMKI,IPH,Sultan Azlan Shah Airport,Sultan Azlan Shah Airport,Ipoh,Ipoh,MY,Asia/Kuala_Lumpur,4.567330,101.091643,130,false
+WMKJ,JHB,Senai International Airport,Senai International Airport,Johor Bahru,Johor Bahru,MY,Asia/Kuala_Lumpur,1.641310,103.669998,135,false
+WMKK,KUL,Kuala Lumpur International Airport,Kuala Lumpur International Airport,Sepang,Sepang,MY,Asia/Kuala_Lumpur,2.745580,101.709999,69,true
+WMKL,LGK,Langkawi International Airport,Langkawi International Airport,Langkawi,Langkawi,MY,Asia/Kuala_Lumpur,6.329730,99.728699,29,false
+WMKP,PEN,Penang International Airport,Penang International Airport,Penang,Penang,MY,Asia/Kuala_Lumpur,5.296303,100.276185,11,false
+WMSA,SZB,Sultan Abdul Aziz Shah International Airport,Sultan Abdul Aziz Shah International Airport,Subang,Subang,MY,Asia/Kuala_Lumpur,3.130580,101.549004,90,false
+WPDL,DIL,Presidente Nicolau Lobato International Airport,Presidente Nicolau Lobato International Airport,Dili,Dili,TL,Asia/Dili,-8.546562,125.524507,154,false
+WPOC,OEC,Oecusse Route of the Sandalwood International Airport,Oecusse Route of the Sandalwood International Airport,Oecussi-Ambeno,Oecussi-Ambeno,TL,Asia/Dili,-9.198419,124.337873,0,false
+WSSL,XSP,Seletar Airport,Seletar Airport,Seletar,Seletar,SG,Asia/Singapore,1.415550,103.866730,36,false
+WSSS,SIN,Singapore Changi Airport,Singapore Changi Airport,Singapore,Singapore,SG,Asia/Singapore,1.350190,103.994003,22,true
+YBBN,BNE,Brisbane International Airport,Brisbane International Airport,Brisbane,Brisbane,AU,Australia/Brisbane,-27.384199,153.117004,13,true
+YBCG,OOL,Gold Coast Airport,Gold Coast Airport,Gold Coast,Gold Coast,AU,Australia/Brisbane,-28.165962,153.506641,21,false
+YBCS,CNS,Cairns International Airport,Cairns International Airport,Cairns,Cairns,AU,Australia/Brisbane,-16.878921,145.749480,10,false
+YBRM,BME,Broome International Airport,Broome International Airport,Broome,Broome,AU,Australia/Perth,-17.949194,122.228300,56,false
+YBSU,MCY,Sunshine Coast Airport,Sunshine Coast Airport,Maroochydore,Maroochydore,AU,Australia/Brisbane,-26.593324,153.083190,15,false
+YBWW,WTB,Toowoomba Wellcamp Airport,Toowoomba Wellcamp Airport,Toowoomba,Toowoomba,AU,Australia/Brisbane,-27.558332,151.793335,1509,false
+YMAV,AVV,Melbourne Avalon International Airport,Melbourne Avalon International Airport,Geelong/Melbourne,Geelong/Melbourne,AU,Australia/Hobart,-38.040269,144.467196,35,false
+YMHB,HBA,Hobart International Airport,Hobart International Airport,Hobart (Cambridge),Hobart (Cambridge),AU,Australia/Melbourne,-42.837032,147.513022,13,false
+YMML,MEL,Melbourne Airport,Melbourne Airport,Melbourne,Melbourne,AU,Australia/Hobart,-37.670732,144.837898,434,true
+YPAD,ADL,Adelaide International Airport,Adelaide International Airport,Adelaide,Adelaide,AU,Australia/Adelaide,-34.947512,138.533393,20,false
+YPCC,CCK,Cocos (Keeling) Islands Airport,Cocos (Keeling) Islands Airport,West Island,West Island,CC,Indian/Cocos,-12.192218,96.834103,10,false
+YPDN,DRW,Darwin International Airport / RAAF Darwin,Darwin International Airport / RAAF Darwin,Darwin,Darwin,AU,Australia/Darwin,-12.414970,130.881850,103,false
+YPPD,PHE,Port Hedland International Airport,Port Hedland International Airport,Port Hedland,Port Hedland,AU,Australia/Perth,-20.382787,118.629789,33,false
+YPPH,PER,Perth International Airport,Perth International Airport,Perth,Perth,AU,Australia/Perth,-31.940300,115.967003,67,false
+YSSY,SYD,Sydney Kingsford Smith International Airport,Sydney Kingsford Smith International Airport,Sydney (Mascot),Sydney (Mascot),AU,Australia/Sydney,-33.946098,151.177002,21,true
+YSWS,WSI,Western Sydney International (Nancy-Bird Walton) Airport,Western Sydney International (Nancy-Bird Walton) Airport,Sydney,Sydney,AU,Australia/Sydney,-33.883461,150.712981,262,false
+YWLM,NTL,Newcastle Airport,Newcastle Airport,Williamtown,Williamtown,AU,Australia/Sydney,-32.796114,151.835025,31,false
+ZBAA,PEK,Beijing Capital International Airport,Beijing Capital International Airport,Beijing,Beijing,CN,Asia/Shanghai,40.077349,116.596702,116,true
+ZBAD,PKX,Beijing Daxing International Airport,Beijing Daxing International Airport,Beijing,Beijing,CN,Asia/Shanghai,39.501289,116.413967,98,false
+ZBDS,DSN,Ordos Ejin Horo International Airport,Ordos Ejin Horo International Airport,Ordos,Ordos,CN,Asia/Shanghai,39.493514,109.859900,4557,false
+ZBDT,DAT,Datong Yungang International Airport,Datong Yungang International Airport,Datong,Datong,CN,Asia/Shanghai,40.061390,113.480509,3442,false
+ZBHH,HET,Hohhot Baita International Airport,Hohhot Baita International Airport,Hohhot,Hohhot,CN,Asia/Shanghai,40.849658,111.824598,3556,false
+ZBLA,HLD,Hulunbuir Hailar Airport,Hulunbuir Hailar Airport,Hailar,Hailar,CN,Asia/Shanghai,49.208616,119.822301,2169,false
+ZBOW,BAV,Baotou Donghe International Airport,Baotou Donghe International Airport,Baotou,Baotou,CN,Asia/Shanghai,40.560001,109.997002,3321,false
+ZBSJ,SJW,Shijiazhuang Zhengding International Airport,Shijiazhuang Zhengding International Airport,Shijiazhuang,Shijiazhuang,CN,Asia/Shanghai,38.280701,114.696999,233,false
+ZBTJ,TSN,Tianjin Binhai International Airport,Tianjin Binhai International Airport,Tianjin,Tianjin,CN,Asia/Shanghai,39.124401,117.346001,10,false
+ZBYC,YCU,Yuncheng Yanhu International Airport,Yuncheng Yanhu International Airport,Yuncheng (Yanhu),Yuncheng (Yanhu),CN,Asia/Shanghai,35.117823,111.034023,1242,false
+ZBYN,TYN,Taiyuan Wusu International Airport,Taiyuan Wusu International Airport,Taiyuan,Taiyuan,CN,Asia/Shanghai,37.746899,112.627998,2575,false
+ZGDY,DYG,Zhangjiajie Hehua International Airport,Zhangjiajie Hehua International Airport,Zhangjiajie (Yongding),Zhangjiajie (Yongding),CN,Asia/Shanghai,29.104749,110.442786,8530,false
+ZGGG,CAN,Guangzhou Baiyun International Airport,Guangzhou Baiyun International Airport,Guangzhou (Huadu),Guangzhou (Huadu),CN,Asia/Shanghai,23.392401,113.299004,50,true
+ZGHA,CSX,Changsha Huanghua International Airport,Changsha Huanghua International Airport,Changsha (Changsha),Changsha (Changsha),CN,Asia/Shanghai,28.189199,113.220001,217,false
+ZGKL,KWL,Guilin Liangjiang International Airport,Guilin Liangjiang International Airport,Guilin (Lingui),Guilin (Lingui),CN,Asia/Shanghai,25.219828,110.039553,570,false
+ZGNN,NNG,Nanning Wuxu International Airport,Nanning Wuxu International Airport,Nanning (Jiangnan),Nanning (Jiangnan),CN,Asia/Shanghai,22.598071,108.181922,421,false
+ZGOW,SWA,Jieyang Chaoshan International Airport,Jieyang Chaoshan International Airport,Jieyang (Rongcheng),Jieyang (Rongcheng),CN,Asia/Shanghai,23.552000,116.503300,0,false
+ZGSD,ZUH,Zhuhai Jinwan Airport,Zhuhai Jinwan Airport,Zhuhai (Jinwan),Zhuhai (Jinwan),CN,Asia/Shanghai,22.006399,113.375999,23,false
+ZGSZ,SZX,Shenzhen Bao'an International Airport,Shenzhen Bao'an International Airport,Shenzhen,Shenzhen,CN,Asia/Shanghai,22.639474,113.803262,13,false
+ZGZJ,ZHA,Zhanjiang Wuchuan International Airport,Zhanjiang Wuchuan International Airport,Zhanjiang,Zhanjiang,CN,Asia/Shanghai,21.481667,110.590278,0,false
+ZHCC,CGO,Zhengzhou Xinzheng International Airport,Zhengzhou Xinzheng International Airport,Zhengzhou,Zhengzhou,CN,Asia/Shanghai,34.526497,113.849165,495,false
+ZHEC,EHU,Ezhou Huahu International Airport,Ezhou Huahu International Airport,Ezhou,Ezhou,CN,Asia/Shanghai,30.341178,115.039260,86,false
+ZHHH,WUH,Wuhan Tianhe International Airport,Wuhan Tianhe International Airport,Wuhan (Huangpi),Wuhan (Huangpi),CN,Asia/Shanghai,30.774798,114.213723,113,false
+ZHLY,LYA,Luoyang Beijiao Airport,Luoyang Beijiao Airport,Luoyang (Laocheng),Luoyang (Laocheng),CN,Asia/Shanghai,34.741100,112.388000,840,false
+ZJHK,HAK,Haikou Meilan International Airport,Haikou Meilan International Airport,Haikou (Meilan),Haikou (Meilan),CN,Asia/Shanghai,19.934900,110.459000,75,false
+ZJSY,SYX,Sanya Phoenix International Airport,Sanya Phoenix International Airport,Sanya (Tianya),Sanya (Tianya),CN,Asia/Shanghai,18.302900,109.412003,92,false
+ZKPY,FNJ,Pyongyang Sunan International Airport,Pyongyang Sunan International Airport,Pyongyang,Pyongyang,KP,Asia/Pyongyang,39.224098,125.669998,117,false
+ZLDH,DNH,Dunhuang Mogao International Airport,Dunhuang Mogao International Airport,Dunhuang,Dunhuang,CN,Asia/Shanghai,40.161953,94.812827,0,false
+ZLIC,INC,Yinchuan Hedong International Airport,Yinchuan Hedong International Airport,Yinchuan,Yinchuan,CN,Asia/Shanghai,38.322758,106.393214,3743,false
+ZLJQ,JGN,Jiayuguan International Airport,Jiayuguan International Airport,Jiayuguan,Jiayuguan,CN,Asia/Shanghai,39.859052,98.339344,5112,false
+ZLLL,LHW,Lanzhou Zhongchuan International Airport,Lanzhou Zhongchuan International Airport,Lanzhou (Yongdeng),Lanzhou (Yongdeng),CN,Asia/Shanghai,36.515202,103.620003,6388,false
+ZLXN,XNN,Xining Caojiabao International Airport,Xining Caojiabao International Airport,Haidong (Huzhu Tu Autonomous County),Haidong (Huzhu Tu Autonomous County),CN,Asia/Shanghai,36.527750,102.040215,7119,false
+ZLXY,XIY,Xi'an Xianyang International Airport,Xi'an Xianyang International Airport,Xi'an,Xi'an,CN,Asia/Shanghai,34.442207,108.762385,1572,false
+ZMCK,UBN,Ulaanbaatar Chinggis Khaan International Airport,Ulaanbaatar Chinggis Khaan International Airport,Ulaanbaatar (Sergelen),Ulaanbaatar (Sergelen),MN,Asia/Ulaanbaatar,47.646916,106.819833,4482,false
+ZMUB,ULN,Buyant-Ukhaa International Airport,Buyant-Ukhaa International Airport,Ulaanbaatar,Ulaanbaatar,MN,Asia/Ulaanbaatar,47.843102,106.766998,4364,false
+ZPJH,JHG,Xishuangbanna Gasa International Airport,Xishuangbanna Gasa International Airport,Jinghong (Gasa),Jinghong (Gasa),CN,Asia/Shanghai,21.974648,100.762224,1815,false
+ZPLJ,LJG,Lijiang Sanyi International Airport,Lijiang Sanyi International Airport,Lijiang,Lijiang,CN,Asia/Shanghai,26.677483,100.244944,7359,false
+ZPPP,KMG,Kunming Changshui International Airport,Kunming Changshui International Airport,Kunming,Kunming,CN,Asia/Shanghai,25.110313,102.936743,6903,false
+ZSAM,XMN,Xiamen Gaoqi International Airport,Xiamen Gaoqi International Airport,Xiamen,Xiamen,CN,Asia/Shanghai,24.543889,118.127454,59,false
+ZSCN,KHN,Nanchang Changbei International Airport,Nanchang Changbei International Airport,Nanchang,Nanchang,CN,Asia/Shanghai,28.864815,115.902710,143,false
+ZSFZ,FOC,Fuzhou Changle International Airport,Fuzhou Changle International Airport,Fuzhou (Changle),Fuzhou (Changle),CN,Asia/Shanghai,25.929254,119.672524,46,false
+ZSHC,HGH,Hangzhou Xiaoshan International Airport,Hangzhou Xiaoshan International Airport,Hangzhou,Hangzhou,CN,Asia/Shanghai,30.236090,120.428865,23,false
+ZSJN,TNA,Jinan Yaoqiang International Airport,Jinan Yaoqiang International Airport,Jinan (Licheng),Jinan (Licheng),CN,Asia/Shanghai,36.857201,117.216003,76,false
+ZSLG,LYG,Lianyungang Huaguoshan International Airport,Lianyungang Huaguoshan International Airport,Lianyungang,Lianyungang,CN,Asia/Shanghai,34.414060,119.178990,0,false
+ZSNB,NGB,Ningbo Lishe International Airport,Ningbo Lishe International Airport,Ningbo,Ningbo,CN,Asia/Shanghai,29.826700,121.461998,13,false
+ZSNJ,NKG,Nanjing Lukou International Airport,Nanjing Lukou International Airport,Nanjing,Nanjing,CN,Asia/Shanghai,31.735032,118.865949,49,false
+ZSOF,HFE,Hefei Xinqiao International Airport,Hefei Xinqiao International Airport,Hefei,Hefei,CN,Asia/Shanghai,31.987790,116.976900,207,false
+ZSPD,PVG,Shanghai Pudong International Airport,Shanghai Pudong International Airport,Shanghai (Pudong),Shanghai (Pudong),CN,Asia/Shanghai,31.143400,121.805000,13,true
+ZSQD,TAO,Qingdao Jiaodong International Airport,Qingdao Jiaodong International Airport,Qingdao (Jiaozhou),Qingdao (Jiaozhou),CN,Asia/Shanghai,36.361953,120.088171,30,false
+ZSQZ,JJN,Quanzhou Jinjiang International Airport,Quanzhou Jinjiang International Airport,Quanzhou,Quanzhou,CN,Asia/Shanghai,24.795855,118.588599,39,false
+ZSSH,HIA,Huai'an Lianshui Airport,Huai'an Lianshui Airport,Huai'an,Huai'an,CN,Asia/Shanghai,33.792712,119.126657,28,false
+ZSSS,SHA,Shanghai Hongqiao International Airport,Shanghai Hongqiao International Airport,Shanghai (Minhang),Shanghai (Minhang),CN,Asia/Shanghai,31.198104,121.334260,10,false
+ZSTX,TXN,Huangshan Tunxi International Airport,Huangshan Tunxi International Airport,Huangshan,Huangshan,CN,Asia/Shanghai,29.733299,118.255997,0,false
+ZSWX,WUX,Sunan Shuofang International Airport,Sunan Shuofang International Airport,Wuxi,Wuxi,CN,Asia/Shanghai,31.496952,120.430380,24,false
+ZSWZ,WNZ,Wenzhou Longwan International Airport,Wenzhou Longwan International Airport,Wenzhou (Longwan),Wenzhou (Longwan),CN,Asia/Shanghai,27.910572,120.853465,13,false
+ZSYN,YNZ,Yancheng Nanyang International Airport,Yancheng Nanyang International Airport,Yancheng (Tinghu),Yancheng (Tinghu),CN,Asia/Shanghai,33.428317,120.205450,10,false
+ZSYT,YNT,Yantai Penglai International Airport,Yantai Penglai International Airport,Yantai,Yantai,CN,Asia/Shanghai,37.659724,120.978124,154,false
+ZSYW,YIW,Yiwu Airport,Yiwu Airport,Yiwu/Jinhua,Yiwu/Jinhua,CN,Asia/Shanghai,29.342095,120.031160,262,false
+ZSZS,HSN,Zhoushan Putuoshan International Airport,Zhoushan Putuoshan International Airport,Zhoushan,Zhoushan,CN,Asia/Shanghai,29.933874,122.362307,6,false
+ZUCK,CKG,Chongqing Jiangbei International Airport,Chongqing Jiangbei International Airport,Chongqing,Chongqing,CN,Asia/Shanghai,29.712254,106.651895,1365,false
+ZUGY,KWE,Guiyang Longdongbao International Airport,Guiyang Longdongbao International Airport,Guiyang (Nanming),Guiyang (Nanming),CN,Asia/Shanghai,26.541805,106.804020,3736,false
+ZULS,LXA,Lhasa Gonggar International Airport,Lhasa Gonggar International Airport,Shannan (Gonggar),Shannan (Gonggar),CN,Asia/Shanghai,29.298001,90.911951,11713,false
+ZURK,RKZ,Xigaze Peace Airport / Shigatse Air Base,Xigaze Peace Airport / Shigatse Air Base,Xigazê (Samzhubzê),Xigazê (Samzhubzê),CN,Asia/Shanghai,29.350876,89.299157,12408,false
+ZUTF,TFU,Chengdu Tianfu International Airport,Chengdu Tianfu International Airport,Chengdu (Jianyang),Chengdu (Jianyang),CN,Asia/Shanghai,30.312520,104.441284,1440,false
+ZUUU,CTU,Chengdu Shuangliu International Airport,Chengdu Shuangliu International Airport,Chengdu (Shuangliu),Chengdu (Shuangliu),CN,Asia/Shanghai,30.558257,103.945966,1625,false
+ZWSH,KHG,Kashgar Laining International Airport,Kashgar Laining International Airport,Kashgar,Kashgar,CN,Asia/Shanghai,39.542273,76.020230,4529,false
+ZWWW,URC,Ürümqi Tianshan International Airport,Ürümqi Tianshan International Airport,Ürümqi,Ürümqi,CN,Asia/Shanghai,43.913584,87.479372,2125,false
+ZYCC,CGQ,Changchun Longjia International Airport,Changchun Longjia International Airport,Changchun,Changchun,CN,Asia/Shanghai,43.996201,125.684998,706,false
+ZYHB,HRB,Harbin Taiping International Airport,Harbin Taiping International Airport,Harbin,Harbin,CN,Asia/Shanghai,45.623402,126.250000,457,false
+ZYQQ,NDG,Qiqihar Sanjiazi Airport,Qiqihar Sanjiazi Airport,Qiqihar,Qiqihar,CN,Asia/Shanghai,47.229969,123.914179,477,false
+ZYTL,DLC,Dalian Zhoushuizi International Airport,Dalian Zhoushuizi International Airport,Dalian (Ganjingzi),Dalian (Ganjingzi),CN,Asia/Shanghai,38.965719,121.538477,107,false
+ZYTX,SHE,Shenyang Taoxian International Airport,Shenyang Taoxian International Airport,Shenyang,Shenyang,CN,Asia/Shanghai,41.639800,123.483668,198,false

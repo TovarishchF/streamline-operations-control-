@@ -12,7 +12,16 @@ PROFILE       ?= dev
 PY            := backend/.venv/Scripts/python.exe
 PY_UNIX       := backend/.venv/bin/python
 PYTHON        := $(shell test -f $(PY) && echo $(PY) || echo $(PY_UNIX))
-MANAGE        := cd backend && ../$(PYTHON) manage.py
+
+# Цели, которым нужна база, выполняются в контейнере: с машины разработчика
+# адрес db:5432 не разрешается, это имя сети Docker. Каталог backend/ смонтирован
+# внутрь, поэтому созданные миграции появляются в репозитории.
+MANAGE        := $(COMPOSE) exec -T api python manage.py
+MANAGE_TTY    := $(COMPOSE) exec api python manage.py
+
+# Цели, работающие без базы, используют локальное окружение: так быстрее
+# и не требует поднятого Docker.
+MANAGE_LOCAL  := cd backend && ../$(PYTHON) manage.py
 
 help:  ## Список команд
 	@grep -hE '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -46,10 +55,10 @@ makemigrations:  ## Создать миграции (проверить глаз
 	$(MANAGE) makemigrations
 
 shell:  ## Django shell
-	$(MANAGE) shell
+	$(MANAGE_TTY) shell
 
 superuser:  ## Создать администратора
-	$(MANAGE) createsuperuser
+	$(MANAGE_TTY) createsuperuser
 
 seed-reference:  ## Справочники: аэропорты, типы ВС, ставки НДС
 	$(MANAGE) seed_reference
@@ -64,7 +73,7 @@ demo-reset:  ## Сброс и перегенерация демо-данных
 # ─────────────────────────── Контракт API ───────────────────────────
 
 api-schema:  ## Сгенерировать схему из кода и сверить с openapi.yaml
-	$(MANAGE) spectacular --file ../artifacts/openapi.generated.yaml --validate
+	$(MANAGE_LOCAL) spectacular --file ../artifacts/openapi.generated.yaml --validate
 	$(PYTHON) scripts/check_schema_drift.py openapi.yaml artifacts/openapi.generated.yaml
 
 api-types:  ## Сгенерировать shared/api-types.ts из контракта

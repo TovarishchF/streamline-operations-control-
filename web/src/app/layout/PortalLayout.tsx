@@ -1,10 +1,10 @@
 import type { JSX } from 'react';
-import { Button, Dropdown, Layout, Menu, Space, Tag, Tooltip, Typography, Select } from 'antd';
+import { Button, Dropdown, Layout, Menu, Tag, Tooltip, Typography, Select } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { DEMO_USERS, useSession } from '@/shared/auth/session';
+import { useCurrentUser, useSession } from '@/shared/auth/session';
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
@@ -18,15 +18,15 @@ import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
  */
 export function PortalLayout(): JSX.Element {
   const { t, i18n } = useTranslation();
-  const user = useSession((s) => s.user);
-  const setUser = useSession((s) => s.setUser);
+  const user = useCurrentUser();
+  const signOut = useSession((s) => s.signOut);
   const navigate = useNavigate();
   const location = useLocation();
   const { nowUtc } = useClock();
   useClockTicker();
 
   const items =
-    user.role === 'client'
+    user?.role === 'client'
       ? [
           { key: '/portal/client/flights', label: <Link to="/portal/client/flights">{t('portal.client.flights')}</Link> },
           { key: '/portal/client/request', label: <Link to="/portal/client/request">{t('portal.client.newRequest')}</Link> },
@@ -38,19 +38,17 @@ export function PortalLayout(): JSX.Element {
           { key: '/portal/vendor/performance', label: <Link to="/portal/vendor/performance">{t('portal.vendor.performance')}</Link> },
         ];
 
-  const roleItems = DEMO_USERS.map((demo) => ({
-    key: demo.id,
-    label: (
-      <Space size={6}>
-        <span>{demo.name}</span>
-        <Typography.Text type="secondary">{t(`roles.${demo.role}`)}</Typography.Text>
-      </Space>
-    ),
-    onClick: () => {
-      setUser(demo);
-      navigate('/');
+  const userItems = [
+    {
+      key: 'signOut',
+      label: t('auth.signOut'),
+      onClick: () => {
+        void signOut().then(() => {
+          navigate('/login');
+        });
+      },
     },
-  }));
+  ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -68,7 +66,7 @@ export function PortalLayout(): JSX.Element {
           {t('app.name')}
         </Typography.Text>
         <Tag color="blue" style={{ margin: 0 }}>
-          {user.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
+          {user?.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
         </Tag>
         <Tooltip title={t('app.demoTooltip')}>
           <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
@@ -102,9 +100,9 @@ export function PortalLayout(): JSX.Element {
           aria-label={t('common.language')}
         />
 
-        <Dropdown menu={{ items: roleItems, selectedKeys: [user.id] }} trigger={['click']}>
-          <Button size="small" icon={<UserOutlined />}>
-            {user.name}
+        <Dropdown menu={{ items: userItems }} trigger={['click']}>
+          <Button size="small" icon={<UserOutlined />} className="soc-user-button">
+            <span className="soc-user-name">{user?.name ?? ''}</span>
           </Button>
         </Dropdown>
       </Layout.Header>

@@ -19,6 +19,22 @@ class DomainError(Exception):
         self.details = details or {}
 
 
+class AuthenticationFailed(DomainError):
+    """Неверные учётные данные либо неверный второй фактор `[ТЗ 4.3]`.
+
+    Формулировка одна и та же для несуществующего пользователя и для
+    неверного пароля: иначе форма входа превращается в справочник логинов.
+    """
+
+    code = "AUTHENTICATION_FAILED"
+
+
+class AccountLocked(DomainError):
+    """Учётная запись временно заблокирована после неудачных попыток `[ТЗ 4.3]`."""
+
+    code = "ACCOUNT_LOCKED"
+
+
 class TransitionNotAllowed(DomainError):
     """Переход автомата не существует из текущего состояния (`DOMAIN.md § 5`)."""
 

@@ -6,15 +6,18 @@ import {
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
+import { useUsers } from '@/api/admin';
 import type { SlaRule, User } from '@/api/types';
-import { SLA_RULES, USERS } from '@/mocks/admin';
+import { SLA_RULES } from '@/mocks/admin';
 import { VENDORS } from '@/mocks/counterparties';
 import { SERVICE_CATEGORIES } from '@/mocks/reference';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
 
 /** Пользователи и роли `[ТЗ 4.3]`. */
 export function UsersPage(): JSX.Element {
   const { t } = useTranslation();
+  const query = useUsers();
 
   const columns: DataColumns<User> = [
     { title: t('admin.name'), dataIndex: 'name', width: 200 },
@@ -63,11 +66,15 @@ export function UsersPage(): JSX.Element {
       <Alert type="info" showIcon message={t('admin.permissionsNotice')} />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<User>
-          size="small" rowKey="id" columns={columns} dataSource={USERS}
-          pagination={false} scroll={{ x: 900 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<User>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              pagination={false} scroll={{ x: 900 }}
+              locale={{ emptyText: <EmptyState /> }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );

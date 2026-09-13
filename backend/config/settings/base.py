@@ -15,6 +15,9 @@ import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 REPO_ROOT = BASE_DIR.parent
+# Каталог, общий с клиентами: автоматы состояний и справочники (CLAUDE.md § 6).
+# В контейнере смонтирован в /shared, при локальном запуске — рядом с backend/.
+SHARED_DIR = REPO_ROOT / "shared"
 
 env = environ.Env()
 env_file = REPO_ROOT / ".env"
@@ -44,6 +47,9 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    # Список отзыва refresh-токенов: без него выход из системы
+    # не отменяет уже выданный токен (BACKEND.md § 6).
+    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_spectacular",
     "django_celery_beat",
@@ -237,6 +243,11 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LOGIN_FAILURE_LIMIT = 5
+
+# Куда seed_demo складывает ссылки otpauth демонстрационных пользователей.
+# Пустое значение — не записывать (так работают испытания: секретам
+# вымышленных пользователей нечего делать на диске после прогона).
+DEMO_TWO_FACTOR_FILE = str(REPO_ROOT / "artifacts" / "demo-2fa.json")
 LOGIN_LOCKOUT_MINUTES = 15
 TWO_FACTOR_REQUIRED_ROLES = ["admin", "finance"]
 

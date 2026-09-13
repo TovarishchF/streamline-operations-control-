@@ -25,10 +25,10 @@
 
 | ID | Пункт | Требование | Реализация | Эндпоинт | Экран | Тест | Веха | Статус |
 |---|---|---|---|---|---|---|---|---|
-| T-2.1-01 | 2.1 | Роль «Диспетчерская служба» | `accounts` роль `dispatcher` | `/auth/me` | все операционные | `test_permissions_dispatcher` | M3 | план |
+| T-2.1-01 | 2.1 | Роль «Диспетчерская служба» | `accounts.permissions` роль `dispatcher` | `GET /auth/me` | все операционные | `tests/test_permissions.py::TestPermissionMap` | M3 | реализовано |
 | T-2.1-02 | 2.1 | Роль «Отдел продаж» | `accounts` роль `sales` (ADR-011) | `/auth/me` | `/billing/quotes` | `test_permissions_sales` | M3 | требует решения (G-06) |
-| T-2.1-03 | 2.1 | Роль «Финансовый отдел» | `accounts` роль `finance` | `/auth/me` | финансовые | `test_permissions_finance` | M3 | план |
-| T-2.1-04 | 2.1 | Роль «Руководство» | `accounts` роль `manager` | `/auth/me` | `/dashboards/manager` | `test_permissions_manager` | M3 | план |
+| T-2.1-03 | 2.1 | Роль «Финансовый отдел» | `accounts.permissions` роль `finance` | `GET /auth/me` | финансовые | `tests/test_permissions.py::TestPermissionMap` | M3 | реализовано |
+| T-2.1-04 | 2.1 | Роль «Руководство» | `accounts.permissions` роль `manager` | `GET /auth/me` | `/dashboards/manager` | `tests/test_permissions.py::test_only_admin_and_manager_read_audit` | M3 | реализовано |
 | T-2.1-05 | 2.1 | Роль «Клиенты (авиакомпании)» | `accounts` роль `client` + фильтр арендатора | `/portal/client/*` | портал клиента | `test_tenant_isolation_client` | M3, M8 | план |
 | T-2.1-06 | 2.1 | Роль «Поставщики услуг» | `accounts` роль `vendor` + фильтр арендатора | `/portal/vendor/*` | портал поставщика | `test_tenant_isolation_vendor` | M3, M8 | план |
 | T-2.2-01 | 2.2 | Планирование с учётом ограничений: слоты | `flights.services.conflicts`, `Slot` (ADR-026) | `GET /slots` | `/slots`, `/schedule` | `test_ready_requires_slot` | M4 | план |
@@ -73,11 +73,11 @@
 
 | ID | Пункт | Требование | Реализация | Эндпоинт | Экран | Тест | Веха | Статус |
 |---|---|---|---|---|---|---|---|---|
-| T-3.2.1-01 | 3.2.1 | Единый справочник услуг с группировкой по категориям | `catalog.Service`, `ServiceCategory` | `GET /catalog/services` | `/catalog/services` | `test_catalog_tree` | M3 | план |
+| T-3.2.1-01 | 3.2.1 | Единый справочник услуг с группировкой по категориям | `catalog.Service`, `ServiceCategory` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_service_categories_are_exactly_those_in_the_specification` | M3 | реализовано |
 | T-3.2.1-02 | 3.2.1 | Топливообеспечение: Jet A-1, Avgas, цены по аэропортам | позиции каталога + `VendorPrice` по ICAO | `GET /catalog/prices` | `/catalog/prices` | `test_fuel_prices_by_airport` | M3, M5 | план |
-| T-3.2.1-03 | 3.2.1 | Наземное обслуживание: техобслуживание, уборка, трапы, буксировка | позиции категории `handling` | `GET /catalog/services` | `/catalog/services` | `test_seed_reference_handling` | M3 | план |
-| T-3.2.1-04 | 3.2.1 | Кейтеринг — бортовое питание | позиции категории `catering` | `GET /catalog/services` | `/catalog/services` | `test_seed_reference_catering` | M3 | план |
-| T-3.2.1-05 | 3.2.1 | Транспорт: автобусы для экипажа и пассажиров, VIP-трансферы | позиции категории `transport` | `GET /catalog/services` | `/catalog/services` | `test_seed_reference_transport` | M3 | план |
+| T-3.2.1-03 | 3.2.1 | Наземное обслуживание: техобслуживание, уборка, трапы, буксировка | позиции категории `handling` в `shared/reference/services.json` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
+| T-3.2.1-04 | 3.2.1 | Кейтеринг — бортовое питание | позиции категории `catering` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
+| T-3.2.1-05 | 3.2.1 | Транспорт: автобусы для экипажа и пассажиров, VIP-трансферы | позиции категории `transport` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
 | T-3.2.1-06 | 3.2.1 | Разрешительные документы: пермиты на пролёт, слоты | категория `permits` + `Slot` (ADR-026) | `GET /slots` | `/slots` | `test_permit_and_slot` | M4 | план |
 | T-3.2.1-07 | 3.2.1 | Противообледенительная обработка с привязкой к погодным условиям | категория `deicing`, адаптер `WX`, правило ADR-029 | `GET /catalog/services` | мастер заказа | `test_deicing_weather_rule` | M5, M13 | план |
 | T-3.2.1-08 | 3.2.1 | Заказ кейтеринга через специализированные системы | адаптер `VENDOR_API` | `GET /integrations` | `/admin/integrations` | `test_adapter_vendor_api_stub` | M14 | план (stub, G-12) |
@@ -199,7 +199,7 @@
 | T-4.1-02 | 4.1 | Мобильное приложение Android | Expo, EAS Build (ADR-006) | — | мобильные экраны | Maestro + установка на устройство | M12 | план |
 | T-4.1-03 | 4.1 | Мобильное приложение iOS | Expo, TestFlight (ADR-006) | — | мобильные экраны | Maestro + TestFlight | M12 | план |
 | T-4.1-04 | 4.1 | Профиль «полевой персонал» | профиль диспетчера с урезанными правами | `/auth/me` | мобильные экраны | `test_permissions_field_staff` | M12 | требует решения (G-50) |
-| T-4.1-05 | 4.1 | SaaS-архитектура | `Organization` + фильтр арендатора (ADR-003) | все | — | `test_organization_isolation` | M3 | план |
+| T-4.1-05 | 4.1 | SaaS-архитектура | `Organization` + `TenantScopedMixin` (ADR-003) | все | — | `tests/test_tenant_isolation.py` | M3 | реализовано |
 | T-4.1-06 | 4.1 | Развёртывание on-premise | тот же набор образов, другая конфигурация | — | — | развёртывание на чистой машине | M1, M17 | план |
 | T-4.1-07 | 4.1 | Клиент-серверная архитектура (Windows-сервис) | контейнеры Linux, в том числе на сервере Windows | — | — | — | — | требует решения (G-02) |
 | T-4.1-08 | 4.1 | БД PostgreSQL | PostgreSQL 16 (ADR-001) | — | — | `make migrate` на чистой базе | M1 | план |
@@ -215,14 +215,14 @@
 | T-4.2-08 | 4.2 | Интеграция с Power BI | те же представления | — | — | построение отчёта в Power BI | M13 | план |
 | T-4.2-09 | 4.2 | Интеграция с Tableau | те же представления | — | — | подключение Tableau | M13 | план |
 | T-4.3-01 | 4.3 | Аутентификация LDAP / Active Directory | адаптер `LDAP`, `django-auth-ldap` | `POST /auth/login` | `/login` | `test_adapter_ldap_stub`, `test_ldap_group_to_role` | M3, M14 | план (stub до доступа) |
-| T-4.3-02 | 4.3 | Двухфакторная аутентификация | TOTP `pyotp`, резервные коды (ADR-013) | `POST /auth/2fa` | `/login` | `test_totp_flow`, `test_backup_code_single_use` | M3 | план |
-| T-4.3-03 | 4.3 | Ролевая модель доступа: 6 ролей ТЗ | карта `role → permission` | `GET /auth/me` | `/admin/users` | `test_permission_matrix` | M3 | план |
-| T-4.3-04 | 4.3 | Проверка прав на сервере в каждом эндпоинте | класс прав на эндпоинт | все | — | `test_403_for_each_forbidden_role` | M3 | план |
+| T-4.3-02 | 4.3 | Двухфакторная аутентификация | TOTP `pyotp`, резервные коды (ADR-013) | `POST /auth/2fa` | `/login` | `accounts/tests/test_auth.py::TestTwoFactor`, `e2e/helpers/session.ts` | M3 | реализовано |
+| T-4.3-03 | 4.3 | Ролевая модель доступа: 6 ролей ТЗ | карта `role → permission`, единая с клиентом | `GET /auth/me` | `/admin/users` | `tests/test_permissions.py`, `tests/test_permission_map.py` | M3 | реализовано |
+| T-4.3-04 | 4.3 | Проверка прав на сервере в каждом эндпоинте | `HasRolePermission`: действие без объявленного права запрещено | все | — | `tests/test_permissions.py::TestEndpointPermissions` | M3 | реализовано |
 | T-4.3-05 | 4.3 | Изоляция данных порталов | `TenantScopedViewSet`, 404 вместо 403 | портальные | порталы | `test_tenant_leak_<endpoint>` | M3, M8 | план |
 | T-4.3-06 | 4.3 | Логирование изменения статуса рейса | `audit` | `GET /audit` | `/admin/audit` | `test_audit_flight_status` | M3, M4 | план |
 | T-4.3-07 | 4.3 | Логирование замены поставщика | `audit` | `GET /audit` | `/admin/audit` | `test_audit_vendor_assigned` | M3, M5 | план |
 | T-4.3-08 | 4.3 | Логирование выставления счёта | `audit` | `GET /audit` | `/admin/audit` | `test_audit_invoice_issued` | M3, M7 | план |
-| T-4.3-09 | 4.3 | Неизменяемость записей аудита | права пользователя БД без `UPDATE`/`DELETE` | — | — | `test_audit_update_denied_by_db` | M3 | план |
+| T-4.3-09 | 4.3 | Неизменяемость записей аудита | триггер `audit_entry_append_only` (ADR-033) | `GET /audit` | `/admin/audit` | `audit/tests/test_audit.py::TestImmutability` | M3 | реализовано |
 | T-4.3-10 | 4.3 | Защита персональных данных экипажа (152-ФЗ) | ограничение доступа, журналирование, обезличивание (ADR-028) | `GET /crew` | карточка рейса | `test_crew_access_logged` | M3, M4 | план |
 | T-4.4-01 | 4.4 | Одновременная работа до 50 пользователей без деградации | — | — | — | k6, профиль 50 VU, 15 мин | M15 | план |
 | T-4.4-02 | 4.4 | Открытие карточки рейса не более 2 секунд | — | `GET /flights/{id}` | `/flights/:id` | k6 `p95 < 2000` + LCP (ADR-017) | M15 | план |
@@ -232,7 +232,7 @@
 | T-4.4-06 | 4.4 | Хранение резервных копий 30 дней | политика хранения pgBackRest | — | — | проверка политики | M15 | план |
 | T-4.5-01 | 4.5 | Интерфейс на русском языке | `i18next`, `ru` | — | все | `test_no_hardcoded_strings` | M1, M10 | план |
 | T-4.5-02 | 4.5 | Интерфейс на английском языке | `i18next`, `en` | — | все | `test_locale_completeness` | M1, M10 | план |
-| T-4.5-03 | 4.5 | Наименования справочников на двух языках | `name_ru` / `name_en` (ADR-031) | справочные | справочники | `test_reference_bilingual` | M3 | план |
+| T-4.5-03 | 4.5 | Наименования справочников на двух языках | `name_ru` / `name_en` (ADR-031) | справочные | справочники | `catalog/tests/test_reference.py::test_verified_airports_have_russian_names` | M3 | реализовано |
 | T-4.5-04 | 4.5 | Отображение данных в разных часовых поясах (UTC / локальное) | `timezoneMode`, обязательная подпись зоны | — | все | `test_timezone_modes` | M10 | план |
 
 ---

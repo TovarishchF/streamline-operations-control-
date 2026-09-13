@@ -37,7 +37,7 @@ export function VendorOrdersPage(): JSX.Element {
   const [finishing, setFinishing] = useState<ServiceOrder | null>(null);
   const [needsResponseOnly, setNeedsResponseOnly] = useState(false);
 
-  const orders = SERVICE_ORDERS.filter((o) => o.vendorId === user.vendorId).filter(
+  const orders = SERVICE_ORDERS.filter((o) => o.vendorId === user?.vendorId).filter(
     (o) => !needsResponseOnly || o.status === 'ordered',
   );
 
@@ -132,7 +132,7 @@ export function VendorOrdersPage(): JSX.Element {
   ];
 
   const needsResponse = SERVICE_ORDERS.filter(
-    (o) => o.vendorId === user.vendorId && o.status === 'ordered',
+    (o) => o.vendorId === user?.vendorId && o.status === 'ordered',
   ).length;
 
   return (
@@ -206,7 +206,7 @@ export function VendorOrdersPage(): JSX.Element {
 export function VendorPerformancePage(): JSX.Element {
   const { t } = useTranslation();
   const user = useCurrentUser();
-  const vendor = user.vendorId ? VENDOR_BY_ID.get(user.vendorId) : undefined;
+  const vendor = user?.vendorId ? VENDOR_BY_ID.get(user.vendorId) : undefined;
   const rating = vendor?.rating;
 
   if (!rating?.sufficientData) {
@@ -294,7 +294,7 @@ export function VendorPayablesPage(): JSX.Element {
   const { t } = useTranslation();
   const user = useCurrentUser();
 
-  const items = PAYABLES.filter((p) => p.vendorId === user.vendorId);
+  const items = PAYABLES.filter((p) => p.vendorId === user?.vendorId);
 
   const columns: DataColumns<PayableItem> = [
     {

@@ -1,0 +1,104 @@
+# Выверенные вручную сведения об аэропортах: русские наименования и часовая зона.
+#
+# Накладываются на данные открытых наборов при сборке
+# (scripts/build_reference.py). Нужны по двум причинам.
+#
+# 1. Наименования. OurAirports и OpenFlights ведутся на английском. Машинная
+#    транслитерация выдавала бы придуманное название за принятое, поэтому
+#    русские наименования проставлены только там, где они проверены.
+#
+# 2. Часовые зоны. OpenFlights местами отстал от изменений: Астрахань с 2016
+#    года UTC+4, а в наборе указан UTC+3. Там, где зона в наборе отсутствует,
+#    сборщик подставляет её по ближайшему аэропорту той же страны, и смещение
+#    получается верным, а имя зоны — нет: Южно-Сахалинску доставался
+#    Asia/Srednekolymsk вместо Asia/Sakhalin. Смещение сегодня то же, но при
+#    следующем изменении времени в регионе они разойдутся.
+#
+# Перечень покрывает СНГ — рабочий регион заказчика. Для остальных аэропортов
+# зона берётся из OpenFlights, а наименование остаётся английским.
+#
+# Зоны сверены с базой IANA tzdb; тест backend/catalog/tests/test_reference.py
+# проверяет, что зона существует и её смещение согласуется с долготой.
+icao,name_ru,city_ru,timezone
+UUEE,Шереметьево,Москва,Europe/Moscow
+UUDD,Домодедово,Москва,Europe/Moscow
+UUWW,Внуково,Москва,Europe/Moscow
+UUBW,Жуковский,Москва,Europe/Moscow
+ULLI,Пулково,Санкт-Петербург,Europe/Moscow
+UUOO,Чертовицкое,Воронеж,Europe/Moscow
+UUBP,Брянск,Брянск,Europe/Moscow
+UUDL,Южный,Иваново,Europe/Moscow
+UUYY,Сыктывкар,Сыктывкар,Europe/Moscow
+ULAA,Талаги,Архангельск,Europe/Moscow
+ULMM,Мурманск,Мурманск,Europe/Moscow
+ULWW,Вологда,Вологда,Europe/Moscow
+UMKK,Храброво,Калининград,Europe/Kaliningrad
+URSS,Сочи,Сочи,Europe/Moscow
+URKK,Пашковский,Краснодар,Europe/Moscow
+URKA,Витязево,Анапа,Europe/Moscow
+URKG,Геленджик,Геленджик,Europe/Moscow
+URRP,Платов,Ростов-на-Дону,Europe/Moscow
+URMM,Минеральные Воды,Минеральные Воды,Europe/Moscow
+URMT,Шпаковское,Ставрополь,Europe/Moscow
+URML,Уйташ,Махачкала,Europe/Moscow
+URMO,Беслан,Владикавказ,Europe/Moscow
+URMG,Северный,Грозный,Europe/Moscow
+URMN,Нальчик,Нальчик,Europe/Moscow
+URWW,Гумрак,Волгоград,Europe/Volgograd
+URWI,Нариманово,Астрахань,Europe/Astrakhan
+URWA,Гагарин,Саратов,Europe/Saratov
+UWWW,Курумоч,Самара,Europe/Samara
+UWLW,Баратаевка,Ульяновск,Europe/Ulyanovsk
+UWPP,Пенза,Пенза,Europe/Moscow
+UWKD,Казань,Казань,Europe/Moscow
+UWKE,Бегишево,Нижнекамск,Europe/Moscow
+UWGG,Стригино,Нижний Новгород,Europe/Moscow
+UWUU,Уфа,Уфа,Asia/Yekaterinburg
+UWOO,Оренбург,Оренбург,Asia/Yekaterinburg
+USSS,Кольцово,Екатеринбург,Asia/Yekaterinburg
+USCC,Челябинск,Челябинск,Asia/Yekaterinburg
+USPP,Большое Савино,Пермь,Asia/Yekaterinburg
+USTR,Рощино,Тюмень,Asia/Yekaterinburg
+USRR,Сургут,Сургут,Asia/Yekaterinburg
+USNN,Нижневартовск,Нижневартовск,Asia/Yekaterinburg
+USHH,Ханты-Мансийск,Ханты-Мансийск,Asia/Yekaterinburg
+USDD,Салехард,Салехард,Asia/Yekaterinburg
+USMM,Новый Уренгой,Новый Уренгой,Asia/Yekaterinburg
+UNOO,Омск-Центральный,Омск,Asia/Omsk
+UNNT,Толмачёво,Новосибирск,Asia/Novosibirsk
+UNTT,Богашёво,Томск,Asia/Tomsk
+UNBB,Барнаул,Барнаул,Asia/Barnaul
+UNEE,Кемерово,Кемерово,Asia/Novokuznetsk
+UNWW,Спиченково,Новокузнецк,Asia/Novokuznetsk
+UNKL,Емельяново,Красноярск,Asia/Krasnoyarsk
+UNAA,Абакан,Абакан,Asia/Krasnoyarsk
+UIII,Иркутск,Иркутск,Asia/Irkutsk
+UIUU,Байкал,Улан-Удэ,Asia/Irkutsk
+UIAA,Кадала,Чита,Asia/Chita
+UEEE,Якутск,Якутск,Asia/Yakutsk
+UERR,Мирный,Мирный,Asia/Yakutsk
+UHHH,Новый,Хабаровск,Asia/Vladivostok
+UHWW,Кневичи,Владивосток,Asia/Vladivostok
+UHSS,Хомутово,Южно-Сахалинск,Asia/Sakhalin
+UHMM,Сокол,Магадан,Asia/Magadan
+UHPP,Елизово,Петропавловск-Камчатский,Asia/Kamchatka
+UHMA,Угольный,Анадырь,Asia/Anadyr
+UMMS,Национальный,Минск,Europe/Minsk
+UKBB,Борисполь,Киев,Europe/Kyiv
+UACC,Нурсултан Назарбаев,Астана,Asia/Almaty
+UAAA,Алматы,Алматы,Asia/Almaty
+UACK,Сары-Арка,Караганда,Asia/Almaty
+UATT,Актобе,Актобе,Asia/Aqtobe
+UATE,Актау,Актау,Asia/Aqtau
+UCFM,Манас,Бишкек,Asia/Bishkek
+UZTT,Ташкент,Ташкент,Asia/Tashkent
+UZSS,Самарканд,Самарканд,Asia/Samarkand
+UZSB,Бухара,Бухара,Asia/Samarkand
+UTDD,Душанбе,Душанбе,Asia/Dushanbe
+UTAA,Ашхабад,Ашхабад,Asia/Ashgabat
+UBBB,Гейдар Алиев,Баку,Asia/Baku
+UDYZ,Звартноц,Ереван,Asia/Yerevan
+UGTB,Тбилиси,Тбилиси,Asia/Tbilisi
+UGSB,Батуми,Батуми,Asia/Tbilisi
+LUKK,Кишинёв,Кишинёв,Europe/Chisinau
+UODN,Нагурское,Земля Александры,Europe/Moscow

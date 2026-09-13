@@ -6,8 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
-import { DEMO_USERS, useSession, type DemoUser } from '@/shared/auth/session';
-import { hasPermission } from '@/shared/auth/permissions';
+import { useCurrentUser, usePermissionMap, useSession } from '@/shared/auth/session';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { NOTIFICATIONS } from '@/mocks/comms';
 import { NAV_GROUPS } from './navigation';
@@ -37,36 +36,40 @@ function LocaleSwitch(): JSX.Element {
 /**
  * Переключатель роли.
  *
- * Существует только на макетах (веха M2) и на демонстрационном стенде: на M3
- * его заменит настоящий вход (ADR-013). Нужен, чтобы заказчик мог увидеть,
- * что каждая роль видит свой набор экранов.
+ * Профиль и выход. Переключателя ролей нет: обход аутентификации запрещён
+ * (ADR-013). Чтобы посмотреть систему глазами другой роли, нужно войти
+ * под другим пользователем.
  */
-function RoleSwitch(): JSX.Element {
+function UserMenu(): JSX.Element | null {
   const { t } = useTranslation();
-  const user = useSession((s) => s.user);
-  const setUser = useSession((s) => s.setUser);
+  const user = useCurrentUser();
+  const signOut = useSession((s) => s.signOut);
   const navigate = useNavigate();
 
-  const items = DEMO_USERS.map((demo: DemoUser) => ({
-    key: demo.id,
-    label: (
-      <Space size={6}>
-        <span>{demo.name}</span>
-        <Typography.Text type="secondary">{t(`roles.${demo.role}`)}</Typography.Text>
-      </Space>
-    ),
-    onClick: () => {
-      setUser(demo);
-      navigate('/');
+  if (!user) return null;
+
+  const items = [
+    {
+      key: 'signOut',
+      label: t('auth.signOut'),
+      onClick: () => {
+        void signOut().then(() => {
+          navigate('/login');
+        });
+      },
     },
-  }));
+  ];
 
   return (
-    <Dropdown menu={{ items, selectedKeys: [user.id] }} trigger={['click']}>
-      <Button size="small" icon={<UserOutlined />}>
+    <Dropdown menu={{ items }} trigger={['click']}>
+      {/* Имя урезается по ширине: настоящие имена с отчеством длиннее
+          выдуманных и на узком экране распирали шапку. */}
+      <Button size="small" icon={<UserOutlined />} className="soc-user-button">
         <Space size={4}>
-          {user.name}
-          <Typography.Text type="secondary">{t(`roles.${user.role}`)}</Typography.Text>
+          <span className="soc-user-name">{user.name}</span>
+          <Typography.Text type="secondary" className="soc-hide-sm">
+            {t(`roles.${user.role}`)}
+          </Typography.Text>
         </Space>
       </Button>
     </Dropdown>
@@ -76,12 +79,12 @@ function RoleSwitch(): JSX.Element {
 function Sidebar({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
   const { t } = useTranslation();
   const location = useLocation();
-  const role = useSession((s) => s.user.role);
+  const permissions = usePermissionMap();
 
   const items = useMemo(
     () =>
       NAV_GROUPS.map((group) => {
-        const visible = group.items.filter((item) => hasPermission(role, item.permission));
+        const visible = group.items.filter((item) => permissions[item.permission] === true);
         if (visible.length === 0) return null;
         return {
           key: group.key,
@@ -93,7 +96,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
           })),
         };
       }).filter((group): group is NonNullable<typeof group> => group !== null),
-    [role, t],
+    [permissions, t],
   );
 
   // Подсветка пункта: самый длинный совпадающий префикс, иначе на карточке
@@ -199,7 +202,7 @@ export function AppLayout(): JSX.Element {
         <span className="soc-hide-sm">
           <LocaleSwitch />
         </span>
-        <RoleSwitch />
+        <UserMenu />
       </Layout.Header>
 
       <Layout>

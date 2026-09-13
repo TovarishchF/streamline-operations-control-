@@ -192,6 +192,35 @@ paths:
               schema: { $ref: '#/components/schemas/MeResponse' }
         '401': { $ref: '#/components/responses/Unauthorized' }
 
+  /auth/password:
+    post:
+      tags: [auth]
+      summary: Смена пароля владельцем учётной записи
+      description: |
+        Пароль задаёт и меняет только владелец учётной записи. Администратор
+        заводит пользователя без пароля (`POST /users`) и чужих паролей
+        не знает: иначе по журналу нельзя понять, кто совершил действие.
+
+        Требования к паролю — `BACKEND § 6`: не короче двенадцати символов,
+        не из списка распространённых, не полностью числовой, не совпадающий
+        с данными учётной записи. Нарушение возвращает 400 с перечнем
+        невыполненных условий в `details`.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string, format: password }
+                newPassword: { type: string, format: password }
+      responses:
+        '204': { description: Пароль изменён }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
   /auth/2fa/setup:
     post:
       tags: [auth]
@@ -2827,6 +2856,13 @@ components:
         demoMode:
           type: boolean
           description: Признак демонстрационного стенда (ADR-008)
+        twoFactorSetupRequired:
+          type: boolean
+          description: |
+            Политика требует второй фактор для этой роли, но приложение-
+            аутентификатор ещё не привязано. Такой пользователь входит
+            по паролю — привязать приложение можно только изнутри системы, —
+            но интерфейс не должен давать ему ничего, кроме экрана привязки.
 
     User:
       type: object
@@ -2836,7 +2872,11 @@ components:
         name: { type: string }
         email: { type: string, format: email }
         role: { $ref: '#/components/schemas/Role' }
-        organizationId: { type: string }
+        organizationId:
+          type: [string, 'null']
+          description: |
+            Арендатор пользователя (ADR-003). Пуст у платформенного
+            администратора: он заводится до появления организаций.
         clientId:
           type: [string, 'null']
           description: Обязателен для роли `client`
@@ -4498,11 +4538,16 @@ components:
     # ───────────────────────────── АДМИНИСТРИРОВАНИЕ ─────────────────────────────
 
     AuditEntityType:
+      description: |
+        Типы сущностей, действия над которыми попадают в журнал.
+        Справочники (`aircraft`, `service`, `airport`) добавлены на M3:
+        изменение справочника меняет расчёты, и его автор должен быть виден.
       type: string
       enum:
         - flight
         - service_order
         - vendor
+        - client
         - contract
         - tariff
         - quote
@@ -4513,6 +4558,9 @@ components:
         - user
         - settings
         - crew
+        - aircraft
+        - service
+        - airport
 
     AuditEntry:
       type: object

@@ -4,10 +4,12 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { useServices } from '@/api/catalog';
 import type { ServiceCatalogItem, ServiceCategory, VendorPrice } from '@/api/types';
 import { VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
-import { AIRPORTS, SERVICES, SERVICE_BY_ID, SERVICE_CATEGORIES } from '@/mocks/reference';
+import { AIRPORTS, SERVICE_BY_ID, SERVICE_CATEGORIES } from '@/mocks/reference';
 import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
 
 /**
  * Каталог услуг `[ТЗ 3.2.1]`.
@@ -15,22 +17,27 @@ import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
  * Дерево категорий строго по ТЗ: топливообеспечение, наземное обслуживание,
  * кейтеринг, транспорт, разрешительные документы, противообледенительная
  * обработка. Наименования — двумя полями ru/en (ADR-031).
+ *
+ * Категория фильтруется на сервере, поиск по названию — на клиенте:
+ * каталог невелик и целиком помещается в память, а искать по двум языкам
+ * запросом значило бы заводить эндпоинту ещё один параметр без нужды.
  */
 export function ServicesCatalogPage(): JSX.Element {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<ServiceCategory | undefined>();
 
+  const query = useServices(category);
+  const services = query.data?.data;
+
   const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return SERVICES.filter((service) => {
-      if (category && service.category !== category) return false;
-      if (query && !`${service.name.ru} ${service.name.en} ${service.code}`.toLowerCase().includes(query)) {
-        return false;
-      }
-      return true;
-    });
-  }, [search, category]);
+    const needle = search.trim().toLowerCase();
+    if (!services) return [];
+    if (!needle) return services;
+    return services.filter((service) =>
+      `${service.name.ru} ${service.name.en} ${service.code}`.toLowerCase().includes(needle),
+    );
+  }, [search, services]);
 
   const columns: DataColumns<ServiceCatalogItem> = [
     {
@@ -136,15 +143,19 @@ export function ServicesCatalogPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<ServiceCatalogItem>
-          size="small"
-          rowKey="id"
-          columns={columns}
-          dataSource={filtered}
-          pagination={false}
-          scroll={{ x: 1000 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {() => (
+            <DataTable<ServiceCatalogItem>
+              size="small"
+              rowKey="id"
+              columns={columns}
+              dataSource={filtered}
+              pagination={false}
+              scroll={{ x: 1000 }}
+              locale={{ emptyText: <EmptyState /> }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );
@@ -155,6 +166,10 @@ export function VendorPricesPage(): JSX.Element {
   const { t } = useTranslation();
   const [airport, setAirport] = useState<string | undefined>();
   const [serviceId, setServiceId] = useState<string | undefined>();
+
+  // Перечень услуг — настоящий, с сервера. Сами прайсы поставщиков появятся
+  // вместе с реестром контрагентов (M6), пока они из набора для макетов.
+  const services = useServices().data?.data ?? [];
 
   const filtered = useMemo(
     () =>
@@ -245,7 +260,7 @@ export function VendorPricesPage(): JSX.Element {
               placeholder={t('service.name')}
               value={serviceId}
               onChange={setServiceId}
-              options={SERVICES.map((s) => ({ value: s.id, label: s.name.ru }))}
+              options={services.map((service) => ({ value: service.id, label: service.name.ru }))}
             />
           </Col>
         </Row>
