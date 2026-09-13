@@ -1797,6 +1797,13 @@ paths:
         - name: onDate
           in: query
           schema: { type: string, format: date }
+        - name: from
+          in: query
+          description: |
+            Если задано, к снимку добавляется поле `history` — курсы за период
+            от этой даты до `onDate`. Нужно для графика динамики: иначе экран
+            курсов пришлось бы собирать десятками запросов по одной дате.
+          schema: { type: string, format: date }
       responses:
         '200':
           description: Курсы на дату
@@ -3937,6 +3944,20 @@ components:
           description: |
             Заполнено, если источник недоступен и используется последний известный
             курс. Показывается пользователю.
+        history:
+          type: array
+          description: |
+            Курсы за период, если запрошен параметр `from`. Каждый элемент —
+            дата и набор курсов на неё. Пустой массив означает, что за период
+            курсов не загружено, а не что они равны нулю.
+          items:
+            type: object
+            required: [date, rates]
+            properties:
+              date: { type: string, format: date }
+              rates:
+                type: object
+                additionalProperties: { $ref: '#/components/schemas/DecimalString' }
 
     DocumentLine:
       type: object
