@@ -34,9 +34,11 @@ from catalog.api.views import (
     AirportViewSet,
     ServiceViewSet,
     VatRateViewSet,
+    VendorPriceViewSet,
 )
+from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
 from core.api.views import ClockView, HealthView
-from counterparties.api.views import ClientViewSet, VendorViewSet
+from counterparties.api.views import ClientViewSet, VendorContractViewSet, VendorViewSet
 from fleet.api.views import AircraftViewSet
 from flights.api.views import (
     FlightRequestViewSet,
@@ -59,6 +61,8 @@ router.register("airports", AirportViewSet, basename="airport")
 router.register("aircraft-types", AircraftTypeViewSet, basename="aircraft-type")
 router.register("vat-rates", VatRateViewSet, basename="vat-rate")
 router.register("catalog/services", ServiceViewSet, basename="service")
+router.register("catalog/prices", VendorPriceViewSet, basename="vendor-price")
+router.register("contracts", VendorContractViewSet, basename="contract")
 router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("audit", AuditViewSet, basename="audit")
 router.register("users", UserViewSet, basename="user")
@@ -78,6 +82,12 @@ api_v1: list[URLPattern | URLResolver] = [
     path("clock", ClockView.as_view(), name="clock"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
+    path("attachments", AttachmentCreateView.as_view(), name="attachment-create"),
+    path(
+        "attachments/<str:attachment_id>/confirm",
+        AttachmentConfirmView.as_view(),
+        name="attachment-confirm",
+    ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
     *router.urls,
 ]

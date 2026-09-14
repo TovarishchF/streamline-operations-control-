@@ -182,3 +182,75 @@ class VatRate(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.code} ({self.percent} %)"
+
+
+class VendorPrice(BaseModel):
+    """Закупочная цена поставщика в аэропорту `[ТЗ 3.2.1]`.
+
+    Живёт здесь, а не в `counterparties`: по таблице `BACKEND.md § 4` прайс —
+    часть каталога, и правило зависимостей запрещает каталогу знать
+    о контрагентах в обратную сторону.
+
+    Цена **копируется** в заявку при назначении поставщика (`CLAUDE.md § 3`
+    п. 5). Изменение прайса не переписывает уже оформленные заявки —
+    это проверяется тестом, а не обещанием.
+
+    Периоды действия по одной тройке (поставщик, услуга, аэропорт) могут
+    примыкать друг к другу, но не пересекаться: иначе на дату оказания
+    подходят две цены и выбор между ними произволен. Проверка — в сервисе,
+    а не ограничением базы: диапазонное исключение потребовало бы `btree_gist`,
+    а расширение на чужом сервере не всегда можно поставить.
+    """
+
+    id_prefix: ClassVar[str] = "prc"
+
+    vendor = models.ForeignKey(
+        "counterparties.Vendor", on_delete=models.CASCADE, related_name="prices"
+    )
+    service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name="prices")
+    airport_icao = models.CharField(max_length=4, validators=[icao_validator], db_index=True)
+
+    amount = models.DecimalField(max_digits=18, decimal_places=4)
+    currency = models.CharField(max_length=3)
+
+    # Минимальный чек: поставщик берёт не меньше этой суммы, сколько бы
+    # единиц ни было заказано (`DOMAIN.md § 7.1`).
+    min_charge_amount = models.DecimalField(
+        max_digits=18, decimal_places=4, null=True, blank=True
+    )
+
+    valid_from = models.DateTimeField()
+    valid_to = models.DateTimeField(db_index=True)
+
+    # Надбавки: ночная, выходного дня, срочная и прочие (ADR-021).
+    # Список описаний, применяется при расчёте закупочной стоимости.
+    surcharges = models.JSONField(default=list, blank=True)
+
+    class Meta:
+        verbose_name = _("Цена поставщика")
+        verbose_name_plural = _("Цены поставщиков")
+        ordering = ("airport_icao", "service", "-valid_from")
+        indexes = (
+            models.Index(
+                fields=("vendor", "service", "airport_icao", "valid_from"),
+                name="vendorprice_lookup_idx",
+            ),
+        )
+        constraints = (
+            models.CheckConstraint(
+                condition=models.Q(valid_to__gt=models.F("valid_from")),
+                name="vendorprice_valid_to_after_valid_from",
+                violation_error_message=_("Дата окончания цены раньше даты начала"),
+            ),
+            models.CheckConstraint(
+                condition=models.Q(amount__gte=0),
+                name="vendorprice_amount_not_negative",
+                violation_error_message=_("Отрицательная закупочная цена не имеет смысла"),
+            ),
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"{self.vendor_id}/{self.service_id}@{self.airport_icao}: "
+            f"{self.amount} {self.currency}"
+        )

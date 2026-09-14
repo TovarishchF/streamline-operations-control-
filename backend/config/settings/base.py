@@ -180,6 +180,12 @@ STORAGES = {
     },
 }
 
+# Адрес хранилища, по которому к нему обращается браузер. Внутри сети Docker
+# это `http://minio:9000`, снаружи — проброшенный порт. Подпись SigV4 покрывает
+# заголовок Host, поэтому ссылка на загрузку подписывается для внешнего адреса:
+# подменить host в готовой ссылке нельзя, подпись перестанет сходиться.
+S3_PUBLIC_ENDPOINT = env("S3_PUBLIC_ENDPOINT", default="http://localhost:9000")
+
 FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 MAX_ATTACHMENT_SIZE_BYTES = 25 * 1024 * 1024
 ALLOWED_ATTACHMENT_TYPES = [

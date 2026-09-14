@@ -13,6 +13,9 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
+from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -147,3 +150,64 @@ class Settings(SingletonModel):
 
     def __str__(self) -> str:
         return "Настройки системы"
+
+
+class AttachmentKind(models.TextChoices):
+    """Назначение вложения (`openapi.yaml` AttachmentRef.kind)."""
+
+    ACT = "act", _("Акт выполненных работ")
+    RECEIPT = "receipt", _("Квитанция")
+    INVOICE = "invoice", _("Счёт")
+    WAYBILL = "waybill", _("Накладная")
+    CONTRACT = "contract", _("Договор")
+    OTHER = "other", _("Прочее")
+
+
+class Attachment(BaseModel):
+    """Файл в объектном хранилище (ADR-007, `BACKEND.md § 8`).
+
+    Запись заводится **до** загрузки: клиент получает подписанную ссылку,
+    льёт файл прямо в S3 и подтверждает загрузку. Пока `uploaded_at` пуст,
+    вложение считается незавершённым и в выдачу владельца не попадает —
+    иначе оборванная загрузка оставила бы в договоре ссылку в никуда.
+
+    Владелец — обобщённая связь: договор, заявка на услугу и счёт носят
+    вложения одного вида, и три почти одинаковые таблицы отличались бы
+    только именем колонки.
+    """
+
+    id_prefix: ClassVar[str] = "att"
+
+    file_name = models.CharField(max_length=255)
+    mime_type = models.CharField(max_length=128)
+    size_bytes = models.PositiveIntegerField()
+    kind = models.CharField(
+        max_length=16, choices=AttachmentKind.choices, default=AttachmentKind.OTHER
+    )
+    # Ключ в бакете. Уникален: два вложения не могут указывать на один объект,
+    # иначе удаление одного оборвёт второе.
+    storage_key = models.CharField(max_length=512, unique=True)
+
+    uploaded_at = models.DateTimeField(null=True, blank=True)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="attachments",
+    )
+
+    content_type = models.ForeignKey(
+        ContentType, on_delete=models.CASCADE, null=True, blank=True
+    )
+    object_id = models.CharField(max_length=40, blank=True, db_index=True)
+    owner = GenericForeignKey("content_type", "object_id")
+
+    class Meta:
+        verbose_name = _("Вложение")
+        verbose_name_plural = _("Вложения")
+        ordering = ("-created_at",)
+        indexes = (models.Index(fields=("content_type", "object_id")),)
+
+    def __str__(self) -> str:
+        return self.file_name

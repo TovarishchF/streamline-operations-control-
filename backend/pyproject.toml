@@ -135,7 +135,7 @@ ignore_errors = true
 [[tool.mypy.overrides]]
 # Библиотеки без py.typed. Список ведётся явно: молчаливое
 # ignore_missing_imports = true на весь проект скрыло бы и наши опечатки.
-module = ["environ.*", "celery.*", "django_fsm.*"]
+module = ["environ.*", "celery.*", "django_fsm.*", "boto3.*", "botocore.*"]
 ignore_missing_imports = true
 
 [tool.django-stubs]
