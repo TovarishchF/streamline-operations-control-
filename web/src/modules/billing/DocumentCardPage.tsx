@@ -1,14 +1,22 @@
-import type { JSX } from 'react';
-import { Alert, Button, Card, Col, Descriptions, Row, Space, Table, Tag, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import {
+  Alert, App, Button, Card, Col, Descriptions, Input, Row, Skeleton,
+  Space, Table, Tag, Typography,
+} from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
-import { FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { DocumentLine } from '@/api/types';
-import { INVOICES, QUOTES } from '@/mocks/billing';
-import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { FLIGHT_BY_ID } from '@/mocks/flights';
+import { ApiError } from '@/api/client';
+import { useClient } from '@/api/counterparties';
+import {
+  useInvoice,
+  useInvoiceAction,
+  useQuote,
+  useQuoteAction,
+  type DocumentLineRow,
+} from '@/api/documents';
+import { useFlight } from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
@@ -25,19 +33,93 @@ import { NotFoundPage } from '@/modules/misc/NotFoundPage';
  */
 export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.Element {
   const { t } = useTranslation();
+  const { message, modal } = App.useApp();
   const { id } = useParams<{ id: string }>();
+  // Причина аннулирования живёт снаружи диалога: содержимое диалога
+  // Ant Design не перерисовывается, и читать её из состояния поля нельзя.
+  const [voidReason, setVoidReason] = useState('');
 
-  const quote = kind === 'quote' ? QUOTES.find((q) => q.id === id) : undefined;
-  const document = quote ?? INVOICES.find((i) => i.id === id);
+  const quoteQuery = useQuote(kind === 'quote' ? id : undefined);
+  const invoiceQuery = useInvoice(kind === 'invoice' ? id : undefined);
+  const query = kind === 'quote' ? quoteQuery : invoiceQuery;
+
+  const quote = quoteQuery.data;
+  const invoice = invoiceQuery.data;
+  const document = quote ?? invoice;
+
+  const issueQuote = useQuoteAction('issue');
+  const voidQuote = useQuoteAction('void');
+  const issueInvoice = useInvoiceAction('issue');
+  const voidInvoice = useInvoiceAction('void');
+
+  const client = useClient(document?.clientId).data;
+  const flight = useFlight(document?.flightId).data;
+
+  if (query.isPending) return <Skeleton active paragraph={{ rows: 10 }} />;
   if (!document) return <NotFoundPage />;
 
-  const client = CLIENT_BY_ID.get(document.clientId);
-  const flight = FLIGHT_BY_ID.get(document.flightId);
   const issued = document.status !== 'draft';
-  const invoice = kind === 'invoice' ? INVOICES.find((i) => i.id === id) : undefined;
   const comparison = invoice?.planFactComparison ?? [];
+  const busy =
+    issueQuote.isPending ||
+    voidQuote.isPending ||
+    issueInvoice.isPending ||
+    voidInvoice.isPending;
 
-  const columns: DataColumns<DocumentLine> = [
+  /** Ошибка сервера человеку: код без текста ничего не объясняет. */
+  const report = (error: unknown): void => {
+    void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+  };
+
+  const issue = (): void => {
+    if (!id) return;
+    const action = kind === 'quote' ? issueQuote : issueInvoice;
+    action
+      .mutateAsync({ id })
+      .then((updated) => {
+        void message.success(t('finance.issued', { number: updated.number ?? '' }));
+      })
+      .catch(report);
+  };
+
+  /**
+   * Аннулирование требует причины: она уходит в аудит и объясняет,
+   * почему документ с присвоенным номером больше не действует.
+   */
+  const requestVoid = (): void => {
+    if (!id) return;
+    setVoidReason('');
+    modal.confirm({
+      title: t('finance.voidTitle'),
+      content: (
+        <Space direction="vertical" size={8} style={{ width: '100%' }}>
+          <Typography.Text>{t('finance.voidHint')}</Typography.Text>
+          <Input.TextArea
+            rows={3}
+            placeholder={t('finance.voidReasonPlaceholder')}
+            onChange={(event) => {
+              setVoidReason(event.target.value);
+            }}
+          />
+        </Space>
+      ),
+      okText: t('finance.void'),
+      okButtonProps: { danger: true },
+      cancelText: t('common.cancel'),
+      onOk: async () => {
+        const action = kind === 'quote' ? voidQuote : voidInvoice;
+        try {
+          await action.mutateAsync({ id, reason: voidReason });
+          void message.success(t('finance.voided'));
+        } catch (error) {
+          report(error);
+          throw error;
+        }
+      },
+    });
+  };
+
+  const columns: DataColumns<DocumentLineRow> = [
     { title: t('finance.description'), dataIndex: 'description', ellipsis: true },
     {
       title: t('flight.airport'), dataIndex: 'airportIcao', width: 80,
@@ -91,17 +173,17 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
           </Col>
           <Col>
             <Space size={8} wrap>
-              <Button icon={<FilePdfOutlined />}>PDF</Button>
-              <Button icon={<FileExcelOutlined />}>XLSX</Button>
-              {issued ? (
-                <Can permission="billing.documents.edit">
-                  <Button danger>{t('finance.void')}</Button>
-                </Can>
-              ) : (
-                <Can permission="billing.documents.edit">
-                  <Button type="primary">{t('finance.issue')}</Button>
-                </Can>
-              )}
+              <Can permission="billing.documents.edit">
+                {issued ? (
+                  <Button danger loading={busy} onClick={requestVoid}>
+                    {t('finance.void')}
+                  </Button>
+                ) : (
+                  <Button type="primary" loading={busy} onClick={issue}>
+                    {t('finance.issue')}
+                  </Button>
+                )}
+              </Can>
             </Space>
           </Col>
         </Row>
@@ -118,7 +200,7 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
       <Row gutter={[12, 12]}>
         <Col xs={24} lg={16}>
           <Card size="small" styles={{ body: { padding: 0 } }}>
-            <DataTable<DocumentLine>
+            <DataTable<DocumentLineRow>
               size="small"
               rowKey={(row) => row.serviceOrderId ?? row.description}
               columns={columns}
@@ -181,12 +263,12 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
                   </Descriptions.Item>
                 )}
                 <Descriptions.Item label={t('client.paymentTerms')}>
-                  {t(`paymentMode.${client?.paymentTerms.mode ?? 'postpayment'}`)}
+                  {client ? t(`paymentMode.${client.paymentTerms.mode}`) : '—'}
                 </Descriptions.Item>
                 <Descriptions.Item label={t('finance.fxSnapshot')}>
                   <Space direction="vertical" size={0}>
-                    <Mono>1 USD = {document.fx?.rates['USD'] ?? '—'} RUB</Mono>
-                    <Mono>1 EUR = {document.fx?.rates['EUR'] ?? '—'} RUB</Mono>
+                    <Mono>1 USD = {document.fx.rates['USD'] ?? '—'} RUB</Mono>
+                    <Mono>1 EUR = {document.fx.rates['EUR'] ?? '—'} RUB</Mono>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                       {t('finance.fxFixedInDocument')}
                     </Typography.Text>
@@ -207,10 +289,10 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
             </Typography.Text>
             {comparison.map((item, index) => (
               <Space key={index} size={10} wrap>
-                <Tag>{t(`planFactKind.${item.kind ?? 'quantity_changed'}`)}</Tag>
-                <MoneyText value={item.planValue ?? null} />
+                <Tag>{t(`planFactKind.${item.kind}`)}</Tag>
+                <MoneyText value={item.planValue} />
                 <span>→</span>
-                <MoneyText value={item.factValue ?? null} strong />
+                <MoneyText value={item.factValue} strong />
                 <Typography.Text type="secondary">{item.comment}</Typography.Text>
               </Space>
             ))}

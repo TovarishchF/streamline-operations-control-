@@ -4,7 +4,8 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight } from '@/api/flights';
-import type { MarginMode, ServiceOrder } from '@/api/types';
+import type { ServiceOrderRow } from '@/api/orders';
+import type { MarginMode } from '@/api/types';
 import { MARGINS } from '@/mocks/flights';
 import { usePermission } from '@/shared/auth/session';
 import { MoneyText, Mono, PercentText } from '@/shared/ui/primitives';
@@ -24,7 +25,7 @@ export function FlightFinanceTab({
   orders,
 }: {
   flight: Flight;
-  orders: ServiceOrder[];
+  orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
   const [mode, setMode] = useState<MarginMode>('mixed');
@@ -36,7 +37,7 @@ export function FlightFinanceTab({
     return order.status !== 'cancelled' && order.status !== 'rejected';
   });
 
-  const purchaseColumn: DataColumns<ServiceOrder> = canSeePurchase
+  const purchaseColumn: DataColumns<ServiceOrderRow> = canSeePurchase
     ? [
         {
           title: t('service.purchaseCost'),
@@ -48,7 +49,7 @@ export function FlightFinanceTab({
       ]
     : [];
 
-  const columns: DataColumns<ServiceOrder> = [
+  const columns: DataColumns<ServiceOrderRow> = [
     {
       title: t('service.name'),
       key: 'name',
@@ -173,7 +174,7 @@ export function FlightFinanceTab({
         </Space>
       </Card>
 
-      <DataTable<ServiceOrder>
+      <DataTable<ServiceOrderRow>
         size="small"
         rowKey="id"
         columns={columns}

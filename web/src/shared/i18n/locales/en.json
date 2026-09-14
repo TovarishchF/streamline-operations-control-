@@ -447,7 +447,26 @@
     "validUntil": "Valid until",
     "vat": "VAT",
     "vatTotal": "VAT total",
-    "void": "Void"
+    "void": "Void",
+    "quoteCreated": "Quote created",
+    "invoiceCreated": "Invoice created",
+    "quoteBuildHint": "The quote is assembled by the server from the flight's planned services. Lines and amounts are computed from the client's tariffs; there is nothing to type in.",
+    "invoiceBuildHint": "The invoice is assembled by the server from services actually provided, at actual quantities. Unfinished orders are not included.",
+    "basedOnQuote": "Compare with quote",
+    "basedOnQuoteHint": "The invoice will show how it differs from the selected quote",
+    "numberOnIssueHint": "The number is assigned on issue, not on creation: a draft does not consume a number.",
+    "issued": "Document issued as {{number}}",
+    "voided": "Document voided",
+    "voidTitle": "Void document",
+    "voidHint": "An issued document cannot be edited. Voiding withdraws it; a corrected one is issued separately.",
+    "voidReasonPlaceholder": "Reason — it goes into the audit log",
+    "noQuotes": "No quotes yet",
+    "noInvoices": "No invoices yet",
+    "overdueNotice": "Overdue invoices: {{count}}",
+    "overdueDays": "{{days}} days overdue",
+    "paidFromPaymentsHint": "Computed from recorded payments. Payments are the next layer of this milestone; zero for now.",
+    "client": "Client",
+    "flight": "Flight"
   },
   "fleet": {
     "approvals": "Approvals",
@@ -973,7 +992,9 @@
     "vendor": "Vendor",
     "vendorsAt": "Vendors at {{airport}}",
     "whatHappensNext": "After submission the order moves to “Ordered”, a letter is sent to the vendor and the SLA countdown starts.",
-    "wizardTitle": "Order a service"
+    "wizardTitle": "Order a service",
+    "checksFromServer": "These are the checks the server ran on submission; they are more accurate than the preview.",
+    "rejectReasonPlaceholder": "Reason for rejection — it goes to the dispatcher and into the audit log"
   },
   "serviceCategory": {
     "catering": "Catering",

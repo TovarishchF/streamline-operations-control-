@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight } from '@/api/flights';
-import type { ServiceOrder } from '@/api/types';
+import type { ServiceOrderRow } from '@/api/orders';
 import { INVOICES, QUOTES } from '@/mocks/billing';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 
@@ -20,14 +20,14 @@ export function FlightDocumentsTab({
   orders,
 }: {
   flight: Flight;
-  orders: ServiceOrder[];
+  orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
 
   const quotes = QUOTES.filter((q) => q.flightId === flight.id);
   const invoices = INVOICES.filter((i) => i.flightId === flight.id);
   const attachments = orders.flatMap((order) =>
-    (order.documents ?? []).map((doc) => ({ doc, order })),
+    order.documents.map((doc) => ({ doc, order })),
   );
 
   return (

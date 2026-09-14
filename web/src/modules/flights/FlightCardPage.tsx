@@ -11,7 +11,7 @@ import { useFleet } from '@/api/fleet';
 import { useFlight, useScheduleConflicts } from '@/api/flights';
 import { useSlots } from '@/api/slots';
 import { MARGINS } from '@/mocks/flights';
-import { useFlightOrders } from '@/mocks/store';
+import { useFlightOrders } from '@/api/orders';
 import { Can } from '@/shared/auth/Can';
 import { formatUtcOffset, utcOffsetHours } from '@/shared/format/timezone';
 import { QueryState } from '@/shared/ui/QueryState';
@@ -51,7 +51,7 @@ export function FlightCardPage(): JSX.Element {
 
   const flightQuery = useFlight(id);
   const flight = flightQuery.data;
-  const orders = useFlightOrders(id);
+  const orders = useFlightOrders(id).data ?? [];
 
   const airports = useAirportsByIcao([flight?.depIcao ?? '', flight?.arrIcao ?? '']);
   const fleet = useFleet().data?.data ?? [];

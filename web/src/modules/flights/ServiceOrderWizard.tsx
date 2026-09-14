@@ -1,28 +1,48 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Tag, Typography,
+  Alert, App, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Tag,
+  Typography,
 } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone, WarningTwoTone } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
+import { useServices, useVendorPrices } from '@/api/catalog';
+import { ApiError } from '@/api/client';
+import { useContracts, type VendorContractRow } from '@/api/counterparties';
+import {
+  checksFromError,
+  requiresOverride,
+  useCreateOrder,
+  type ServiceCheck,
+} from '@/api/orders';
 import type { Flight } from '@/api/flights';
-import type { ServiceCategory, ServiceCheckResult } from '@/api/types';
-import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
-import { SERVICES, SERVICE_CATEGORIES } from '@/mocks/reference';
+import type { ServiceCategory } from '@/api/types';
 import { useClock } from '@/shared/clock/useClock';
-import { useSocStore } from '@/mocks/store';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+
+const SERVICE_CATEGORIES: ServiceCategory[] = [
+  'fuel',
+  'handling',
+  'catering',
+  'transport',
+  'permits',
+  'deicing',
+];
 
 /**
  * Мастер заказа услуги `[ТЗ 3.2.2]`.
  *
- * Шаги: категория → услуга → плечо → атрибуты → поставщик → проверки.
+ * Шаги: услуга и плечо → поставщик → проверки.
  *
- * Автоматические проверки (`SPEC.md § 5.2`) выполняются **до** отправки
- * и показываются списком. Провал проверок 1–3 (доступность услуги, действующий
- * контракт, актуальная цена) блокирует отправку. Провал 4–5 (лидтайм, погодное
- * условие) требует подтверждения с причиной, и причина идёт в аудит.
+ * Проверки (`SPEC.md § 5.2`) показываются здесь **до** отправки, но решение
+ * принимает сервер: показанное полминуты назад могло устареть. Поэтому
+ * список на третьем шаге — предварительный, а окончательный приходит
+ * в отказе сервера и замещает его.
+ *
+ * Провал проверок 1–3 (доступность услуги, действующий контракт, актуальная
+ * цена) блокирует отправку. Провал 4–5 (лидтайм, погодное условие) требует
+ * подтверждения с причиной, и причина идёт в аудит.
  */
 export function ServiceOrderWizard({
   flight,
@@ -35,8 +55,8 @@ export function ServiceOrderWizard({
 }): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const createOrder = useSocStore((state) => state.createOrder);
   const { nowUtc } = useClock();
+
   const [step, setStep] = useState(0);
   const [category, setCategory] = useState<ServiceCategory | null>(null);
   const [serviceId, setServiceId] = useState<string | null>(null);
@@ -44,69 +64,91 @@ export function ServiceOrderWizard({
   const [vendorId, setVendorId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState<number>(1);
   const [overrideReason, setOverrideReason] = useState('');
+  // Проверки, которые вернул сервер в отказе. Они точнее предварительных
+  // и замещают их: между показом и отправкой прайс мог закончиться.
+  const [serverChecks, setServerChecks] = useState<ServiceCheck[]>([]);
 
-  const service = serviceId ? SERVICES.find((s) => s.id === serviceId) : null;
+  const services = useServices(category ?? undefined).data?.data ?? [];
+  const service = services.find((item) => item.id === serviceId) ?? null;
   const airport = leg === 'departure' ? flight.depIcao : flight.arrIcao;
+  const serviceMoment = leg === 'departure' ? flight.stdUtc : flight.staUtc;
 
-  const candidates = useMemo(
-    () =>
-      VENDOR_PRICES.filter((price) => price.serviceId === serviceId && price.airportIcao === airport),
-    [serviceId, airport],
-  );
+  // Кандидаты — поставщики с действующей ценой на услугу в этом аэропорту.
+  // Фильтрацию по дате делает сервер: она идёт на дату оказания.
+  const pricesQuery = useVendorPrices({
+    serviceId: serviceId ?? '',
+    airportIcao: airport,
+    onDate: serviceMoment.slice(0, 10),
+  });
+  const candidates = useMemo(() => pricesQuery.data?.data ?? [], [pricesQuery.data]);
 
-  /** Проверки `SPEC.md § 5.2`. Порядок и блокирующий признак — оттуда же. */
-  const checks: ServiceCheckResult[] = useMemo(() => {
+  const contractsQuery = useContracts({});
+  const contractByVendor = useMemo(() => {
+    const map = new Map<string, VendorContractRow>();
+    for (const contract of contractsQuery.data?.data ?? []) {
+      const existing = map.get(contract.vendorId);
+      if (!existing || contract.validTo > existing.validTo) map.set(contract.vendorId, contract);
+    }
+    return map;
+  }, [contractsQuery.data]);
+
+  const createOrder = useCreateOrder();
+
+  /** Предварительные проверки. Окончательные выполняет сервер. */
+  const localChecks: ServiceCheck[] = useMemo(() => {
     if (!service) return [];
 
-    const price = candidates.find((c) => c.vendorId === vendorId) ?? candidates[0];
-    const contract = vendorId ? CONTRACT_BY_VENDOR.get(vendorId) : undefined;
-    const hoursToDeparture = (new Date(flight.stdUtc).getTime() - nowUtc.getTime()) / 3_600_000;
+    const contract = vendorId ? contractByVendor.get(vendorId) : undefined;
+    const hoursLeft = (new Date(serviceMoment).getTime() - nowUtc.getTime()) / 3_600_000;
 
     return [
       {
         code: 'availability',
         passed: candidates.length > 0,
         blocking: true,
-        message: candidates.length > 0
-          ? t('service.checkAvailabilityOk', { count: candidates.length, airport })
-          : t('service.checkAvailabilityFail', { airport }),
+        message:
+          candidates.length > 0
+            ? t('service.checkAvailabilityOk', { count: candidates.length, airport })
+            : t('service.checkAvailabilityFail', { airport }),
       },
       {
         code: 'contract_valid',
         passed: contract !== undefined && contract.status !== 'expired',
         blocking: true,
-        message: contract === undefined
-          ? t('service.checkContractMissing')
-          : contract.status === 'expired'
-            ? t('service.checkContractExpired', {
-                vendor: VENDOR_BY_ID.get(vendorId ?? '')?.name ?? '',
-                date: new Date(contract.validTo).toLocaleDateString('ru-RU'),
-              })
-            : t('service.checkContractOk', { number: contract.number }),
+        message:
+          contract === undefined
+            ? t('service.checkContractMissing')
+            : contract.status === 'expired'
+              ? t('service.checkContractExpired', {
+                  vendor: candidates.find((c) => c.vendorId === vendorId)?.vendorName ?? '',
+                  date: new Date(contract.validTo).toLocaleDateString('ru-RU'),
+                })
+              : t('service.checkContractOk', { number: contract.number }),
       },
       {
         code: 'price_valid',
-        passed: price !== undefined,
+        passed: candidates.some((price) => price.vendorId === vendorId),
         blocking: true,
-        message: price
+        message: candidates.some((price) => price.vendorId === vendorId)
           ? t('service.checkPriceOk')
           : t('service.checkPriceFail'),
       },
       {
         code: 'lead_time',
-        passed: hoursToDeparture >= service.leadTimeH,
+        passed: hoursLeft >= service.leadTimeH,
         blocking: false,
-        message: hoursToDeparture >= service.leadTimeH
-          ? t('service.checkLeadTimeOk', { hours: service.leadTimeH })
-          : t('service.checkLeadTimeFail', {
-              required: service.leadTimeH,
-              actual: Math.max(0, Math.round(hoursToDeparture)),
-            }),
+        message:
+          hoursLeft >= service.leadTimeH
+            ? t('service.checkLeadTimeOk', { hours: service.leadTimeH })
+            : t('service.checkLeadTimeFail', {
+                required: service.leadTimeH,
+                actual: Math.max(0, Math.round(hoursLeft)),
+              }),
       },
       ...(service.requiresWeather
         ? [
             {
-              code: 'weather' as const,
+              code: 'weather',
               passed: true,
               blocking: false,
               // ADR-029: подсказка диспетчеру, решение принимает командир ВС
@@ -115,11 +157,16 @@ export function ServiceOrderWizard({
           ]
         : []),
     ];
-  }, [service, candidates, vendorId, flight.stdUtc, airport, nowUtc, t]);
+  }, [service, candidates, vendorId, contractByVendor, serviceMoment, airport, nowUtc, t]);
 
-  const blockingFailed = checks.some((c) => c.blocking && !c.passed);
-  const softFailed = checks.some((c) => !c.blocking && !c.passed);
-  const canSubmit = !blockingFailed && (!softFailed || overrideReason.trim().length > 0);
+  const checks = serverChecks.length > 0 ? serverChecks : localChecks;
+  const blockingFailed = checks.some((check) => check.blocking && !check.passed);
+  const softFailed = checks.some((check) => !check.blocking && !check.passed);
+  const canSubmit =
+    Boolean(serviceId) &&
+    Boolean(vendorId) &&
+    !blockingFailed &&
+    (!softFailed || overrideReason.trim().length > 0);
 
   const reset = (): void => {
     setStep(0);
@@ -128,6 +175,47 @@ export function ServiceOrderWizard({
     setVendorId(null);
     setQuantity(1);
     setOverrideReason('');
+    setServerChecks([]);
+  };
+
+  const close = (): void => {
+    onClose();
+    reset();
+  };
+
+  const submit = (): void => {
+    if (!serviceId || !vendorId) return;
+    setServerChecks([]);
+
+    createOrder
+      .mutateAsync({
+        flightId: flight.id,
+        serviceId,
+        leg,
+        // Количество уходит строкой: деньги и количества в JSON числом
+        // с плавающей точкой не передаются (`CLAUDE.md § 3` п. 1).
+        quantity: quantity.toFixed(4),
+        vendorId,
+        ...(overrideReason.trim() ? { overrideReason: overrideReason.trim() } : {}),
+      })
+      .then(() => {
+        void message.success(t('service.orderCreated'));
+        close();
+      })
+      .catch((error: unknown) => {
+        const fromServer = checksFromError(error);
+        if (fromServer.length > 0) {
+          setServerChecks(fromServer);
+          setStep(2);
+          if (requiresOverride(error)) {
+            void message.warning(t('service.overrideRequired'));
+            return;
+          }
+        }
+        void message.error(
+          error instanceof ApiError ? error.message : t('service.orderFailed'),
+        );
+      });
   };
 
   return (
@@ -135,7 +223,7 @@ export function ServiceOrderWizard({
       open={open}
       width={720}
       title={t('service.wizardTitle')}
-      onCancel={() => { onClose(); reset(); }}
+      onCancel={close}
       footer={
         <Space>
           {step > 0 ? (
@@ -144,7 +232,7 @@ export function ServiceOrderWizard({
           {step < 2 ? (
             <Button
               type="primary"
-              disabled={step === 0 ? !serviceId : false}
+              disabled={step === 0 ? !serviceId : !vendorId}
               onClick={() => { setStep((s) => s + 1); }}
             >
               {t('common.next')}
@@ -153,23 +241,8 @@ export function ServiceOrderWizard({
             <Button
               type="primary"
               disabled={!canSubmit}
-              onClick={() => {
-                if (!serviceId || !vendorId) return;
-                const order = createOrder({
-                  flightId: flight.id,
-                  serviceId,
-                  leg,
-                  quantity: String(quantity),
-                  vendorId,
-                });
-                if (!order) {
-                  void message.error(t('service.orderFailed'));
-                  return;
-                }
-                void message.success(t('service.orderCreated'));
-                onClose();
-                reset();
-              }}
+              loading={createOrder.isPending}
+              onClick={submit}
             >
               {t('service.submitOrder')}
             </Button>
@@ -196,6 +269,7 @@ export function ServiceOrderWizard({
                 onChange={(value: ServiceCategory) => {
                   setCategory(value);
                   setServiceId(null);
+                  setVendorId(null);
                 }}
                 options={SERVICE_CATEGORIES.map((code) => ({
                   value: code,
@@ -208,10 +282,13 @@ export function ServiceOrderWizard({
               <Select
                 value={serviceId}
                 disabled={!category}
-                onChange={setServiceId}
-                options={SERVICES.filter((s) => s.category === category).map((s) => ({
-                  value: s.id,
-                  label: `${s.name.ru} (${s.code})`,
+                onChange={(value: string) => {
+                  setServiceId(value);
+                  setVendorId(null);
+                }}
+                options={services.map((item) => ({
+                  value: item.id,
+                  label: `${item.name.ru} (${item.code})`,
                 }))}
               />
             </Form.Item>
@@ -219,7 +296,10 @@ export function ServiceOrderWizard({
             <Form.Item label={t('service.leg')} required>
               <Radio.Group
                 value={leg}
-                onChange={(e) => { setLeg(e.target.value as 'departure' | 'arrival'); }}
+                onChange={(e) => {
+                  setLeg(e.target.value as 'departure' | 'arrival');
+                  setVendorId(null);
+                }}
                 optionType="button"
                 options={[
                   { label: `${t('serviceLeg.departure')} — ${flight.depIcao}`, value: 'departure' },
@@ -229,9 +309,12 @@ export function ServiceOrderWizard({
             </Form.Item>
 
             {service ? (
-              <Form.Item label={`${t('service.quantity')}, ${t(`serviceUnit.${service.unit}`)}`} required>
+              <Form.Item
+                label={`${t('service.quantity')}, ${t(`serviceUnit.${service.unit}`)}`}
+                required
+              >
                 <InputNumber
-                  min={1}
+                  min={0.0001}
                   value={quantity}
                   onChange={(value) => { setQuantity(value ?? 1); }}
                   style={{ width: 180 }}
@@ -255,14 +338,17 @@ export function ServiceOrderWizard({
               {t('service.vendorsAt', { airport })}
             </Typography.Text>
             {candidates.length === 0 ? (
-              <Alert type="error" showIcon message={t('service.checkAvailabilityFail', { airport })} />
+              <Alert
+                type="error"
+                showIcon
+                message={t('service.checkAvailabilityFail', { airport })}
+              />
             ) : (
               <List
                 bordered
                 dataSource={candidates}
                 renderItem={(price) => {
-                  const vendor = VENDOR_BY_ID.get(price.vendorId);
-                  const contract = CONTRACT_BY_VENDOR.get(price.vendorId);
+                  const contract = contractByVendor.get(price.vendorId);
                   const selected = vendorId === price.vendorId;
                   return (
                     <List.Item
@@ -275,12 +361,7 @@ export function ServiceOrderWizard({
                       <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
                         <Space direction="vertical" size={0}>
                           <Space size={6}>
-                            <Typography.Text strong>{vendor?.name}</Typography.Text>
-                            {vendor?.rating?.sufficientData ? (
-                              <Tag>{Number.parseFloat(vendor.rating.rating ?? '0').toFixed(1)} / 5</Tag>
-                            ) : (
-                              <Tag>{t('vendor.insufficientData')}</Tag>
-                            )}
+                            <Typography.Text strong>{price.vendorName}</Typography.Text>
                             {contract?.status === 'expired' ? (
                               <Tag color="red">{t('contract.expired')}</Tag>
                             ) : contract?.status === 'expiring' ? (
@@ -303,6 +384,10 @@ export function ServiceOrderWizard({
 
         {step === 2 ? (
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
+            {serverChecks.length > 0 ? (
+              <Alert type="warning" showIcon message={t('service.checksFromServer')} />
+            ) : null}
+
             <List
               size="small"
               bordered

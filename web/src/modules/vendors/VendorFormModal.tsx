@@ -174,7 +174,7 @@ export function VendorFormModal({
           <Col xs={24} sm={12}>
             <Form.Item
               name="exchangeMethod"
-              label={t('vendor.exchangeMethod')}
+              label={t('vendor.exchange')}
               tooltip={t('vendor.exchangeMethodHint')}
               initialValue="email"
             >

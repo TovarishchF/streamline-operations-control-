@@ -3,7 +3,7 @@ import { Alert, App, Button, Form, Input, Modal, Select, Space, Steps, Tooltip, 
 import { useTranslation } from 'react-i18next';
 
 import type { Flight, FlightTransition } from '@/api/flights';
-import type { ServiceOrder } from '@/api/types';
+import type { ServiceOrderRow } from '@/api/orders';
 import flightMachine from '@shared/state-machines/flight.json';
 import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
@@ -42,7 +42,7 @@ export function StatusPanel({
   orders,
 }: {
   flight: Flight;
-  orders: ServiceOrder[];
+  orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();

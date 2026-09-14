@@ -1,13 +1,14 @@
 import { useState, type JSX } from 'react';
-import { App, Button, Card, Space, Tag, Tooltip, Typography } from 'antd';
+import { App, Button, Card, Input, Space, Tag, Tooltip, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { PaperClipOutlined, PlusOutlined, SwapOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
+import { ApiError } from '@/api/client';
 import type { Flight } from '@/api/flights';
-import type { ServiceOrder } from '@/api/types';
-import { useSocStore } from '@/mocks/store';
+import { useOrderTransition, type ServiceOrderRow } from '@/api/orders';
 import { Can } from '@/shared/auth/Can';
+import { useClock } from '@/shared/clock/useClock';
 import { usePermission } from '@/shared/auth/session';
 import { EmptyState, MoneyText, Mono, ServiceStatusTag, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -26,16 +27,17 @@ export function FlightServicesTab({
   orders,
 }: {
   flight: Flight;
-  orders: ServiceOrder[];
+  orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
-  const { message } = App.useApp();
-  const transitionOrder = useSocStore((state) => state.transitionOrder);
+  const { message, modal } = App.useApp();
+  const { nowUtc } = useClock();
+  const transition = useOrderTransition();
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [suggestFor, setSuggestFor] = useState<ServiceOrder | null>(null);
+  const [suggestFor, setSuggestFor] = useState<ServiceOrderRow | null>(null);
   const canSeePurchase = usePermission('billing.purchase_price.view');
 
-  const columns: DataColumns<ServiceOrder> = [
+  const columns: DataColumns<ServiceOrderRow> = [
     {
       title: t('service.name'), key: 'service', width: 230, fixed: 'left',
       render: (_, row) => (
@@ -89,7 +91,7 @@ export function FlightServicesTab({
             title: t('service.purchaseCost'), key: 'cost', width: 130, align: 'right',
             render: (_, row) => <MoneyText value={row.purchaseCost} />,
           },
-        ] as DataColumns<ServiceOrder>)
+        ] as DataColumns<ServiceOrderRow>)
       : []),
     {
       title: t('service.salePrice'), key: 'sale', width: 130, align: 'right',
@@ -120,11 +122,11 @@ export function FlightServicesTab({
     {
       title: t('service.documents'), key: 'docs', width: 80, align: 'center',
       render: (_, row) =>
-        (row.documents?.length ?? 0) > 0 ? (
-          <Tooltip title={row.documents?.map((d) => d.fileName).join(', ')}>
+        row.documents.length > 0 ? (
+          <Tooltip title={row.documents.map((doc) => doc.fileName).join(', ')}>
             <Space size={2}>
               <PaperClipOutlined />
-              {row.documents?.length}
+              {row.documents.length}
             </Space>
           </Tooltip>
         ) : (
@@ -148,7 +150,7 @@ export function FlightServicesTab({
                 <Button
                   size="small"
                   danger
-                  onClick={() => { runTransition(row.id, 'reject'); }}
+                  onClick={() => { requestReject(row.id); }}
                 >
                   {t('serviceTransition.reject')}
                 </Button>
@@ -195,14 +197,77 @@ export function FlightServicesTab({
 
   const rejected = orders.filter((o) => o.status === 'rejected');
 
-  /** Переход заявки. Проверяется против shared/state-machines/service-order.json. */
-  const runTransition = (id: string, transition: 'confirm' | 'begin' | 'finish' | 'reject'): void => {
-    const error = transitionOrder(id, transition);
-    if (error) {
-      void message.error(t('service.transitionFailed'));
-      return;
-    }
-    void message.success(t('service.transitionDone', { transition: t(`serviceTransition.${transition}`) }));
+  /**
+   * Переход заявки. Условия проверяет сервер против того же определения
+   * автомата, из которого строит машину клиент (ADR-015).
+   *
+   * Переход `finish` требует фактического времени и количества (ADR-020):
+   * они спрашиваются здесь же, чтобы между сохранением карточки и нажатием
+   * «Выполнена» заявка не оказалась в состоянии, которого автомат не знает.
+   */
+  const runTransition = (
+    id: string,
+    name: 'confirm' | 'begin' | 'finish' | 'reject',
+    extra: { comment?: string; actualQuantity?: string } = {},
+  ): void => {
+    const order = orders.find((item) => item.id === id);
+    const now = nowUtc.toISOString();
+
+    transition
+      .mutateAsync({
+        id,
+        transition: name,
+        ...extra,
+        ...(name === 'finish'
+          ? {
+              actualStartAt: order?.startedAt ?? now,
+              actualEndAt: now,
+              actualQuantity: extra.actualQuantity ?? order?.quantity ?? '1',
+            }
+          : {}),
+      })
+      .then(() => {
+        void message.success(
+          t('service.transitionDone', { transition: t(`serviceTransition.${name}`) }),
+        );
+      })
+      .catch((error: unknown) => {
+        // Список невыполненных условий точнее общего текста: человеку
+        // нужно знать, чего именно не хватает (`SPEC.md § 4.4`).
+        const unmet =
+          error instanceof ApiError && Array.isArray(error.details['unmetConditions'])
+            ? (error.details['unmetConditions'] as { message: string }[])
+                .map((item) => item.message)
+                .join('; ')
+            : '';
+        void message.error(
+          unmet ||
+            (error instanceof ApiError ? error.message : t('service.transitionFailed')),
+        );
+      });
+  };
+
+  /** Отклонение требует причины — её спрашивают, а не подставляют. */
+  const requestReject = (id: string): void => {
+    let reason = '';
+    modal.confirm({
+      title: t('serviceTransition.reject'),
+      content: (
+        <Input.TextArea
+          rows={3}
+          placeholder={t('service.rejectReasonPlaceholder')}
+          onChange={(event) => {
+            reason = event.target.value;
+          }}
+        />
+      ),
+      okText: t('serviceTransition.reject'),
+      okButtonProps: { danger: true },
+      cancelText: t('common.cancel'),
+      onOk: () => {
+        runTransition(id, 'reject', { comment: reason });
+      },
+    });
   };
 
   return (
@@ -229,7 +294,7 @@ export function FlightServicesTab({
         </Can>
       </Space>
 
-      <DataTable<ServiceOrder>
+      <DataTable<ServiceOrderRow>
         size="small"
         rowKey="id"
         columns={columns}

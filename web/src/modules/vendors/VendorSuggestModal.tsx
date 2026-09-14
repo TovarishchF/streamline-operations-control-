@@ -4,7 +4,8 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { Flight } from '@/api/flights';
-import type { ServiceOrder, VendorCandidate } from '@/api/types';
+import type { ServiceOrderRow } from '@/api/orders';
+import type { VendorCandidate } from '@/api/types';
 import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -34,7 +35,7 @@ export function VendorSuggestModal({
   flight,
   onClose,
 }: {
-  order: ServiceOrder | null;
+  order: ServiceOrderRow | null;
   flight: Flight;
   onClose: () => void;
 }): JSX.Element {
