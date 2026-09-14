@@ -4,12 +4,14 @@ import {
   Space, Table, Tag, Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
+import { FileExcelOutlined, FilePdfOutlined } from '@ant-design/icons';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { ApiError } from '@/api/client';
 import { useClient } from '@/api/counterparties';
 import {
+  useExportInvoice,
   useInvoice,
   useInvoiceAction,
   useQuote,
@@ -47,6 +49,7 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
   const invoice = invoiceQuery.data;
   const document = quote ?? invoice;
 
+  const exportInvoice = useExportInvoice();
   const issueQuote = useQuoteAction('issue');
   const voidQuote = useQuoteAction('void');
   const issueInvoice = useInvoiceAction('issue');
@@ -69,6 +72,24 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
   /** Ошибка сервера человеку: код без текста ничего не объясняет. */
   const report = (error: unknown): void => {
     void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+  };
+
+  /**
+   * Выгрузка документа. Сервер кладёт файл в хранилище и отдаёт
+   * подписанную ссылку — её и открывает браузер, в новой вкладке.
+   */
+  const download = (format: 'pdf' | 'xlsx'): void => {
+    if (!id) return;
+    exportInvoice
+      .mutateAsync({ id, format })
+      .then((ticket) => {
+        if (ticket.downloadUrl) {
+          window.open(ticket.downloadUrl, '_blank', 'noopener');
+          return;
+        }
+        void message.info(t('finance.exportQueued'));
+      })
+      .catch(report);
   };
 
   const issue = (): void => {
@@ -173,6 +194,24 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
           </Col>
           <Col>
             <Space size={8} wrap>
+              {kind === 'invoice' ? (
+                <>
+                  <Button
+                    icon={<FilePdfOutlined />}
+                    loading={exportInvoice.isPending}
+                    onClick={() => { download('pdf'); }}
+                  >
+                    PDF
+                  </Button>
+                  <Button
+                    icon={<FileExcelOutlined />}
+                    loading={exportInvoice.isPending}
+                    onClick={() => { download('xlsx'); }}
+                  >
+                    XLSX
+                  </Button>
+                </>
+              ) : null}
               <Can permission="billing.documents.edit">
                 {issued ? (
                   <Button danger loading={busy} onClick={requestVoid}>

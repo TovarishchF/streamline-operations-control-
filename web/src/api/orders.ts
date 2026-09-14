@@ -211,3 +211,49 @@ export function useReassignOrder() {
     },
   });
 }
+
+const uploadTicketSchema = z.object({
+  attachment: attachmentRefSchema,
+  uploadUrl: z.string(),
+  expiresInSeconds: z.number().int(),
+});
+
+/**
+ * Загрузка документа по заявке `[ТЗ 3.2.3]`.
+ *
+ * Отличается от общего `POST /attachments` тем, что вложение сразу
+ * привязано к заявке. Это существенно: акт, загруженный и не привязанный,
+ * не откроет переход в «Выполнена», и разбираться с этим пришлось бы
+ * у стойки.
+ */
+export async function uploadOrderDocument(
+  orderId: string,
+  file: File,
+  kind: 'act' | 'receipt' | 'waybill' | 'invoice' | 'other',
+): Promise<z.infer<typeof attachmentRefSchema>> {
+  const mimeType = file.type || 'application/octet-stream';
+
+  const ticket = await request(`/service-orders/${orderId}/documents`, uploadTicketSchema, {
+    method: 'POST',
+    body: { fileName: file.name, mimeType, sizeBytes: file.size, kind },
+    idempotencyKey: newIdempotencyKey(),
+  });
+
+  const put = await fetch(ticket.uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': mimeType },
+    body: file,
+  });
+  if (!put.ok) {
+    throw new ApiError(
+      put.status,
+      'UPLOAD_FAILED',
+      `Не удалось передать файл в хранилище (HTTP ${String(put.status)})`,
+      {},
+    );
+  }
+
+  return request(`/attachments/${ticket.attachment.id}/confirm`, attachmentRefSchema, {
+    method: 'POST',
+  });
+}

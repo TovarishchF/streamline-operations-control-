@@ -8,8 +8,9 @@ import { useTranslation } from 'react-i18next';
 
 import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 
+import { ApiError } from '@/api/client';
+import { useInvoices, useQuotes, useQuoteAction } from '@/api/documents';
 import type { ClientPortalDocument, ClientPortalFlight } from '@/api/types';
-import { INVOICES, QUOTES } from '@/mocks/billing';
 import { ordersForFlight } from '@/mocks/flights';
 import { AIRPORTS } from '@/mocks/reference';
 import { useSocStore } from '@/mocks/store';
@@ -215,32 +216,67 @@ export function ClientRequestPage(): JSX.Element {
   );
 }
 
-/** Финансовые документы клиента: котировки и счета с выгрузкой PDF. */
+/**
+ * Финансовые документы клиента `[ТЗ 3.5.3]`.
+ *
+ * Выборка ограничена сервером по `client_id` (ADR-003): чужие документы
+ * сюда не попадают по построению, а не потому, что их отфильтровали
+ * на экране.
+ *
+ * Черновики клиенту не показываются: документ становится документом
+ * в момент выставления, а до него это внутренняя заготовка.
+ */
 export function ClientDocumentsPage(): JSX.Element {
   const { t } = useTranslation();
-  const user = useCurrentUser();
+  const { message } = App.useApp();
+
+  const quotes = useQuotes({}).data?.data ?? [];
+  const invoices = useInvoices({}).data?.data ?? [];
+
+  const accept = useQuoteAction('accept');
+  const decline = useQuoteAction('decline');
+
+  const respond = (id: string, accepted: boolean): void => {
+    const action = accepted ? accept : decline;
+    action
+      .mutateAsync({ id })
+      .then(() => {
+        void message.success(
+          accepted ? t('portal.client.quoteAccepted') : t('portal.client.quoteDeclined'),
+        );
+      })
+      .catch((error: unknown) => {
+        void message.error(
+          error instanceof ApiError ? error.message : t('common.saveFailed'),
+        );
+      });
+  };
 
   const documents: ClientPortalDocument[] = [
-    ...QUOTES.filter((q) => q.clientId === user?.clientId && q.number).map((q) => ({
-      id: q.id,
-      kind: 'quote' as const,
-      number: q.number ?? '',
-      issuedAt: q.issuedAt ?? null,
-      dueDate: null,
-      status: q.status,
-      total: q.totals.grandTotal,
-      downloadUrl: '#',
-    })),
-    ...INVOICES.filter((i) => i.clientId === user?.clientId).map((i) => ({
-      id: i.id,
-      kind: 'invoice' as const,
-      number: i.number ?? '',
-      issuedAt: i.issuedAt ?? null,
-      dueDate: i.dueDate ?? null,
-      status: i.status,
-      total: i.totals.grandTotal,
-      downloadUrl: '#',
-    })),
+    ...quotes
+      .filter((quote) => quote.number !== null)
+      .map((quote) => ({
+        id: quote.id,
+        kind: 'quote' as const,
+        number: quote.number ?? '',
+        issuedAt: quote.issuedAt,
+        dueDate: null,
+        status: quote.status,
+        total: quote.totals.grandTotal,
+        downloadUrl: '#',
+      })),
+    ...invoices
+      .filter((invoice) => invoice.number !== null)
+      .map((invoice) => ({
+        id: invoice.id,
+        kind: 'invoice' as const,
+        number: invoice.number ?? '',
+        issuedAt: invoice.issuedAt,
+        dueDate: invoice.dueDate,
+        status: invoice.status,
+        total: invoice.totals.grandTotal,
+        downloadUrl: '#',
+      })),
   ];
 
   const columns: DataColumns<ClientPortalDocument> = [
@@ -271,18 +307,30 @@ export function ClientDocumentsPage(): JSX.Element {
       ),
     },
     {
-      title: t('common.actions'), key: 'actions', sortable: false, width: 210,
-      render: (_, row) => (
-        <Space size={4}>
-          <Button size="small">PDF</Button>
-          {row.kind === 'quote' && row.status === 'issued' ? (
-            <>
-              <Button size="small" type="primary">{t('finance.acceptQuote')}</Button>
-              <Button size="small" danger>{t('finance.declineQuote')}</Button>
-            </>
-          ) : null}
-        </Space>
-      ),
+      title: t('common.actions'), key: 'actions', sortable: false, width: 230,
+      render: (_, row) =>
+        row.kind === 'quote' && row.status === 'issued' ? (
+          <Space size={4}>
+            <Button
+              size="small"
+              type="primary"
+              loading={accept.isPending}
+              onClick={() => { respond(row.id, true); }}
+            >
+              {t('finance.acceptQuote')}
+            </Button>
+            <Button
+              size="small"
+              danger
+              loading={decline.isPending}
+              onClick={() => { respond(row.id, false); }}
+            >
+              {t('finance.declineQuote')}
+            </Button>
+          </Space>
+        ) : (
+          <Typography.Text type="secondary">—</Typography.Text>
+        ),
     },
   ];
 

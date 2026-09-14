@@ -239,3 +239,29 @@ export function useInvoiceAction(action: 'issue' | 'void') {
     },
   });
 }
+
+const exportTicketSchema = z.object({
+  taskId: z.string(),
+  status: z.enum(['queued', 'running', 'ready', 'failed']),
+  downloadUrl: z.string().nullable(),
+  expiresAt: z.string().nullable(),
+});
+
+/**
+ * Выгрузка счёта в PDF или XLSX `[ТЗ 3.4.1]`.
+ *
+ * Файл собирает сервер: сумма в выгрузке обязана совпадать с суммой в API
+ * и на экране до копейки, а считать её второй раз в браузере значит завести
+ * второй источник истины. Наружу приходит подписанная ссылка со сроком
+ * жизни, её и открывает браузер.
+ */
+export function useExportInvoice() {
+  return useMutation({
+    mutationFn: (input: { id: string; format: 'pdf' | 'xlsx' }) =>
+      request(`/invoices/${input.id}/export`, exportTicketSchema, {
+        method: 'POST',
+        body: { format: input.format },
+        idempotencyKey: newIdempotencyKey(),
+      }),
+  });
+}

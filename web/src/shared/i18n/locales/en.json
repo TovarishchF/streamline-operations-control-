@@ -466,7 +466,8 @@
     "overdueDays": "{{days}} days overdue",
     "paidFromPaymentsHint": "Computed from recorded payments. Payments are the next layer of this milestone; zero for now.",
     "client": "Client",
-    "flight": "Flight"
+    "flight": "Flight",
+    "exportQueued": "The export is being prepared; the link will appear when ready"
   },
   "fleet": {
     "approvals": "Approvals",
@@ -562,7 +563,8 @@
     "transitionFailed": "Transition is not possible",
     "type": "Flight type",
     "unconfirmed": "Unconf.",
-    "unconfirmedCount": "Unconfirmed services: {{count}}"
+    "unconfirmedCount": "Unconfirmed services: {{count}}",
+    "attachmentsBelongToOrders": "Attachments belong to service orders: an act is uploaded in the order card, where it is clear what to attach it to."
   },
   "flightStatus": {
     "aog": "AOG / delay",
@@ -778,7 +780,9 @@
       "requestedDate": "Requested date and time",
       "servicesStatus": "Service statuses",
       "submitRequest": "Submit request",
-      "title": "Client portal"
+      "title": "Client portal",
+      "quoteAccepted": "Quote accepted",
+      "quoteDeclined": "Quote declined"
     },
     "vendor": {
       "agreedPrice": "Agreed price",
@@ -794,7 +798,8 @@
       "performance": "Performance",
       "ratingHint": "The same components are used in the internal rating — the calculation is transparent.",
       "reject": "Decline",
-      "title": "Vendor portal"
+      "title": "Vendor portal",
+      "finished": "Order marked as completed"
     }
   },
   "quoteStatus": {
@@ -994,7 +999,10 @@
     "whatHappensNext": "After submission the order moves to “Ordered”, a letter is sent to the vendor and the SLA countdown starts.",
     "wizardTitle": "Order a service",
     "checksFromServer": "These are the checks the server ran on submission; they are more accurate than the preview.",
-    "rejectReasonPlaceholder": "Reason for rejection — it goes to the dispatcher and into the audit log"
+    "rejectReasonPlaceholder": "Reason for rejection — it goes to the dispatcher and into the audit log",
+    "endBeforeStart": "End is earlier than start",
+    "actRequiredHint": "This service requires an act: without it the transition to Completed will not pass",
+    "orderedAt": "Ordered at"
   },
   "serviceCategory": {
     "catering": "Catering",

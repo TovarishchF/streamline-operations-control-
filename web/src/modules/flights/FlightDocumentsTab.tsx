@@ -1,12 +1,13 @@
 import type { JSX } from 'react';
-import { Button, Card, Col, Empty, List, Row, Space, Tag, Typography, Upload } from 'antd';
-import { FilePdfOutlined, InboxOutlined } from '@ant-design/icons';
+import { App, Button, Card, Col, Empty, List, Row, Space, Tag, Typography } from 'antd';
+import { FilePdfOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { ApiError } from '@/api/client';
+import { useExportInvoice, useInvoices, useQuotes } from '@/api/documents';
 import type { Flight } from '@/api/flights';
 import type { ServiceOrderRow } from '@/api/orders';
-import { INVOICES, QUOTES } from '@/mocks/billing';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 
 /**
@@ -23,12 +24,29 @@ export function FlightDocumentsTab({
   orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
 
-  const quotes = QUOTES.filter((q) => q.flightId === flight.id);
-  const invoices = INVOICES.filter((i) => i.flightId === flight.id);
+  const quotes = useQuotes({ flightId: flight.id }).data?.data ?? [];
+  const invoices = useInvoices({ flightId: flight.id }).data?.data ?? [];
   const attachments = orders.flatMap((order) =>
     order.documents.map((doc) => ({ doc, order })),
   );
+
+  const exportInvoice = useExportInvoice();
+
+  /** Выгрузка счёта: ссылку выдаёт сервер, браузер её открывает. */
+  const downloadInvoice = (id: string): void => {
+    exportInvoice
+      .mutateAsync({ id, format: 'pdf' })
+      .then((ticket) => {
+        if (ticket.downloadUrl) window.open(ticket.downloadUrl, '_blank', 'noopener');
+      })
+      .catch((error: unknown) => {
+        void message.error(
+          error instanceof ApiError ? error.message : t('common.saveFailed'),
+        );
+      });
+  };
 
   return (
     <Row gutter={[12, 12]}>
@@ -43,9 +61,9 @@ export function FlightDocumentsTab({
                 renderItem={(quote) => (
                   <List.Item
                     actions={[
-                      <Button key="pdf" size="small" icon={<FilePdfOutlined />}>
-                        PDF
-                      </Button>,
+                      <Link key="open" to={`/billing/quotes/${quote.id}`}>
+                        <Button size="small">{t('common.open')}</Button>
+                      </Link>,
                     ]}
                   >
                     <Space direction="vertical" size={0}>
@@ -77,7 +95,13 @@ export function FlightDocumentsTab({
                 renderItem={(invoice) => (
                   <List.Item
                     actions={[
-                      <Button key="pdf" size="small" icon={<FilePdfOutlined />}>
+                      <Button
+                        key="pdf"
+                        size="small"
+                        icon={<FilePdfOutlined />}
+                        loading={exportInvoice.isPending}
+                        onClick={() => { downloadInvoice(invoice.id); }}
+                      >
                         PDF
                       </Button>,
                     ]}
@@ -85,7 +109,7 @@ export function FlightDocumentsTab({
                     <Space direction="vertical" size={0}>
                       <Space size={8}>
                         <Link to={`/billing/invoices/${invoice.id}`}>
-                          <Mono>{invoice.number}</Mono>
+                          <Mono>{invoice.number ?? t('finance.draft')}</Mono>
                         </Link>
                         <Tag>{t(`invoiceStatus.${invoice.status}`)}</Tag>
                       </Space>
@@ -102,13 +126,9 @@ export function FlightDocumentsTab({
       <Col xs={24} lg={12}>
         <Card size="small" title={t('flight.attachments')}>
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
-            <Upload.Dragger multiple disabled style={{ padding: 8 }}>
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">{t('flight.dropFiles')}</p>
-              <p className="ant-upload-hint">{t('flight.dropFilesHint')}</p>
-            </Upload.Dragger>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('flight.attachmentsBelongToOrders')}
+            </Typography.Text>
 
             {attachments.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('flight.noAttachments')} />
@@ -119,7 +139,16 @@ export function FlightDocumentsTab({
                 renderItem={({ doc, order }) => (
                   <List.Item
                     actions={[
-                      <Button key="dl" size="small">
+                      // Ссылка подписана сервером и живёт ограниченное время
+                      // (ADR-007): прямого пути к файлу в хранилище нет.
+                      <Button
+                        key="dl"
+                        size="small"
+                        disabled={doc.downloadUrl === null}
+                        href={doc.downloadUrl ?? undefined}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         {t('common.download')}
                       </Button>,
                     ]}
