@@ -950,6 +950,27 @@ paths:
                       data:
                         type: array
                         items: { $ref: '#/components/schemas/Airport' }
+    post:
+      tags: [catalog]
+      summary: Добавление аэропорта в справочник
+      description: |
+        Справочник наполняется из открытых источников командой `seed_reference`,
+        но диспетчеру бывает нужна площадка, которой в выгрузке нет: частный
+        аэродром, временный пункт. Ручной ввод — штатный путь, запись получает
+        `dataSource: user` и отличима от выгрузки (`CLAUDE.md § 4`).
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AirportCreate' }
+      responses:
+        '201':
+          description: Аэропорт добавлен
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Airport' }
 
   /aircraft-types:
     get:
@@ -1017,6 +1038,22 @@ paths:
                       data:
                         type: array
                         items: { $ref: '#/components/schemas/Aircraft' }
+    post:
+      tags: [fleet]
+      summary: Постановка борта в парк
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AircraftCreate' }
+      responses:
+        '201':
+          description: Борт поставлен в парк
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Aircraft' }
 
   /fleet/{id}:
     parameters: [{ $ref: '#/components/parameters/PathId' }]
@@ -1029,6 +1066,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Aircraft' }
+        '404': { $ref: '#/components/responses/NotFound' }
     patch:
       tags: [fleet]
       summary: Изменение техсостояния борта
@@ -2282,6 +2320,66 @@ paths:
                         type: array
                         items: { $ref: '#/components/schemas/PayableItem' }
 
+  # ──────────────────────────────── ВЛОЖЕНИЯ ───────────────────────────────────
+
+  /attachments:
+    post:
+      tags: [attachments]
+      summary: Завести вложение и получить ссылку на загрузку
+      description: |
+        Файл идёт из браузера **прямо в объектное хранилище** по подписанной
+        ссылке, минуя приложение (ADR-007): двадцатимегабайтный скан договора
+        не должен занимать воркер на всё время загрузки.
+
+        Порядок: `POST /attachments` → `PUT` по `uploadUrl` → `POST
+        /attachments/{id}/confirm` → передать `id` в создание договора,
+        заявки или счёта. До подтверждения вложение считается незавершённым
+        и к владельцу не привязывается.
+
+        Тип и размер проверяются здесь, до выдачи ссылки: отказывать после
+        того, как файл уже отправлен, — худший из возможных моментов.
+      x-idempotency: optional
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AttachmentCreate' }
+      responses:
+        '201':
+          description: Вложение заведено, ссылка на загрузку выдана
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttachmentUpload' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
+  /attachments/{attachment_id}/confirm:
+    parameters:
+      - name: attachment_id
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [attachments]
+      summary: Подтвердить загрузку вложения
+      description: |
+        Сервер убеждается, что объект появился в хранилище, и берёт его
+        фактический размер. Без этого шага оборванная загрузка оставила бы
+        в договоре ссылку на несуществующий файл.
+
+        Операция идемпотентна по построению: повтор перечитывает размер
+        того же объекта и даёт тот же ответ, ничего не создавая. Ключ
+        поэтому не обязателен.
+      x-idempotency: optional
+      responses:
+        '200':
+          description: Загрузка подтверждена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttachmentRef' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
   # ────────────────────────────── АДМИНИСТРИРОВАНИЕ ─────────────────────────────
 
   /users:
@@ -2930,6 +3028,24 @@ components:
           type: boolean
           description: Требуется слот-координация (ADR-026)
 
+    AirportCreate:
+      type: object
+      required: [icao, name, country, timezone, lat, lon]
+      properties:
+        icao: { $ref: '#/components/schemas/IcaoCode' }
+        iata: { type: string, maxLength: 3 }
+        name: { $ref: '#/components/schemas/LocalizedName' }
+        city: { $ref: '#/components/schemas/LocalizedName' }
+        country: { type: string, maxLength: 2, description: 'ISO 3166-1 alpha-2' }
+        timezone:
+          type: string
+          description: Зона IANA. Проверяется на существование — от неё считается местное время.
+          examples: ['Europe/Moscow']
+        lat: { type: number, minimum: -90, maximum: 90 }
+        lon: { type: number, minimum: -180, maximum: 180 }
+        elevationFt: { type: integer, default: 0 }
+        isCoordinated: { type: boolean, default: false }
+
     AircraftType:
       type: object
       required: [id, icaoType, name, category, seats, cruiseSpeedKts, turnaroundMin]
@@ -2978,6 +3094,25 @@ components:
         number: { type: string }
         validFrom: { type: string, format: date-time }
         validTo: { type: string, format: date-time }
+
+    AircraftCreate:
+      type: object
+      required: [registration, typeId, homeBaseIcao]
+      properties:
+        registration:
+          type: string
+          description: Приводится к верхнему регистру и уникален — иначе на одну машину заведётся два расписания.
+          examples: ['RA-67231']
+        typeId: { type: string }
+        operatorId:
+          type: [string, 'null']
+          description: Клиент-эксплуатант. По нему портал клиента видит только свои борта.
+        homeBaseIcao: { $ref: '#/components/schemas/IcaoCode' }
+        status: { $ref: '#/components/schemas/AircraftStatus' }
+        notes: { type: string }
+        approvals:
+          type: array
+          items: { $ref: '#/components/schemas/AircraftApproval' }
 
     CrewMember:
       type: object
@@ -3099,7 +3234,11 @@ components:
       properties:
         id: { type: string }
         vendorId: { type: string }
+        vendorName:
+          type: string
+          description: Наименование поставщика — без него таблица цен читается только со словарём идентификаторов.
         serviceId: { type: string }
+        serviceCode: { type: string }
         airportIcao: { $ref: '#/components/schemas/IcaoCode' }
         price: { $ref: '#/components/schemas/Money' }
         minCharge:
@@ -3361,11 +3500,17 @@ components:
       required: [vendorId, number, validFrom, validTo, currency, paymentTerms]
       properties:
         vendorId: { type: string }
-        number: { type: string }
+        number: { type: string, description: 'Уникален в пределах поставщика' }
         validFrom: { type: string, format: date-time }
         validTo: { type: string, format: date-time }
         currency: { $ref: '#/components/schemas/CurrencyCode' }
         paymentTerms: { $ref: '#/components/schemas/PaymentTerms' }
+        attachmentIds:
+          type: array
+          description: |
+            Идентификаторы уже загруженных и подтверждённых вложений
+            (`POST /attachments`). Незавершённые загрузки отсеиваются.
+          items: { type: string }
 
     TariffRule:
       type: object
@@ -3780,8 +3925,34 @@ components:
         downloadUrl:
           type: string
           description: Подписанная ссылка с ограниченным сроком жизни
-        uploadedAt: { type: string, format: date-time }
-        uploadedBy: { type: string }
+        uploadedAt: { type: [string, 'null'], format: date-time }
+        uploadedBy: { type: [string, 'null'] }
+
+    AttachmentCreate:
+      type: object
+      required: [fileName, mimeType, sizeBytes]
+      properties:
+        fileName: { type: string, maxLength: 255 }
+        mimeType:
+          type: string
+          description: Из перечня ALLOWED_ATTACHMENT_TYPES, иначе 400 до выдачи ссылки.
+        sizeBytes: { type: integer, minimum: 1 }
+        kind:
+          type: string
+          enum: [act, receipt, invoice, waybill, contract, other]
+          default: other
+
+    AttachmentUpload:
+      type: object
+      required: [attachment, uploadUrl, expiresInSeconds]
+      properties:
+        attachment: { $ref: '#/components/schemas/AttachmentRef' }
+        uploadUrl:
+          type: string
+          description: |
+            Подписанная ссылка для HTTP PUT прямо в хранилище. Подпись покрывает
+            заголовок Host — подменить адрес в готовой ссылке нельзя.
+        expiresInSeconds: { type: integer }
 
     ServiceOrder:
       type: object
