@@ -21,11 +21,12 @@ from accounts.models import User
 from accounts.permissions import Permission
 from audit.api.views import AuditEntrySerializer
 from audit.models import AuditEntityType, AuditEntry
+from catalog.models import Service
 from core.api.idempotency import IdempotentCreateMixin
 from core.api.permissions import HasRolePermission
 from core.api.serializers import ErrorResponseSerializer
 from core.api.viewsets import SocViewSetMixin, TenantScopedViewSet
-from counterparties.models import Client
+from counterparties.models import Client, Vendor
 from fleet.models import Aircraft
 from flights.api.serializers import (
     ConflictSerializer,
@@ -43,6 +44,9 @@ from flights.api.serializers import (
 from flights.models import Flight, FlightRequest, FlightTemplate, Slot
 from flights.services import conflicts as conflict_detector
 from flights.services import generation, planning, transitions
+from orders.api.serializers import ServiceOrderCreateSerializer, ServiceOrderSerializer
+from orders.models import ServiceOrder
+from orders.services import orders as order_services
 
 # Горизонт поиска конфликтов по умолчанию. Дальше месяца расписание меняется
 # столько раз, что предупреждать о конфликтах преждевременно.
@@ -108,6 +112,7 @@ class FlightViewSet(
         "partial_update": Permission.FLIGHT_EDIT,
         "status": Permission.FLIGHT_STATUS,
         "history": Permission.SCHEDULE_VIEW,
+        "services": Permission.SERVICE_ORDER,
     }
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -221,6 +226,57 @@ class FlightViewSet(
             comment=payload.validated_data["comment"],
         )
         return Response(FlightSerializer(flight).data)
+
+    @extend_schema(
+        summary="Заявки на услуги рейса",
+        request=ServiceOrderCreateSerializer,
+        responses={
+            200: ServiceOrderSerializer(many=True),
+            201: ServiceOrderSerializer,
+            400: ErrorResponseSerializer,
+            # Провал блокирующих проверок SPEC § 5.2 — это не ошибка запроса,
+            # а отказ по существу: 422 с перечнем непройденных проверок.
+            422: ErrorResponseSerializer,
+        },
+        tags=["orders"],
+    )
+    @action(detail=True, methods=["get", "post"], url_path="services")
+    def services(self, request: Request, pk: str | None = None) -> Response:
+        """`GET|POST /api/v1/flights/{id}/services` `[ТЗ 3.2.2]`.
+
+        Путь вложен в рейс, потому что владение заявкой определяется рейсом:
+        фильтрация по арендатору уже сделана в `get_queryset()` этого вьюсета,
+        и отдельный вьюсет пришлось бы учить ей заново.
+        """
+        flight = self.get_object()
+
+        if request.method == "GET":
+            queryset = (
+                ServiceOrder.objects.filter(flight=flight)
+                .select_related("service", "vendor", "contract", "flight")
+                .prefetch_related("documents")
+            )
+            return Response({"data": ServiceOrderSerializer(queryset, many=True).data})
+
+        return self.idempotent(request, lambda: self._create_service_order(request, flight))
+
+    def _create_service_order(self, request: Request, flight: Flight) -> Response:
+        payload = ServiceOrderCreateSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+
+        vendor_id = data.get("vendorId")
+        order = order_services.create_order(
+            flight=flight,
+            service=Service.objects.get(pk=data["serviceId"]),
+            leg=data["leg"],
+            quantity=data["quantity"],
+            vendor=Vendor.objects.get(pk=vendor_id) if vendor_id else None,
+            attributes=data["attributes"],
+            override_reason=data["overrideReason"],
+            actor=cast(User, request.user),
+        )
+        return Response(ServiceOrderSerializer(order).data, status=status.HTTP_201_CREATED)
 
     @extend_schema(
         summary="История изменений рейса",

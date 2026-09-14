@@ -9,6 +9,12 @@
 вьюхи; `"default"` покрывает остальное. Действие без объявленного права
 запрещено: умолчание «разрешено» рано или поздно открывает эндпоинт,
 про который забыли.
+
+Значением может быть набор прав — тогда достаточно любого из них. Это не
+послабление, а отражение матрицы: до списка заявок на услуги добираются
+и диспетчер по праву на каталог, и поставщик по праву на подтверждение
+своих заявок. Чужие записи при этом отсекает фильтрация выборки, а не
+право (`BACKEND.md § 3.7`).
 """
 
 from __future__ import annotations
@@ -43,15 +49,24 @@ class HasRolePermission(BasePermission):
             # Право не объявлено — значит эндпоинт не продуман. Отказ
             # заметят сразу, молчаливое разрешение — через полгода.
             return False
-        return has_permission(str(getattr(user, "role", "")), required)
 
-    def _required_for(self, request: Request, view: APIView) -> str | None:
+        role = str(getattr(user, "role", ""))
+        return any(has_permission(role, permission) for permission in required)
+
+    def _required_for(self, request: Request, view: APIView) -> tuple[str, ...] | None:
+        """Права, любого из которых достаточно. `None` — право не объявлено."""
         declared: dict[str, Any] = getattr(view, "required_permissions", {})
         if not declared:
             return None
         action = getattr(view, "action", None) or request.method or ""
         if action in declared:
-            return str(declared[action])
+            return _as_tuple(declared[action])
         if "default" in declared:
-            return str(declared["default"])
+            return _as_tuple(declared["default"])
         return None
+
+
+def _as_tuple(value: Any) -> tuple[str, ...]:
+    if isinstance(value, list | tuple | set | frozenset):
+        return tuple(str(item) for item in value)
+    return (str(value),)

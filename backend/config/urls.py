@@ -47,6 +47,7 @@ from flights.api.views import (
     ScheduleConflictsView,
     SlotViewSet,
 )
+from orders.api.views import ServiceOrderViewSet
 
 router = DefaultRouter(trailing_slash=False)
 # Конфликты объявлены до вьюсета рейсов: иначе «conflicts» разберётся
@@ -55,6 +56,7 @@ router.register("flights", FlightViewSet, basename="flight")
 router.register("flight-templates", FlightTemplateViewSet, basename="flight-template")
 router.register("flight-requests", FlightRequestViewSet, basename="flight-request")
 router.register("slots", SlotViewSet, basename="slot")
+router.register("service-orders", ServiceOrderViewSet, basename="service-order")
 router.register("clients", ClientViewSet, basename="client")
 router.register("vendors", VendorViewSet, basename="vendor")
 router.register("airports", AirportViewSet, basename="airport")

@@ -31,14 +31,16 @@ TTL_SECONDS = 24 * 60 * 60
 MIN_KEY_LENGTH = 8
 
 
-class IdempotentCreateMixin:
-    """Проверка ключа идемпотентности для операций создания.
+class IdempotencyMixin:
+    """Помощник `idempotent()` без маршрута создания.
 
     `idempotency = "required" | "optional"` — так же, как в контракте.
 
-    Вьюха вызывает `idempotent()` явно, а не полагается на подмену `create`
-    через `super()`: порядок наследования тогда становится значимым,
-    и собственный `create` во вьюсете молча отключает всю проверку.
+    Отделён от `IdempotentCreateMixin` намеренно: вьюсету, у которого
+    создание идёт вложенным путём (заявки создаются через рейс), нужен
+    только помощник. Примесь создания добавила бы вьюсету метод `create`,
+    а роутер DRF — маршрут POST, которого в контракте нет, и проверка
+    расхождения схемы это заметит.
     """
 
     idempotency: ClassVar[str] = "optional"
@@ -89,9 +91,16 @@ class IdempotentCreateMixin:
             )
         return response
 
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
-        """Стандартное создание DRF, обёрнутое проверкой ключа."""
 
+class IdempotentCreateMixin(IdempotencyMixin):
+    """Стандартное создание DRF, обёрнутое проверкой ключа.
+
+    Вьюха вызывает `idempotent()` явно, а не полагается на подмену `create`
+    через `super()`: порядок наследования тогда становится значимым,
+    и собственный `create` во вьюсете молча отключает всю проверку.
+    """
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         def produce() -> Response:
             result: Response = super(IdempotentCreateMixin, self).create(  # type: ignore[misc]
                 request, *args, **kwargs

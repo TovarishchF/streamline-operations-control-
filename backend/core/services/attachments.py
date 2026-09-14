@@ -116,5 +116,19 @@ def attach(*, attachment_ids: list[str], owner: django_models.Model) -> list[Att
     return attachments
 
 
+def link(*, attachment: Attachment, owner: django_models.Model) -> Attachment:
+    """Привязывает одно вложение к владельцу, не дожидаясь загрузки.
+
+    Нужно там, где вложение заводится сразу «для этой заявки»: акт,
+    загруженный и не привязанный, не открыл бы переход в «Выполнена»,
+    и разбираться с этим пришлось бы у стойки. Незавершённые вложения
+    отсеиваются при чтении, по `uploaded_at`.
+    """
+    attachment.content_type = ContentType.objects.get_for_model(owner)
+    attachment.object_id = str(owner.pk)
+    attachment.save(update_fields=["content_type", "object_id", "updated_at", "version"])
+    return attachment
+
+
 def download_url(attachment: Attachment) -> str:
     return storage.presign_get(key=attachment.storage_key, file_name=attachment.file_name)
