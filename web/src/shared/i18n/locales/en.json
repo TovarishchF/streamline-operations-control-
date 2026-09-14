@@ -34,7 +34,17 @@
     "realDataNotice": "Codes, coordinates and time zones are real public data. Only counterparty names are fictional.",
     "searchPlaceholder": "ICAO, IATA, city or name",
     "slotRequired": "Slot required",
-    "timezone": "Time zone"
+    "timezone": "Time zone",
+    "add": "Add airport",
+    "created": "Airport {{icao}} added to the reference",
+    "icaoHint": "Four letters, e.g. UUWW",
+    "iataHint": "Three letters, e.g. VKO",
+    "cityRu": "City (Russian)",
+    "cityEn": "City (English)",
+    "lat": "Latitude",
+    "lon": "Longitude",
+    "timezoneHint": "Local time on every screen is derived from it",
+    "manualEntryNotice": "The reference is filled from open sources. Manual entry is for a site missing from the dataset: a private airfield or a temporary point."
   },
   "api": {
     "auth": "Authentication",
@@ -149,7 +159,14 @@
     "surcharges": "Surcharges",
     "unit": "Unit",
     "unitPrice": "Unit price",
-    "validity": "Validity"
+    "validity": "Validity",
+    "addService": "Add service",
+    "serviceCreated": "Service {{code}} added to the catalogue",
+    "codeHint": "Short code for documents and reconciliation, e.g. FUEL-JETA1",
+    "nameRu": "Name (Russian)",
+    "nameEn": "Name (English)",
+    "leadTimeHint": "How many hours before departure an order is still accepted",
+    "attributesLater": "Required service attributes are configured in the card after creation."
   },
   "channel": {
     "email": "Email",
@@ -169,7 +186,15 @@
     "tabs": {
       "profile": "Profile",
       "tariffs": "Tariffs"
-    }
+    },
+    "add": "Add client",
+    "created": "Client {{name}} created",
+    "legalName": "Legal name",
+    "namePlaceholder": "As shown in lists and on screens",
+    "legalNamePlaceholder": "As in the contract",
+    "countryHint": "Two letters per ISO 3166-1, e.g. RU",
+    "creditLimitCurrency": "Limit currency",
+    "localeHint": "Language of documents and emails for this client"
   },
   "clock": {
     "demoPanel": "Time control",
@@ -214,7 +239,11 @@
     "toHome": "To home",
     "updatedAt": "Updated",
     "utc": "UTC",
-    "yes": "Yes"
+    "yes": "Yes",
+    "create": "Create",
+    "remove": "Remove",
+    "saveFailed": "Could not save. Check the fields and try again.",
+    "kilobytes": "KB"
   },
   "comms": {
     "applied": "Applied",
@@ -274,7 +303,16 @@
     "number": "Contract number",
     "status": "Status",
     "validFrom": "Valid from",
-    "validTo": "Valid to"
+    "validTo": "Valid to",
+    "add": "Add contract",
+    "created": "Contract no. {{number}} created",
+    "numberHint": "Unique within the vendor",
+    "validToBeforeFrom": "The end date must be later than the start date",
+    "scan": "Contract scan",
+    "scanHint": "The file goes straight to secure storage, bypassing the application server",
+    "uploadScan": "Upload file",
+    "uploadFailed": "Could not upload the file",
+    "attachmentsCount": "Attachments: {{count}}"
   },
   "contractStatus": {
     "active": "Active",
@@ -422,7 +460,14 @@
     "turnaroundHint": "Minimum time between flights for this aircraft type",
     "type": "Aircraft type",
     "unserviceableNotice": "Unserviceable aircraft: {{count}}",
-    "upcomingFlights": "Flights"
+    "upcomingFlights": "Flights",
+    "add": "Add aircraft",
+    "created": "Aircraft {{registration}} added to the fleet",
+    "operator": "Operator",
+    "operatorHint": "The client that owns the aircraft. Empty means own fleet.",
+    "approvalsHint": "An expired approval raises a schedule conflict",
+    "addApproval": "Add approval",
+    "approvalNumber": "Approval number"
   },
   "flight": {
     "actualTimes": "Actual times",
@@ -1125,7 +1170,18 @@
     "weight_price": "Price weight",
     "weight_proximity": "Proximity weight",
     "weight_rating": "Rating weight",
-    "weights": "Weights"
+    "weights": "Weights",
+    "add": "Add vendor",
+    "created": "Vendor {{name}} created",
+    "specializationsHint": "Service categories the vendor provides. Without them it will not appear in any selection.",
+    "coverageAirports": "Airports",
+    "coverageAirportsHint": "Where the vendor operates. Empty means everywhere.",
+    "coverageRegions": "Regions",
+    "coverageRegionsHint": "Comma-separated",
+    "exchangeMethodHint": "Where the order goes: portal, email, or the vendor API",
+    "manualScore": "Dispatcher score",
+    "manualScoreHint": "Enters the rating with weight 0.20 alongside measured components",
+    "ratingNotComputed": "The rating is computed from completed orders. There are no orders on the server yet, so no figure is invented."
   },
   "weekday": {
     "fri": "Fri",
@@ -1135,5 +1191,34 @@
     "thu": "Thu",
     "tue": "Tue",
     "wed": "Wed"
+  },
+  "counterparty": {
+    "contacts": "Contacts",
+    "contactName": "Name",
+    "contactEmail": "Email",
+    "contactRole": "Position",
+    "contactLocale": "Language",
+    "addContact": "Add contact",
+    "noContactsHint": "Without a contact, correspondence about orders goes nowhere. Add at least one.",
+    "paymentMode": "Payment mode",
+    "deferDays": "Deferral, days",
+    "prepaymentPercent": "Prepayment share"
+  },
+  "price": {
+    "add": "Add price",
+    "created": "Price added to the list",
+    "airport": "Airport",
+    "validFrom": "Valid from",
+    "validTo": "Valid to",
+    "validToBeforeFrom": "The end date must be later than the start date",
+    "unitPrice": "Unit price",
+    "minCharge": "Minimum charge",
+    "minChargeHint": "The vendor charges at least this amount regardless of quantity ordered",
+    "surcharges": "Surcharges",
+    "surchargesHint": "Calculated from the base amount, not cumulatively",
+    "addSurcharge": "Add surcharge",
+    "kindPercent": "Percent",
+    "kindFixed": "Fixed",
+    "snapshotNotice": "The price is copied into the order when a vendor is assigned. Changing the price list does not alter amounts in orders already placed."
   }
 }

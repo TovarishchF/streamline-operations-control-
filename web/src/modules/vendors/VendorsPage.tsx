@@ -1,19 +1,45 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Card, Col, Input, Progress, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import {
+  Button, Card, Col, Input, Progress, Row, Select, Space, Tag, Tooltip, Typography,
+} from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { ServiceCategory, Vendor } from '@/api/types';
-import { CONTRACT_BY_VENDOR, VENDORS } from '@/mocks/counterparties';
-import { AIRPORTS, SERVICE_CATEGORIES } from '@/mocks/reference';
+import { useAirports } from '@/api/catalog';
+import {
+  useContracts,
+  useVendors,
+  type VendorContractRow,
+  type VendorRow,
+} from '@/api/counterparties';
+import type { ServiceCategory, VendorRating } from '@/api/types';
+import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { VendorFormModal } from './VendorFormModal';
 
-/** Рейтинг с разложением: цифра без объяснения выглядит выдуманной. */
-export function RatingCell({ vendor }: { vendor: Vendor }): JSX.Element {
+const SERVICE_CATEGORIES: ServiceCategory[] = [
+  'fuel',
+  'handling',
+  'catering',
+  'transport',
+  'permits',
+  'deicing',
+];
+
+/**
+ * Рейтинг с разложением: цифра без объяснения выглядит выдуманной.
+ *
+ * `rating === undefined` означает, что сервер его не считал, а не что он
+ * нулевой. Расчёт рейтинга — отдельная задача вехи M6 (`DOMAIN.md § 7.4`);
+ * до неё здесь честно написано «данных недостаточно», а не выдуманный балл
+ * (`CLAUDE.md § 4`).
+ */
+export function RatingCell({ rating }: { rating: VendorRating | null | undefined }): JSX.Element {
   const { t } = useTranslation();
-  const rating = vendor.rating;
 
   if (!rating?.sufficientData) {
     return (
@@ -58,18 +84,40 @@ export function VendorsPage(): JSX.Element {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<ServiceCategory | undefined>();
   const [airport, setAirport] = useState<string | undefined>();
+  const [airportSearch, setAirportSearch] = useState('');
+  const [adding, setAdding] = useState(false);
+
+  const query = useVendors();
+  const vendors = useMemo(() => query.data?.data ?? [], [query.data]);
+  const airports = useAirports({ search: airportSearch, perPage: 30 }).data?.data ?? [];
+
+  // Договоры одним запросом на всех поставщиков: по строке на каждого
+  // было бы столько запросов, сколько строк в таблице.
+  const contractsQuery = useContracts({});
+  const contractByVendor = useMemo(() => {
+    const map = new Map<string, VendorContractRow>();
+    for (const contract of contractsQuery.data?.data ?? []) {
+      const existing = map.get(contract.vendorId);
+      // Показывается самый поздний по сроку: он и определяет, можно ли
+      // заказывать у поставщика сегодня.
+      if (!existing || contract.validTo > existing.validTo) map.set(contract.vendorId, contract);
+    }
+    return map;
+  }, [contractsQuery.data]);
 
   const filtered = useMemo(() => {
-    const query = search.trim().toLowerCase();
-    return VENDORS.filter((vendor) => {
-      if (query && !`${vendor.name} ${vendor.legalName}`.toLowerCase().includes(query)) return false;
+    const needle = search.trim().toLowerCase();
+    return vendors.filter((vendor) => {
+      if (needle && !`${vendor.name} ${vendor.legalName}`.toLowerCase().includes(needle)) {
+        return false;
+      }
       if (category && !vendor.specializations.includes(category)) return false;
-      if (airport && !vendor.coverage?.airports?.includes(airport)) return false;
+      if (airport && !vendor.coverage.airports.includes(airport)) return false;
       return true;
     });
-  }, [search, category, airport]);
+  }, [vendors, search, category, airport]);
 
-  const columns: DataColumns<Vendor> = [
+  const columns: DataColumns<VendorRow> = [
     {
       title: t('vendor.name'),
       dataIndex: 'name',
@@ -92,7 +140,7 @@ export function VendorsPage(): JSX.Element {
       title: t('vendor.specializations'),
       dataIndex: 'specializations',
       width: 240,
-      render: (value: ServiceCategory[]) => (
+      render: (value: string[]) => (
         <Space size={4} wrap>
           {value.map((code) => (
             <Tag key={code} style={{ margin: 0 }}>
@@ -106,18 +154,18 @@ export function VendorsPage(): JSX.Element {
       title: t('vendor.coverage'),
       key: 'coverage',
       width: 190,
-      sortBy: (row) => row.coverage?.airports?.length ?? 0,
+      sortBy: (row) => row.coverage.airports.length,
       render: (_, row) => (
         <Space size={4} wrap>
-          {(row.coverage?.airports ?? []).slice(0, 4).map((icao) => (
+          {row.coverage.airports.slice(0, 4).map((icao) => (
             <Mono key={icao}>{icao}</Mono>
           ))}
-          {(row.coverage?.airports?.length ?? 0) > 4 ? (
+          {row.coverage.airports.length > 4 ? (
             <Typography.Text type="secondary">
-              +{(row.coverage?.airports?.length ?? 0) - 4}
+              +{row.coverage.airports.length - 4}
             </Typography.Text>
           ) : null}
-          {(row.coverage?.airports?.length ?? 0) === 0 ? (
+          {row.coverage.airports.length === 0 ? (
             <Typography.Text type="secondary">{t('vendor.global')}</Typography.Text>
           ) : null}
         </Space>
@@ -127,9 +175,9 @@ export function VendorsPage(): JSX.Element {
       title: t('vendor.rating'),
       key: 'rating',
       width: 150,
-      sorter: (a, b) =>
-        Number.parseFloat(a.rating?.rating ?? '0') - Number.parseFloat(b.rating?.rating ?? '0'),
-      render: (_, row) => <RatingCell vendor={row} />,
+      // Рейтинг сервер пока не считает: сортировать нечего, и сортировка
+      // по пустому значению только вводила бы в заблуждение.
+      render: () => <RatingCell rating={null} />,
     },
     {
       title: t('vendor.currency'),
@@ -152,7 +200,7 @@ export function VendorsPage(): JSX.Element {
       key: 'contract',
       width: 140,
       render: (_, row) => {
-        const contract = CONTRACT_BY_VENDOR.get(row.id);
+        const contract = contractByVendor.get(row.id);
         if (!contract) return <Typography.Text type="secondary">—</Typography.Text>;
         const color =
           contract.status === 'expired' ? 'red' : contract.status === 'expiring' ? 'orange' : 'green';
@@ -167,9 +215,26 @@ export function VendorsPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>
-        {t('nav.vendors')}
-      </Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            {t('nav.vendors')}
+          </Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="vendor.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('vendor.add')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       <Card size="small" styles={{ body: { padding: 10 } }}>
         <Row gutter={[8, 8]}>
@@ -200,28 +265,40 @@ export function VendorsPage(): JSX.Element {
             <Select
               allowClear
               showSearch
-              optionFilterProp="label"
+              filterOption={false}
               style={{ width: '100%' }}
               placeholder={t('flight.airport')}
               value={airport}
               onChange={setAirport}
-              options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
+              onSearch={setAirportSearch}
+              options={airports.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
             />
           </Col>
         </Row>
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<Vendor>
-          size="small"
-          rowKey="id"
-          columns={columns}
-          dataSource={filtered}
-          scroll={{ x: 1150 }}
-          pagination={{ pageSize: 20, size: 'small' }}
-          locale={{ emptyText: <EmptyState description={t('vendor.empty')} /> }}
-        />
+        <QueryState query={query}>
+          {() => (
+            <DataTable<VendorRow>
+              size="small"
+              rowKey="id"
+              columns={columns}
+              dataSource={filtered}
+              scroll={{ x: 1150 }}
+              pagination={{ pageSize: 20, size: 'small' }}
+              locale={{ emptyText: <EmptyState description={t('vendor.empty')} /> }}
+            />
+          )}
+        </QueryState>
       </Card>
+
+      <VendorFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }

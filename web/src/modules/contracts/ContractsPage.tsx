@@ -1,14 +1,17 @@
-import { useMemo, useState, type JSX } from 'react';
-import { Alert, Card, Segmented, Space, Tag, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import { Alert, Button, Card, Col, Row, Segmented, Space, Tag, Tooltip, Typography } from 'antd';
+import { PaperClipOutlined, PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { VendorContract } from '@/api/types';
-import { CONTRACTS, VENDOR_BY_ID } from '@/mocks/counterparties';
+import { useContracts, useVendors, type VendorContractRow } from '@/api/counterparties';
+import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
 import { DateText, EmptyState, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { ContractFormModal } from './ContractFormModal';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   active: 'done', expiring: 'warning', expired: 'critical', terminated: 'cancelled',
@@ -21,6 +24,10 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
  * «требуют внимания» (`SPEC.md § 6.3`): администратору нужен список того,
  * чем заняться, а не полный реестр.
  *
+ * Статус приходит с сервера и вычисляется там от дат (G-42): хранимый
+ * статус неизбежно разъезжается с датами, потому что его некому
+ * пересчитывать в полночь по каждой записи.
+ *
  * Уведомления за 30, 15 и 7 дней ставятся планировщиком с ключом
  * идемпотентности `contractId + порог` — повторно одно и то же уведомление
  * не создаётся.
@@ -29,30 +36,48 @@ export function ContractsPage(): JSX.Element {
   const { t } = useTranslation();
   const { nowUtc } = useClock();
   const [filter, setFilter] = useState<'attention' | 'all'>('attention');
+  const [adding, setAdding] = useState(false);
 
-  const filtered = useMemo(
-    () =>
-      CONTRACTS.filter((contract) =>
-        filter === 'all' ? true : contract.status === 'expiring' || contract.status === 'expired',
-      ),
-    [filter],
+  // Реестр запрашивается целиком: фильтр «требуют внимания» — это два
+  // статуса из четырёх, и два запроса вместо одного ничего не экономят.
+  const query = useContracts({});
+  const contracts = query.data?.data ?? [];
+
+  const vendorNames = new Map(
+    (useVendors().data?.data ?? []).map((vendor) => [vendor.id, vendor.name]),
   );
 
-  const expiring = CONTRACTS.filter((c) => c.status === 'expiring').length;
-  const expired = CONTRACTS.filter((c) => c.status === 'expired').length;
+  const filtered =
+    filter === 'all'
+      ? contracts
+      : contracts.filter(
+          (contract) => contract.status === 'expiring' || contract.status === 'expired',
+        );
+
+  const expiring = contracts.filter((c) => c.status === 'expiring').length;
+  const expired = contracts.filter((c) => c.status === 'expired').length;
 
   const daysLeft = (validTo: string): number =>
     Math.round((new Date(validTo).getTime() - nowUtc.getTime()) / 86_400_000);
 
-  const columns: DataColumns<VendorContract> = [
+  const columns: DataColumns<VendorContractRow> = [
     {
-      title: t('contract.number'), dataIndex: 'number', width: 150, fixed: 'left',
-      render: (value: string) => <Mono>{value}</Mono>,
+      title: t('contract.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      render: (value: string, row) => (
+        <Space size={6}>
+          <Mono>{value}</Mono>
+          {row.attachments.length > 0 ? (
+            <Tooltip title={t('contract.attachmentsCount', { count: row.attachments.length })}>
+              <PaperClipOutlined />
+            </Tooltip>
+          ) : null}
+        </Space>
+      ),
     },
     {
       title: t('service.vendor'), dataIndex: 'vendorId', ellipsis: true,
       render: (value: string) => (
-        <Link to={`/vendors/${value}`}>{VENDOR_BY_ID.get(value)?.name ?? value}</Link>
+        <Link to={`/vendors/${value}`}>{vendorNames.get(value) ?? value}</Link>
       ),
     },
     {
@@ -91,7 +116,29 @@ export function ContractsPage(): JSX.Element {
     {
       title: t('client.paymentTerms'), key: 'terms', width: 170,
       render: (_, row) =>
-        `${t(`paymentMode.${row.paymentTerms?.mode ?? 'deferred'}`)}, ${String(row.paymentTerms?.deferDays ?? 0)} ${t('common.days')}`,
+        `${t(`paymentMode.${row.paymentTerms.mode}`)}, ${String(row.paymentTerms.deferDays)} ${t('common.days')}`,
+    },
+    {
+      title: t('contract.scan'), key: 'files', width: 210,
+      render: (_, row) =>
+        row.attachments.length === 0 ? (
+          <Typography.Text type="secondary">—</Typography.Text>
+        ) : (
+          <Space direction="vertical" size={0}>
+            {row.attachments.map((attachment) => (
+              <Typography.Link
+                key={attachment.id}
+                href={attachment.downloadUrl ?? undefined}
+                target="_blank"
+                rel="noreferrer"
+                style={{ fontSize: 12 }}
+                ellipsis
+              >
+                {attachment.fileName}
+              </Typography.Link>
+            ))}
+          </Space>
+        ),
     },
     {
       title: t('contract.status'), dataIndex: 'status', width: 140,
@@ -108,7 +155,24 @@ export function ContractsPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.contracts')}</Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.contracts')}</Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="contract.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('contract.add')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       {expired > 0 || expiring > 0 ? (
         <Alert
@@ -129,12 +193,23 @@ export function ContractsPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<VendorContract>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1000 }}
-          locale={{ emptyText: <EmptyState description={t('contract.noneNeedAttention')} /> }}
-        />
+        <QueryState query={query}>
+          {() => (
+            <DataTable<VendorContractRow>
+              size="small" rowKey="id" columns={columns} dataSource={filtered}
+              pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1200 }}
+              locale={{ emptyText: <EmptyState description={t('contract.noneNeedAttention')} /> }}
+            />
+          )}
+        </QueryState>
       </Card>
+
+      <ContractFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }

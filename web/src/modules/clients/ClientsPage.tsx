@@ -1,19 +1,24 @@
-import type { JSX } from 'react';
-import { Card, Space, Tag, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import { Button, Card, Col, Row, Space, Tag, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { Client } from '@/api/types';
-import { CLIENTS } from '@/mocks/counterparties';
-import { FLIGHT_LIST } from '@/mocks/flights';
+import { useClients, type ClientRow } from '@/api/counterparties';
+import { Can } from '@/shared/auth/Can';
 import { EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { QueryState } from '@/shared/ui/QueryState';
+import { ClientFormModal } from './ClientFormModal';
 
 /** Клиенты (авиакомпании) `[ТЗ 3.4.1]`. */
 export function ClientsPage(): JSX.Element {
   const { t } = useTranslation();
+  const [adding, setAdding] = useState(false);
 
-  const columns: DataColumns<Client> = [
+  const query = useClients();
+
+  const columns: DataColumns<ClientRow> = [
     {
       title: t('client.name'), dataIndex: 'name', width: 230, fixed: 'left',
       render: (value: string, row) => (
@@ -56,16 +61,12 @@ export function ClientsPage(): JSX.Element {
     },
     {
       title: t('client.creditLimit'), key: 'limit', width: 170, align: 'right',
-      render: (_, row) => <MoneyText value={row.creditLimit ?? null} />,
-    },
-    {
-      title: t('client.flights'), key: 'flights', width: 100, align: 'right',
-      render: (_, row) => <Mono>{FLIGHT_LIST.filter((f) => f.clientId === row.id).length}</Mono>,
+      render: (_, row) => <MoneyText value={row.creditLimit} />,
     },
     {
       title: t('client.contact'), key: 'contact', ellipsis: true,
       render: (_, row) => {
-        const contact = row.contacts?.[0];
+        const contact = row.contacts.find((item) => item.isPrimary) ?? row.contacts[0];
         return contact ? (
           <Space direction="vertical" size={0}>
             <span>{contact.name}</span>
@@ -82,15 +83,43 @@ export function ClientsPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.clients')}</Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.clients')}</Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="client.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('client.add')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<Client>
-          size="small" rowKey="id" columns={columns} dataSource={CLIENTS}
-          pagination={false} scroll={{ x: 1100 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<ClientRow>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              pagination={false} scroll={{ x: 1100 }}
+              locale={{ emptyText: <EmptyState /> }}
+            />
+          )}
+        </QueryState>
       </Card>
+
+      <ClientFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }

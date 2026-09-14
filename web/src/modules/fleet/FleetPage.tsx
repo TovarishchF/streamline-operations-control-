@@ -1,11 +1,14 @@
-import type { JSX } from 'react';
-import { Alert, Card, Space, Tag, Tooltip, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import { Alert, Button, Card, Col, Row, Space, Tag, Tooltip, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import { useFleet } from '@/api/fleet';
 import type { Aircraft } from '@/api/types';
+import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
+import { AircraftFormModal } from './AircraftFormModal';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -29,6 +32,7 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
 export function FleetPage(): JSX.Element {
   const { t } = useTranslation();
   const { nowUtc } = useClock();
+  const [adding, setAdding] = useState(false);
 
   const query = useFleet();
   const aircraft = query.data?.data ?? [];
@@ -125,7 +129,24 @@ export function FleetPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.fleet')}</Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.fleet')}</Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="flight.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('fleet.add')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       {unserviceable.length > 0 ? (
         <Alert
@@ -150,6 +171,13 @@ export function FleetPage(): JSX.Element {
           )}
         </QueryState>
       </Card>
+
+      <AircraftFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }

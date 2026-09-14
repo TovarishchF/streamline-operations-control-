@@ -1,11 +1,14 @@
 import { useState, type JSX } from 'react';
-import { Alert, Card, Input, Space, Tag, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Col, Input, Row, Space, Tag, Tooltip, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import { useAirports } from '@/api/catalog';
 import type { Airport } from '@/api/types';
+import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { AirportFormModal } from './AirportFormModal';
 import { QueryState } from '@/shared/ui/QueryState';
 import { formatUtcOffset } from '@/shared/format/timezone';
 import { useClock } from '@/shared/clock/useClock';
@@ -29,6 +32,7 @@ export function AirportsPage(): JSX.Element {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [adding, setAdding] = useState(false);
   const { nowUtc } = useClock();
 
   const query = useAirports({ search, page, perPage: 20 });
@@ -102,7 +106,24 @@ export function AirportsPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.airports')}</Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.airports')}</Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="catalog.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('airport.add')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       <Alert type="info" showIcon message={t('airport.realDataNotice')} />
 
@@ -138,6 +159,13 @@ export function AirportsPage(): JSX.Element {
           )}
         </QueryState>
       </Card>
+
+      <AirportFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }

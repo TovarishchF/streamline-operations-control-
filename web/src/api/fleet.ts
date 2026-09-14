@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from '@tan
 import { z } from 'zod';
 
 import { aircraftTypeSchema, pagedSchema, type Paged } from './catalog';
-import { request } from './client';
+import { newIdempotencyKey, request } from './client';
 import type { Aircraft, AircraftStatus } from './types';
 
 export const aircraftApprovalSchema = z.object({
@@ -56,6 +56,40 @@ export function useUpdateAircraft() {
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['fleet'] });
+    },
+  });
+}
+
+export interface CreateAircraftInput {
+  registration: string;
+  typeId: string;
+  operatorId?: string | null;
+  homeBaseIcao: string;
+  status: AircraftStatus;
+  notes: string;
+  approvals: {
+    kind: 'ETOPS' | 'RVSM' | 'MNPS' | 'CAT_II' | 'CAT_III' | 'RNP' | 'other';
+    number: string;
+    validFrom: string;
+    validTo: string;
+  }[];
+}
+
+/** Постановка борта в парк `[ТЗ 3.1.3]`. */
+export function useCreateAircraft() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateAircraftInput) =>
+      request('/fleet', aircraftSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['fleet'] });
+      // Новый борт обязан появиться в выборе при создании рейса
+      void queryClient.invalidateQueries({ queryKey: ['flight-conflicts'] });
     },
   });
 }

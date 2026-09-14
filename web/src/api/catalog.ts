@@ -6,13 +6,32 @@
  * этом берутся из сгенерированных, а не пишутся руками (п. 6): схема
  * проверяет то, что тип обещает.
  */
-import { useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQuery,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { pageMetaSchema, request } from './client';
+import { newIdempotencyKey, pageMetaSchema, request } from './client';
 import type { AircraftType, Airport, ServiceCatalogItem, VatRate } from './types';
 
 const localizedNameSchema = z.object({ ru: z.string(), en: z.string() });
+
+/**
+ * Код валюты. Перечисление, а не строка: контракт объявляет `CurrencyCode`
+ * закрытым списком, и принимать от сервера что-то другое означало бы
+ * протащить в расчёты валюту, для которой нет курса.
+ */
+export const currencyCodeSchema = z.enum(['RUB', 'USD', 'EUR']);
+
+/** `Money` из контракта: сумма строкой (`CLAUDE.md § 3` п. 1). */
+export const moneySchema = z.object({
+  amount: z.string(),
+  currency: currencyCodeSchema,
+});
 
 export const airportSchema = z.object({
   id: z.string(),
@@ -158,4 +177,146 @@ export function useAirportsByIcao(codes: string[]): Record<string, Airport> {
     if (airport) found[airport.icao] = airport;
   }
   return found;
+}
+
+// ─────────────────────────── Цены поставщиков ───────────────────────────
+
+export const surchargeSchema = z.object({
+  code: z.enum(['night', 'weekend', 'holiday', 'urgent', 'into_plane']),
+  kind: z.enum(['percent', 'fixed']),
+  value: z.string(),
+  appliesWhen: z.record(z.unknown()).optional(),
+});
+
+export type SurchargeInput = z.infer<typeof surchargeSchema>;
+
+export const vendorPriceSchema = z.object({
+  id: z.string(),
+  vendorId: z.string(),
+  vendorName: z.string(),
+  serviceId: z.string(),
+  serviceCode: z.string(),
+  airportIcao: z.string(),
+  price: moneySchema,
+  minCharge: moneySchema.nullable(),
+  validFrom: z.string(),
+  validTo: z.string(),
+  surcharges: z.array(surchargeSchema).default([]),
+});
+
+export type VendorPriceRow = z.infer<typeof vendorPriceSchema>;
+
+export function useVendorPrices(params: {
+  vendorId?: string;
+  serviceId?: string;
+  airportIcao?: string;
+  onDate?: string;
+}): UseQueryResult<Paged<VendorPriceRow>> {
+  const query = new URLSearchParams({ perPage: '200' });
+  if (params.vendorId) query.set('vendorId', params.vendorId);
+  if (params.serviceId) query.set('serviceId', params.serviceId);
+  if (params.airportIcao) query.set('airportIcao', params.airportIcao);
+  if (params.onDate) query.set('onDate', params.onDate);
+
+  return useQuery({
+    queryKey: [
+      'vendor-prices',
+      params.vendorId ?? '',
+      params.serviceId ?? '',
+      params.airportIcao ?? '',
+      params.onDate ?? '',
+    ],
+    queryFn: ({ signal }) =>
+      request(`/catalog/prices?${query.toString()}`, pagedSchema(vendorPriceSchema), { signal }),
+  });
+}
+
+export interface CreateVendorPriceInput {
+  vendorId: string;
+  serviceId: string;
+  airportIcao: string;
+  price: z.infer<typeof moneySchema>;
+  minCharge?: z.infer<typeof moneySchema> | null;
+  validFrom: string;
+  validTo: string;
+  surcharges: SurchargeInput[];
+}
+
+export function useCreateVendorPrice() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateVendorPriceInput) =>
+      request('/catalog/prices', vendorPriceSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['vendor-prices'] });
+    },
+  });
+}
+
+// ─────────────────────────── Каталог услуг ───────────────────────────
+
+export interface CreateServiceInput {
+  code: string;
+  category: string;
+  name: { ru: string; en: string };
+  unit: string;
+  requiresWeather: boolean;
+  leadTimeH: number;
+  requiresActToComplete: boolean;
+  requiredAttributes: { key: string; type: string; required: boolean; options?: string[] }[];
+}
+
+export function useCreateService() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateServiceInput) =>
+      request('/catalog/services', serviceSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['catalog-services'] });
+    },
+  });
+}
+
+// ─────────────────────────── Аэропорты ───────────────────────────
+
+export interface CreateAirportInput {
+  icao: string;
+  iata: string;
+  name: { ru: string; en: string };
+  city: { ru: string; en: string };
+  country: string;
+  timezone: string;
+  lat: number;
+  lon: number;
+  elevationFt: number;
+  isCoordinated: boolean;
+}
+
+export function useCreateAirport() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateAirportInput) =>
+      request('/airports', airportSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      // Помечаются устаревшими и список, и точечные запросы по коду:
+      // новый аэропорт обязан стать доступен в выборе маршрута сразу.
+      void queryClient.invalidateQueries({ queryKey: ['airports'] });
+      void queryClient.invalidateQueries({ queryKey: ['airport'] });
+    },
+  });
 }

@@ -1,13 +1,15 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Card, Col, Input, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Input, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useServices } from '@/api/catalog';
-import type { ServiceCatalogItem, ServiceCategory, VendorPrice } from '@/api/types';
-import { VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
-import { AIRPORTS, SERVICE_BY_ID, SERVICE_CATEGORIES } from '@/mocks/reference';
+import { useAirports, useServices, useVendorPrices, type VendorPriceRow } from '@/api/catalog';
+import type { ServiceCatalogItem, ServiceCategory } from '@/api/types';
+import { Can } from '@/shared/auth/Can';
+import { ServiceFormModal } from './ServiceFormModal';
+import { VendorPriceFormModal } from './VendorPriceFormModal';
 import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 
@@ -22,10 +24,20 @@ import { QueryState } from '@/shared/ui/QueryState';
  * каталог невелик и целиком помещается в память, а искать по двум языкам
  * запросом значило бы заводить эндпоинту ещё один параметр без нужды.
  */
+const SERVICE_CATEGORIES: ServiceCategory[] = [
+  'fuel',
+  'handling',
+  'catering',
+  'transport',
+  'permits',
+  'deicing',
+];
+
 export function ServicesCatalogPage(): JSX.Element {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<ServiceCategory | undefined>();
+  const [adding, setAdding] = useState(false);
 
   const query = useServices(category);
   const services = query.data?.data;
@@ -110,9 +122,26 @@ export function ServicesCatalogPage(): JSX.Element {
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>
-        {t('nav.catalog')}
-      </Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            {t('nav.catalog')}
+          </Typography.Title>
+        </Col>
+        <Col>
+          <Can permission="catalog.edit">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setAdding(true);
+              }}
+            >
+              {t('catalog.addService')}
+            </Button>
+          </Can>
+        </Col>
+      </Row>
 
       <Card size="small" styles={{ body: { padding: 10 } }}>
         <Row gutter={[8, 8]}>
@@ -157,31 +186,44 @@ export function ServicesCatalogPage(): JSX.Element {
           )}
         </QueryState>
       </Card>
+
+      <ServiceFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }
 
-/** Цены поставщиков по аэропортам `[ТЗ 3.2.1]`. */
+/**
+ * Цены поставщиков по аэропортам `[ТЗ 3.2.1]`.
+ *
+ * Цена действует в периоде и **копируется** в заявку при назначении
+ * поставщика (`CLAUDE.md § 3` п. 5). Правки здесь нет: новые условия —
+ * это новый период, иначе изменение прайса переписало бы суммы в уже
+ * оформленных заявках.
+ */
 export function VendorPricesPage(): JSX.Element {
   const { t } = useTranslation();
   const [airport, setAirport] = useState<string | undefined>();
   const [serviceId, setServiceId] = useState<string | undefined>();
+  const [airportSearch, setAirportSearch] = useState('');
+  const [adding, setAdding] = useState(false);
 
-  // Перечень услуг — настоящий, с сервера. Сами прайсы поставщиков появятся
-  // вместе с реестром контрагентов (M6), пока они из набора для макетов.
   const services = useServices().data?.data ?? [];
+  const airports = useAirports({ search: airportSearch, perPage: 30 }).data?.data ?? [];
+  const serviceNames = new Map(services.map((service) => [service.id, service.name.ru]));
 
-  const filtered = useMemo(
-    () =>
-      VENDOR_PRICES.filter((price) => {
-        if (airport && price.airportIcao !== airport) return false;
-        if (serviceId && price.serviceId !== serviceId) return false;
-        return true;
-      }),
-    [airport, serviceId],
-  );
+  // Фильтрация на сервере: прайс растёт быстрее справочника услуг,
+  // и выкачивать его целиком ради двух выпадающих списков незачем.
+  const query = useVendorPrices({
+    ...(airport ? { airportIcao: airport } : {}),
+    ...(serviceId ? { serviceId } : {}),
+  });
 
-  const columns: DataColumns<VendorPrice> = [
+  const columns: DataColumns<VendorPriceRow> = [
     {
       title: t('flight.airport'),
       dataIndex: 'airportIcao',
@@ -192,15 +234,13 @@ export function VendorPricesPage(): JSX.Element {
     {
       title: t('service.name'),
       dataIndex: 'serviceId',
-      render: (value: string) => SERVICE_BY_ID.get(value)?.name.ru ?? value,
+      render: (value: string, row) => serviceNames.get(value) ?? row.serviceCode,
     },
     {
       title: t('service.vendor'),
       dataIndex: 'vendorId',
       width: 210,
-      render: (value: string) => (
-        <Link to={`/vendors/${value}`}>{VENDOR_BY_ID.get(value)?.name ?? value}</Link>
-      ),
+      render: (value: string, row) => <Link to={`/vendors/${value}`}>{row.vendorName}</Link>,
     },
     {
       title: t('catalog.unitPrice'),
@@ -215,7 +255,26 @@ export function VendorPricesPage(): JSX.Element {
       key: 'min',
       width: 140,
       align: 'right',
-      render: (_, row) => <MoneyText value={row.minCharge ?? null} />,
+      render: (_, row) => <MoneyText value={row.minCharge} />,
+    },
+    {
+      title: t('catalog.surcharges'),
+      key: 'surcharges',
+      width: 200,
+      render: (_, row) =>
+        row.surcharges.length === 0 ? (
+          <Typography.Text type="secondary">—</Typography.Text>
+        ) : (
+          <Space size={4} wrap>
+            {row.surcharges.map((surcharge) => (
+              <Tag key={surcharge.code} style={{ margin: 0 }}>
+                {t(`surcharge.${surcharge.code}`)} +
+                {Number.parseFloat(surcharge.value).toFixed(0)}
+                {surcharge.kind === 'percent' ? '%' : ''}
+              </Tag>
+            ))}
+          </Space>
+        ),
     },
     {
       title: t('catalog.validity'),
@@ -231,11 +290,30 @@ export function VendorPricesPage(): JSX.Element {
     },
   ];
 
+  const addButton = (
+    <Can permission="catalog.edit">
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={() => {
+          setAdding(true);
+        }}
+      >
+        {t('price.add')}
+      </Button>
+    </Can>
+  );
+
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>
-        {t('nav.prices')}
-      </Typography.Title>
+      <Row align="middle" justify="space-between" gutter={[8, 8]}>
+        <Col>
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            {t('nav.prices')}
+          </Typography.Title>
+        </Col>
+        <Col>{addButton}</Col>
+      </Row>
 
       <Card size="small" styles={{ body: { padding: 10 } }}>
         <Row gutter={[8, 8]}>
@@ -243,12 +321,13 @@ export function VendorPricesPage(): JSX.Element {
             <Select
               allowClear
               showSearch
-              optionFilterProp="label"
+              filterOption={false}
               style={{ width: '100%' }}
               placeholder={t('flight.airport')}
               value={airport}
               onChange={setAirport}
-              options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
+              onSearch={setAirportSearch}
+              options={airports.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
             />
           </Col>
           <Col xs={12} md={10}>
@@ -267,16 +346,31 @@ export function VendorPricesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<VendorPrice>
-          size="small"
-          rowKey="id"
-          columns={columns}
-          dataSource={filtered}
-          pagination={{ pageSize: 25, size: 'small' }}
-          scroll={{ x: 900 }}
-          locale={{ emptyText: <EmptyState description={t('catalog.noPrices')} /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<VendorPriceRow>
+              size="small"
+              rowKey="id"
+              columns={columns}
+              dataSource={paged.data}
+              pagination={{ pageSize: 25, size: 'small' }}
+              scroll={{ x: 1100 }}
+              locale={{
+                emptyText: (
+                  <EmptyState description={t('catalog.noPrices')} action={addButton} />
+                ),
+              }}
+            />
+          )}
+        </QueryState>
       </Card>
+
+      <VendorPriceFormModal
+        open={adding}
+        onClose={() => {
+          setAdding(false);
+        }}
+      />
     </Space>
   );
 }
