@@ -1,0 +1,157 @@
+{% load i18n %}<!doctype html>
+{# Печатная форма котировки и счёта [ТЗ 3.4.1].
+
+   Шаблон Django, а не вёрстка в коде: печатные формы правятся без
+   пересборки приложения (BACKEND.md § 8). CSS Paged Media — потому что
+   WeasyPrint умеет колонтитулы и нумерацию страниц только через него.
+
+   Отметка DEMO наносится при DEMO_DATA=true (ADR-008): выгрузка со стенда
+   не должна быть неотличима от настоящей. #}
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }} {{ number }}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 18mm 16mm 20mm 16mm;
+      @bottom-center {
+        content: "{{ title }} {{ number }} · {% trans "страница" %} " counter(page) " / " counter(pages);
+        font-size: 8pt;
+        color: #8c8c8c;
+      }
+    }
+
+    body {
+      font-family: "DejaVu Sans", sans-serif;
+      font-size: 9.5pt;
+      color: #1f1f1f;
+    }
+
+    h1 { font-size: 15pt; margin: 0 0 2mm; }
+
+    .meta { width: 100%; margin-bottom: 6mm; }
+    .meta td { padding: 0.6mm 0; vertical-align: top; }
+    .meta .label { color: #595959; width: 34mm; }
+
+    table.lines { width: 100%; border-collapse: collapse; }
+    table.lines th {
+      background: #fafafa;
+      border-bottom: 0.4mm solid #d9d9d9;
+      padding: 2mm 1.5mm;
+      text-align: left;
+      font-size: 8.5pt;
+    }
+    table.lines td {
+      border-bottom: 0.2mm solid #f0f0f0;
+      padding: 1.8mm 1.5mm;
+    }
+    /* Суммы и количества моноширинным: колонка цифр обязана быть ровной */
+    .num { text-align: right; font-family: "DejaVu Sans Mono", monospace; white-space: nowrap; }
+
+    table.totals { margin-left: auto; margin-top: 5mm; }
+    table.totals td { padding: 1.2mm 2mm; }
+    table.totals .grand td { font-weight: bold; border-top: 0.4mm solid #1f1f1f; }
+
+    /* Водяной знак стенда. Печатается под содержимым, чтобы не мешать
+       чтению, но так, что его нельзя не заметить. */
+    .demo-mark {
+      position: fixed;
+      top: 45%;
+      left: 12%;
+      transform: rotate(-28deg);
+      font-size: 60pt;
+      color: rgba(192, 57, 43, 0.12);
+      font-weight: bold;
+      letter-spacing: 6pt;
+      z-index: -1;
+    }
+    .demo-note {
+      border: 0.3mm solid #c0392b;
+      color: #c0392b;
+      padding: 2mm 3mm;
+      margin-bottom: 5mm;
+      font-size: 8.5pt;
+    }
+  </style>
+</head>
+<body>
+
+{% if is_demo %}
+  <div class="demo-mark">DEMO</div>
+  <div class="demo-note">
+    {% trans "Документ сформирован на демонстрационном стенде и не является финансовым документом." %}
+  </div>
+{% endif %}
+
+<h1>{{ title }} {{ number }}</h1>
+
+<table class="meta">
+  <tr>
+    <td class="label">{% trans "Клиент" %}</td>
+    <td>{{ client_legal|default:client }}</td>
+  </tr>
+  <tr>
+    <td class="label">{% trans "Рейс" %}</td>
+    <td>{{ flight }} · {{ route }}</td>
+  </tr>
+  {% if issued_at %}
+    <tr>
+      <td class="label">{% trans "Дата выставления" %}</td>
+      <td>{{ issued_at|date:"d.m.Y" }}</td>
+    </tr>
+  {% endif %}
+  {% if due_date %}
+    <tr>
+      <td class="label">{% trans "Срок оплаты" %}</td>
+      <td>{{ due_date|date:"d.m.Y" }}</td>
+    </tr>
+  {% endif %}
+  <tr>
+    <td class="label">{% trans "Валюта" %}</td>
+    <td>{{ currency }}</td>
+  </tr>
+</table>
+
+<table class="lines">
+  <thead>
+    <tr>
+      <th>{% trans "Наименование" %}</th>
+      <th>{% trans "Аэропорт" %}</th>
+      <th class="num">{% trans "Кол-во" %}</th>
+      <th class="num">{% trans "Цена" %}</th>
+      <th class="num">{% trans "Сумма" %}</th>
+      <th class="num">{% trans "НДС" %}</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for line in lines %}
+      <tr>
+        <td>{{ line.description }}</td>
+        <td>{{ line.airport }}</td>
+        <td class="num">{{ line.quantity }}</td>
+        <td class="num">{{ line.unit_price }}</td>
+        <td class="num">{{ line.amount }}</td>
+        <td class="num">{{ line.vat }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<table class="totals">
+  <tr>
+    <td>{% trans "Подытог" %}</td>
+    <td class="num">{{ subtotal }} {{ currency }}</td>
+  </tr>
+  <tr>
+    <td>{% trans "НДС" %}</td>
+    <td class="num">{{ vat_total }} {{ currency }}</td>
+  </tr>
+  <tr class="grand">
+    <td>{% trans "Итого" %}</td>
+    <td class="num">{{ grand_total }} {{ currency }}</td>
+  </tr>
+</table>
+
+</body>
+</html>

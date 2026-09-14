@@ -178,3 +178,25 @@ class TariffRuleSerializer(serializers.Serializer):  # type: ignore[type-arg]
         if not obj.discount_kind:
             return None
         return {"kind": obj.discount_kind, "value": str(obj.discount_value or Decimal(0))}
+
+
+class ExportRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`ExportRequest` из контракта."""
+
+    format = serializers.ChoiceField(choices=["pdf", "xlsx"])
+    locale = serializers.ChoiceField(choices=["ru", "en"], required=False, default="ru")
+    currency = serializers.CharField(required=False, allow_blank=True, default="")
+
+
+class ExportTicketSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`ExportTicket` из контракта.
+
+    Форма ответа рассчитана на отложенную задачу, хотя формирование
+    сейчас синхронное: перенос в очередь при росте объёмов не должен
+    требовать менять клиентов.
+    """
+
+    taskId = serializers.CharField()  # noqa: N815
+    status = serializers.ChoiceField(choices=["queued", "running", "ready", "failed"])
+    downloadUrl = serializers.CharField(allow_null=True)  # noqa: N815
+    expiresAt = serializers.DateTimeField(allow_null=True)  # noqa: N815

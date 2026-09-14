@@ -12,6 +12,7 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import Any, ClassVar, cast
 
 from django.db.models import QuerySet
@@ -24,6 +25,8 @@ from rest_framework.response import Response
 from accounts.models import User
 from accounts.permissions import Permission
 from billing.api.serializers import (
+    ExportRequestSerializer,
+    ExportTicketSerializer,
     InvoiceCreateSerializer,
     InvoiceSerializer,
     QuoteCreateSerializer,
@@ -31,10 +34,12 @@ from billing.api.serializers import (
     VoidSerializer,
 )
 from billing.models import Invoice, Quote
-from billing.services import documents
+from billing.services import documents, export
+from core import clock
 from core.api.idempotency import IdempotencyMixin
 from core.api.serializers import ErrorResponseSerializer
 from core.api.viewsets import TenantScopedViewSet
+from core.services import storage
 from flights.models import Flight
 
 
@@ -188,6 +193,9 @@ class InvoiceViewSet(
         "create": Permission.BILLING_DOCUMENTS_EDIT,
         "issue": Permission.BILLING_DOCUMENTS_EDIT,
         "void": Permission.BILLING_DOCUMENTS_EDIT,
+        # Выгрузить счёт может и тот, кто его только читает: клиент
+        # скачивает свой счёт из портала.
+        "export": Permission.BILLING_DOCUMENTS_VIEW,
     }
 
     def get_queryset(self) -> QuerySet[Invoice]:
@@ -259,6 +267,45 @@ class InvoiceViewSet(
         )
         return Response(InvoiceSerializer(invoice).data)
 
+    @extend_schema(
+        summary="Выгрузка счёта в PDF или XLSX",
+        request=ExportRequestSerializer,
+        responses={202: ExportTicketSerializer, 400: ErrorResponseSerializer},
+        tags=["billing"],
+    )
+    @action(detail=True, methods=["post"])
+    def export(self, request: Request, pk: str | None = None) -> Response:
+        """`POST /api/v1/invoices/{id}/export` `[ТЗ 3.4.1]`.
+
+        Формирование синхронное, а не в Celery: документ на десяток строк
+        собирается за десятки миллисекунд, и очередь ради этого добавляла бы
+        человеку ожидание вместо того, чтобы его убрать. Форма ответа —
+        та же, что у отложенной задачи (`ExportTicket`), поэтому перенос
+        в очередь при росте объёмов не потребует менять клиентов.
+        """
+
+        def produce() -> Response:
+            payload = ExportRequestSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+            invoice = self.get_object()
+
+            url = export.export_document(
+                document=invoice,
+                kind="invoice",
+                export_format=payload.validated_data["format"],
+            )
+            return Response(
+                {
+                    "taskId": invoice.pk,
+                    "status": "ready",
+                    "downloadUrl": url,
+                    "expiresAt": clock.now() + timedelta(seconds=storage.DOWNLOAD_URL_TTL_SECONDS),
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        return self.idempotent(request, produce)
+
 
 def _flight_for(request: Request, flight_id: str) -> Flight:
     """Рейс, по которому формируется документ.
@@ -272,3 +319,4 @@ def _flight_for(request: Request, flight_id: str) -> Flight:
     if flight is None:
         raise ValidationError({"flightId": "Рейс не найден"})
     return flight
+

@@ -333,7 +333,7 @@ def test_numbering_has_no_gaps_under_concurrency(django_db_blocker: Any) -> None
                     number = numbering.next_number(numbering.INVOICE)
                 with lock:
                     issued.append(number)
-        except BaseException as exc:  # noqa: BLE001
+        except BaseException as exc:
             errors.append(exc)
         finally:
             # Каждый поток получает своё соединение: без явного закрытия
