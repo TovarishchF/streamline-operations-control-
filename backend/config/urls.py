@@ -28,6 +28,7 @@ from accounts.api.views import (
     UserViewSet,
 )
 from audit.api.views import AuditViewSet
+from billing.api.documents import InvoiceViewSet, QuoteViewSet
 from billing.api.views import FxRatesView
 from catalog.api.views import (
     AircraftTypeViewSet,
@@ -66,6 +67,8 @@ router.register("catalog/services", ServiceViewSet, basename="service")
 router.register("catalog/prices", VendorPriceViewSet, basename="vendor-price")
 router.register("contracts", VendorContractViewSet, basename="contract")
 router.register("fleet", AircraftViewSet, basename="aircraft")
+router.register("quotes", QuoteViewSet, basename="quote")
+router.register("invoices", InvoiceViewSet, basename="invoice")
 router.register("audit", AuditViewSet, basename="audit")
 router.register("users", UserViewSet, basename="user")
 
