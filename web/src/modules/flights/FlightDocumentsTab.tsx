@@ -4,7 +4,8 @@ import { FilePdfOutlined, InboxOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, ServiceOrder } from '@/api/types';
+import type { Flight } from '@/api/flights';
+import type { ServiceOrder } from '@/api/types';
 import { INVOICES, QUOTES } from '@/mocks/billing';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 

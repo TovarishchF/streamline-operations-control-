@@ -7,12 +7,12 @@ import { ExportOutlined, PlusOutlined, WarningOutlined } from '@ant-design/icons
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { FlightListItem, FlightStatus } from '@/api/types';
-import { CLIENTS } from '@/mocks/counterparties';
-import { CONFLICTS } from '@/mocks/flights';
-import { useFlightList } from '@/mocks/store';
-import { AIRPORTS } from '@/mocks/reference';
+import { useAirports } from '@/api/catalog';
+import { useFlights, useScheduleConflicts, type FlightRow } from '@/api/flights';
+import type { FlightStatus } from '@/api/types';
+import { useClients } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
+import { QueryState } from '@/shared/ui/QueryState';
 import { useClock } from '@/shared/clock/useClock';
 import {
   EmptyState, FlightStatusTag, Mono, PercentText, UtcTime,
@@ -43,16 +43,34 @@ const EMPTY_FILTERS: Filters = {
  *
  * Два представления одних и тех же данных: планшет Gantt для оперативного
  * контроля загрузки парка и плотная таблица с фильтрами для работы со списком.
+ *
+ * Отбор по тексту, статусу, клиенту и аэропорту выполняет сервер: расписание
+ * листается постранично, и выкачивать его целиком ради фильтра нельзя.
+ * Признак «есть неподтверждённые услуги» отбирается на клиенте — он уже
+ * посчитан в строке, и лишний запрос ради него не нужен.
  */
 export function SchedulePage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { nowUtc } = useClock();
-  const flightList = useFlightList();
 
   const [view, setView] = useState<'gantt' | 'table'>('gantt');
   const [scale, setScale] = useState<ScaleKey>('day');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+
+  const query = useFlights({
+    search: filters.search.trim(),
+    status: filters.statuses.join(','),
+    ...(filters.clientId ? { clientId: filters.clientId } : {}),
+    ...(filters.airport ? { airport: filters.airport } : {}),
+    perPage: 200,
+  });
+  // Конфликты приходят по всему горизонту планирования, а не по странице:
+  // предупреждение о пересечении не должно зависеть от того, на какой
+  // странице списка сейчас диспетчер.
+  const conflicts = useScheduleConflicts().data?.data ?? [];
+  const airportsQuery = useAirports({ perPage: 200 });
+  const clients = useClients().data?.data ?? [];
 
   const origin = useMemo(() => {
     const base = new Date(nowUtc);
@@ -61,27 +79,22 @@ export function SchedulePage(): JSX.Element {
   }, [nowUtc, scale]);
 
   const filtered = useMemo(() => {
-    const query = filters.search.trim().toLowerCase();
-    return flightList.filter((flight) => {
-      if (query) {
-        const haystack = `${flight.number} ${flight.clientName ?? ''} ${flight.depIcao} ${flight.arrIcao} ${flight.aircraftRegistration ?? ''}`.toLowerCase();
-        if (!haystack.includes(query)) return false;
-      }
-      if (filters.statuses.length > 0 && !filters.statuses.includes(flight.status)) return false;
-      if (filters.clientId && flight.clientId !== filters.clientId) return false;
-      if (filters.airport && flight.depIcao !== filters.airport && flight.arrIcao !== filters.airport) return false;
-      if (filters.unconfirmedOnly && (flight.unconfirmedServicesCount ?? 0) === 0) return false;
+    const rows = query.data?.data ?? [];
+    return rows.filter((flight) => {
+      if (filters.unconfirmedOnly && flight.unconfirmedServicesCount === 0) return false;
       if (filters.lowMarginOnly) {
-        const margin = flight.marginPercent === null || flight.marginPercent === undefined
+        // Маржа появится вместе с биллингом (M7). Пока её нет, фильтр
+        // не показывает ничего — это честнее, чем показать всё подряд.
+        const margin = flight.marginPercent === null
           ? null
           : Number.parseFloat(flight.marginPercent);
         if (margin === null || margin >= 12) return false;
       }
       return true;
     });
-  }, [filters, flightList]);
+  }, [filters.unconfirmedOnly, filters.lowMarginOnly, query.data]);
 
-  const columns: DataColumns<FlightListItem> = [
+  const columns: DataColumns<FlightRow> = [
     {
       title: t('flight.number'), dataIndex: 'number', width: 110, fixed: 'left',
       sorter: (a, b) => a.number.localeCompare(b.number),
@@ -124,7 +137,7 @@ export function SchedulePage(): JSX.Element {
     },
     {
       title: t('flight.client'), dataIndex: 'clientName', ellipsis: true,
-      sorter: (a, b) => (a.clientName ?? '').localeCompare(b.clientName ?? ''),
+      sorter: (a, b) => a.clientName.localeCompare(b.clientName),
     },
     {
       title: t('flight.type'), dataIndex: 'type', width: 104,
@@ -136,7 +149,7 @@ export function SchedulePage(): JSX.Element {
     },
     {
       title: t('flight.unconfirmed'), dataIndex: 'unconfirmedServicesCount', width: 86, align: 'center',
-      sorter: (a, b) => (a.unconfirmedServicesCount ?? 0) - (b.unconfirmedServicesCount ?? 0),
+      sorter: (a, b) => a.unconfirmedServicesCount - b.unconfirmedServicesCount,
       render: (value: number) =>
         value > 0 ? (
           <Tag color="orange" style={{ margin: 0 }}>{value}</Tag>
@@ -186,20 +199,20 @@ export function SchedulePage(): JSX.Element {
         </Col>
       </Row>
 
-      {CONFLICTS.length > 0 ? (
+      {conflicts.length > 0 ? (
         <Alert
           type="warning"
           showIcon
-          message={t('schedule.conflictsFound', { count: CONFLICTS.length })}
+          message={t('schedule.conflictsFound', { count: conflicts.length })}
           description={
             <Space direction="vertical" size={2}>
-              {CONFLICTS.map((conflict, index) => (
-                <Space key={index} size={6}>
+              {conflicts.map((conflict, index) => (
+                <Space key={`${conflict.flightId}:${String(index)}`} size={6}>
                   <Tag
                     style={{
                       margin: 0,
-                      color: conflict.severity === 'blocking' ? STATUS_TOKENS.critical.color : STATUS_TOKENS.warning.color,
-                      borderColor: conflict.severity === 'blocking' ? STATUS_TOKENS.critical.border : STATUS_TOKENS.warning.border,
+                      color: conflict.severity === 'critical' ? STATUS_TOKENS.critical.color : STATUS_TOKENS.warning.color,
+                      borderColor: conflict.severity === 'critical' ? STATUS_TOKENS.critical.border : STATUS_TOKENS.warning.border,
                       background: 'transparent',
                     }}
                   >
@@ -247,7 +260,7 @@ export function SchedulePage(): JSX.Element {
               onChange={(value: string | undefined) => {
                 setFilters((f) => ({ ...f, clientId: value }));
               }}
-              options={CLIENTS.map((client) => ({ value: client.id, label: client.name }))}
+              options={clients.map((client) => ({ value: client.id, label: client.name }))}
             />
           </Col>
           <Col xs={12} md={4}>
@@ -258,8 +271,9 @@ export function SchedulePage(): JSX.Element {
               onChange={(value: string | undefined) => {
                 setFilters((f) => ({ ...f, airport: value }));
               }}
-              options={AIRPORTS.map((airport) => ({
-                value: airport.icao, label: `${airport.icao} — ${airport.city}`,
+              options={(airportsQuery.data?.data ?? []).map((airport) => ({
+                value: airport.icao,
+                label: `${airport.icao} — ${airport.city}`,
               }))}
             />
           </Col>
@@ -286,7 +300,8 @@ export function SchedulePage(): JSX.Element {
         </Row>
       </Card>
 
-      {view === 'gantt' ? (
+      <QueryState query={query}>
+      {() => view === 'gantt' ? (
         <Space direction="vertical" size={8} style={{ width: '100%' }}>
           <Space size={8} wrap>
             <Radio.Group
@@ -313,7 +328,7 @@ export function SchedulePage(): JSX.Element {
         </Space>
       ) : (
         <Card size="small" styles={{ body: { padding: 0 } }}>
-          <DataTable<FlightListItem>
+          <DataTable<FlightRow>
             size="small"
             rowKey="id"
             columns={columns}
@@ -341,6 +356,7 @@ export function SchedulePage(): JSX.Element {
           />
         </Card>
       )}
+      </QueryState>
     </Space>
   );
 }

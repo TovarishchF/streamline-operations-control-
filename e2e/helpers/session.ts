@@ -144,3 +144,23 @@ export async function signInAs(page: Page, roleKey: string): Promise<void> {
     window.sessionStorage.setItem('soc.e2e.signed-in', '1');
   }, JSON.stringify({ state: { refreshToken: tokens.refresh }, version: 0 }));
 }
+
+/**
+ * Идентификатор существующего рейса.
+ *
+ * Экраны рейсов работают на настоящем API, и жёстко заданный `flt_001`
+ * из набора для макетов теперь даёт 404. Берём первый рейс из расписания:
+ * какой именно — неважно, важно что он есть.
+ */
+export async function anyFlightId(page: Page, status = 'in_work'): Promise<string> {
+  const tokens = await obtainTokens(page, ACCOUNTS['usr_disp1'] ?? 'karpov.demo');
+  const response = await page.request.get(`${API}/flights?status=${status}&perPage=1`, {
+    headers: { Authorization: `Bearer ${tokens.access}` },
+  });
+  const body = (await response.json()) as { data: { id: string }[] };
+  const first = body.data[0];
+  if (!first) {
+    throw new Error('в расписании нет рейсов: выполните make seed-demo');
+  }
+  return first.id;
+}

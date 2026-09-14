@@ -3,7 +3,8 @@ import { Alert, Modal, Radio, Slider, Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, ServiceOrder, VendorCandidate } from '@/api/types';
+import type { Flight } from '@/api/flights';
+import type { ServiceOrder, VendorCandidate } from '@/api/types';
 import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';

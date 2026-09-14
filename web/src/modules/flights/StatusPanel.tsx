@@ -2,7 +2,8 @@ import { useMemo, useState, type JSX } from 'react';
 import { Alert, App, Button, Form, Input, Modal, Select, Space, Steps, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, FlightTransition, ServiceOrder } from '@/api/types';
+import type { Flight, FlightTransition } from '@/api/flights';
+import type { ServiceOrder } from '@/api/types';
 import flightMachine from '@shared/state-machines/flight.json';
 import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
@@ -50,7 +51,7 @@ export function StatusPanel({
   const [pending, setPending] = useState<FlightTransition | null>(null);
   const [form] = Form.useForm<ReasonForm>();
 
-  const available = useMemo(() => flight.availableTransitions ?? [], [flight.availableTransitions]);
+  const available = flight.availableTransitions;
   const currentIndex = MAIN_LINE.indexOf(flight.status);
   const offMainLine = currentIndex === -1;
 

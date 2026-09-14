@@ -22,6 +22,8 @@ from rest_framework.response import Response
 from core.exceptions import IdempotencyKeyConflict, IdempotencyKeyRequired
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from rest_framework.request import Request
 
 HEADER = "Idempotency-Key"
@@ -30,14 +32,24 @@ MIN_KEY_LENGTH = 8
 
 
 class IdempotentCreateMixin:
-    """Подмешивается в вьюсет, у которого есть `create`.
+    """Проверка ключа идемпотентности для операций создания.
 
     `idempotency = "required" | "optional"` — так же, как в контракте.
+
+    Вьюха вызывает `idempotent()` явно, а не полагается на подмену `create`
+    через `super()`: порядок наследования тогда становится значимым,
+    и собственный `create` во вьюсете молча отключает всю проверку.
     """
 
     idempotency: ClassVar[str] = "optional"
 
-    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+    def idempotent(self, request: Request, produce: Callable[[], Response]) -> Response:
+        """Выполняет операцию один раз на ключ.
+
+        Повтор с тем же ключом возвращает первый ответ. Повтор с тем же
+        ключом, но другим телом — ошибка клиента, а не повтор: вернуть
+        первый ответ значило бы тихо потерять вторую операцию.
+        """
         key = request.headers.get(HEADER, "").strip()
 
         if not key:
@@ -46,7 +58,7 @@ class IdempotentCreateMixin:
                     f"Операция требует заголовок {HEADER}: он защищает от повторного "
                     f"создания записи при повторе запроса"
                 )
-            return super().create(request, *args, **kwargs)  # type: ignore[misc,no-any-return]
+            return produce()
 
         if len(key) < MIN_KEY_LENGTH:
             raise IdempotencyKeyRequired(
@@ -64,7 +76,7 @@ class IdempotentCreateMixin:
                 )
             return Response(stored["body"], status=stored["status"])
 
-        response: Response = super().create(request, *args, **kwargs)  # type: ignore[misc]
+        response = produce()
         if status.is_success(response.status_code):
             cache.set(
                 cache_key,
@@ -76,6 +88,17 @@ class IdempotentCreateMixin:
                 TTL_SECONDS,
             )
         return response
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Стандартное создание DRF, обёрнутое проверкой ключа."""
+
+        def produce() -> Response:
+            result: Response = super(IdempotentCreateMixin, self).create(  # type: ignore[misc]
+                request, *args, **kwargs
+            )
+            return result
+
+        return self.idempotent(request, produce)
 
 
 def _cache_key(request: Request, key: str) -> str:

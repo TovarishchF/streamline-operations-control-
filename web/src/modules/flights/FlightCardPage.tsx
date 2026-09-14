@@ -5,11 +5,16 @@ import {
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { AIRCRAFT_BY_ID, AIRCRAFT_TYPE_BY_ID, AIRPORT_BY_ICAO, AIRPORT_UTC_OFFSET } from '@/mocks/reference';
-import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { CONFLICTS, MARGINS, SLOTS } from '@/mocks/flights';
-import { useFlight, useFlightOrders } from '@/mocks/store';
+import { useAirportsByIcao } from '@/api/catalog';
+import { useClients } from '@/api/counterparties';
+import { useFleet } from '@/api/fleet';
+import { useFlight, useScheduleConflicts } from '@/api/flights';
+import { useSlots } from '@/api/slots';
+import { MARGINS } from '@/mocks/flights';
+import { useFlightOrders } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
+import { formatUtcOffset, utcOffsetHours } from '@/shared/format/timezone';
+import { QueryState } from '@/shared/ui/QueryState';
 import {
   DateText, EmptyState, Field, FlightStatusTag, MoneyText, Mono, PercentText, UtcTime,
 } from '@/shared/ui/primitives';
@@ -21,13 +26,21 @@ import { FlightDocumentsTab } from './FlightDocumentsTab';
 import { FlightHistoryTab } from './FlightHistoryTab';
 import { StatusPanel } from './StatusPanel';
 
-/** Локальное время аэропорта — подпись зоны обязательна (`CLAUDE.md § 10`). */
-function localAt(icao: string, iso: string): { time: string; offset: string } {
-  const offset = AIRPORT_UTC_OFFSET[icao] ?? 0;
-  const shifted = new Date(new Date(iso).getTime() + offset * 3_600_000);
+/**
+ * Локальное время аэропорта — подпись зоны обязательна (`CLAUDE.md § 10`).
+ *
+ * Зона берётся из справочника, смещение считается на момент рейса:
+ * в зоне с переходом на летнее время оно зависит от даты.
+ */
+function localAt(timezone: string | undefined, iso: string): { time: string; offset: string } {
+  if (!timezone) return { time: '', offset: '' };
+
+  const at = new Date(iso);
+  const offset = utcOffsetHours(timezone, at);
+  const shifted = new Date(at.getTime() + offset * 3_600_000);
   const hh = String(shifted.getUTCHours()).padStart(2, '0');
   const mm = String(shifted.getUTCMinutes()).padStart(2, '0');
-  return { time: `${hh}:${mm}`, offset: `UTC${offset >= 0 ? '+' : ''}${String(offset)}` };
+  return { time: `${hh}:${mm}`, offset: formatUtcOffset(timezone, at) };
 }
 
 export function FlightCardPage(): JSX.Element {
@@ -36,19 +49,32 @@ export function FlightCardPage(): JSX.Element {
   const { id, tab } = useParams<{ id: string; tab?: string }>();
   const [contextOpen, setContextOpen] = useState(false);
 
-  const flight = useFlight(id);
+  const flightQuery = useFlight(id);
+  const flight = flightQuery.data;
   const orders = useFlightOrders(id);
+
+  const airports = useAirportsByIcao([flight?.depIcao ?? '', flight?.arrIcao ?? '']);
+  const fleet = useFleet().data?.data ?? [];
+  const clients = useClients().data?.data ?? [];
+  const allConflicts = useScheduleConflicts().data?.data ?? [];
+  const allSlots = useSlots(id).data?.data ?? [];
+
+  // Маржа появится вместе с биллингом (M7): до тех пор она берётся
+  // из набора для макетов и на настоящих рейсах отсутствует.
   const margin = id ? MARGINS.get(id) : undefined;
 
-  if (!flight) return <NotFoundPage />;
+  if (flightQuery.isError) return <NotFoundPage />;
+  if (!flight) return <QueryState query={flightQuery}>{() => null}</QueryState>;
 
-  const client = CLIENT_BY_ID.get(flight.clientId);
-  const aircraft = flight.aircraftId ? AIRCRAFT_BY_ID.get(flight.aircraftId) : undefined;
-  const aircraftType = aircraft ? AIRCRAFT_TYPE_BY_ID.get(aircraft.typeId) : undefined;
-  const dep = AIRPORT_BY_ICAO.get(flight.depIcao);
-  const arr = AIRPORT_BY_ICAO.get(flight.arrIcao);
-  const conflicts = CONFLICTS.filter((c) => c.flightId === flight.id);
-  const slots = SLOTS.filter((s) => s.flightId === flight.id);
+  const client = clients.find((item) => item.id === flight.clientId);
+  const aircraft = flight.aircraftId
+    ? fleet.find((item) => item.id === flight.aircraftId)
+    : undefined;
+  const aircraftType = aircraft?.type;
+  const dep = airports[flight.depIcao];
+  const arr = airports[flight.arrIcao];
+  const conflicts = allConflicts.filter((item) => item.flightId === flight.id);
+  const slots = allSlots;
 
   const marginPercent = margin?.marginPercent ?? null;
   const belowThreshold = margin?.isBelowThreshold ?? false;
@@ -66,18 +92,18 @@ export function FlightCardPage(): JSX.Element {
                   <Space direction="vertical" size={0}>
                     <Space size={6}>
                       <Mono>{flight.depIcao}</Mono>
-                      <Typography.Text type="secondary">{dep?.name.ru}</Typography.Text>
+                      <Typography.Text type="secondary">{dep?.name.ru ?? ''}</Typography.Text>
                     </Space>
-                    <UtcTime value={flight.stdUtc} withDate local={localAt(flight.depIcao, flight.stdUtc)} />
+                    <UtcTime value={flight.stdUtc} withDate local={localAt(dep?.timezone, flight.stdUtc)} />
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label={t('flight.arrival')}>
                   <Space direction="vertical" size={0}>
                     <Space size={6}>
                       <Mono>{flight.arrIcao}</Mono>
-                      <Typography.Text type="secondary">{arr?.name.ru}</Typography.Text>
+                      <Typography.Text type="secondary">{arr?.name.ru ?? ''}</Typography.Text>
                     </Space>
-                    <UtcTime value={flight.staUtc} withDate local={localAt(flight.arrIcao, flight.staUtc)} />
+                    <UtcTime value={flight.staUtc} withDate local={localAt(arr?.timezone, flight.staUtc)} />
                   </Space>
                 </Descriptions.Item>
                 <Descriptions.Item label={t('flight.actualTimes')}>
@@ -90,7 +116,7 @@ export function FlightCardPage(): JSX.Element {
                   <Space direction="vertical" size={0}>
                     <Space size={12}>
                       <Mono>{flight.distanceNm} NM</Mono>
-                      <Mono>{Math.floor((flight.blockTimeMin ?? 0) / 60)}ч {(flight.blockTimeMin ?? 0) % 60}м</Mono>
+                      <Mono>{Math.floor(flight.blockTimeMin / 60)}ч {flight.blockTimeMin % 60}м</Mono>
                       <Mono>{flight.fuelPlanKg} кг</Mono>
                     </Space>
                     {/* DOMAIN § 7.8: расчёт плановый и оценочный */}
@@ -118,12 +144,8 @@ export function FlightCardPage(): JSX.Element {
                   <Descriptions.Item label={t('client.currency')}>
                     <Mono>{flight.billingCurrency}</Mono>
                   </Descriptions.Item>
-                  <Descriptions.Item label={t('client.paymentTerms')}>
-                    {t(`paymentMode.${client?.paymentTerms.mode ?? 'postpayment'}`)}
-                    {client?.paymentTerms.deferDays ? `, ${String(client.paymentTerms.deferDays)} ${t('common.days')}` : ''}
-                  </Descriptions.Item>
-                  <Descriptions.Item label={t('client.contact')}>
-                    {client?.contacts?.[0]?.name} · {client?.contacts?.[0]?.email}
+                  <Descriptions.Item label={t('client.country')}>
+                    <Mono>{client?.country ?? '—'}</Mono>
                   </Descriptions.Item>
                 </Descriptions>
               </Card>
@@ -147,8 +169,8 @@ export function FlightCardPage(): JSX.Element {
                     <Descriptions.Item label={t('flight.pax')}>{flight.paxCount}</Descriptions.Item>
                     <Descriptions.Item label={t('flight.crew')}>
                       <Space direction="vertical" size={0}>
-                        {flight.crew?.map((member) => (
-                          <span key={member.id}>
+                        {flight.crew.map((member) => (
+                          <span key={`${member.role}:${member.name}`}>
                             {member.name} — {t(`crewRole.${member.role}`)}
                           </span>
                         ))}
@@ -167,7 +189,7 @@ export function FlightCardPage(): JSX.Element {
                       <Space key={slot.id} size={8} wrap>
                         <Mono>{slot.airportIcao}</Mono>
                         <Tag>{t(`slotKind.${slot.kind}`)}</Tag>
-                        <UtcTime value={slot.confirmedTimeUtc ?? slot.requestedTimeUtc ?? null} withDate />
+                        <UtcTime value={slot.confirmedTimeUtc ?? slot.requestedTimeUtc} withDate />
                         <Tag
                           color={slot.status === 'confirmed' ? 'green' : slot.status === 'rejected' ? 'red' : 'default'}
                         >
@@ -212,7 +234,7 @@ export function FlightCardPage(): JSX.Element {
                 <Typography.Text type="secondary">{client?.name}</Typography.Text>
                 <Mono>{flight.depIcao} → {flight.arrIcao}</Mono>
                 {aircraft ? <Mono>{aircraft.registration}</Mono> : <Tag>{t('schedule.noAircraft')}</Tag>}
-                <UtcTime value={flight.stdUtc} withDate local={localAt(flight.depIcao, flight.stdUtc)} />
+                <UtcTime value={flight.stdUtc} withDate local={localAt(dep?.timezone, flight.stdUtc)} />
               </Space>
             </Space>
           </Col>
@@ -242,7 +264,7 @@ export function FlightCardPage(): JSX.Element {
 
       {conflicts.length > 0 ? (
         <Alert
-          type={conflicts.some((c) => c.severity === 'blocking') ? 'error' : 'warning'}
+          type={conflicts.some((c) => c.severity === 'critical') ? 'error' : 'warning'}
           showIcon
           message={t('schedule.conflictsFound', { count: conflicts.length })}
           description={
@@ -343,10 +365,10 @@ export function FlightCardPage(): JSX.Element {
           <Card size="small" title={t('flight.meta')}>
             <Descriptions size="small" column={1}>
               <Descriptions.Item label={t('common.createdAt')}>
-                <DateText value={flight.createdAt ?? null} />
+                <DateText value={flight.createdAt} />
               </Descriptions.Item>
               <Descriptions.Item label={t('common.updatedAt')}>
-                <DateText value={flight.updatedAt ?? null} />
+                <DateText value={flight.updatedAt} />
               </Descriptions.Item>
               <Descriptions.Item label={t('common.dataSource')}>
                 <Tooltip title={t('demo.syntheticHint')}>

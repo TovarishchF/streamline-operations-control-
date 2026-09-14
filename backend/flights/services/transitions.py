@@ -71,6 +71,7 @@ def apply_transition(
     actor: User | None = None,
     reason_code: str = "",
     comment: str = "",
+    source: AuditSource | None = None,
 ) -> Flight:
     """Выполняет переход. Возбуждает исключение, если он невозможен."""
     definition = transition_by_name(name)
@@ -126,7 +127,7 @@ def apply_transition(
         before=before,
         after=audit.snapshot(flight, fields=["status", "atd_utc", "ata_utc"]),
         comment=comment or f"{previous_status} → {definition['to']}",
-        source=AuditSource.USER if actor else AuditSource.SYSTEM,
+        source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
         is_demo=flight.is_demo,
     )
     return flight

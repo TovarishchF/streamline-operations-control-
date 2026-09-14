@@ -3,7 +3,8 @@ import { Alert, Card, Col, Radio, Row, Space, Statistic, Tag, Tooltip, Typograph
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, MarginMode, ServiceOrder } from '@/api/types';
+import type { Flight } from '@/api/flights';
+import type { MarginMode, ServiceOrder } from '@/api/types';
 import { MARGINS } from '@/mocks/flights';
 import { usePermission } from '@/shared/auth/session';
 import { MoneyText, Mono, PercentText } from '@/shared/ui/primitives';

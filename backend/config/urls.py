@@ -36,9 +36,25 @@ from catalog.api.views import (
     VatRateViewSet,
 )
 from core.api.views import ClockView, HealthView
+from counterparties.api.views import ClientViewSet, VendorViewSet
 from fleet.api.views import AircraftViewSet
+from flights.api.views import (
+    FlightRequestViewSet,
+    FlightTemplateViewSet,
+    FlightViewSet,
+    ScheduleConflictsView,
+    SlotViewSet,
+)
 
 router = DefaultRouter(trailing_slash=False)
+# Конфликты объявлены до вьюсета рейсов: иначе «conflicts» разберётся
+# как идентификатор рейса и вернёт 404.
+router.register("flights", FlightViewSet, basename="flight")
+router.register("flight-templates", FlightTemplateViewSet, basename="flight-template")
+router.register("flight-requests", FlightRequestViewSet, basename="flight-request")
+router.register("slots", SlotViewSet, basename="slot")
+router.register("clients", ClientViewSet, basename="client")
+router.register("vendors", VendorViewSet, basename="vendor")
 router.register("airports", AirportViewSet, basename="airport")
 router.register("aircraft-types", AircraftTypeViewSet, basename="aircraft-type")
 router.register("vat-rates", VatRateViewSet, basename="vat-rate")
@@ -62,6 +78,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("clock", ClockView.as_view(), name="clock"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
+    path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
     *router.urls,
 ]
 

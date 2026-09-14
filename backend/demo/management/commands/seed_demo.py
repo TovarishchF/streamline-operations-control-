@@ -36,12 +36,15 @@ from accounts import services as accounts
 from accounts.models import Organization, Role, TimezoneMode, User
 from audit import services as audit
 from audit.models import AuditEntityType, AuditEntry, AuditSource
-from catalog.models import AircraftType, Airport
+from catalog.models import AircraftType, Airport, Service, ServiceCategory
 from core import clock
-from core.exceptions import DemoOnlyOperation
+from core.exceptions import DemoOnlyOperation, DomainError
 from core.models import DataSource
 from counterparties.models import Client, Vendor
 from fleet.models import Aircraft, AircraftApproval, AircraftStatus
+from flights.models import Flight, FlightRequest, ServiceLeg, Slot, SlotStatus, SlotType
+from flights.services import planning, transitions
+from orders.models import ServiceOrder, ServiceOrderStatus
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -98,12 +101,29 @@ SECOND_SPECIALIZATION_SHARE = 0.3
 EXPIRING_APPROVAL_SHARE = 0.4
 AIRCRAFT_COUNT = 26
 
+# Рейсы генерируются относительно текущей даты (CLAUDE.md § 4), а не
+# «историей за год»: стенд должен выглядеть работающим сегодня.
+FLIGHTS_BACK_DAYS = 7
+FLIGHTS_FORWARD_DAYS = 14
+FLIGHTS_PER_DAY = 4
+CANCELLED_SHARE = 0.1
+
+# Маршрут собирается из пары аэропортов: меньше двух — собирать не из чего.
+MIN_ROUTE_AIRPORTS = 2
+
 # Номера бортов, которым задаётся особое состояние. Набор без единого
 # неисправного борта не даёт показать ни одного сценария срыва расписания.
 AOG_INDEX = 3
 MAINTENANCE_INDEXES = (7, 14)
 
 HOME_BASES = ("UUWW", "UUDD", "UUEE", "ULLI", "USSS", "UNNT", "UWWW", "URSS")
+
+# Направления демонстрационного расписания: настоящие аэропорты, среди них
+# международные — иначе не показать проверку разрешительных документов.
+DEMO_ROUTES_ICAO = (
+    "UUWW", "UUDD", "UUEE", "ULLI", "USSS", "UNNT", "UWWW", "URSS", "UWKD", "UHWW",
+    "LFPB", "LSGG", "EGGW", "OMDB", "LTFM", "UACC", "UBBB", "UDYZ",
+)
 
 
 class Command(BaseCommand):
@@ -138,6 +158,10 @@ class Command(BaseCommand):
         """
         counts = {
             "пользователи": User.objects.filter(username__endswith=".demo").delete()[0],
+            "заявки клиентов": FlightRequest.objects.filter(is_demo=True).delete()[0],
+            "заявки на услуги": ServiceOrder.objects.filter(is_demo=True).delete()[0],
+            "слоты": Slot.objects.filter(is_demo=True).delete()[0],
+            "рейсы": Flight.objects.filter(is_demo=True).delete()[0],
             "борта": Aircraft.objects.filter(is_demo=True).delete()[0],
             "клиенты": Client.objects.filter(is_demo=True).delete()[0],
             "поставщики": Vendor.objects.filter(is_demo=True).delete()[0],
@@ -182,13 +206,13 @@ class Command(BaseCommand):
         vendors = self._vendors(organization, seed)
         aircraft = self._aircraft(clients, seed)
         self._portal_users(organization, clients, vendors)
+        flights = self._flights(clients, aircraft, vendors, seed)
+        requests = self._flight_requests(organization, clients, seed)
 
         self.stdout.write(
             f"Создано: клиентов {len(clients)}, поставщиков {len(vendors)}, "
-            f"бортов {len(aircraft)}, сотрудников {len(staff)}"
-        )
-        self.stdout.write(
-            "Рейсы и заявки появятся вместе с соответствующими модулями (M4, M5)."
+            f"бортов {len(aircraft)}, сотрудников {len(staff)}, "
+            f"рейсов {len(flights)}, заявок клиентов {len(requests)}"
         )
 
     def _bind_two_factor(self, staff: list[User]) -> None:
@@ -382,6 +406,214 @@ class Command(BaseCommand):
                 is_demo=True,
                 data_source=DataSource.SYNTHETIC,
             )
+
+    def _flights(
+        self,
+        clients: list[Client],
+        aircraft: list[Aircraft],
+        vendors: list[Vendor],
+        seed: int,
+    ) -> list[Flight]:
+        """Расписание вокруг сегодняшнего дня.
+
+        Набор подбирается так, чтобы на стенде не приходилось угадывать,
+        какое сочетание сработает: есть рейсы в каждом состоянии автомата,
+        международные и внутренние, с заявками на услуги и без.
+        """
+        airports = list(
+            Airport.objects.filter(icao__in=DEMO_ROUTES_ICAO).values_list("icao", flat=True)
+        )
+        # По одной услуге на категорию: набор должен покрывать и
+        # разрешительные документы, иначе международные рейсы не взлетят.
+        services = [
+            service
+            for category in ServiceCategory.values
+            if (service := Service.objects.filter(category=category).first()) is not None
+        ]
+        if len(airports) < MIN_ROUTE_AIRPORTS or not aircraft:
+            self.stdout.write("Недостаточно справочных данных для рейсов, пропущено")
+            return []
+
+        today = clock.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        created: list[Flight] = []
+
+        for offset in range(-FLIGHTS_BACK_DAYS, FLIGHTS_FORWARD_DAYS):
+            for index in range(FLIGHTS_PER_DAY):
+                rnd = self._rnd(seed, f"flight:{offset}:{index}")
+                departure, arrival = rnd.sample(airports, 2)
+                machine = rnd.choice(aircraft)
+                if machine.status != AircraftStatus.SERVICEABLE:
+                    continue
+
+                std = today + timedelta(
+                    days=offset, hours=6 + index * 4, minutes=rnd.choice([0, 10, 25, 40])
+                )
+                # Тот же борт в те же часы — это конфликт расписания, а не
+                # демонстрация: пусть он будет заведомо редким и намеренным.
+                if Flight.objects.filter(
+                    aircraft=machine,
+                    std_utc__gte=std - timedelta(hours=6),
+                    std_utc__lte=std + timedelta(hours=6),
+                ).exists():
+                    continue
+
+                flight = planning.create_flight(
+                    client=rnd.choice(clients),
+                    dep_icao=departure,
+                    arr_icao=arrival,
+                    std_utc=std,
+                    aircraft=machine,
+                    flight_type=rnd.choice(
+                        ["charter", "charter", "charter", "cargo", "ferry"]
+                    ),
+                    pax_count=rnd.randint(1, max(1, machine.type.seats)),
+                    is_demo=True,
+                    source=AuditSource.SEED,
+                )
+                self._advance(flight, services, vendors, rnd, offset)
+                created.append(flight)
+        return created
+
+    def _advance(
+        self,
+        flight: Flight,
+        services: list[Service],
+        vendors: list[Vendor],
+        rnd: random.Random,
+        offset: int,
+    ) -> None:
+        """Доводит рейс до состояния, соответствующего его дате.
+
+        Прошедший рейс, висящий в «Запланирован», выглядит поломкой: на стенде
+        каждая такая мелочь читается как недоделка, а не как условность.
+        """
+        if not services:
+            return
+
+        legs = (
+            (ServiceLeg.DEPARTURE, flight.dep_icao),
+            (ServiceLeg.ARRIVAL, flight.arr_icao),
+        )
+        ordinary = [item for item in services if item.category != ServiceCategory.PERMITS]
+        for leg, icao in legs:
+            for service in rnd.sample(ordinary, min(2, len(ordinary))):
+                ServiceOrder.objects.create(
+                    flight=flight,
+                    service=service,
+                    leg=leg,
+                    airport_icao=icao,
+                    vendor=rnd.choice(vendors) if vendors else None,
+                    quantity=rnd.randint(1, 4),
+                    is_demo=True,
+                    data_source=DataSource.SYNTHETIC,
+                )
+
+        # Международный рейс без разрешительного документа не выпускается
+        # (DOMAIN § 5.1). Без этой заявки половина расписания на стенде
+        # застревала бы в «В работе», и понять почему было бы нельзя.
+        permit = next(
+            (item for item in services if item.category == ServiceCategory.PERMITS), None
+        )
+        if permit is not None and flight.is_international:
+            ServiceOrder.objects.create(
+                flight=flight,
+                service=permit,
+                leg=ServiceLeg.DEPARTURE,
+                airport_icao=flight.dep_icao,
+                vendor=rnd.choice(vendors) if vendors else None,
+                quantity=1,
+                is_demo=True,
+                data_source=DataSource.SYNTHETIC,
+            )
+
+        # Слот нужен только в координируемом аэропорту (ADR-026).
+        coordinated = Airport.objects.filter(
+            icao__in=[flight.dep_icao, flight.arr_icao], is_coordinated=True
+        ).values_list("icao", flat=True)
+        for icao in coordinated:
+            is_departure = icao == flight.dep_icao
+            Slot.objects.get_or_create(
+                flight=flight,
+                airport_icao=icao,
+                type=SlotType.DEPARTURE if is_departure else SlotType.ARRIVAL,
+                defaults={
+                    "requested_utc": flight.std_utc if is_departure else flight.sta_utc,
+                    "confirmed_utc": flight.std_utc if is_departure else flight.sta_utc,
+                    "status": SlotStatus.CONFIRMED,
+                    "message_number": f"SCR{rnd.randint(1000, 9999)}",
+                    "is_demo": True,
+                    "data_source": DataSource.SYNTHETIC,
+                },
+            )
+
+        def move(name: str, reason_code: str = "", comment: str = "") -> bool:
+            try:
+                transitions.apply_transition(
+                    flight,
+                    name,
+                    source=AuditSource.SEED,
+                    reason_code=reason_code,
+                    comment=comment,
+                )
+            except DomainError:
+                return False
+            return True
+
+        # Один рейс из десяти отменён: расписание без единой отмены
+        # неправдоподобно, а отмена — сценарий, который надо показывать.
+        if rnd.random() < CANCELLED_SHARE:
+            move("cancel", reason_code="client_request", comment="Клиент перенёс поездку")
+            return
+
+        if not move("start"):
+            return
+        flight.service_orders.update(status=ServiceOrderStatus.CONFIRMED)
+
+        # Будущим рейсам ещё готовиться: они остаются в работе.
+        if offset > 1 or not move("ready") or offset > 0:
+            return
+        if not move("depart") or offset == 0:
+            return
+        move("arrive")
+        flight.service_orders.update(status=ServiceOrderStatus.COMPLETED)
+        move("complete")
+
+    def _flight_requests(
+        self, organization: Organization, clients: list[Client], seed: int
+    ) -> list[FlightRequest]:
+        """Заявки клиентов в очереди на подтверждение `[ТЗ 3.5.3]`."""
+        airports = list(
+            Airport.objects.filter(icao__in=DEMO_ROUTES_ICAO).values_list("icao", flat=True)
+        )
+        if len(airports) < MIN_ROUTE_AIRPORTS:
+            return []
+
+        comments = (
+            "Нужен борт с салоном на восемь мест",
+            "Просим подтвердить до конца недели",
+            "Обратный вылет уточним позже",
+            "",
+        )
+        created: list[FlightRequest] = []
+        for index in range(6):
+            rnd = self._rnd(seed, f"request:{index}")
+            departure, arrival = rnd.sample(airports, 2)
+            request, was_created = FlightRequest.objects.get_or_create(
+                client=rnd.choice(clients),
+                dep_icao=departure,
+                arr_icao=arrival,
+                requested_std_utc=clock.now() + timedelta(days=index + 2, hours=9),
+                defaults={
+                    "organization": organization,
+                    "pax_count": rnd.randint(1, 9),
+                    "comment": rnd.choice(comments),
+                    "is_demo": True,
+                    "data_source": DataSource.SYNTHETIC,
+                },
+            )
+            if was_created:
+                created.append(request)
+        return created
 
     def _portal_users(
         self, organization: Organization, clients: list[Client], vendors: list[Vendor]

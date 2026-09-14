@@ -2,7 +2,7 @@ import { expect, test, type ConsoleMessage } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { signInAs } from './helpers/session';
+import { anyFlightId, signInAs } from './helpers/session';
 
 /**
  * Съёмка экранов и проверка, что они отрисовываются без ошибок.
@@ -105,7 +105,13 @@ test.describe('Экраны', () => {
       });
 
       await signInAs(page, screen.role ?? 'usr_disp1');
-      await page.goto(screen.path, { waitUntil: 'networkidle' });
+
+      // Экраны рейса адресуются идентификатором существующего рейса:
+      // расписание теперь настоящее, и выдуманный идентификатор даёт 404.
+      const path = screen.path.includes('flt_002')
+        ? screen.path.replace('flt_002', await anyFlightId(page))
+        : screen.path;
+      await page.goto(path, { waitUntil: 'networkidle' });
 
       // Экран считается открывшимся, когда появился основной контейнер
       await expect(page.locator('.ant-layout').first()).toBeVisible({ timeout: 15_000 });

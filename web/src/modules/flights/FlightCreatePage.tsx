@@ -7,9 +7,11 @@ import type { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { CLIENTS } from '@/mocks/counterparties';
-import { AIRCRAFT, AIRCRAFT_TYPE_BY_ID, AIRPORTS, AIRPORT_BY_ICAO } from '@/mocks/reference';
-import { useSocStore } from '@/mocks/store';
+import { useAirports } from '@/api/catalog';
+import { ApiError } from '@/api/client';
+import { useFleet } from '@/api/fleet';
+import { useCreateFlight } from '@/api/flights';
+import { useClients } from '@/api/counterparties';
 import { useClock } from '@/shared/clock/useClock';
 import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 import { Mono } from '@/shared/ui/primitives';
@@ -53,46 +55,70 @@ export function FlightCreatePage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { message } = App.useApp();
-  const createFlight = useSocStore((state) => state.createFlight);
   const { nowUtc } = useClock();
+
+  // Справочники и парк — с сервера: создать рейс в аэропорт, которого нет
+  // в справочнике, сервер не даст, и предлагать такой выбор нельзя.
+  const airportsQuery = useAirports({ perPage: 200 });
+  const fleetQuery = useFleet();
+  const airports = useMemo(() => airportsQuery.data?.data ?? [], [airportsQuery.data]);
+  const fleet = useMemo(() => fleetQuery.data?.data ?? [], [fleetQuery.data]);
+  const clients = useClients().data?.data ?? [];
+  const createFlight = useCreateFlight();
 
   const [form] = Form.useForm<FormValues>();
   const [dep, setDep] = useState<string>('UUWW');
   const [arr, setArr] = useState<string>('ULLI');
   const [aircraftId, setAircraftId] = useState<string | undefined>();
 
+  /**
+   * Предварительная оценка для формы.
+   *
+   * Окончательный расчёт делает сервер (`DOMAIN § 7.8`) — здесь он повторён,
+   * чтобы диспетчер видел расстояние и время в пути до отправки формы.
+   * Значения после создания берутся из ответа сервера, а не отсюда.
+   */
   const estimate = useMemo(() => {
-    const from = AIRPORT_BY_ICAO.get(dep);
-    const to = AIRPORT_BY_ICAO.get(arr);
+    const from = airports.find((item) => item.icao === dep);
+    const to = airports.find((item) => item.icao === arr);
     if (!from || !to) return null;
 
-    const aircraft = aircraftId ? AIRCRAFT.find((a) => a.id === aircraftId) : undefined;
-    const type = aircraft ? AIRCRAFT_TYPE_BY_ID.get(aircraft.typeId) : undefined;
-    const speed = type?.cruiseSpeedKts ?? 450;
-    const burn = type?.fuelBurnKgPerHour ?? 1000;
+    const aircraft = aircraftId ? fleet.find((item) => item.id === aircraftId) : undefined;
+    const speed = aircraft?.type?.cruiseSpeedKts ?? 450;
+    const burn = aircraft?.type?.fuelBurnKgPerHour ?? 1000;
 
     const distanceNm = Math.round(haversineNm([from.lat, from.lon], [to.lat, to.lon]));
     const blockTimeMin = Math.round((distanceNm / speed) * 60 + 20);
 
     return { distanceNm, blockTimeMin, fuelPlanKg: Math.round((blockTimeMin / 60) * burn * 1.1) };
-  }, [dep, arr, aircraftId]);
+  }, [airports, fleet, dep, arr, aircraftId]);
 
   const sameAirport = dep === arr;
 
   const handleFinish = (values: FormValues): void => {
-    const flight = createFlight({
-      clientId: values.clientId,
-      aircraftId: values.aircraftId,
-      type: values.type,
-      depIcao: dep,
-      arrIcao: arr,
-      stdUtc: values.std.toISOString(),
-      paxCount: values.pax,
-      remarks: values.remarks,
-    });
-
-    void message.success(t('flight.created', { number: flight.number }));
-    navigate(`/flights/${flight.id}`);
+    createFlight.mutate(
+      {
+        clientId: values.clientId,
+        aircraftId: values.aircraftId ?? null,
+        type: values.type,
+        depIcao: dep,
+        arrIcao: arr,
+        stdUtc: values.std.toISOString(),
+        paxCount: values.pax,
+        remarks: values.remarks,
+      },
+      {
+        onSuccess: (flight) => {
+          void message.success(t('flight.created', { number: flight.number }));
+          navigate(`/flights/${flight.id}`);
+        },
+        onError: (cause: unknown) => {
+          void message.error(
+            cause instanceof ApiError ? cause.message : t('auth.serverUnavailable'),
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -120,7 +146,7 @@ export function FlightCreatePage(): JSX.Element {
                     <Select
                       showSearch
                       optionFilterProp="label"
-                      options={CLIENTS.filter((c) => c.isActive).map((c) => ({
+                      options={clients.map((c) => ({
                         value: c.id,
                         label: `${c.name} (${c.settlementCurrency})`,
                       }))}
@@ -145,7 +171,7 @@ export function FlightCreatePage(): JSX.Element {
                       optionFilterProp="label"
                       value={dep}
                       onChange={setDep}
-                      options={AIRPORTS.map((a) => ({
+                      options={airports.map((a) => ({
                         value: a.icao,
                         label: `${a.icao} — ${a.city}`,
                       }))}
@@ -164,7 +190,7 @@ export function FlightCreatePage(): JSX.Element {
                       optionFilterProp="label"
                       value={arr}
                       onChange={setArr}
-                      options={AIRPORTS.map((a) => ({
+                      options={airports.map((a) => ({
                         value: a.icao,
                         label: `${a.icao} — ${a.city}`,
                       }))}
@@ -195,9 +221,9 @@ export function FlightCreatePage(): JSX.Element {
                       onChange={(value: string | undefined) => {
                         setAircraftId(value);
                       }}
-                      options={AIRCRAFT.map((a) => ({
+                      options={fleet.map((a) => ({
                         value: a.id,
-                        label: `${a.registration} — ${AIRCRAFT_TYPE_BY_ID.get(a.typeId)?.icaoType ?? ''}${
+                        label: `${a.registration} — ${a.type?.icaoType ?? ''}${
                           a.status === 'serviceable' ? '' : ` (${t(`aircraftStatus.${a.status}`)})`
                         }`,
                       }))}

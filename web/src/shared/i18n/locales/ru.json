@@ -807,6 +807,7 @@
     "approved": "Заявка подтверждена, создан рейс {{number}}",
     "comment": "Комментарий",
     "createdAt": "Создана",
+    "createdFlight": "Открыть рейс",
     "empty": "Заявок нет",
     "pendingCount": "Заявок ожидает решения: {{count}}",
     "pendingOnly": "Только ожидающие",

@@ -80,6 +80,9 @@ def as_role(api: APIClient, make_user: Callable[..., User]) -> Callable[..., API
     """
 
     def login(role: str, **extra: object) -> APIClient:
+        # Отдельный суффикс: в тесте рядом может быть пользователь той же роли,
+        # созданный приспособлением, и логины столкнулись бы.
+        extra.setdefault("suffix", "api")
         api.force_authenticate(user=make_user(role, **extra))
         return api
 

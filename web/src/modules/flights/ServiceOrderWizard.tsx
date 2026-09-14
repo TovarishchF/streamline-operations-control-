@@ -5,7 +5,8 @@ import {
 import { CheckCircleTwoTone, CloseCircleTwoTone, WarningTwoTone } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, ServiceCategory, ServiceCheckResult } from '@/api/types';
+import type { Flight } from '@/api/flights';
+import type { ServiceCategory, ServiceCheckResult } from '@/api/types';
 import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
 import { SERVICES, SERVICE_CATEGORIES } from '@/mocks/reference';
 import { useClock } from '@/shared/clock/useClock';

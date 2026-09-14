@@ -3,8 +3,8 @@ import { Space, Tooltip, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { FlightListItem } from '@/api/types';
-import { AIRCRAFT, AIRCRAFT_TYPE_BY_ID } from '@/mocks/reference';
+import { useFleet } from '@/api/fleet';
+import type { FlightRow } from '@/api/flights';
 import { useClock } from '@/shared/clock/useClock';
 import { FLIGHT_STATUS_TOKENS, STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
@@ -31,13 +31,19 @@ export function GanttBoard({
   scale,
   originUtc,
 }: {
-  flights: FlightListItem[];
+  flights: FlightRow[];
   scale: ScaleKey;
   originUtc: Date;
 }): JSX.Element {
   const { t } = useTranslation();
   const { nowUtc } = useClock();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Парк берётся с сервера: строки планшета — это борта, и строить их
+  // по набору для макетов значило бы показывать пустой планшет
+  // при настоящем расписании.
+  const fleetQuery = useFleet();
+  const fleet = useMemo(() => fleetQuery.data?.data ?? [], [fleetQuery.data]);
 
   const totalHours = SCALE_HOURS[scale];
   const pxPerHour = scale === 'day' ? 46 : scale === 'threeDays' ? 20 : 9;
@@ -46,13 +52,19 @@ export function GanttBoard({
 
   /** Группировка строк: борта по типу ВС, затем «Без борта». */
   const rows = useMemo(() => {
-    const used = new Set(flights.map((f) => f.aircraftId).filter(Boolean));
-    const byType = new Map<string, typeof AIRCRAFT>();
-    for (const aircraft of AIRCRAFT) {
+    const used = new Set(flights.map((flight) => flight.aircraftId).filter(Boolean));
+    const byType = new Map<string, { id: string; registration: string; status: string }[]>();
+
+    for (const aircraft of fleet) {
       if (!used.has(aircraft.id)) continue;
-      const list = byType.get(aircraft.typeId) ?? [];
-      list.push(aircraft);
-      byType.set(aircraft.typeId, list);
+      const label = aircraft.type?.name.ru ?? aircraft.typeId;
+      const list = byType.get(label) ?? [];
+      list.push({
+        id: aircraft.id,
+        registration: aircraft.registration,
+        status: aircraft.status,
+      });
+      byType.set(label, list);
     }
 
     const result: Array<
@@ -60,9 +72,8 @@ export function GanttBoard({
       | { kind: 'aircraft'; key: string; id: string; label: string; status: string }
     > = [];
 
-    for (const [typeId, list] of byType) {
-      const type = AIRCRAFT_TYPE_BY_ID.get(typeId);
-      result.push({ kind: 'group', key: `g_${typeId}`, label: type?.name.ru ?? typeId });
+    for (const [typeLabel, list] of byType) {
+      result.push({ kind: 'group', key: `g_${typeLabel}`, label: typeLabel });
       for (const aircraft of list) {
         result.push({
           kind: 'aircraft',
@@ -74,13 +85,13 @@ export function GanttBoard({
       }
     }
 
-    if (flights.some((flight) => flight.aircraftId === null || flight.aircraftId === undefined)) {
+    if (flights.some((flight) => flight.aircraftId === null)) {
       result.push({ kind: 'group', key: 'g_none', label: t('schedule.noAircraft') });
       result.push({ kind: 'aircraft', key: 'none', id: '', label: '—', status: 'serviceable' });
     }
 
     return result;
-  }, [flights, t]);
+  }, [fleet, flights, t]);
 
   const hourMarks = useMemo(() => {
     const step = scale === 'day' ? 2 : scale === 'threeDays' ? 6 : 24;

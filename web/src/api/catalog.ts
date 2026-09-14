@@ -6,7 +6,7 @@
  * этом берутся из сгенерированных, а не пишутся руками (п. 6): схема
  * проверяет то, что тип обещает.
  */
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import { useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { pageMetaSchema, request } from './client';
@@ -130,4 +130,32 @@ export function useServices(category?: string): UseQueryResult<Paged<ServiceCata
       request(`/catalog/services?${query.toString()}`, pagedSchema(serviceSchema), { signal }),
     staleTime: REFERENCE_STALE_MS,
   });
+}
+
+/**
+ * Аэропорты по кодам ИКАО.
+ *
+ * Отдельный запрос на каждый код, а не выборка из первой страницы
+ * справочника: в нём больше тысячи записей, и нужный аэропорт в первые
+ * двести почти наверняка не попадает. Именно так местное время рейса
+ * оказывалось пустым.
+ */
+export function useAirportsByIcao(codes: string[]): Record<string, Airport> {
+  const unique = [...new Set(codes.filter(Boolean))].sort();
+
+  const results = useQueries({
+    queries: unique.map((icao) => ({
+      queryKey: ['airport', icao],
+      queryFn: ({ signal }: { signal: AbortSignal }) =>
+        request(`/airports?search=${icao}&perPage=1`, pagedSchema(airportSchema), { signal }),
+      staleTime: REFERENCE_STALE_MS,
+    })),
+  });
+
+  const found: Record<string, Airport> = {};
+  for (const result of results) {
+    const airport = result.data?.data[0];
+    if (airport) found[airport.icao] = airport;
+  }
+  return found;
 }

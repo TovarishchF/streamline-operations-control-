@@ -4,7 +4,8 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { PaperClipOutlined, PlusOutlined, SwapOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, ServiceOrder } from '@/api/types';
+import type { Flight } from '@/api/flights';
+import type { ServiceOrder } from '@/api/types';
 import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
 import { usePermission } from '@/shared/auth/session';

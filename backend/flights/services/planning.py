@@ -18,7 +18,8 @@ from billing.services import fx
 from catalog.models import Airport
 from core import clock, geo
 from core.exceptions import DomainError
-from flights.models import Flight
+from flights.models import Flight, FlightRequest, FlightRequestStatus
+from flights.services import conflicts as conflict_detector
 
 if TYPE_CHECKING:
     from accounts.models import User
@@ -34,6 +35,12 @@ DEFAULT_BURN_KG_H = 600
 
 class AirportNotFound(DomainError):
     """Аэропорта нет в справочнике."""
+
+    code = "VALIDATION_ERROR"
+
+
+class RequestAlreadyReviewed(DomainError):
+    """Заявка уже рассмотрена либо не хватает причины отклонения."""
 
     code = "VALIDATION_ERROR"
 
@@ -129,7 +136,34 @@ def create_flight(
         source=source,
         is_demo=is_demo,
     )
+    record_conflicts(flight, actor=actor, source=source)
     return flight
+
+
+def record_conflicts(
+    flight: Flight, *, actor: User | None = None, source: AuditSource = AuditSource.USER
+) -> list[conflict_detector.Conflict]:
+    """Записывает обнаруженные конфликты в журнал.
+
+    Конфликт не запрещает сохранение, но он должен быть зафиксирован
+    с причиной: спустя неделю «почему рейс поставили на борт в AOG»
+    выясняется по журналу, а не по памяти диспетчера.
+    """
+    found = conflict_detector.detect(flight)
+    if not found:
+        return []
+
+    audit.record(
+        entity_type=AuditEntityType.FLIGHT,
+        entity_id=flight.pk,
+        action="schedule_conflict",
+        actor=actor,
+        after={"conflicts": [{"kind": item.kind, "reason": item.message} for item in found]},
+        comment="; ".join(item.message for item in found),
+        source=source,
+        is_demo=flight.is_demo,
+    )
+    return found
 
 
 @transaction.atomic
@@ -167,7 +201,69 @@ def update_route(flight: Flight, *, actor: User | None = None, **changes: Any) -
         ),
         is_demo=flight.is_demo,
     )
+    record_conflicts(flight, actor=actor)
     return flight
+
+
+@transaction.atomic
+def approve_request(request: FlightRequest, *, actor: User | None = None) -> Flight:
+    """Подтверждает заявку клиента и создаёт рейс `[ТЗ 3.5.3]`.
+
+    Клиент не создаёт рейс сам: заявка попадает диспетчеру в очередь,
+    и только после подтверждения появляется рейс (`SPEC § 2.2`, сноска).
+    """
+    if request.status != FlightRequestStatus.PENDING:
+        raise RequestAlreadyReviewed(
+            f"Заявка уже рассмотрена: {request.get_status_display()}",
+            {"status": request.status},
+        )
+
+    flight = create_flight(
+        client=request.client,
+        dep_icao=request.dep_icao,
+        arr_icao=request.arr_icao,
+        std_utc=request.requested_std_utc,
+        pax_count=request.pax_count,
+        remarks=request.comment,
+        actor=actor,
+        is_demo=request.is_demo,
+    )
+
+    request.status = FlightRequestStatus.APPROVED
+    request.flight = flight
+    request.save(update_fields=["status", "flight", "updated_at", "version"])
+
+    audit.record(
+        entity_type=AuditEntityType.FLIGHT,
+        entity_id=flight.pk,
+        action="request_approved",
+        actor=actor,
+        after={"requestId": request.pk, "number": flight.number},
+        is_demo=request.is_demo,
+    )
+    return flight
+
+
+@transaction.atomic
+def reject_request(
+    request: FlightRequest, reason: str, *, actor: User | None = None
+) -> FlightRequest:
+    """Отклоняет заявку. Причина обязательна: клиенту нужно объяснение."""
+    if request.status != FlightRequestStatus.PENDING:
+        raise RequestAlreadyReviewed(
+            f"Заявка уже рассмотрена: {request.get_status_display()}",
+            {"status": request.status},
+        )
+    if not reason:
+        raise RequestAlreadyReviewed(
+            "Не указана причина отклонения: клиенту нужно объяснение",
+            {"field": "reason"},
+        )
+
+    request.status = FlightRequestStatus.REJECTED
+    request.rejection_reason = reason
+    request.save(update_fields=["status", "rejection_reason", "updated_at", "version"])
+    return request
 
 
 def local_time_at(icao: str, moment: datetime) -> datetime:

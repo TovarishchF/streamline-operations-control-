@@ -391,7 +391,7 @@ class TestPasswordPolicy:
         )
 
         assert response.status_code == 204
-        user = User.objects.get(username="dispatcher-1")
+        user = User.objects.get(role=Role.DISPATCHER)
         assert user.check_password("novyy-dlinnyy-parol-2026")
         assert AuditEntry.objects.filter(action="password_changed").exists()
 

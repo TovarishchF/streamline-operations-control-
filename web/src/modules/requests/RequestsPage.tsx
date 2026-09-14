@@ -4,9 +4,15 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { FlightRequest } from '@/api/types';
-import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { useSocStore } from '@/mocks/store';
+import { ApiError } from '@/api/client';
+import { useClients } from '@/api/counterparties';
+import {
+  useApproveRequest,
+  useFlightRequests,
+  useRejectRequest,
+  type FlightRequest,
+} from '@/api/flights';
+import { QueryState } from '@/shared/ui/QueryState';
 import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -29,10 +35,11 @@ export function RequestsPage(): JSX.Element {
   const navigate = useNavigate();
   const [rejectReason, setRejectReason] = useState('');
   const [filter, setFilter] = useState<'pending' | 'all'>('pending');
-  const requests = useSocStore((state) => state.requests);
-  const flights = useSocStore((state) => state.flights);
-  const approveRequest = useSocStore((state) => state.approveRequest);
-  const rejectRequest = useSocStore((state) => state.rejectRequest);
+  const query = useFlightRequests();
+  const requests = query.data?.data ?? [];
+  const clients = useClients().data?.data ?? [];
+  const approveRequest = useApproveRequest();
+  const rejectRequest = useRejectRequest();
   const [rejecting, setRejecting] = useState<FlightRequest | null>(null);
 
   const filtered = requests.filter((request) =>
@@ -44,13 +51,15 @@ export function RequestsPage(): JSX.Element {
     {
       title: t('request.createdAt'), dataIndex: 'createdAt', width: 120,
       defaultSortOrder: 'descend',
-      sorter: (a, b) => (a.createdAt ?? '').localeCompare(b.createdAt ?? ''),
+      sorter: (a, b) => a.createdAt.localeCompare(b.createdAt),
       render: (value: string) => <UtcTime value={value} withDate />,
     },
     {
       title: t('flight.client'), dataIndex: 'clientId', width: 220,
       render: (value: string) => (
-        <Link to={`/clients/${value}`}>{CLIENT_BY_ID.get(value)?.name ?? value}</Link>
+        <Link to={`/clients/${value}`}>
+          {clients.find((client) => client.id === value)?.name ?? value}
+        </Link>
       ),
     },
     {
@@ -80,7 +89,7 @@ export function RequestsPage(): JSX.Element {
             </Tag>
             {row.createdFlightId ? (
               <Link to={`/flights/${row.createdFlightId}`} style={{ fontSize: 12 }}>
-                {flights.find((f) => f.id === row.createdFlightId)?.number ?? row.createdFlightId}
+                {t('request.createdFlight')}
               </Link>
             ) : null}
             {row.rejectionReason ? (
@@ -101,14 +110,23 @@ export function RequestsPage(): JSX.Element {
               <Button
                 size="small"
                 type="primary"
+                loading={approveRequest.isPending}
                 onClick={() => {
-                  const flight = approveRequest(row.id);
-                  if (!flight) {
-                    void message.error(t('request.approveFailed'));
-                    return;
-                  }
-                  void message.success(t('request.approved', { number: flight.number }));
-                  navigate(`/flights/${flight.id}`);
+                  approveRequest.mutate(row.id, {
+                    onSuccess: (flight) => {
+                      void message.success(
+                        t('request.approved', { number: flight.number }),
+                      );
+                      navigate(`/flights/${flight.id}`);
+                    },
+                    onError: (cause: unknown) => {
+                      void message.error(
+                        cause instanceof ApiError
+                          ? cause.message
+                          : t('request.approveFailed'),
+                      );
+                    },
+                  });
                 }}
               >
                 {t('request.approve')}
@@ -148,11 +166,15 @@ export function RequestsPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<FlightRequest>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={false} scroll={{ x: 1150 }}
-          locale={{ emptyText: <EmptyState description={t('request.empty')} /> }}
-        />
+        <QueryState query={query}>
+          {() => (
+            <DataTable<FlightRequest>
+              size="small" rowKey="id" columns={columns} dataSource={filtered}
+              pagination={false} scroll={{ x: 1150 }}
+              locale={{ emptyText: <EmptyState description={t('request.empty')} /> }}
+            />
+          )}
+        </QueryState>
       </Card>
 
       <Modal
@@ -164,10 +186,21 @@ export function RequestsPage(): JSX.Element {
         okButtonProps={{ disabled: rejectReason.trim().length === 0 }}
         onOk={() => {
           if (!rejecting) return;
-          rejectRequest(rejecting.id, rejectReason.trim());
-          void message.success(t('request.rejected'));
-          setRejecting(null);
-          setRejectReason('');
+          rejectRequest.mutate(
+            { id: rejecting.id, reason: rejectReason.trim() },
+            {
+              onSuccess: () => {
+                void message.success(t('request.rejected'));
+                setRejecting(null);
+                setRejectReason('');
+              },
+              onError: (cause: unknown) => {
+                void message.error(
+                  cause instanceof ApiError ? cause.message : t('request.approveFailed'),
+                );
+              },
+            },
+          );
         }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>

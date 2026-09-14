@@ -807,6 +807,7 @@
     "approved": "Request approved, flight {{number}} created",
     "comment": "Comment",
     "createdAt": "Created",
+    "createdFlight": "Open the flight",
     "empty": "No requests",
     "pendingCount": "Requests pending: {{count}}",
     "pendingOnly": "Pending only",
