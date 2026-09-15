@@ -112,6 +112,10 @@ ignore = [
 "tests/*" = ["S101", "S105", "S106", "PLR2004"]
 "*/tests/*" = ["S101", "S105", "S106", "PLR2004"]
 "config/settings/*" = ["F403", "F405"]
+# S320 — разбор XML через lxml. Здесь разбирается то, что тот же тест
+# только что сформировал выгрузкой, и схема из репозитория; внешних
+# данных в этих вызовах нет.
+"reports/tests/test_export.py" = ["S101", "S105", "S106", "PLR2004", "S320"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["config", "core", "accounts", "catalog", "counterparties",
@@ -139,7 +143,7 @@ module = [
     "environ.*", "celery.*", "django_fsm.*",
     "boto3.*", "botocore.*",
     # Библиотеки печатных форм (`BACKEND.md § 8`) без аннотаций
-    "weasyprint.*", "openpyxl.*",
+    "weasyprint.*", "openpyxl.*", "lxml.*",
 ]
 ignore_missing_imports = true
 

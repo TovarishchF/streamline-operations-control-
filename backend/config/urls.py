@@ -49,6 +49,12 @@ from flights.api.views import (
     SlotViewSet,
 )
 from orders.api.views import ServiceOrderViewSet
+from reports.api.views import (
+    ReportBuildView,
+    ReportCatalogView,
+    ReportExportView,
+    ReportSubscriptionViewSet,
+)
 
 router = DefaultRouter(trailing_slash=False)
 # Конфликты объявлены до вьюсета рейсов: иначе «conflicts» разберётся
@@ -70,6 +76,9 @@ router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("quotes", QuoteViewSet, basename="quote")
 router.register("invoices", InvoiceViewSet, basename="invoice")
 router.register("audit", AuditViewSet, basename="audit")
+router.register(
+    "report-subscriptions", ReportSubscriptionViewSet, basename="report-subscription"
+)
 router.register("users", UserViewSet, basename="user")
 
 auth_urls: list[URLPattern | URLResolver] = [
@@ -94,6 +103,9 @@ api_v1: list[URLPattern | URLResolver] = [
         name="attachment-confirm",
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
+    path("reports", ReportCatalogView.as_view(), name="report-catalog"),
+    path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
+    path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),
     *router.urls,
 ]
 

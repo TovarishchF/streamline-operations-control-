@@ -48,6 +48,7 @@ class AuditEntityType(models.TextChoices):
     CREW = "crew", _("Экипаж")
     AIRCRAFT = "aircraft", _("Воздушное судно")
     SERVICE = "service", _("Услуга каталога")
+    REPORT_SUBSCRIPTION = "report_subscription", _("Подписка на отчёт")
     VENDOR_PRICE = "vendor_price", _("Цена поставщика")
     AIRPORT = "airport", _("Аэропорт")
 

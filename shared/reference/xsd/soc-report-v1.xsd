@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Внутренняя схема XML-выгрузки отчётов (ADR-032) [ТЗ 3.6.3, 4.2].
+
+  Одна схема на все семь отчётов. Поэтому значения строк — не элементы,
+  названные по ключу колонки, а <Value key="...">: набор колонок у отчётов
+  разный, и схема, перечисляющая их поимённо, разошлась бы с каталогом
+  отчётов при первом же изменении определения.
+
+  Денежные величины несут атрибут currency. Отчёт может смешивать валюты:
+  закупка у поставщика бывает в EUR, счёт клиенту — в RUB. Сумма без
+  указания валюты в такой выгрузке смысла не имеет.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="urn:soc:report:1.0"
+           targetNamespace="urn:soc:report:1.0"
+           elementFormDefault="qualified">
+
+  <xs:simpleType name="ColumnType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="number"/>
+      <xs:enumeration value="money"/>
+      <xs:enumeration value="date"/>
+      <xs:enumeration value="percent"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="CurrencyCode">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[A-Z]{3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="ValueType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="xs:NCName" use="required"/>
+        <xs:attribute name="currency" type="CurrencyCode"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="ColumnDef">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="xs:NCName" use="required"/>
+        <xs:attribute name="type" type="ColumnType" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:element name="Report">
+    <xs:complexType>
+      <xs:sequence>
+        <!-- Пометка демонстрационного стенда. Присутствует только
+             при demo="true" (CLAUDE.md § 4). -->
+        <xs:element name="Note" type="xs:string" minOccurs="0"/>
+
+        <xs:element name="Parameters" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Parameter" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:string">
+                      <xs:attribute name="key" type="xs:NCName" use="required"/>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Columns">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Column" type="ColumnDef" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <!-- Отчёт без строк — законный результат: за период ничего
+             не было. Пустой <Rows/> отличается от отсутствия выгрузки. -->
+        <xs:element name="Rows">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Row" minOccurs="0" maxOccurs="unbounded">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="Value" type="ValueType"
+                                minOccurs="0" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+
+        <xs:element name="Totals" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Total" type="ValueType"
+                          minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+
+      <xs:attribute name="code" type="xs:NCName" use="required"/>
+      <xs:attribute name="generatedAt" type="xs:dateTime" use="required"/>
+      <xs:attribute name="currency" type="CurrencyCode" use="required"/>
+      <xs:attribute name="demo" type="xs:boolean" use="required"/>
+    </xs:complexType>
+  </xs:element>
+
+</xs:schema>

@@ -1,0 +1,115 @@
+{% load i18n report_extras %}<!doctype html>
+{# Печатная форма отчёта [ТЗ 3.6.3].
+
+   Альбомная ориентация: у отчётов по семь колонок, в книжной они
+   не помещаются и переносятся на вторую страницу по одной.
+
+   Заголовок таблицы повторяется на каждой странице (thead + CSS Paged
+   Media): отчёт на двадцать страниц без повторяющейся шапки читать
+   невозможно. #}
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>{{ title }}</title>
+  <style>
+    @page {
+      size: A4 landscape;
+      margin: 14mm 12mm 16mm 12mm;
+      @bottom-center {
+        content: "{{ title }} · {% trans "страница" %} " counter(page) " / " counter(pages);
+        font-size: 8pt;
+        color: #8c8c8c;
+      }
+    }
+
+    body { font-family: "DejaVu Sans", sans-serif; font-size: 8.5pt; color: #1f1f1f; }
+    h1 { font-size: 13pt; margin: 0 0 1mm; }
+    .generated { color: #595959; font-size: 8pt; margin-bottom: 4mm; }
+
+    table { width: 100%; border-collapse: collapse; }
+    thead { display: table-header-group; }
+    th {
+      background: #fafafa;
+      border-bottom: 0.4mm solid #d9d9d9;
+      padding: 1.6mm 1.2mm;
+      text-align: left;
+      font-size: 8pt;
+    }
+    td { border-bottom: 0.2mm solid #f0f0f0; padding: 1.4mm 1.2mm; }
+    tr { page-break-inside: avoid; }
+
+    /* Колонки цифр моноширинным и по правому краю: иначе разряды
+       не выстраиваются и таблицу невозможно просмотреть по вертикали. */
+    .num { text-align: right; font-family: "DejaVu Sans Mono", monospace; white-space: nowrap; }
+    tfoot td { font-weight: bold; border-top: 0.4mm solid #1f1f1f; }
+
+    .demo-mark {
+      position: fixed;
+      top: 40%;
+      left: 20%;
+      transform: rotate(-24deg);
+      font-size: 64pt;
+      color: rgba(192, 57, 43, 0.10);
+      font-weight: bold;
+      letter-spacing: 8pt;
+      z-index: -1;
+    }
+    .demo-note {
+      border: 0.3mm solid #c0392b;
+      color: #c0392b;
+      padding: 1.6mm 2.5mm;
+      margin-bottom: 4mm;
+      font-size: 8pt;
+    }
+  </style>
+</head>
+<body>
+
+{% if is_demo %}
+  <div class="demo-mark">DEMO</div>
+  <div class="demo-note">
+    {% trans "Отчёт сформирован на демонстрационном стенде на искусственных данных." %}
+  </div>
+{% endif %}
+
+<h1>{{ title }}</h1>
+<div class="generated">{% trans "Сформирован" %}: {{ generated_at }}</div>
+
+<table>
+  <thead>
+    <tr>
+      {% for column in columns %}
+        <th{% if column.type == 'money' or column.type == 'number' or column.type == 'percent' %} class="num"{% endif %}>{{ column.ru }}</th>
+      {% endfor %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+      <tr>
+        {% for column in columns %}
+          <td{% if column.type == 'money' or column.type == 'number' or column.type == 'percent' %} class="num"{% endif %}>{{ row|get:column.key|default_if_none:"—" }}</td>
+        {% endfor %}
+      </tr>
+    {% empty %}
+      <tr>
+        <td colspan="{{ columns|length }}">{% trans "За выбранный период данных нет" %}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+  {% if totals %}
+    <tfoot>
+      <tr>
+        {% for column in columns %}
+          {% if forloop.first %}
+            <td>{% trans "Итого" %}</td>
+          {% else %}
+            <td class="num">{{ totals|get:column.key|default_if_none:"" }}</td>
+          {% endif %}
+        {% endfor %}
+      </tr>
+    </tfoot>
+  {% endif %}
+</table>
+
+</body>
+</html>

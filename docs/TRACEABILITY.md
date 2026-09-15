@@ -173,20 +173,20 @@
 
 | ID | Пункт | Требование | Реализация | Эндпоинт | Экран | Тест | Веха | Статус |
 |---|---|---|---|---|---|---|---|---|
-| T-3.6.1-01 | 3.6.1 | Суточный, недельный, месячный отчёт по рейсам | отчёт `flights_period` | `GET /reports/flights_period` | `/reports/:code` | `test_report_flights_period` | M9 | план |
-| T-3.6.1-02 | 3.6.1 | Отчёт по оказанным услугам с группировкой по типу | отчёт `services_rendered` | `GET /reports/services_rendered` | `/reports/:code` | `test_report_services` | M9 | план |
-| T-3.6.1-03 | 3.6.1 | Финансовый отчёт: доходы, расходы, маржинальность | отчёт `financial` | `GET /reports/financial` | `/reports/:code` | `test_report_financial_matches_flights` | M9 | план |
-| T-3.6.1-04 | 3.6.1 | Отчёт по поставщикам: объём заказов, качество, задержки | отчёт `vendors` | `GET /reports/vendors` | `/reports/:code` | `test_report_vendors_matches_rating` | M9 | план |
-| T-3.6.1-05 | 3.6.1 | Отчёт по дебиторской и кредиторской задолженности | отчёт `receivables_payables` | `GET /reports/receivables_payables` | `/reports/:code` | `test_report_aging_buckets` | M9 | план |
-| T-3.6.1-06 | 3.6.1 | Реестр нарушений SLA | отчёт `sla_breaches` | `GET /reports/sla_breaches` | `/reports/:code` | `test_report_sla` | M9 | план |
-| T-3.6.1-07 | 3.6.1 | Журнал изменений рейсов за период | отчёт `flight_audit` | `GET /reports/flight_audit` | `/reports/:code` | `test_report_audit_export` | M9 | план |
+| T-3.6.1-01 | 3.6.1 | Суточный, недельный, месячный отчёт по рейсам | отчёт `flights_period` | `GET /reports/flights_period` | `/reports/:code` | `test_flights_period_counts_services_of_the_flight` | M9 | реализовано |
+| T-3.6.1-02 | 3.6.1 | Отчёт по оказанным услугам с группировкой по типу | отчёт `services_rendered` | `GET /reports/services_rendered` | `/reports/:code` | `test_services_rendered_shows_actual_quantity_and_purchase_cost` | M9 | реализовано |
+| T-3.6.1-03 | 3.6.1 | Финансовый отчёт: доходы, расходы, маржинальность | отчёт `financial` | `GET /reports/financial` | `/reports/:code` | `test_financial_margin_is_revenue_minus_cost` | M9 | реализовано |
+| T-3.6.1-04 | 3.6.1 | Отчёт по поставщикам: объём заказов, качество, задержки | отчёт `vendors` | `GET /reports/vendors` | `/reports/:code` | `test_vendors_report_counts_orders_and_sla_breaches` | M9 | реализовано |
+| T-3.6.1-05 | 3.6.1 | Отчёт по дебиторской и кредиторской задолженности | отчёт `receivables_payables` | `GET /reports/receivables_payables` | `/reports/:code` | `test_receivables_show_issued_unpaid_invoice_with_bucket` | M9 | реализовано |
+| T-3.6.1-06 | 3.6.1 | Реестр нарушений SLA | отчёт `sla_breaches` | `GET /reports/sla_breaches` | `/reports/:code` | `test_sla_register_lists_only_breached_orders` | M9 | реализовано |
+| T-3.6.1-07 | 3.6.1 | Журнал изменений рейсов за период | отчёт `flight_audit` | `GET /reports/flight_audit` | `/reports/:code` | `test_flight_audit_shows_status_changes` | M9 | реализовано |
 | T-3.6.2-01 | 3.6.2 | Дашборд диспетчера: текущий статус рейсов, критические задержки | `reports.dashboards.dispatcher` | `GET /dashboards/dispatcher` | `/dashboards/dispatcher` | `test_dashboard_dispatcher` | M9 | план |
 | T-3.6.2-02 | 3.6.2 | Дашборд руководителя: количество рейсов, загрузка, маржинальность по клиентам | `reports.dashboards.manager` | `GET /dashboards/manager` | `/dashboards/manager` | `test_dashboard_manager` | M9 | план |
 | T-3.6.2-03 | 3.6.2 | Настройка виджетов под роль пользователя | раскладка на пользователя | `PUT /dashboards/{role}/layout` | дашборды | `test_dashboard_layout_persist` | M9, M10 | план |
-| T-3.6.3-01 | 3.6.3 | Выгрузка отчётов в PDF | WeasyPrint | `POST /reports/{code}/export` | `/reports/:code` | `test_export_pdf` | M9 | план |
-| T-3.6.3-02 | 3.6.3 | Выгрузка отчётов в Excel (XLSX) | openpyxl | `POST /reports/{code}/export` | `/reports/:code` | `test_export_xlsx` | M9 | план |
-| T-3.6.3-03 | 3.6.3 | Выгрузка отчётов в CSV | стандартный `csv` | `POST /reports/{code}/export` | `/reports/:code` | `test_export_csv` | M9 | план |
-| T-3.6.3-04 | 3.6.3 | Выгрузка отчётов в XML | схема `soc-report-v1.xsd` (ADR-032) | `POST /reports/{code}/export` | `/reports/:code` | `test_export_xml_validates_xsd` | M9 | план |
+| T-3.6.3-01 | 3.6.3 | Выгрузка отчётов в PDF | WeasyPrint | `POST /reports/{code}/export` | `/reports/:code` | `test_pdf_is_produced` | M9 | реализовано |
+| T-3.6.3-02 | 3.6.3 | Выгрузка отчётов в Excel (XLSX) | openpyxl | `POST /reports/{code}/export` | `/reports/:code` | `test_xlsx_money_cells_are_numbers` | M9 | реализовано |
+| T-3.6.3-03 | 3.6.3 | Выгрузка отчётов в CSV | стандартный `csv` | `POST /reports/{code}/export` | `/reports/:code` | `test_csv_carries_the_same_numbers_as_the_report` | M9 | реализовано |
+| T-3.6.3-04 | 3.6.3 | Выгрузка отчётов в XML | схема `soc-report-v1.xsd` (ADR-032) | `POST /reports/{code}/export` | `/reports/:code` | `test_xml_validates_against_soc_report_xsd` | M9 | реализовано |
 | T-3.6.3-05 | 3.6.3 | Отправка отчётов по e-mail по расписанию | подписки + `reports.scheduled` | `GET/POST /report-subscriptions` | `/reports` | `test_scheduled_report_to_outbox` | M9 | план |
 
 ---
