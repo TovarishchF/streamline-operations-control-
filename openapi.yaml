@@ -2157,6 +2157,34 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/ReportSubscription' }
 
+  /report-subscriptions/{id}:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    patch:
+      tags: [reports]
+      summary: Изменение подписки `[ТЗ 3.6.3]`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ReportSubscription' }
+      responses:
+        '200':
+          description: Подписка изменена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ReportSubscription' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [reports]
+      summary: Отписка `[ТЗ 3.6.3]`
+      description: |
+        Снимает признак активности, а не удаляет запись: история отправок
+        ссылается на подписку, и удаление оборвало бы эти ссылки.
+      responses:
+        '204':
+          description: Подписка отключена
+        '404': { $ref: '#/components/responses/NotFound' }
+
   /dashboards/{role}:
     parameters:
       - name: role
