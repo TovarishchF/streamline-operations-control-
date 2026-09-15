@@ -1923,6 +1923,9 @@ paths:
     post:
       tags: [comms]
       summary: Повторная отправка сообщения
+      description: |
+        Повторяется только то, что не ушло. Повтор отправленного письма
+        поставщик прочитает как второй заказ, поэтому он запрещён.
       x-idempotency: required
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses:
@@ -1931,6 +1934,12 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/OutboxMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Сообщение уже отправлено (`MESSAGE_ALREADY_SENT`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /inbox:
     get:
@@ -1981,6 +1990,12 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/InboxMessage' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: Входящее уже применено (`INBOX_ALREADY_APPLIED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /message-templates:
     get:
@@ -2040,6 +2055,14 @@ paths:
                 properties:
                   subject: { type: string }
                   body: { type: string }
+                  missing:
+                    type: array
+                    description: |
+                      Переменные шаблона, для которых на выбранном рейсе не нашлось
+                      значения. В тексте они остаются видимыми именами: письмо
+                      с провалом посреди фразы уходить получателю не должно,
+                      и увидеть пропуск нужно в предпросмотре.
+                    items: { type: string }
 
   # ─────────────────────────────────── ОТЧЁТНОСТЬ ───────────────────────────────
 
@@ -2837,6 +2860,8 @@ components:
         - DOCUMENT_IMMUTABLE
         - IDEMPOTENCY_KEY_REQUIRED
         - IDEMPOTENCY_KEY_CONFLICT
+        - MESSAGE_ALREADY_SENT
+        - INBOX_ALREADY_APPLIED
         - SCHEDULE_CONFLICT
         - INTEGRATION_UNAVAILABLE
         - DEMO_ONLY_OPERATION
