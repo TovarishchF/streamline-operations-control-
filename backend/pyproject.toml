@@ -144,6 +144,8 @@ module = [
     "boto3.*", "botocore.*",
     # Библиотеки печатных форм (`BACKEND.md § 8`) без аннотаций
     "weasyprint.*", "openpyxl.*", "lxml.*",
+    # Планировщик Celery Beat в базе (`BACKEND.md § 5`)
+    "django_celery_beat.*",
 ]
 ignore_missing_imports = true
 

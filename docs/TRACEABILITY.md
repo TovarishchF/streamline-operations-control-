@@ -85,7 +85,7 @@
 | T-3.2.2-02 | 3.2.2 | Автопроверка: доступность услуги в аэропорту | `orders.services.checks.availability` | `POST /flights/{id}/services` | мастер заказа | `test_check_service_unavailable` | M5 | план |
 | T-3.2.2-03 | 3.2.2 | Автопроверка: наличие действующего контракта с поставщиком | `orders.services.checks.contract_valid` | `POST /flights/{id}/services` | мастер заказа | `test_check_contract_expired` | M5 | план |
 | T-3.2.2-04 | 3.2.2 | Автопроверка: актуальность цен и тарифов | `orders.services.checks.price_valid` | `POST /flights/{id}/services` | мастер заказа | `test_check_price_outdated` | M5 | план |
-| T-3.2.2-05 | 3.2.2 | Автоматическое резервирование: отправка заявки поставщику | переход `order`, письмо в исходящие | `POST /service-orders/{id}/status` | `/communications/outbox` | `test_order_creates_outbox` | M5, M8 | план |
+| T-3.2.2-05 | 3.2.2 | Автоматическое резервирование: отправка заявки поставщику | переход `order`, письмо в исходящие | `POST /service-orders/{id}/status` | `/communications/outbox` | `test_placing_an_order_puts_a_letter_in_the_outbox` | M5, M8 | реализовано |
 | T-3.2.2-06 | 3.2.2 | Подтверждение заявки в системе | портал поставщика, адаптер `MAILBOT` | `POST /service-orders/{id}/status` | портал поставщика | `test_vendor_confirms_order` | M8, M14 | план |
 | T-3.2.3-01 | 3.2.3 | Статус услуги «Заказана» | автомат заявки, `ordered` | `POST /service-orders/{id}/status` | `/flights/:id/services` | `test_fsm_order_ordered` | M5 | план |
 | T-3.2.3-02 | 3.2.3 | Статус «Подтверждена» | `confirmed` | `POST /service-orders/{id}/status` | `/flights/:id/services` | `test_fsm_order_confirmed` | M5 | план |
@@ -150,17 +150,17 @@
 
 | ID | Пункт | Требование | Реализация | Эндпоинт | Экран | Тест | Веха | Статус |
 |---|---|---|---|---|---|---|---|---|
-| T-3.5.1-01 | 3.5.1 | Оповещение диспетчеров об изменении статуса рейса | `comms.Notification` kind `flight_status` | `GET /notifications` | колокольчик | `test_notify_flight_status` | M8 | план |
-| T-3.5.1-02 | 3.5.1 | Оповещение о подтверждении или отказе услуги поставщиком | kind `service_confirmed`, `service_rejected` | `GET /notifications` | колокольчик | `test_notify_service_response` | M8 | план |
+| T-3.5.1-01 | 3.5.1 | Оповещение диспетчеров об изменении статуса рейса | `comms.Notification` kind `flight_status` | `GET /notifications` | колокольчик | `test_flight_status_change_notifies_dispatchers` | M8 | реализовано |
+| T-3.5.1-02 | 3.5.1 | Оповещение о подтверждении или отказе услуги поставщиком | kind `service_confirmed`, `service_rejected` | `GET /notifications` | колокольчик | `test_confirmation_notifies_the_dispatchers` | M8 | реализовано |
 | T-3.5.1-03 | 3.5.1 | Оповещение о приближении дедлайнов | kind `deadline`, Celery Beat | `GET /notifications` | колокольчик | `test_notify_deadline` | M8 | план |
 | T-3.5.1-04 | 3.5.1 | Интеграция с корпоративным мессенджером MAX | адаптер `MSGR` | `GET /integrations` | `/admin/integrations` | `test_adapter_msgr_stub` | M14 | требует решения (G-04) |
-| T-3.5.1-05 | 3.5.1 | Интеграция с e-mail как альтернатива мессенджеру | адаптер `SMTP` | `GET /outbox` | `/communications/outbox` | `test_adapter_smtp_live_cassette` | M13 | план |
-| T-3.5.2-01 | 3.5.2 | Рассылка клиентам: подтверждение рейса | шаблон `flight_confirmed` | `GET /outbox` | `/communications/templates` | `test_template_flight_confirmed` | M8 | план |
-| T-3.5.2-02 | 3.5.2 | Рассылка клиентам: изменения в расписании | шаблон `flight_schedule_changed` | `GET /outbox` | `/communications/templates` | `test_template_schedule_changed` | M8 | план |
-| T-3.5.2-03 | 3.5.2 | Рассылка клиентам: счёт и закрывающие документы | шаблоны `invoice`, `closing_documents` | `GET /outbox` | `/communications/templates` | `test_template_invoice` | M8 | план |
-| T-3.5.2-04 | 3.5.2 | Рассылка поставщикам: заявки на услуги | шаблон `vendor_order` | `GET /outbox` | `/communications/templates` | `test_template_vendor_order` | M8 | план |
+| T-3.5.1-05 | 3.5.1 | Интеграция с e-mail как альтернатива мессенджеру | адаптер `SMTP` | `GET /outbox` | `/communications/outbox` | `test_stub_marks_the_message_sent_but_not_delivered` | M13 | реализовано |
+| T-3.5.2-01 | 3.5.2 | Рассылка клиентам: подтверждение рейса | шаблон `flight_confirmed` | `GET /outbox` | `/communications/templates` | `test_reference_carries_every_required_template` | M8 | реализовано |
+| T-3.5.2-02 | 3.5.2 | Рассылка клиентам: изменения в расписании | шаблон `flight_rescheduled` | `GET /outbox` | `/communications/templates` | `test_reference_carries_every_required_template` | M8 | реализовано |
+| T-3.5.2-03 | 3.5.2 | Рассылка клиентам: счёт и закрывающие документы | шаблоны `invoice_issued`, `closing_documents` | `GET /outbox` | `/communications/templates` | `test_issued_invoice_goes_to_the_client` | M8 | реализовано |
+| T-3.5.2-04 | 3.5.2 | Рассылка поставщикам: заявки на услуги | шаблон `order_placed` | `GET /outbox` | `/communications/templates` | `test_placing_an_order_puts_a_letter_in_the_outbox` | M8 | реализовано |
 | T-3.5.2-05 | 3.5.2 | Рассылка поставщикам: напоминания о сроках исполнения | шаблон `vendor_reminder`, Celery Beat | `GET /outbox` | `/communications/templates` | `test_template_vendor_reminder` | M8 | план |
-| T-3.5.2-06 | 3.5.2 | Язык письма по локали получателя | версии шаблона ru/en | `GET /outbox` | `/communications/templates` | `test_template_locale_en` | M8 | план |
+| T-3.5.2-06 | 3.5.2 | Язык письма по локали получателя | версии шаблона ru/en | `GET /outbox` | `/communications/templates` | `test_letter_language_follows_the_contact` | M8 | реализовано |
 | T-3.5.3-01 | 3.5.3 | Портал клиента: заказ рейсов самостоятельно | заявка на рейс → очередь диспетчера | `POST /portal/client/flight-requests` | портал клиента | `test_client_request_becomes_flight` | M8 | требует решения (G-05) |
 | T-3.5.3-02 | 3.5.3 | Портал клиента: заказ рейсов по шаблонам | шаблоны клиента | `POST /portal/client/flight-requests` | портал клиента | `test_client_request_from_template` | M8 | требует решения (G-05) |
 | T-3.5.3-03 | 3.5.3 | Портал клиента: отслеживание статусов рейсов и услуг | фильтр арендатора | `GET /portal/client/flights` | портал клиента | `test_client_sees_only_own_flights` | M8 | требует решения (G-05) |
@@ -187,7 +187,7 @@
 | T-3.6.3-02 | 3.6.3 | Выгрузка отчётов в Excel (XLSX) | openpyxl | `POST /reports/{code}/export` | `/reports/:code` | `test_xlsx_money_cells_are_numbers` | M9 | реализовано |
 | T-3.6.3-03 | 3.6.3 | Выгрузка отчётов в CSV | стандартный `csv` | `POST /reports/{code}/export` | `/reports/:code` | `test_csv_carries_the_same_numbers_as_the_report` | M9 | реализовано |
 | T-3.6.3-04 | 3.6.3 | Выгрузка отчётов в XML | схема `soc-report-v1.xsd` (ADR-032) | `POST /reports/{code}/export` | `/reports/:code` | `test_xml_validates_against_soc_report_xsd` | M9 | реализовано |
-| T-3.6.3-05 | 3.6.3 | Отправка отчётов по e-mail по расписанию | подписки + `reports.scheduled` | `GET/POST /report-subscriptions` | `/reports` | `test_scheduled_report_to_outbox` | M9 | план |
+| T-3.6.3-05 | 3.6.3 | Отправка отчётов по e-mail по расписанию | подписки + задача `reports.scheduled` | `GET/POST /report-subscriptions` | `/reports` | `test_subscription_produces_a_letter_with_the_report_attached` | M9 | реализовано |
 
 ---
 

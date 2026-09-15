@@ -130,4 +130,10 @@ def apply_transition(
         source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
         is_demo=flight.is_demo,
     )
+
+    # Оповещение диспетчеров `[ТЗ 3.5.1]`. Автомат отвечает за состояние,
+    # кому об этом сообщить — решают коммуникации.
+    from comms.services import events as comms_events
+
+    comms_events.flight_status_changed(flight, previous=previous_status, actor=actor)
     return flight

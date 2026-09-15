@@ -130,5 +130,42 @@ def link(*, attachment: Attachment, owner: django_models.Model) -> Attachment:
     return attachment
 
 
+def attach_stored(
+    *,
+    key: str,
+    file_name: str,
+    mime_type: str,
+    kind: str,
+    owner: django_models.Model,
+) -> Attachment:
+    """Вложение для файла, который сервер уже положил в хранилище.
+
+    Порядок `reserve → confirm` описывает загрузку из браузера: ссылка,
+    ожидание, сверка. Для выгрузки, собранной самим сервером, ждать нечего
+    и сверять не с чем — файл записан этим же кодом. Размер берётся
+    из хранилища, а не от вызывающего: считать его дважды значит завести
+    второй источник истины.
+    """
+    size = storage.object_size(key)
+    if size is None:
+        raise storage.AttachmentNotUploaded(
+            f"Файл {file_name} не найден в хранилище по ключу {key}.",
+            {"key": key},
+        )
+
+    attachment = Attachment.objects.create(
+        id=make_id(Attachment.id_prefix),
+        file_name=file_name,
+        mime_type=mime_type,
+        size_bytes=size,
+        kind=kind,
+        storage_key=key,
+        uploaded_at=now(),
+        content_type=ContentType.objects.get_for_model(owner),
+        object_id=str(owner.pk),
+    )
+    return attachment
+
+
 def download_url(attachment: Attachment) -> str:
     return storage.presign_get(key=attachment.storage_key, file_name=attachment.file_name)

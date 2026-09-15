@@ -19,6 +19,7 @@ from django.utils.translation import gettext as _
 from audit import services as audit
 from audit.models import AuditEntityType
 from catalog import services as catalog_services
+from comms.services import events as comms_events
 from core import clock
 from core.exceptions import ServiceCheckFailed
 from flights.models import ServiceLeg
@@ -206,6 +207,10 @@ def create_order(
         ),
         is_demo=order.is_demo,
     )
+
+    # Заявка ушла поставщику — письмо ставится в очередь. Отправка уходит
+    # наружу только после фиксации транзакции (`CLAUDE.md § 3` п. 13).
+    comms_events.order_placed(order)
     return order
 
 

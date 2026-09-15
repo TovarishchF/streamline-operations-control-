@@ -259,4 +259,22 @@ def apply_transition(
         source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
         is_demo=order.is_demo,
     )
+
+    _announce(order, name, actor)
     return order
+
+
+def _announce(order: ServiceOrder, name: str, actor: User | None) -> None:
+    """Уведомления по итогу перехода `[ТЗ 3.5.1]`.
+
+    Вынесено отдельно, чтобы переход не разрастался: автомат отвечает
+    за состояние, а кому об этом сообщить — решают коммуникации.
+    """
+    from comms.services import events as comms_events
+
+    if name == "confirm":
+        comms_events.order_answered(order, confirmed=True, actor=actor)
+        if order.sla_breached:
+            comms_events.order_sla_breached(order)
+    elif name == "reject":
+        comms_events.order_answered(order, confirmed=False, actor=actor)

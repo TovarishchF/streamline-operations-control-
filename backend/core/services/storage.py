@@ -195,5 +195,17 @@ def put_bytes(*, key: str, data: bytes, mime_type: str) -> None:
     )
 
 
+def get_bytes(key: str) -> bytes:
+    """Чтение объекта на стороне сервера.
+
+    Нужно там, где файл обрабатывает сам сервер: вложение письма читается,
+    чтобы уйти в SMTP. Пользователю файл по-прежнему отдаётся подписанной
+    ссылкой, минуя приложение.
+    """
+    response = _client(public=False).get_object(Bucket=bucket_name(), Key=key)
+    payload: bytes = response["Body"].read()
+    return payload
+
+
 def delete_object(key: str) -> None:
     _client(public=False).delete_object(Bucket=bucket_name(), Key=key)

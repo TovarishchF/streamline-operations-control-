@@ -34,6 +34,7 @@ from billing.models import (
 from billing.services import fx, numbering
 from billing.services import tariffs as tariff_service
 from catalog.models import VatApplicability, VatRate
+from comms.services import events as comms_events
 from core import clock
 from core.exceptions import DocumentImmutable
 from core.money import Money, money_sum
@@ -355,6 +356,9 @@ def issue_quote(*, quote: Quote, actor: User) -> Quote:
         after=audit.snapshot(quote),
         is_demo=quote.is_demo,
     )
+
+    # Выставленный документ уходит клиенту письмом `[ТЗ 3.5.2]`.
+    comms_events.document_issued(quote, kind="quote")
     return quote
 
 
@@ -387,6 +391,8 @@ def issue_invoice(*, invoice: Invoice, actor: User) -> Invoice:
         after=audit.snapshot(invoice),
         is_demo=invoice.is_demo,
     )
+
+    comms_events.document_issued(invoice, kind="invoice")
     return invoice
 
 
@@ -469,4 +475,7 @@ def respond_to_quote(*, quote: Quote, accepted: bool, actor: User) -> Quote:
         after=audit.snapshot(quote),
         is_demo=quote.is_demo,
     )
+
+    # Выставленный документ уходит клиенту письмом `[ТЗ 3.5.2]`.
+    comms_events.document_issued(quote, kind="quote")
     return quote

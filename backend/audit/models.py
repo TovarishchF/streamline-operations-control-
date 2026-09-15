@@ -51,6 +51,9 @@ class AuditEntityType(models.TextChoices):
     REPORT_SUBSCRIPTION = "report_subscription", _("Подписка на отчёт")
     VENDOR_PRICE = "vendor_price", _("Цена поставщика")
     AIRPORT = "airport", _("Аэропорт")
+    OUTBOX_MESSAGE = "outbox_message", _("Исходящее сообщение")
+    INBOX_MESSAGE = "inbox_message", _("Входящее сообщение")
+    MESSAGE_TEMPLATE = "message_template", _("Шаблон сообщения")
 
 
 class AuditEntry(models.Model):

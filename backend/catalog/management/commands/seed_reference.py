@@ -22,12 +22,13 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from catalog.models import AircraftType, Airport, Service, VatRate
+from comms.models import MessageTemplate
 from core.models import BaseModel, DataSource
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
 
-DATASETS = ("airports", "aircraft-types", "vat-rates", "services")
+DATASETS = ("airports", "aircraft-types", "vat-rates", "services", "message-templates")
 
 
 class Command(BaseCommand):
@@ -55,6 +56,7 @@ class Command(BaseCommand):
             "aircraft-types": self._load_aircraft_types,
             "vat-rates": self._load_vat_rates,
             "services": self._load_services,
+            "message-templates": self._load_message_templates,
         }
         for name in requested:
             created, updated = loaders[name](directory)
@@ -149,6 +151,36 @@ class Command(BaseCommand):
                 for item in payload["services"]
             ],
         )
+
+    def _load_message_templates(self, directory: Path) -> tuple[int, int]:
+        """Шаблоны сообщений `SPEC.md § 8.2`.
+
+        Перечень переменных не записан в файле, а собирается из самого
+        текста: два перечня одного и того же расходятся при первой правке
+        шаблона, и редактор начинает предлагать переменные, которых
+        в тексте нет.
+        """
+        from comms.services.templates import PLACEHOLDER
+
+        payload = _read_json(directory / "message-templates.json")
+        rows = []
+        for item in payload["templates"]:
+            texts = (item["subjectRu"], item["subjectEn"], item["bodyRu"], item["bodyEn"])
+            variables = sorted(
+                {match.group(1) for text in texts for match in PLACEHOLDER.finditer(text)}
+            )
+            rows.append(
+                {
+                    "code": item["code"],
+                    "channel": item["channel"],
+                    "subject_ru": item["subjectRu"],
+                    "subject_en": item["subjectEn"],
+                    "body_ru": item["bodyRu"],
+                    "body_en": item["bodyEn"],
+                    "variables": variables,
+                }
+            )
+        return self._upsert(MessageTemplate, "code", rows)
 
     # ─────────────────────────── запись ───────────────────────────
 

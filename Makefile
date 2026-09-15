@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help up down logs migrate makemigrations shell superuser \
-        seed-reference seed-demo demo-reset \
+        seed-reference seed-demo demo-reset setup-beat \
         api-schema api-types lint types test test-e2e test-load test-restore check \
         venv install format
 
@@ -60,8 +60,11 @@ shell:  ## Django shell
 superuser:  ## Создать администратора
 	$(MANAGE_TTY) createsuperuser
 
-seed-reference:  ## Справочники: аэропорты, типы ВС, ставки НДС
+seed-reference:  ## Справочники: аэропорты, типы ВС, ставки НДС, шаблоны сообщений
 	$(MANAGE) seed_reference
+
+setup-beat:  ## Расписание фоновых задач (BACKEND § 5). Идемпотентна.
+	$(MANAGE) setup_periodic_tasks
 
 seed-demo:  ## Демонстрационный набор (только при DEMO_DATA=true)
 	$(MANAGE) seed_demo --seed 20260912

@@ -37,6 +37,12 @@ from catalog.api.views import (
     VatRateViewSet,
     VendorPriceViewSet,
 )
+from comms.api.views import (
+    InboxViewSet,
+    MessageTemplateViewSet,
+    NotificationViewSet,
+    OutboxViewSet,
+)
 from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
 from core.api.views import ClockView, HealthView
 from counterparties.api.views import ClientViewSet, VendorContractViewSet, VendorViewSet
@@ -76,6 +82,10 @@ router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("quotes", QuoteViewSet, basename="quote")
 router.register("invoices", InvoiceViewSet, basename="invoice")
 router.register("audit", AuditViewSet, basename="audit")
+router.register("notifications", NotificationViewSet, basename="notification")
+router.register("outbox", OutboxViewSet, basename="outbox")
+router.register("inbox", InboxViewSet, basename="inbox")
+router.register("message-templates", MessageTemplateViewSet, basename="message-template")
 router.register(
     "report-subscriptions", ReportSubscriptionViewSet, basename="report-subscription"
 )

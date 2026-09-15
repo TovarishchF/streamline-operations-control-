@@ -84,7 +84,11 @@ def soc_exception_handler(exc: Exception, context: dict[str, Any]) -> Response |
     """Обработчик исключений DRF."""
 
     if isinstance(exc, DomainError):
-        http_status = _DOMAIN_STATUS.get(type(exc), status.HTTP_400_BAD_REQUEST)
+        http_status = (
+            _DOMAIN_STATUS.get(type(exc))
+            or exc.http_status
+            or status.HTTP_400_BAD_REQUEST
+        )
         return Response(_build(exc.code, str(exc), exc.details), status=http_status)
 
     if isinstance(exc, CurrencyMismatch):

@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import csv
+from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 from io import BytesIO, StringIO
 from typing import TYPE_CHECKING, Any
@@ -23,6 +24,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
 from core import clock
+from core.demo_marking import DEMO_NOTE as DEMO_NOTE_TEXT
 from core.exceptions import DomainError
 from core.services import storage
 from reports import definitions
@@ -45,8 +47,9 @@ MIME = {
 }
 
 # Пометка для форматов без оформления. Первой строкой, чтобы её нельзя
-# было не заметить при любом способе открытия файла.
-DEMO_NOTE = "DEMO: демонстрационный стенд, не финансовый документ"
+# было не заметить при любом способе открытия файла. Текст один на все
+# выгрузки системы (`core.demo_marking`), здесь только переиспользуется.
+DEMO_NOTE = DEMO_NOTE_TEXT
 
 # Пространство имён внутренней схемы отчётов (ADR-032). Схема лежит
 # в `shared/reference/xsd/soc-report-v1.xsd` и проверяется тестом.
@@ -271,19 +274,43 @@ RENDERERS: dict[str, Callable[[Definition, dict[str, Any]], bytes]] = {
 }
 
 
-def export_report(
+@dataclass(frozen=True, slots=True)
+class Export:
+    """Собранный файл выгрузки в хранилище.
+
+    Ключ нужен там, где файл идёт дальше по системе — например, вложением
+    в письмо. Ссылка нужна там, где файл открывает человек. Возвращать
+    только ссылку значило бы заставить вызывающего разбирать её обратно.
+    """
+
+    key: str
+    url: str
+    mime_type: str
+    file_name: str
+
+
+@dataclass(frozen=True, slots=True)
+class Rendered:
+    """Собранный файл до записи в хранилище."""
+
+    data: bytes
+    mime_type: str
+    file_name: str
+
+
+def render_report(
     *,
     code: str,
     result: dict[str, Any],
     export_format: str,
     params: dict[str, Any] | None = None,
-) -> str:
-    """Формирует файл, кладёт в хранилище и возвращает подписанную ссылку.
+) -> Rendered:
+    """Собирает файл, не трогая хранилище.
 
-    `params` попадают только в XML: схема `soc-report-v1` требует раздел
-    `<Parameters>`, чтобы по выгруженному файлу было видно, за какой период
-    и по какому отбору он построен. В остальных форматах это видно из имени
-    файла и заголовка страницы.
+    Отделено от записи ради рассылки по подписке: отчёт собирается один
+    раз, а кладётся столько раз, сколько у подписки получателей — вложение
+    привязано к своему письму, и один объект хранилища на два письма
+    завести нельзя.
     """
     if export_format not in RENDERERS:
         raise ExportFormatNotSupported(
@@ -298,9 +325,39 @@ def export_report(
         if export_format == XML
         else RENDERERS[export_format](spec, result)
     )
+    return Rendered(
+        data=data, mime_type=MIME[export_format], file_name=f"{code}.{export_format}"
+    )
 
+
+def store(*, rendered: Rendered, key: str) -> Export:
+    """Кладёт собранный файл под заданным ключом."""
+    storage.put_bytes(key=key, data=rendered.data, mime_type=rendered.mime_type)
+    return Export(
+        key=key,
+        url=storage.presign_get(key=key, file_name=rendered.file_name),
+        mime_type=rendered.mime_type,
+        file_name=rendered.file_name,
+    )
+
+
+def export_report(
+    *,
+    code: str,
+    result: dict[str, Any],
+    export_format: str,
+    params: dict[str, Any] | None = None,
+) -> Export:
+    """Формирует файл, кладёт в хранилище и возвращает подписанную ссылку.
+
+    `params` попадают только в XML: схема `soc-report-v1` требует раздел
+    `<Parameters>`, чтобы по выгруженному файлу было видно, за какой период
+    и по какому отбору он построен. В остальных форматах это видно из имени
+    файла и заголовка страницы.
+    """
+    rendered = render_report(
+        code=code, result=result, export_format=export_format, params=params
+    )
     stamp = clock.now()
     key = f"reports/{stamp:%Y/%m}/{code}-{stamp:%Y%m%d-%H%M%S}.{export_format}"
-    storage.put_bytes(key=key, data=data, mime_type=MIME[export_format])
-
-    return storage.presign_get(key=key, file_name=f"{code}.{export_format}")
+    return store(rendered=rendered, key=key)

@@ -21,6 +21,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
 from core import clock
+from core.demo_marking import DEMO_NOTE
 from core.exceptions import DomainError
 from core.services import storage
 
@@ -101,7 +102,8 @@ def _render_xlsx(context: dict[str, Any]) -> bytes:
     row = 1
 
     if context["is_demo"]:
-        sheet.cell(row=row, column=1, value="DEMO — демонстрационный стенд").font = Font(
+        # Текст пометки задан `SPEC.md § 8.6` и один на все выгрузки системы.
+        sheet.cell(row=row, column=1, value=DEMO_NOTE).font = Font(
             bold=True, color="C0392B"
         )
         row += 2

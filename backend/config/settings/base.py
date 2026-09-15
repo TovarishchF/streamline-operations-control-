@@ -279,6 +279,23 @@ INTEGRATION_STUB_LATENCY_MS = (80, 400)
 INTEGRATION_STUB_ERROR_RATE = 0.02  # INTEGRATIONS § 1 п. 3
 INTEGRATION_LOG_BODY_RETENTION_DAYS = 30
 
+# Каналы сообщений (INTEGRATIONS.md § 3). Значения нужны только режиму
+# `live`: заглушка наружу не ходит и учётных данных не спрашивает.
+SMTP_HOST = env("SMTP_HOST", default="mailpit")
+SMTP_PORT = env.int("SMTP_PORT", default=1025)
+SMTP_USER = env("SMTP_USER", default="")
+SMTP_PASSWORD = env("SMTP_PASSWORD", default="")
+SMTP_FROM = env("SMTP_FROM", default="soc@example.test")
+SMTP_USE_TLS = env.bool("SMTP_USE_TLS", default=False)
+
+IMAP_HOST = env("IMAP_HOST", default="")
+IMAP_PORT = env.int("IMAP_PORT", default=993)
+IMAP_USER = env("IMAP_USER", default="")
+IMAP_PASSWORD = env("IMAP_PASSWORD", default="")
+
+MSGR_BOT_TOKEN = env("MSGR_BOT_TOKEN", default="")
+MSGR_DEFAULT_CHAT_ID = env("MSGR_DEFAULT_CHAT_ID", default="")
+
 # ─────────────────────────── Деньги ───────────────────────────
 # ADR-002. Единственное место, где заданы эти константы.
 

@@ -6,13 +6,18 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 
 class DomainError(Exception):
     """Базовое доменное исключение."""
 
     code = "INTERNAL_ERROR"
+
+    # Код ответа, если он не задан таблицей в `core.api.exceptions`.
+    # Нужен исключениям прикладных модулей: таблица живёт в ядре, а ядро
+    # не должно импортировать модули, которые само не знает.
+    http_status: ClassVar[int | None] = None
 
     def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
         super().__init__(message)

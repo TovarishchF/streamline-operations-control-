@@ -1,0 +1,125 @@
+{
+  "$comment": [
+    "Шаблоны исходящих сообщений. Первые двенадцать — обязательный набор",
+    "SPEC § 8.2, ни один из них убрать нельзя. Тринадцатый,",
+    "report_scheduled, добавлен под рассылку отчётов по подписке",
+    "(ТЗ 3.6.3): отчёт уходит письмом, и текст этого письма редактируется",
+    "там же, где остальные.",
+    "",
+    "Подстановка — {{путь.через.точку}}. Это не язык шаблонов Django:",
+    "текст редактирует пользователь через интерфейс, и исполнять его нельзя.",
+    "Ни условий, ни циклов, ни вызовов методов — только замена значения.",
+    "",
+    "Тексты — деловая переписка на двух языках. Язык письма выбирается",
+    "по локали получателя, а не по языку интерфейса отправителя.",
+    "",
+    "Наименования организаций в примерах не встречаются: шаблон подставляет",
+    "настоящие данные того, кому пишет."
+  ],
+  "templates": [
+    {
+      "code": "flight_confirmed",
+      "channel": "email",
+      "subjectRu": "Рейс {{flight.number}} подтверждён",
+      "subjectEn": "Flight {{flight.number}} confirmed",
+      "bodyRu": "Здравствуйте!\n\nПодтверждаем рейс {{flight.number}} {{flight.route}}.\nВылет: {{flight.std}} UTC.\nВоздушное судно: {{flight.aircraft}}.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nWe confirm flight {{flight.number}} {{flight.route}}.\nDeparture: {{flight.std}} UTC.\nAircraft: {{flight.aircraft}}.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "flight_rescheduled",
+      "channel": "email",
+      "subjectRu": "Изменение расписания: рейс {{flight.number}}",
+      "subjectEn": "Schedule change: flight {{flight.number}}",
+      "bodyRu": "Здравствуйте!\n\nПо рейсу {{flight.number}} {{flight.route}} изменено время вылета.\nБыло: {{change.before}} UTC.\nСтало: {{flight.std}} UTC.\n\nПричина: {{change.reason}}\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nThe departure time of flight {{flight.number}} {{flight.route}} has changed.\nWas: {{change.before}} UTC.\nNow: {{flight.std}} UTC.\n\nReason: {{change.reason}}\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "flight_cancelled",
+      "channel": "email",
+      "subjectRu": "Отмена рейса {{flight.number}}",
+      "subjectEn": "Flight {{flight.number}} cancelled",
+      "bodyRu": "Здравствуйте!\n\nРейс {{flight.number}} {{flight.route}} от {{flight.std}} UTC отменён.\nПричина: {{change.reason}}\n\nЗаказанные по рейсу услуги отменяются отдельными уведомлениями.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nFlight {{flight.number}} {{flight.route}} of {{flight.std}} UTC has been cancelled.\nReason: {{change.reason}}\n\nServices ordered for the flight are cancelled by separate notices.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "quote_issued",
+      "channel": "email",
+      "subjectRu": "Котировка {{document.number}} по рейсу {{flight.number}}",
+      "subjectEn": "Quotation {{document.number}} for flight {{flight.number}}",
+      "bodyRu": "Здравствуйте!\n\nНаправляем котировку {{document.number}} по рейсу {{flight.number}} {{flight.route}}.\nСумма: {{document.total}} {{document.currency}}.\nДействительна до: {{document.validUntil}}.\n\nКотировка приложена файлом.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nPlease find quotation {{document.number}} for flight {{flight.number}} {{flight.route}}.\nAmount: {{document.total}} {{document.currency}}.\nValid until: {{document.validUntil}}.\n\nThe quotation is attached.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "invoice_issued",
+      "channel": "email",
+      "subjectRu": "Счёт {{document.number}} по рейсу {{flight.number}}",
+      "subjectEn": "Invoice {{document.number}} for flight {{flight.number}}",
+      "bodyRu": "Здравствуйте!\n\nНаправляем счёт {{document.number}} по рейсу {{flight.number}} {{flight.route}}.\nСумма к оплате: {{document.total}} {{document.currency}}.\nСрок оплаты: {{document.dueDate}}.\n\nСчёт приложен файлом.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nPlease find invoice {{document.number}} for flight {{flight.number}} {{flight.route}}.\nAmount due: {{document.total}} {{document.currency}}.\nDue date: {{document.dueDate}}.\n\nThe invoice is attached.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "closing_documents",
+      "channel": "email",
+      "subjectRu": "Закрывающие документы по рейсу {{flight.number}}",
+      "subjectEn": "Closing documents for flight {{flight.number}}",
+      "bodyRu": "Здравствуйте!\n\nНаправляем закрывающие документы по рейсу {{flight.number}} {{flight.route}} от {{flight.std}} UTC.\nДокументы приложены файлами.\n\nПросим подписать и вернуть один экземпляр.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nPlease find the closing documents for flight {{flight.number}} {{flight.route}} of {{flight.std}} UTC.\nThe documents are attached.\n\nPlease sign and return one copy.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "order_placed",
+      "channel": "email",
+      "subjectRu": "Заявка {{order.id}}: {{service.name}} в {{order.airport}}",
+      "subjectEn": "Order {{order.id}}: {{service.name}} at {{order.airport}}",
+      "bodyRu": "Здравствуйте!\n\nЗаказываем услугу: {{service.name}}.\nАэропорт: {{order.airport}}.\nРейс: {{flight.number}} {{flight.route}}, {{flight.std}} UTC.\nКоличество: {{order.quantity}}.\n\nПросим подтвердить до {{order.confirmBy}} UTC.\nПри ответе сохраняйте, пожалуйста, номер заявки {{order.id}} в теме письма.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nWe would like to order: {{service.name}}.\nAirport: {{order.airport}}.\nFlight: {{flight.number}} {{flight.route}}, {{flight.std}} UTC.\nQuantity: {{order.quantity}}.\n\nPlease confirm by {{order.confirmBy}} UTC.\nWhen replying, please keep order number {{order.id}} in the subject line.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "order_changed",
+      "channel": "email",
+      "subjectRu": "Изменение заявки {{order.id}}",
+      "subjectEn": "Order {{order.id}} changed",
+      "bodyRu": "Здравствуйте!\n\nПо заявке {{order.id}} ({{service.name}}, {{order.airport}}) изменились условия.\nБыло: {{change.before}}\nСтало: {{change.after}}\n\nПросим подтвердить изменение.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nThe terms of order {{order.id}} ({{service.name}}, {{order.airport}}) have changed.\nWas: {{change.before}}\nNow: {{change.after}}\n\nPlease confirm the change.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "order_cancelled",
+      "channel": "email",
+      "subjectRu": "Отмена заявки {{order.id}}",
+      "subjectEn": "Order {{order.id}} cancelled",
+      "bodyRu": "Здравствуйте!\n\nЗаявка {{order.id}} ({{service.name}}, {{order.airport}}) отменяется.\nПричина: {{change.reason}}\n\nПриносим извинения за неудобства.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nOrder {{order.id}} ({{service.name}}, {{order.airport}}) is cancelled.\nReason: {{change.reason}}\n\nWe apologise for the inconvenience.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "order_deadline_reminder",
+      "channel": "email",
+      "subjectRu": "Напоминание: заявка {{order.id}} ждёт подтверждения",
+      "subjectEn": "Reminder: order {{order.id}} awaits confirmation",
+      "bodyRu": "Здравствуйте!\n\nНапоминаем о заявке {{order.id}} ({{service.name}}, {{order.airport}}) по рейсу {{flight.number}}.\nСрок подтверждения: {{order.confirmBy}} UTC.\n\nЕсли услуга не может быть оказана, сообщите, пожалуйста, об этом — мы подберём другого поставщика.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nThis is a reminder about order {{order.id}} ({{service.name}}, {{order.airport}}) for flight {{flight.number}}.\nConfirmation deadline: {{order.confirmBy}} UTC.\n\nIf the service cannot be provided, please let us know — we will find another supplier.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "contract_expiring",
+      "channel": "email",
+      "subjectRu": "Контракт {{contract.number}} истекает {{contract.validTo}}",
+      "subjectEn": "Contract {{contract.number}} expires on {{contract.validTo}}",
+      "bodyRu": "Здравствуйте!\n\nСрок действия контракта {{contract.number}} истекает {{contract.validTo}}.\nПосле этой даты мы не сможем размещать заявки по нему.\n\nПросим сообщить о планах по продлению.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nContract {{contract.number}} expires on {{contract.validTo}}.\nAfter that date we will not be able to place orders under it.\n\nPlease let us know your plans for renewal.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "reconciliation_claim",
+      "channel": "email",
+      "subjectRu": "Расхождение по счёту {{document.number}}",
+      "subjectEn": "Discrepancy in invoice {{document.number}}",
+      "bodyRu": "Здравствуйте!\n\nПри сверке счёта {{document.number}} обнаружено расхождение.\nПо нашим данным: {{claim.expected}} {{document.currency}}.\nВ счёте: {{claim.actual}} {{document.currency}}.\nРасхождение: {{claim.difference}} {{document.currency}}.\n\nОснование: {{claim.reason}}\n\nПросим проверить и направить корректировку.\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nA discrepancy was found while reconciling invoice {{document.number}}.\nOur records: {{claim.expected}} {{document.currency}}.\nThe invoice: {{claim.actual}} {{document.currency}}.\nDifference: {{claim.difference}} {{document.currency}}.\n\nGrounds: {{claim.reason}}\n\nPlease check and send a correction.\n\nBest regards,\n{{operator.name}}"
+    },
+    {
+      "code": "report_scheduled",
+      "channel": "email",
+      "subjectRu": "Отчёт «{{report.name}}» за {{report.period}}",
+      "subjectEn": "Report “{{report.name}}” for {{report.period}}",
+      "bodyRu": "Здравствуйте!\n\nВо вложении отчёт «{{report.name}}» за период {{report.period}}.\nСформирован {{report.generatedAt}} UTC.\n\nОтчёт приходит по подписке. Отключить её можно на экране «Отчёты».\n\nС уважением,\n{{operator.name}}",
+      "bodyEn": "Hello,\n\nPlease find attached the report “{{report.name}}” for {{report.period}}.\nGenerated at {{report.generatedAt}} UTC.\n\nThe report is delivered by subscription. You can disable it on the Reports screen.\n\nBest regards,\n{{operator.name}}"
+    }
+  ]
+}

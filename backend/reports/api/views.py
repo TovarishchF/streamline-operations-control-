@@ -245,7 +245,7 @@ class ReportExportView(IdempotencyMixin, APIView):
 
             params = _parse_params(request, code)
             result = builders.build(code, params)
-            url = export.export_report(
+            produced = export.export_report(
                 code=code,
                 result=result,
                 export_format=payload.validated_data["format"],
@@ -258,7 +258,7 @@ class ReportExportView(IdempotencyMixin, APIView):
                 {
                     "taskId": f"{code}-{clock.now():%Y%m%d%H%M%S}",
                     "status": "ready",
-                    "downloadUrl": url,
+                    "downloadUrl": produced.url,
                     "expiresAt": clock.now()
                     + timedelta(seconds=storage.DOWNLOAD_URL_TTL_SECONDS),
                 },
