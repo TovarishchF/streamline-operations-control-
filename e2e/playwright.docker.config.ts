@@ -25,12 +25,19 @@ import { defineConfig, devices } from '@playwright/test';
  */
 const HOST = process.env['SOC_HOST'] ?? 'host.docker.internal';
 
+/**
+ * Куда складывается отчёт прогона. Имя задаётся снаружи: в `artifacts/`
+ * лежат отчёты разных наборов испытаний, и одно имя на всех означало бы,
+ * что каждый следующий прогон затирает предыдущий (`CLAUDE.md § 4`).
+ */
+const REPORT = process.env['SOC_E2E_REPORT'] ?? '../artifacts/e2e/registries.json';
+
 export default defineConfig({
   testDir: '.',
   timeout: 90_000,
   fullyParallel: false,
   workers: 1,
-  reporter: [['list'], ['json', { outputFile: '../artifacts/e2e/registries.json' }]],
+  reporter: [['list'], ['json', { outputFile: REPORT }]],
 
   use: {
     baseURL: `http://${HOST}:5173`,
