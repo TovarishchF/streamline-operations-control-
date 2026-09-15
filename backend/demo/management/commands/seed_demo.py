@@ -37,10 +37,11 @@ from accounts.models import Organization, Role, TimezoneMode, User
 from audit import services as audit
 from audit.models import AuditEntityType, AuditEntry, AuditSource
 from catalog.models import AircraftType, Airport, Service, ServiceCategory
+from comms.models import InboxMessage, Notification, OutboxMessage
 from core import clock
 from core.exceptions import DemoOnlyOperation, DomainError
 from core.models import DataSource
-from counterparties.models import Client, Vendor
+from counterparties.models import Client, Contact, Vendor
 from fleet.models import Aircraft, AircraftApproval, AircraftStatus
 from flights.models import Flight, FlightRequest, ServiceLeg, Slot, SlotStatus, SlotType
 from flights.services import planning, transitions
@@ -65,6 +66,32 @@ CLIENT_NAMES = (
     "Новый Горизонт",
     "Магистраль Карго",
 )
+
+# Вымышленные контактные лица контрагентов.
+CONTACT_NAMES = (
+    ("Иван", "Петров"),
+    ("Мария", "Орлова"),
+    ("Сергей", "Кузнецов"),
+    ("Анна", "Белова"),
+    ("Дмитрий", "Ершов"),
+    ("Ольга", "Сомова"),
+)
+
+CONTACT_ROLES = ("Диспетчер", "Менеджер по работе с клиентами", "Руководитель смены")
+
+# Доля контрагентов, переписывающихся по-английски.
+ENGLISH_CONTACT_SHARE = 0.25
+
+# Сколько заявок оставить ожидающими ответа поставщика: на них
+# показывается разбор входящих.
+PENDING_ORDERS = 12
+
+# Доли состояний исходящих: экран должен показывать не только «отправлено».
+FAILED_MESSAGE_SHARE = 0.1
+SENT_MESSAGE_SHARE = 0.7
+
+# Сколько событий положить в колокольчик.
+DEMO_NOTIFICATIONS = 6
 
 VENDOR_NAMES: dict[str, tuple[str, ...]] = {
     "fuel": ("Топливная Компания Восток", "Аэро Фьюэл Сервис", "Нефтепродукт Аэро", "Крыло-Ойл"),
@@ -158,6 +185,12 @@ class Command(BaseCommand):
         """
         counts = {
             "пользователи": User.objects.filter(username__endswith=".demo").delete()[0],
+            # Коммуникации уходят первыми: входящее ссылается на заявку,
+            # уведомление — на пользователя.
+            "уведомления": Notification.objects.filter(is_demo=True).delete()[0],
+            "входящие": InboxMessage.objects.filter(is_demo=True).delete()[0],
+            "исходящие": OutboxMessage.objects.filter(is_demo=True).delete()[0],
+            "контакты": Contact.objects.filter(is_demo=True).delete()[0],
             "заявки клиентов": FlightRequest.objects.filter(is_demo=True).delete()[0],
             "заявки на услуги": ServiceOrder.objects.filter(is_demo=True).delete()[0],
             "слоты": Slot.objects.filter(is_demo=True).delete()[0],
@@ -208,12 +241,128 @@ class Command(BaseCommand):
         self._portal_users(organization, clients, vendors)
         flights = self._flights(clients, aircraft, vendors, seed)
         requests = self._flight_requests(organization, clients, seed)
+        self._contacts(clients, vendors, seed)
+        messages = self._communications(staff, seed)
 
         self.stdout.write(
             f"Создано: клиентов {len(clients)}, поставщиков {len(vendors)}, "
             f"бортов {len(aircraft)}, сотрудников {len(staff)}, "
-            f"рейсов {len(flights)}, заявок клиентов {len(requests)}"
+            f"рейсов {len(flights)}, заявок клиентов {len(requests)}, "
+            f"сообщений и уведомлений {messages}"
         )
+
+    def _contacts(
+        self, clients: list[Client], vendors: list[Vendor], seed: int
+    ) -> None:
+        """Контактные лица контрагентов.
+
+        Без них переписка не с кем: письмо поставщику уходит контактному
+        лицу, а не «в компанию». Адреса в зоне `.test` — она по RFC 2606
+        никому не принадлежит и настоящей не станет.
+        """
+        owners: list[Client | Vendor] = [*clients, *vendors]
+        for owner in owners:
+            rnd = self._rnd(seed, f"contact:{owner.name}")
+            if Contact.objects.filter(
+                client=owner if isinstance(owner, Client) else None,
+                vendor=owner if isinstance(owner, Vendor) else None,
+            ).exists():
+                continue
+            first, last = rnd.choice(CONTACT_NAMES)
+            Contact.objects.create(
+                client=owner if isinstance(owner, Client) else None,
+                vendor=owner if isinstance(owner, Vendor) else None,
+                name=f"{first} {last}",
+                role=rnd.choice(CONTACT_ROLES),
+                email=f"ops@{_translit(owner.name)[:18]}.test",
+                phone=f"+7 495 {rnd.randint(100, 999)}-{rnd.randint(10, 99)}-{rnd.randint(10, 99)}",
+                # Часть контрагентов переписывается по-английски: язык письма
+                # выбирается по контакту, и это надо показывать.
+                locale="en" if rnd.random() < ENGLISH_CONTACT_SHARE else "ru",
+                is_primary=True,
+                is_demo=True,
+                data_source=DataSource.SYNTHETIC,
+            )
+
+    def _communications(self, staff: list[User], seed: int) -> int:
+        """Переписка и уведомления на стенде `[ТЗ 3.5.1, 3.5.2, 3.2.2]`.
+
+        Заявки, ожидающие ответа поставщика, оставляются нарочно: без них
+        входящие пусты, а именно на них показывается разбор писем.
+        Сообщения помечены `source='seed'` и за действия людей не выдаются.
+        """
+        from comms.services import inbox as inbox_service
+        from comms.services import notifications as notification_service
+        from comms.services import outbox as outbox_service
+
+        rnd = self._rnd(seed, "communications")
+        created = 0
+
+        # Часть подтверждённых заявок возвращается в «Заказана»: поставщик
+        # ещё не ответил. Статус меняется прямой записью, как и остальной
+        # набор генератора, — это данные стенда, а не действие пользователя.
+        pending = list(
+            ServiceOrder.objects.filter(
+                status=ServiceOrderStatus.CONFIRMED, vendor__isnull=False
+            ).order_by("pk")[:PENDING_ORDERS]
+        )
+        ServiceOrder.objects.filter(pk__in=[item.pk for item in pending]).update(
+            status=ServiceOrderStatus.ORDERED,
+            confirmed_at=None,
+            sla_confirm_deadline=clock.now() + timedelta(hours=4),
+        )
+
+        for order in ServiceOrder.objects.filter(
+            pk__in=[item.pk for item in pending]
+        ).select_related("vendor", "service", "flight"):
+            message = outbox_service.enqueue(
+                channel="email",
+                to=[
+                    {"name": contact.name, "address": contact.email, "locale": contact.locale}
+                    for contact in (order.vendor.contacts.all() if order.vendor else [])
+                ],
+                subject=f"Заявка {order.pk}: {order.service.name_ru}",
+                body=(
+                    f"Здравствуйте!\n\nЗаказываем услугу: {order.service.name_ru}.\n"
+                    f"Аэропорт: {order.airport_icao}.\n"
+                    f"Рейс: {order.flight.number}.\n\n"
+                    f"Просим подтвердить заявку {order.pk}."
+                ),
+                template_code="order_placed",
+                related=("service_order", order.pk),
+                is_demo=True,
+            )
+            # Часть писем уже ушла, часть ещё в очереди, одно — с ошибкой:
+            # экран исходящих должен показывать все состояния.
+            roll = rnd.random()
+            if roll < FAILED_MESSAGE_SHARE:
+                message.status = "failed"
+                message.attempts = 4
+                message.last_error = "ChannelError: сервер исходящей почты недоступен"
+                message.save()
+            elif roll < FAILED_MESSAGE_SHARE + SENT_MESSAGE_SHARE:
+                outbox_service.send(message)
+            created += 1
+
+        # Входящие собираются тем же разбором, что и в работе: часть писем
+        # опознаётся, часть уходит в ручную очередь.
+        created += inbox_service.poll(len(pending))
+
+        dispatchers = [user for user in staff if user.role in (Role.DISPATCHER, Role.MANAGER)]
+        for order in ServiceOrder.objects.filter(
+            status=ServiceOrderStatus.COMPLETED
+        ).select_related("service", "flight")[:DEMO_NOTIFICATIONS]:
+            notification_service.notify_many(
+                users=dispatchers,
+                kind="service_confirmed",
+                title=(
+                    f"{order.service.name_ru}: подтверждена по рейсу {order.flight.number}"
+                ),
+                link=f"/flights/{order.flight_id}/services",
+            )
+            created += len(dispatchers)
+
+        return created
 
     def _bind_two_factor(self, staff: list[User]) -> None:
         """Привязывает приложение-аутентификатор там, где его требует политика.

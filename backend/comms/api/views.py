@@ -17,6 +17,7 @@ from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -56,7 +57,14 @@ class NotificationViewSet(
     queryset = Notification.objects.all()
     serializer_class = NotificationSerializer
     # Уведомления получают все вошедшие, включая порталы: событие по своей
-    # заявке поставщик видеть обязан. Ограничение — связью с пользователем.
+    # заявке поставщик видеть обязан. Ограничение — связью с пользователем,
+    # а не правом.
+    #
+    # Поэтому здесь `IsAuthenticated`, а не карта ролей: пустая карта
+    # у `HasRolePermission` означает «право не объявлено» и запрещает
+    # доступ всем — это защита от забытого эндпоинта, и обходить её
+    # пустым словарём нельзя.
+    permission_classes: Any = (IsAuthenticated,)
     required_permissions: ClassVar[dict[str, Any]] = {}
 
     def get_queryset(self) -> QuerySet[Notification]:

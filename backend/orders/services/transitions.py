@@ -260,7 +260,8 @@ def apply_transition(
         is_demo=order.is_demo,
     )
 
-    _announce(order, name, actor)
+    if source != AuditSource.SEED:
+        _announce(order, name, actor)
     return order
 
 

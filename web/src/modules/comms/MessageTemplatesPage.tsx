@@ -4,12 +4,18 @@ import {
 } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import type { MessageTemplate } from '@/api/types';
-import { useSocStore } from '@/mocks/store';
+import {
+  useMessageTemplates,
+  useUpdateMessageTemplate,
+  type MessageTemplateRow,
+} from '@/api/comms';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
+import { TemplatePreviewDrawer } from './TemplatePreviewDrawer';
+
 type Locale = 'ru' | 'en';
+type Draft = Pick<MessageTemplateRow, 'subject' | 'body'>;
 
 /**
  * Шаблоны сообщений `[ТЗ 3.5.2]`.
@@ -26,15 +32,18 @@ export function MessageTemplatesPage(): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
 
-  const templates = useSocStore((state) => state.templates);
-  const saveTemplate = useSocStore((state) => state.saveTemplate);
+  const query = useMessageTemplates();
+  const updateTemplate = useUpdateMessageTemplate();
+  const templates = query.data ?? [];
 
-  const [selectedCode, setSelectedCode] = useState<string>(() => templates[0]?.code ?? '');
+  const [selectedCode, setSelectedCode] = useState<string>('');
   const [locale, setLocale] = useState<Locale>('ru');
-  const [draft, setDraft] = useState<Pick<MessageTemplate, 'subject' | 'body'> | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
-  const selected = templates.find((template) => template.code === selectedCode);
+  const selected =
+    templates.find((template) => template.code === selectedCode) ?? templates[0];
 
   // Черновик сбрасывается при смене шаблона: редактирование одного шаблона
   // не должно случайно перетечь в другой.
@@ -42,10 +51,14 @@ export function MessageTemplatesPage(): JSX.Element {
     setDraft(selected ? { subject: { ...selected.subject }, body: { ...selected.body } } : null);
   }, [selected]);
 
+  if (query.isLoading) {
+    return <Card loading />;
+  }
+
   if (!selected || !draft) {
     return (
       <Card>
-        <EmptyState />
+        <EmptyState description={t('comms.noTemplates')} />
       </Card>
     );
   }
@@ -66,10 +79,18 @@ export function MessageTemplatesPage(): JSX.Element {
     setDraft({ subject: { ...selected.subject }, body: { ...selected.body } });
   };
 
-  const commit = (): void => {
-    saveTemplate(selected.code, draft);
-    setConfirmOpen(false);
-    void message.success(t('comms.templateSaved', { code: selected.code }));
+  const commit = async (): Promise<void> => {
+    try {
+      await updateTemplate.mutateAsync({
+        id: selected.id,
+        subject: draft.subject,
+        body: draft.body,
+      });
+      setConfirmOpen(false);
+      void message.success(t('comms.templateSaved', { code: selected.code }));
+    } catch {
+      void message.error(t('common.saveFailed'));
+    }
   };
 
   return (
@@ -183,7 +204,7 @@ export function MessageTemplatesPage(): JSX.Element {
                   {t('comms.variables')}
                 </Typography.Text>
                 <Space size={4} wrap>
-                  {(selected.variables ?? []).map((variable) => (
+                  {selected.variables.map((variable) => (
                     <Tag
                       key={variable}
                       style={{ margin: 0, cursor: 'pointer' }}
@@ -221,6 +242,15 @@ export function MessageTemplatesPage(): JSX.Element {
                 <Button disabled={!anyChanged} onClick={discard}>
                   {t('comms.discard')}
                 </Button>
+                {/* Предпросмотр на настоящем рейсе `SPEC § 8.2`: собирает
+                    сервер тем же сборщиком, что и отправку. */}
+                <Button
+                  onClick={() => {
+                    setPreviewOpen(true);
+                  }}
+                >
+                  {t('comms.preview')}
+                </Button>
               </Space>
             </Space>
           </Card>
@@ -234,10 +264,13 @@ export function MessageTemplatesPage(): JSX.Element {
         okText={t('comms.confirmSave')}
         cancelText={t('common.cancel')}
         width={720}
+        confirmLoading={updateTemplate.isPending}
         onCancel={() => {
           setConfirmOpen(false);
         }}
-        onOk={commit}
+        onOk={() => {
+          void commit();
+        }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           <Alert type="warning" showIcon message={t('comms.confirmHint')} />
@@ -290,6 +323,15 @@ export function MessageTemplatesPage(): JSX.Element {
           ))}
         </Space>
       </Modal>
+
+      <TemplatePreviewDrawer
+        open={previewOpen}
+        template={selected}
+        locale={locale}
+        onClose={() => {
+          setPreviewOpen(false);
+        }}
+      />
     </Space>
   );
 }

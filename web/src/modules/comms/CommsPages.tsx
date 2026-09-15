@@ -1,15 +1,23 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Drawer, List, Segmented, Space, Tag, Typography,
+  Alert, App, Button, Card, Drawer, List, Popconfirm, Segmented, Space, Tag, Typography,
 } from 'antd';
-import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { DownloadOutlined, RedoOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import type { InboxMessage, OutboxMessage } from '@/api/types';
-import { INBOX, OUTBOX } from '@/mocks/comms';
+import {
+  useApplyInbox,
+  useInbox,
+  useOutbox,
+  useRetryMessage,
+  type InboxMessageRow,
+  type OutboxMessageRow,
+} from '@/api/comms';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+
+import { ApplyInboxModal } from './ApplyInboxModal';
 
 const OUTBOX_TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   queued: 'neutral', sent: 'progress', delivered: 'done', failed: 'critical',
@@ -19,30 +27,41 @@ const OUTBOX_TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
  * Исходящие `[ТЗ 3.5.2]`.
  *
  * Сообщение хранится целиком: канал, получатели, тема, отрендеренное тело,
- * вложения, статус и число попыток. В режиме `stub` внешний вызов не
- * выполняется — бейдж канала показывает **фактический режим** и не выдаёт
- * заглушку за отправку (`CLAUDE.md § 4`).
+ * вложения, статус и число попыток. Бейдж канала показывает **фактический
+ * режим** и не выдаёт заглушку за отправку (`CLAUDE.md § 4`).
  */
 export function OutboxPage(): JSX.Element {
   const { t } = useTranslation();
-  const [preview, setPreview] = useState<OutboxMessage | null>(null);
+  const { message: toast } = App.useApp();
+  const [preview, setPreview] = useState<OutboxMessageRow | null>(null);
   const [status, setStatus] = useState<string | undefined>();
 
-  const filtered = OUTBOX.filter((m) => !status || m.status === status);
+  const outbox = useOutbox({ status });
+  const retry = useRetryMessage();
+  const messages = outbox.data?.data ?? [];
 
-  const columns: DataColumns<OutboxMessage> = [
+  const resend = async (id: string): Promise<void> => {
+    try {
+      await retry.mutateAsync(id);
+      void toast.success(t('comms.retryQueued'));
+    } catch {
+      void toast.error(t('comms.retryFailed'));
+    }
+  };
+
+  const columns: DataColumns<OutboxMessageRow> = [
     {
       title: t('comms.channel'), dataIndex: 'channel', width: 150,
       render: (value: string, row) => (
         <Space size={4}>
           <Tag style={{ margin: 0 }}>{t(`channel.${value}`)}</Tag>
-          <Tag color="purple" style={{ margin: 0 }}>{row.channelMode ?? 'stub'}</Tag>
+          <Tag color="purple" style={{ margin: 0 }}>{row.channelMode || 'stub'}</Tag>
         </Space>
       ),
     },
     {
       title: t('comms.to'), key: 'to', width: 220, ellipsis: true,
-      render: (_, row) => row.to.map((x) => x.name).join(', '),
+      render: (_, row) => row.to.map((x) => x.name || x.address).join(', '),
     },
     { title: t('comms.subject'), dataIndex: 'subject', ellipsis: true },
     {
@@ -54,7 +73,7 @@ export function OutboxPage(): JSX.Element {
             <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
               {t(`outboxStatus.${value}`)}
             </Tag>
-            {(row.attempts ?? 1) > 1 ? <Mono>×{row.attempts}</Mono> : null}
+            {row.attempts > 1 ? <Mono>×{row.attempts}</Mono> : null}
           </Space>
         );
       },
@@ -64,14 +83,35 @@ export function OutboxPage(): JSX.Element {
       render: (value: string | null) => <UtcTime value={value} withDate />,
     },
     {
-      title: t('common.actions'), key: 'actions', sortable: false, width: 170,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 210,
       render: (_, row) => (
         <Space size={4}>
           <Button size="small" onClick={() => { setPreview(row); }}>{t('common.open')}</Button>
-          {row.status === 'failed' ? (
-            <Button size="small" icon={<RedoOutlined />}>{t('comms.retry')}</Button>
+          {/* Повторяется только то, что не ушло: второй экземпляр письма
+              поставщик прочитает как второй заказ. */}
+          {row.status === 'failed' || row.status === 'queued' ? (
+            <Popconfirm
+              title={t('comms.retryConfirm')}
+              okText={t('common.yes')}
+              cancelText={t('common.no')}
+              onConfirm={() => { void resend(row.id); }}
+            >
+              <Button size="small" icon={<RedoOutlined />} loading={retry.isPending}>
+                {t('comms.retry')}
+              </Button>
+            </Popconfirm>
           ) : null}
-          {row.emlUrl ? <Button size="small" icon={<DownloadOutlined />}>eml</Button> : null}
+          {row.emlUrl ? (
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              href={row.emlUrl}
+              target="_blank"
+              rel="noopener"
+            >
+              eml
+            </Button>
+          ) : null}
         </Space>
       ),
     },
@@ -81,11 +121,15 @@ export function OutboxPage(): JSX.Element {
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.outbox')}</Typography.Title>
 
-      <Alert type="info" showIcon message={t('comms.stubNotice')} />
+      {messages.some((item) => item.channelMode === 'stub') ? (
+        <Alert type="info" showIcon message={t('comms.stubNotice')} />
+      ) : null}
+
+      {outbox.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
 
       <Segmented
         value={status ?? 'all'}
-        onChange={(value) => { setStatus(value === 'all' ? undefined : (value)); }}
+        onChange={(value) => { setStatus(value === 'all' ? undefined : String(value)); }}
         options={[
           { label: t('common.all'), value: 'all' },
           ...Object.keys(OUTBOX_TOKEN).map((code) => ({ label: t(`outboxStatus.${code}`), value: code })),
@@ -93,10 +137,11 @@ export function OutboxPage(): JSX.Element {
       />
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<OutboxMessage>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1000 }}
-          locale={{ emptyText: <EmptyState /> }}
+        <DataTable<OutboxMessageRow>
+          size="small" rowKey="id" columns={columns} dataSource={messages}
+          loading={outbox.isFetching}
+          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1040 }}
+          locale={{ emptyText: <EmptyState description={t('comms.outboxEmpty')} /> }}
         />
       </Card>
 
@@ -110,12 +155,12 @@ export function OutboxPage(): JSX.Element {
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
             <Space size={6} wrap>
               <Tag>{t(`channel.${preview.channel}`)}</Tag>
-              <Tag color="purple">{preview.channelMode ?? 'stub'}</Tag>
+              <Tag color="purple">{preview.channelMode || 'stub'}</Tag>
               <Tag>{t(`outboxStatus.${preview.status}`)}</Tag>
             </Space>
             <Typography.Text strong>{preview.subject}</Typography.Text>
             <Typography.Text type="secondary">
-              {preview.to.map((x) => `${x.name ?? ''} <${x.address ?? ''}>`).join(', ')}
+              {preview.to.map((x) => `${x.name} <${x.address}>`).join(', ')}
             </Typography.Text>
             <Card size="small" styles={{ body: { padding: 12 } }}>
               <pre style={{ margin: 0, whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>
@@ -125,10 +170,10 @@ export function OutboxPage(): JSX.Element {
             {preview.lastError ? (
               <Alert type="error" showIcon message={preview.lastError} />
             ) : null}
-            {(preview.attachments?.length ?? 0) > 0 ? (
+            {preview.attachments.length > 0 ? (
               <List
                 size="small" bordered header={t('flight.attachments')}
-                dataSource={preview.attachments ?? []}
+                dataSource={preview.attachments}
                 renderItem={(item) => <List.Item><Mono>{item.fileName}</Mono></List.Item>}
               />
             ) : null}
@@ -148,17 +193,31 @@ export function OutboxPage(): JSX.Element {
  */
 export function InboxPage(): JSX.Element {
   const { t } = useTranslation();
+  const { message: toast } = App.useApp();
   const [unrecognizedOnly, setUnrecognizedOnly] = useState(false);
+  const [manual, setManual] = useState<InboxMessageRow | null>(null);
 
-  const filtered = INBOX.filter((m) => !unrecognizedOnly || !m.recognized);
-  const unrecognized = INBOX.filter((m) => !m.recognized).length;
+  const inbox = useInbox({ unrecognizedOnly });
+  const applyInbox = useApplyInbox();
 
-  const columns: DataColumns<InboxMessage> = [
+  const messages = inbox.data?.data ?? [];
+  const unrecognized = messages.filter((item) => !item.recognized && !item.appliedAt).length;
+
+  const applySuggested = async (id: string): Promise<void> => {
+    try {
+      await applyInbox.mutateAsync({ id });
+      void toast.success(t('comms.applied'));
+    } catch {
+      void toast.error(t('comms.applyFailed'));
+    }
+  };
+
+  const columns: DataColumns<InboxMessageRow> = [
     {
       title: t('comms.receivedAt'), dataIndex: 'receivedAt', width: 110,
       render: (value: string) => <UtcTime value={value} withDate />,
     },
-    { title: t('comms.from'), dataIndex: 'from', width: 260, ellipsis: true,
+    { title: t('comms.from'), dataIndex: 'from', width: 240, ellipsis: true,
       render: (value: string) => <Mono>{value}</Mono> },
     { title: t('comms.subject'), dataIndex: 'subject', ellipsis: true },
     {
@@ -167,21 +226,36 @@ export function InboxPage(): JSX.Element {
         value ? (
           <Space size={4}>
             <Tag color="green" style={{ margin: 0 }}>{t('comms.recognizedYes')}</Tag>
-            {row.suggestedAction ? <Tag style={{ margin: 0 }}>{t(`inboxAction.${row.suggestedAction}`)}</Tag> : null}
+            {row.suggestedAction ? (
+              <Tag style={{ margin: 0 }}>{t(`inboxAction.${row.suggestedAction}`)}</Tag>
+            ) : null}
           </Space>
         ) : (
           <Tag color="orange" style={{ margin: 0 }}>{t('comms.needsManual')}</Tag>
         ),
     },
     {
-      title: t('common.actions'), key: 'actions', sortable: false, width: 150,
+      title: t('common.actions'), key: 'actions', sortable: false, width: 170,
       render: (_, row) =>
         row.appliedAt ? (
           <Typography.Text type="secondary">{t('comms.applied')}</Typography.Text>
         ) : row.recognized ? (
-          <Button size="small" type="primary">{t('comms.apply')}</Button>
+          <Popconfirm
+            title={t('comms.applyConfirm', {
+              action: t(`inboxAction.${row.suggestedAction ?? 'confirm'}`),
+            })}
+            okText={t('common.yes')}
+            cancelText={t('common.no')}
+            onConfirm={() => { void applySuggested(row.id); }}
+          >
+            <Button size="small" type="primary" loading={applyInbox.isPending}>
+              {t('comms.apply')}
+            </Button>
+          </Popconfirm>
         ) : (
-          <Button size="small">{t('comms.processManually')}</Button>
+          <Button size="small" onClick={() => { setManual(row); }}>
+            {t('comms.processManually')}
+          </Button>
         ),
     },
   ];
@@ -198,17 +272,22 @@ export function InboxPage(): JSX.Element {
         />
       ) : null}
 
+      {inbox.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
+
       <Tag.CheckableTag checked={unrecognizedOnly} onChange={setUnrecognizedOnly}>
         {t('comms.unrecognizedOnly')}
       </Tag.CheckableTag>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<InboxMessage>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
-          pagination={false} scroll={{ x: 950 }}
-          locale={{ emptyText: <EmptyState /> }}
+        <DataTable<InboxMessageRow>
+          size="small" rowKey="id" columns={columns} dataSource={messages}
+          loading={inbox.isFetching}
+          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 950 }}
+          locale={{ emptyText: <EmptyState description={t('comms.inboxEmpty')} /> }}
         />
       </Card>
+
+      <ApplyInboxModal message={manual} onClose={() => { setManual(null); }} />
     </Space>
   );
 }

@@ -8,7 +8,7 @@ import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
 import { useCurrentUser, usePermissionMap, useSession } from '@/shared/auth/session';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
-import { NOTIFICATIONS } from '@/mocks/comms';
+import { useNotifications } from '@/api/comms';
 import { NAV_GROUPS } from './navigation';
 import { NotificationCentre } from './NotificationCentre';
 import { DemoClockPanel } from './DemoClockPanel';
@@ -127,7 +127,9 @@ export function AppLayout(): JSX.Element {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   useClockTicker();
 
-  const unread = NOTIFICATIONS.filter((n) => !n.readAt).length;
+  // Непрочитанные считает сервер своей выборкой: колокольчик показывает
+  // ровно то, что лежит в центре уведомлений.
+  const unread = useNotifications(true).data?.meta.total ?? 0;
 
   return (
     <Layout style={{ minHeight: '100vh' }}>

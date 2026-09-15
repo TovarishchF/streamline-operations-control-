@@ -246,8 +246,11 @@
     "kilobytes": "KB"
   },
   "comms": {
+    "action": "Action",
     "applied": "Applied",
     "apply": "Apply",
+    "applyConfirm": "Apply “{{action}}” to the order?",
+    "applyFailed": "Could not apply the message",
     "body": "Body",
     "changed": "changed",
     "changedLocales": "Changed versions: {{locales}}",
@@ -258,17 +261,31 @@
     "discard": "Discard changes",
     "discardAndSwitch": "Discard and switch",
     "from": "From",
+    "inboxEmpty": "No incoming messages",
     "localeHint": "The letter language follows the recipient locale.",
+    "manualHint": "The parser did not recognise this letter. Pick the order and the action — this is a normal case, not a failure.",
     "messagePreview": "Message preview",
     "needsManual": "Manual processing",
+    "noTemplates": "No templates configured",
     "openOutbox": "Open outbox",
+    "outboxEmpty": "No outgoing messages",
+    "preview": "Preview",
+    "previewFailed": "Could not render the preview",
+    "previewFlight": "Flight for preview",
+    "previewHint": "Pick a flight: the server renders the letter on its data.",
+    "previewMissing": "These variables have no value on the selected flight",
+    "previewRefresh": "Rebuild",
     "processManually": "Process",
     "receivedAt": "Received",
     "recognized": "Recognised",
     "recognizedYes": "Recognised",
     "retry": "Retry",
+    "retryConfirm": "Send the message again?",
+    "retryFailed": "Could not resend the message",
+    "retryQueued": "Message queued",
     "saveTemplate": "Save template",
     "sentAt": "Sent",
+    "serviceOrder": "Service order",
     "status": "Status",
     "stubNotice": "Connections run in stub mode: no external call is made, and the channel badge shows it.",
     "subject": "Subject",
@@ -614,9 +631,9 @@
     "title": "System status"
   },
   "inboxAction": {
-    "confirm": "Confirm order",
+    "confirm": "Confirm",
     "import_invoice": "Import invoice",
-    "reject": "Reject order"
+    "reject": "Reject"
   },
   "integrations": {
     "code": "Code",
@@ -717,6 +734,7 @@
   },
   "notifications": {
     "empty": "No new notifications",
+    "markRead": "Mark as read",
     "open": "Open"
   },
   "outboxStatus": {

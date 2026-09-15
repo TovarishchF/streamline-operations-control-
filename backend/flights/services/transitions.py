@@ -133,7 +133,13 @@ def apply_transition(
 
     # Оповещение диспетчеров `[ТЗ 3.5.1]`. Автомат отвечает за состояние,
     # кому об этом сообщить — решают коммуникации.
-    from comms.services import events as comms_events
+    #
+    # Переходы генератора не оповещают: он выстраивает историю стенда,
+    # а не совершает события сейчас. Иначе колокольчик после `seed_demo`
+    # содержал бы сотни записей о прошлом, и настоящее в нём потерялось бы
+    # (`CLAUDE.md § 4`).
+    if source != AuditSource.SEED:
+        from comms.services import events as comms_events
 
-    comms_events.flight_status_changed(flight, previous=previous_status, actor=actor)
+        comms_events.flight_status_changed(flight, previous=previous_status, actor=actor)
     return flight

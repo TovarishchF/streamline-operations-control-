@@ -24,6 +24,7 @@ from django.utils.translation import gettext as _
 from audit import services as audit
 from comms.models import InboxMessage, MessageChannel
 from core import clock
+from core.demo_marking import is_demo as demo_mode
 from core.exceptions import DomainError
 
 if TYPE_CHECKING:
@@ -111,6 +112,9 @@ def ingest(mail: IncomingMail, *, channel: str = MessageChannel.EMAIL) -> InboxM
         suggested_action=action,
         external_id=mail.external_id,
         data_source=DataSource.LIVE if live else DataSource.SYNTHETIC,
+        # Запись стенда помечается как запись стенда, иначе её не отличить
+        # от настоящей и не убрать чисткой (`CLAUDE.md § 4`).
+        is_demo=demo_mode(),
     )
 
 
