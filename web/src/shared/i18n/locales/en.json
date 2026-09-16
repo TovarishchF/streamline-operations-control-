@@ -2,12 +2,16 @@
   "admin": {
     "addUser": "Add user",
     "email": "Email",
+    "emailHint": "The address is also the login: the invitation goes there.",
     "name": "Name",
+    "passwordHint": "No password is set here: it arrives by e-mail, or the account is linked to the directory.",
     "permissionsNotice": "Permissions are enforced on the server in every endpoint. Hiding an element in the interface is not access control.",
+    "portalRoleHint": "A portal role only sees its own counterparty's records — that is why the counterparty is required.",
     "role": "Role",
     "timezone": "Time zone",
     "twoFactor": "Two-factor",
-    "twoFactorRequired": "Required for this role"
+    "twoFactorRequired": "Required for this role",
+    "userCreated": "User {{name}} created"
   },
   "aircraftCategory": {
     "airliner": "Airliner",
@@ -373,7 +377,12 @@
     "autoConfirm": "Automatic order confirmation",
     "autoConfirmHint": "Share of orders the generator confirms on a timer to show the flow without manual clicks.",
     "autoConfirmPercent": "Share of orders",
+    "confirmHint": "The action affects only records marked DEMO. Real data and the action log stay.",
+    "done_purge": "Removed",
+    "done_reset": "Rebuilt",
+    "done_seed": "Created",
     "generate": "Generate",
+    "generated": "Data set generated",
     "generation": "Data set generation",
     "live": "Live source data",
     "markerControl": "Marking control",
@@ -382,11 +391,15 @@
     "pageHint": "In production mode demo data generation is unavailable and no marking is shown.",
     "pageNotice": "Available only when DEMO_DATA=true",
     "purge": "Purge demo records",
+    "purgeConfirm": "Remove all demo records?",
+    "purged": "Demo records removed",
     "reset": "Regenerate",
+    "resetConfirm": "Rebuild the demo data set?",
     "seed": "Generator seed",
     "seedHint": "The same seed produces the same data set — it is reproducible.",
     "synthetic": "Generated",
-    "syntheticHint": "This record was created by the demo data generator and is not real."
+    "syntheticHint": "This record was created by the demo data generator and is not real.",
+    "wasReset": "Data set rebuilt"
   },
   "discrepancyKind": {
     "missing_on_our_side": "Missing on our side",

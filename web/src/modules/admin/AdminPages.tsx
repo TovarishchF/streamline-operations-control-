@@ -1,12 +1,13 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Descriptions, Divider, Input, InputNumber, Row, Select, Space,
-  Tag, Typography,
+  Alert, App, Button, Card, Col, Descriptions, Divider, Input, InputNumber, Row, Select,
+  Space, Tag, Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import { useUsers } from '@/api/admin';
+import { useDemoAction, useUsers, type DemoResult } from '@/api/admin';
+import { ApiError } from '@/api/client';
 import type { SlaRule, User } from '@/api/types';
 import { SLA_RULES } from '@/mocks/admin';
 import { VENDORS } from '@/mocks/counterparties';
@@ -14,10 +15,13 @@ import { SERVICE_CATEGORIES } from '@/mocks/reference';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 
+import { UserFormModal } from './UserFormModal';
+
 /** Пользователи и роли `[ТЗ 4.3]`. */
 export function UsersPage(): JSX.Element {
   const { t } = useTranslation();
   const query = useUsers();
+  const [formOpen, setFormOpen] = useState(false);
 
   const columns: DataColumns<User> = [
     { title: t('admin.name'), dataIndex: 'name', width: 200 },
@@ -60,7 +64,11 @@ export function UsersPage(): JSX.Element {
         <Col flex="auto">
           <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.users')}</Typography.Title>
         </Col>
-        <Col><Button type="primary">{t('admin.addUser')}</Button></Col>
+        <Col>
+          <Button type="primary" onClick={() => { setFormOpen(true); }}>
+            {t('admin.addUser')}
+          </Button>
+        </Col>
       </Row>
 
       <Alert type="info" showIcon message={t('admin.permissionsNotice')} />
@@ -76,6 +84,8 @@ export function UsersPage(): JSX.Element {
           )}
         </QueryState>
       </Card>
+
+      <UserFormModal open={formOpen} onClose={() => { setFormOpen(false); }} />
     </Space>
   );
 }
@@ -176,7 +186,46 @@ export function SlaPage(): JSX.Element {
  */
 export function DemoDataPage(): JSX.Element {
   const { t } = useTranslation();
+  const { message, modal } = App.useApp();
   const [seed, setSeed] = useState('20260913');
+  const [result, setResult] = useState<DemoResult | null>(null);
+
+  const generate = useDemoAction('seed');
+  const reset = useDemoAction('reset');
+  const purge = useDemoAction('purge');
+  const busy = generate.isPending || reset.isPending || purge.isPending;
+
+  const run = async (
+    action: ReturnType<typeof useDemoAction>,
+    label: string,
+  ): Promise<void> => {
+    try {
+      setResult(await action.mutateAsync(Number(seed) || undefined));
+      void message.success(label);
+    } catch (error) {
+      // Отказ объясняет сам сервер: в боевом режиме действие запрещено,
+      // и подменять это сообщение своим значило бы скрыть причину.
+      void message.error(
+        error instanceof ApiError ? error.message : t('common.saveFailed'),
+      );
+    }
+  };
+
+  /** Необратимое действие подтверждается: набор уходит со стенда целиком. */
+  const confirmAnd = (
+    action: ReturnType<typeof useDemoAction>,
+    title: string,
+    label: string,
+  ): void => {
+    modal.confirm({
+      title,
+      content: t('demo.confirmHint'),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: () => run(action, label),
+    });
+  };
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -200,10 +249,58 @@ export function DemoDataPage(): JSX.Element {
                 </Typography.Text>
               </Space>
               <Space size={8} wrap>
-                <Button type="primary">{t('demo.generate')}</Button>
-                <Button>{t('demo.reset')}</Button>
-                <Button danger>{t('demo.purge')}</Button>
+                <Button
+                  type="primary"
+                  loading={generate.isPending}
+                  disabled={busy && !generate.isPending}
+                  onClick={() => { void run(generate, t('demo.generated')); }}
+                >
+                  {t('demo.generate')}
+                </Button>
+                <Button
+                  loading={reset.isPending}
+                  disabled={busy && !reset.isPending}
+                  onClick={() => {
+                    confirmAnd(reset, t('demo.resetConfirm'), t('demo.wasReset'));
+                  }}
+                >
+                  {t('demo.reset')}
+                </Button>
+                <Button
+                  danger
+                  loading={purge.isPending}
+                  disabled={busy && !purge.isPending}
+                  onClick={() => {
+                    confirmAnd(purge, t('demo.purgeConfirm'), t('demo.purged'));
+                  }}
+                >
+                  {t('demo.purge')}
+                </Button>
               </Space>
+
+              {result ? (
+                <Alert
+                  type="success"
+                  showIcon
+                  message={t(`demo.done_${result.action}`)}
+                  description={
+                    <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                      <Space size={10} wrap>
+                        {Object.entries(result.counts).map(([name, count]) => (
+                          <Typography.Text key={name} style={{ fontSize: 12 }}>
+                            {name}: <Mono>{count}</Mono>
+                          </Typography.Text>
+                        ))}
+                      </Space>
+                      {result.message ? (
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                          {result.message}
+                        </Typography.Text>
+                      ) : null}
+                    </Space>
+                  }
+                />
+              ) : null}
             </Space>
           </Card>
         </Col>

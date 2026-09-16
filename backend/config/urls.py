@@ -46,6 +46,7 @@ from comms.api.views import (
 from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
 from core.api.views import ClockView, HealthView
 from counterparties.api.views import ClientViewSet, VendorContractViewSet, VendorViewSet
+from demo.api.views import DemoPurgeView, DemoResetView, DemoSeedView
 from fleet.api.views import AircraftViewSet
 from flights.api.views import (
     FlightRequestViewSet,
@@ -113,6 +114,9 @@ api_v1: list[URLPattern | URLResolver] = [
         name="attachment-confirm",
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
+    path("demo/seed", DemoSeedView.as_view(), name="demo-seed"),
+    path("demo/reset", DemoResetView.as_view(), name="demo-reset"),
+    path("demo/purge", DemoPurgeView.as_view(), name="demo-purge"),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
     path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),

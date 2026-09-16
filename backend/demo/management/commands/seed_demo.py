@@ -156,6 +156,16 @@ DEMO_ROUTES_ICAO = (
 )
 
 
+class ReferenceDataMissing(DomainError):
+    """Демонстрационный набор опирается на справочники, а их нет.
+
+    Молчаливый выход отсюда выглядел бы как успешная генерация пустого
+    набора: команда отработала, а на стенде ничего не появилось.
+    """
+
+    code = "VALIDATION_ERROR"
+
+
 class Command(BaseCommand):
     help = "Демонстрационный набор данных (только при DEMO_DATA=true)"
 
@@ -170,16 +180,21 @@ class Command(BaseCommand):
                 "придуманные контрагенты в базе недопустимы (ADR-008)"
             )
 
+        counts = (
+            self.purge() if options["purge"] else self.generate(int(options["seed"]))
+        )
+        for name, count in counts.items():
+            self.stdout.write(f"{name}: {count}")
         if options["purge"]:
-            self._purge()
-            return
-
-        self._generate(int(options["seed"]))
+            self.stdout.write(
+                "Записи журнала не удаляются: таблица аудита только пополняется "
+                "(BACKEND.md § 3.9)."
+            )
 
     # ─────────────────────────── очистка ───────────────────────────
 
     @transaction.atomic
-    def _purge(self) -> None:
+    def purge(self) -> dict[str, int]:
         """Удаляет только демонстрационные записи.
 
         Порядок обратен порядку создания: связи защищены `PROTECT`, поэтому
@@ -206,12 +221,7 @@ class Command(BaseCommand):
             # отличимы по source='seed' и живут до пересоздания базы.
             "записи журнала": AuditEntry.objects.filter(is_demo=True).count(),
         }
-        for name, count in counts.items():
-            self.stdout.write(f"{name}: {count}")
-        self.stdout.write(
-            "Записи журнала не удаляются: таблица аудита только пополняется "
-            "(BACKEND.md § 3.9)."
-        )
+        return counts
 
     # ─────────────────────────── генерация ───────────────────────────
 
@@ -227,13 +237,12 @@ class Command(BaseCommand):
         return random.Random(f"{seed}:{key}")  # noqa: S311
 
     @transaction.atomic
-    def _generate(self, seed: int) -> None:
+    def generate(self, seed: int) -> dict[str, int]:
         if not Airport.objects.exists():
-            self.stdout.write(
+            raise ReferenceDataMissing(
                 "Справочники пусты. Сначала: make seed-reference — "
                 "демонстрационный набор опирается на настоящие коды аэропортов."
             )
-            return
 
         organization = self._organization()
         staff = self._staff(organization)
@@ -247,12 +256,15 @@ class Command(BaseCommand):
         self._contacts(clients, vendors, seed)
         messages = self._communications(staff, seed)
 
-        self.stdout.write(
-            f"Создано: клиентов {len(clients)}, поставщиков {len(vendors)}, "
-            f"бортов {len(aircraft)}, сотрудников {len(staff)}, "
-            f"рейсов {len(flights)}, заявок клиентов {len(requests)}, "
-            f"сообщений и уведомлений {messages}"
-        )
+        return {
+            "клиенты": len(clients),
+            "поставщики": len(vendors),
+            "борта": len(aircraft),
+            "сотрудники": len(staff),
+            "рейсы": len(flights),
+            "заявки клиентов": len(requests),
+            "сообщения и уведомления": messages,
+        }
 
     def _contacts(
         self, clients: list[Client], vendors: list[Vendor], seed: int
@@ -688,6 +700,7 @@ class Command(BaseCommand):
             # Часть слотов ещё ждёт ответа координатора: реестр, где всё
             # подтверждено, не показывает ни ожидания, ни разбора ответа.
             pending = rnd.random() < PENDING_SLOT_SHARE
+            reference = "" if pending else f"SCR-{moment:%Y}-{rnd.randint(1, 9999):04d}"
             Slot.objects.get_or_create(
                 flight=flight,
                 airport_icao=icao,
@@ -696,7 +709,7 @@ class Command(BaseCommand):
                     "requested_utc": moment,
                     "confirmed_utc": None if pending else moment,
                     "status": SlotStatus.REQUESTED if pending else SlotStatus.CONFIRMED,
-                    "message_number": "" if pending else f"SCR-{moment:%Y}-{rnd.randint(1, 9999):04d}",
+                    "message_number": reference,
                     "is_demo": True,
                     "data_source": DataSource.SYNTHETIC,
                 },
