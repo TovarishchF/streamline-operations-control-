@@ -43,7 +43,15 @@ from core.exceptions import DemoOnlyOperation, DomainError
 from core.models import DataSource
 from counterparties.models import Client, Contact, Vendor
 from fleet.models import Aircraft, AircraftApproval, AircraftStatus
-from flights.models import Flight, FlightRequest, ServiceLeg, Slot, SlotStatus, SlotType
+from flights.models import (
+    Flight,
+    FlightRequest,
+    FlightTemplate,
+    ServiceLeg,
+    Slot,
+    SlotStatus,
+    SlotType,
+)
 from flights.services import planning, transitions
 from orders.models import ServiceOrder, ServiceOrderStatus
 
@@ -95,6 +103,14 @@ DEMO_NOTIFICATIONS = 6
 
 # Доля слотов, ожидающих ответа координатора.
 PENDING_SLOT_SHARE = 0.3
+
+# Регулярные направления стенда: наименование, вылет, прилёт, местный час
+# вылета, дни недели по ISO.
+DEMO_TEMPLATES = (
+    ("Москва — Петербург, будни", "UUWW", "ULLI", 9, (1, 2, 3, 4, 5)),
+    ("Москва — Сочи, выходные", "UUDD", "URSS", 11, (6, 7)),
+    ("Петербург — Москва, вечерний", "ULLI", "UUWW", 19, (1, 3, 5)),
+)
 
 VENDOR_NAMES: dict[str, tuple[str, ...]] = {
     "fuel": ("Топливная Компания Восток", "Аэро Фьюэл Сервис", "Нефтепродукт Аэро", "Крыло-Ойл"),
@@ -210,6 +226,9 @@ class Command(BaseCommand):
             "исходящие": OutboxMessage.objects.filter(is_demo=True).delete()[0],
             "контакты": Contact.objects.filter(is_demo=True).delete()[0],
             "заявки клиентов": FlightRequest.objects.filter(is_demo=True).delete()[0],
+            # Шаблон держит клиента и тип ВС связями PROTECT, поэтому
+            # уходит раньше них.
+            "шаблоны рейсов": FlightTemplate.objects.filter(is_demo=True).delete()[0],
             "заявки на услуги": ServiceOrder.objects.filter(is_demo=True).delete()[0],
             "слоты": Slot.objects.filter(is_demo=True).delete()[0],
             "рейсы": Flight.objects.filter(is_demo=True).delete()[0],
@@ -254,6 +273,7 @@ class Command(BaseCommand):
         flights = self._flights(clients, aircraft, vendors, seed)
         requests = self._flight_requests(organization, clients, seed)
         self._contacts(clients, vendors, seed)
+        templates = self._templates(organization, clients, seed)
         messages = self._communications(staff, seed)
 
         return {
@@ -263,6 +283,7 @@ class Command(BaseCommand):
             "сотрудники": len(staff),
             "рейсы": len(flights),
             "заявки клиентов": len(requests),
+            "шаблоны рейсов": templates,
             "сообщения и уведомления": messages,
         }
 
@@ -298,6 +319,49 @@ class Command(BaseCommand):
                 is_demo=True,
                 data_source=DataSource.SYNTHETIC,
             )
+
+    def _templates(
+        self, organization: Organization, clients: list[Client], seed: int
+    ) -> int:
+        """Шаблоны регулярных рейсов `[ТЗ 3.1.1]`.
+
+        Регулярные направления — то, ради чего шаблон и заводят. Стенд
+        без шаблонов не показывает ни их, ни генерацию серии.
+
+        Время вылета местное: перевод в UTC делается при генерации серии,
+        на каждую дату отдельно.
+        """
+        from datetime import time
+
+        from catalog.models import AircraftType
+
+        types = list(AircraftType.objects.order_by("icao_type")[:3])
+        if not types or not clients:
+            return 0
+
+        created = 0
+        for index, (name, dep, arr, hour, weekdays) in enumerate(DEMO_TEMPLATES):
+            rnd = self._rnd(seed, f"template:{name}")
+            template, is_new = FlightTemplate.objects.get_or_create(
+                name=name,
+                defaults={
+                    "organization": organization,
+                    "client": rnd.choice(clients),
+                    "aircraft_type": types[index % len(types)],
+                    "dep_icao": dep,
+                    "arr_icao": arr,
+                    "dep_time_local": time(hour, 0),
+                    "weekdays": list(weekdays),
+                    "is_demo": True,
+                    "data_source": DataSource.SYNTHETIC,
+                },
+            )
+            if is_new:
+                _record(
+                    AuditEntityType.FLIGHT, template.pk, "template_created", {"name": name}
+                )
+                created += 1
+        return created
 
     def _communications(self, staff: list[User], seed: int) -> int:
         """Переписка и уведомления на стенде `[ТЗ 3.5.1, 3.5.2, 3.2.2]`.

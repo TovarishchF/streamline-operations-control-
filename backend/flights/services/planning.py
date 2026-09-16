@@ -18,7 +18,7 @@ from billing.services import fx
 from catalog.models import Airport
 from core import clock, geo
 from core.exceptions import DomainError
-from flights.models import Flight, FlightRequest, FlightRequestStatus
+from flights.models import Flight, FlightRequest, FlightRequestStatus, FlightTemplate
 from flights.services import conflicts as conflict_detector
 
 if TYPE_CHECKING:
@@ -281,3 +281,54 @@ def local_time_at(icao: str, moment: datetime) -> datetime:
 
 def now_utc() -> datetime:
     return clock.now()
+
+
+@transaction.atomic
+def create_template(*, data: dict[str, Any], actor: User) -> FlightTemplate:
+    """Заводит шаблон регулярного рейса `[ТЗ 3.1.1]`.
+
+    Организация берётся из учётной записи автора: шаблон принадлежит
+    эксплуатанту, а не тому, кто его завёл.
+
+    Услуги по умолчанию заводятся в той же транзакции: шаблон без них
+    сгенерирует серию пустых рейсов, и диспетчер добавит услуги руками
+    к каждому — ровно та работа, ради устранения которой шаблон и нужен.
+    """
+    from flights.models import TemplateService
+
+    if actor.organization is None:
+        # Учётная запись без организации — это ошибка заведения пользователя.
+        # Молча подставить первую попавшуюся организацию значило бы завести
+        # шаблон у чужого эксплуатанта.
+        raise DomainError(
+            "У учётной записи нет организации: шаблон принадлежит эксплуатанту"
+        )
+
+    template = FlightTemplate.objects.create(
+        organization=actor.organization,
+        name=data["name"],
+        client_id=data["clientId"],
+        aircraft_type_id=data["aircraftTypeId"],
+        dep_icao=str(data["depIcao"]).upper(),
+        arr_icao=str(data["arrIcao"]).upper(),
+        dep_time_local=data["depTimeLocal"],
+        weekdays=data["weekdays"],
+    )
+
+    for item in data.get("defaultServices") or []:
+        TemplateService.objects.create(
+            template=template,
+            service_id=item["service_id"],
+            leg=item["leg"],
+            attributes=item.get("attributes") or {},
+        )
+
+    audit.record(
+        entity_type=AuditEntityType.FLIGHT,
+        entity_id=template.pk,
+        action="template_created",
+        actor=actor,
+        after=audit.snapshot(template),
+        is_demo=template.is_demo,
+    )
+    return template

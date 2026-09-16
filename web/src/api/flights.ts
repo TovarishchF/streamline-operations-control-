@@ -360,3 +360,82 @@ export function useRejectRequest() {
     },
   });
 }
+
+export const flightTemplateSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  clientId: z.string(),
+  aircraftTypeId: z.string(),
+  depIcao: z.string(),
+  arrIcao: z.string(),
+  depTimeLocal: z.string(),
+  weekdays: z.array(z.number().int()),
+  defaultServices: z
+    .array(
+      z.object({
+        serviceId: z.string(),
+        leg: z.enum(['departure', 'arrival']),
+        attributes: z.record(z.unknown()),
+      }),
+    )
+    .default([]),
+});
+
+export type FlightTemplateRow = z.infer<typeof flightTemplateSchema>;
+
+export function useFlightTemplates(): UseQueryResult<Paged<FlightTemplateRow>> {
+  return useQuery({
+    queryKey: ['flight-templates'],
+    queryFn: ({ signal }) =>
+      request('/flight-templates?perPage=200', pagedSchema(flightTemplateSchema), { signal }),
+  });
+}
+
+export interface CreateTemplateInput {
+  name: string;
+  clientId: string;
+  aircraftTypeId: string;
+  depIcao: string;
+  arrIcao: string;
+  /** Местное время аэропорта вылета: в UTC переводится при генерации серии. */
+  depTimeLocal: string;
+  weekdays: number[];
+  defaultServices: { serviceId: string; leg: 'departure' | 'arrival'; attributes: object }[];
+}
+
+export function useCreateTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateTemplateInput) =>
+      request('/flight-templates', flightTemplateSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['flight-templates'] });
+    },
+  });
+}
+
+/** Генерация серии рейсов из шаблона `[ТЗ 3.1.1]`. */
+export function useGenerateSeries() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { id: string; fromDate: string; toDate: string }) =>
+      request(
+        `/flight-templates/${input.id}/generate`,
+        z.object({ data: z.array(flightRowSchema) }),
+        {
+          method: 'POST',
+          body: { fromDate: input.fromDate, toDate: input.toDate },
+          idempotencyKey: newIdempotencyKey(),
+        },
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['flights'] });
+    },
+  });
+}

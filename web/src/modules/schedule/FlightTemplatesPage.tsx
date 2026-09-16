@@ -1,16 +1,24 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, DatePicker, Form, Modal, Space, Tag, Typography,
+  Alert, App, Button, Card, DatePicker, Form, Modal, Space, Tag, Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
+import type { Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
-import type { FlightTemplate } from '@/api/types';
-import { CLIENT_BY_ID } from '@/mocks/counterparties';
-import { FLIGHT_TEMPLATES } from '@/mocks/flights';
-import { AIRCRAFT_TYPE_BY_ID, AIRPORT_UTC_OFFSET, SERVICE_BY_ID } from '@/mocks/reference';
+import { useAircraftTypes, useServices } from '@/api/catalog';
+import { ApiError } from '@/api/client';
+import { useClients } from '@/api/counterparties';
+import {
+  useCreateTemplate,
+  useFlightTemplates,
+  useGenerateSeries,
+  type FlightTemplateRow,
+} from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+
+import { TemplateFormModal } from './TemplateFormModal';
 
 const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -27,35 +35,62 @@ const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
  */
 export function FlightTemplatesPage(): JSX.Element {
   const { t } = useTranslation();
-  const [generating, setGenerating] = useState<FlightTemplate | null>(null);
+  const { message } = App.useApp();
 
-  const columns: DataColumns<FlightTemplate> = [
+  const [generating, setGenerating] = useState<FlightTemplateRow | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [period, setPeriod] = useState<[Dayjs, Dayjs] | null>(null);
+
+  const templates = useFlightTemplates();
+  const generateSeries = useGenerateSeries();
+  const createTemplate = useCreateTemplate();
+
+  // Справочники для названий: шаблон хранит связи, а не копии наименований.
+  const clients = new Map(
+    (useClients().data?.data ?? []).map((client) => [client.id, client.name]),
+  );
+  const types = new Map(
+    (useAircraftTypes().data?.data ?? []).map((type) => [type.id, type.icaoType]),
+  );
+  const services = new Map(
+    (useServices().data?.data ?? []).map((service) => [service.id, service.name.ru]),
+  );
+
+  const generate = async (): Promise<void> => {
+    if (!generating || !period) return;
+    try {
+      const created = await generateSeries.mutateAsync({
+        id: generating.id,
+        fromDate: period[0].format('YYYY-MM-DD'),
+        toDate: period[1].format('YYYY-MM-DD'),
+      });
+      void message.success(t('template.generated', { count: created.data.length }));
+      setGenerating(null);
+      setPeriod(null);
+    } catch (error) {
+      void message.error(
+        error instanceof ApiError ? error.message : t('template.generateFailed'),
+      );
+    }
+  };
+
+  const columns: DataColumns<FlightTemplateRow> = [
     { title: t('template.name'), dataIndex: 'name', width: 260, fixed: 'left' },
     {
       title: t('flight.client'), dataIndex: 'clientId', width: 200,
-      render: (value: string) => CLIENT_BY_ID.get(value)?.name ?? value,
+      render: (value: string) => clients.get(value) ?? value,
     },
     {
       title: t('flight.route'), key: 'route', width: 130,
       render: (_, row) => <Mono>{row.depIcao} → {row.arrIcao}</Mono>,
     },
     {
-      title: t('template.depTimeLocal'), dataIndex: 'depTimeLocal', width: 170,
-      render: (value: string, row) => {
-        const offset = AIRPORT_UTC_OFFSET[row.depIcao] ?? 0;
-        return (
-          <Space direction="vertical" size={0}>
-            <Mono>{value} LT</Mono>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              <Mono>UTC{offset >= 0 ? '+' : ''}{offset}</Mono>
-            </Typography.Text>
-          </Space>
-        );
-      },
+      title: t('template.aircraftType'), dataIndex: 'aircraftTypeId', width: 120,
+      render: (value: string) => <Mono>{types.get(value) ?? value}</Mono>,
     },
     {
-      title: t('template.aircraftType'), dataIndex: 'aircraftTypeId', width: 180,
-      render: (value: string) => AIRCRAFT_TYPE_BY_ID.get(value)?.name.ru ?? value,
+      title: t('template.depTimeLocal'), dataIndex: 'depTimeLocal', width: 130,
+      render: (value: string) => <Mono>{value} LT</Mono>,
     },
     {
       title: t('template.weekdays'), dataIndex: 'weekdays', width: 220,
@@ -77,8 +112,8 @@ export function FlightTemplatesPage(): JSX.Element {
       title: t('template.defaultServices'), key: 'services', ellipsis: true,
       render: (_, row) => (
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          {(row.defaultServices ?? [])
-            .map((item) => SERVICE_BY_ID.get(item.serviceId ?? '')?.name.ru ?? item.serviceId)
+          {row.defaultServices
+            .map((item) => services.get(item.serviceId) ?? item.serviceId)
             .join(', ')}
         </Typography.Text>
       ),
@@ -100,34 +135,53 @@ export function FlightTemplatesPage(): JSX.Element {
       <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
         <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.templates')}</Typography.Title>
         <Can permission="flight.create">
-          <Button type="primary">{t('template.create')}</Button>
+          <Button
+            type="primary"
+            loading={createTemplate.isPending}
+            onClick={() => { setFormOpen(true); }}
+          >
+            {t('template.create')}
+          </Button>
         </Can>
       </Space>
 
+      {templates.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
+
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<FlightTemplate>
-          size="small" rowKey="id" columns={columns} dataSource={FLIGHT_TEMPLATES}
+        <DataTable<FlightTemplateRow>
+          size="small" rowKey="id" columns={columns}
+          dataSource={templates.data?.data ?? []}
+          loading={templates.isFetching}
           pagination={false} scroll={{ x: 1300 }}
-          locale={{ emptyText: <EmptyState /> }}
+          locale={{ emptyText: <EmptyState description={t('template.empty')} /> }}
         />
       </Card>
+
+      <TemplateFormModal open={formOpen} onClose={() => { setFormOpen(false); }} />
 
       <Modal
         open={generating !== null}
         title={t('template.generateTitle', { name: generating?.name ?? '' })}
-        okText={t('template.previewSeries')}
+        okText={t('template.generate')}
         cancelText={t('common.cancel')}
         width={600}
-        onCancel={() => { setGenerating(null); }}
-        onOk={() => { setGenerating(null); }}
+        okButtonProps={{ disabled: period === null }}
+        confirmLoading={generateSeries.isPending}
+        onCancel={() => { setGenerating(null); setPeriod(null); }}
+        onOk={() => { void generate(); }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           <Form layout="vertical">
             <Form.Item label={t('template.period')} required>
-              <DatePicker.RangePicker style={{ width: '100%' }} />
-            </Form.Item>
-            <Form.Item label={t('template.exceptions')}>
-              <DatePicker multiple style={{ width: '100%' }} />
+              <DatePicker.RangePicker
+                style={{ width: '100%' }}
+                value={period}
+                onChange={(value) => {
+                  setPeriod(
+                    value && value[0] && value[1] ? [value[0], value[1]] : null,
+                  );
+                }}
+              />
             </Form.Item>
           </Form>
 

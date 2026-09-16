@@ -35,6 +35,7 @@ from flights.api.serializers import (
     FlightListSerializer,
     FlightRequestSerializer,
     FlightSerializer,
+    FlightTemplateCreateSerializer,
     FlightTemplateSerializer,
     FlightTransitionSerializer,
     FlightUpdateSerializer,
@@ -440,6 +441,27 @@ class FlightTemplateViewSet(
         "create": Permission.FLIGHT_CREATE,
         "generate": Permission.FLIGHT_CREATE,
     }
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Заводит шаблон `[ТЗ 3.1.1]`.
+
+        Организация берётся из учётной записи: шаблон принадлежит
+        эксплуатанту, а не тому, кто его завёл, и принимать её от клиента
+        значило бы разрешить завести шаблон в чужой организации.
+        """
+
+        def produce() -> Response:
+            payload = FlightTemplateCreateSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+            template = planning.create_template(
+                data=payload.validated_data, actor=cast(User, request.user)
+            )
+            return Response(
+                FlightTemplateSerializer(template).data, status=status.HTTP_201_CREATED
+            )
+
+        return self.idempotent(request, produce)
+
 
     @extend_schema(
         summary="Сгенерировать серию рейсов",

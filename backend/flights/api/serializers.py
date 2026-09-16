@@ -234,6 +234,34 @@ class FlightTemplateSerializer(serializers.ModelSerializer):  # type: ignore[typ
         )
 
 
+class FlightTemplateCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Заведение шаблона `[ТЗ 3.1.1]`.
+
+    Отдельно от формы ответа: организация берётся из учётной записи,
+    а не приходит от клиента, и услуги по умолчанию заводятся вместе
+    с шаблоном — отдельного эндпоинта на них в контракте нет.
+    """
+
+    name = serializers.CharField(max_length=255)
+    clientId = serializers.CharField()  # noqa: N815
+    aircraftTypeId = serializers.CharField()  # noqa: N815
+    depIcao = serializers.RegexField(r"^[A-Za-z]{4}$")  # noqa: N815
+    arrIcao = serializers.RegexField(r"^[A-Za-z]{4}$")  # noqa: N815
+    depTimeLocal = serializers.TimeField()  # noqa: N815
+    weekdays = serializers.ListField(
+        child=serializers.IntegerField(min_value=1, max_value=7), min_length=1
+    )
+    defaultServices = TemplateServiceSerializer(many=True, required=False, default=list)  # noqa: N815
+
+    def validate_weekdays(self, value: list[int]) -> list[int]:
+        """Дни недели без повторов и по порядку.
+
+        Повтор дал бы два рейса в один день при генерации серии, а порядок
+        нужен, чтобы шаблон читался одинаково при каждом показе.
+        """
+        return sorted(set(value))
+
+
 class GenerateSeriesSerializer(serializers.Serializer):  # type: ignore[type-arg]
     fromDate = serializers.DateField()  # noqa: N815
     toDate = serializers.DateField()  # noqa: N815
