@@ -665,6 +665,72 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Slot' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /slots/{id}/scr:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Черновик сообщения SCR `[ТЗ 4.2]` (ADR-026)
+      description: |
+        Собирает текст сообщения координатору по реестру и закрепляет за слотом
+        номер сообщения. **Сообщение не отправляется**: публичного интерфейса
+        слот-координации не существует (`INTEGRATIONS § 5.1`), диспетчер правит
+        черновик и отправляет его сам.
+      x-idempotency: optional
+      responses:
+        '200':
+          description: Черновик сообщения
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [messageRef, text]
+                properties:
+                  messageRef:
+                    type: string
+                    description: Номер сообщения, на который сошлётся ответ координатора
+                  text: { type: string }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /slots/{id}/apply:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [flights]
+      summary: Применение ответа координатора `[ТЗ 3.1.1]`
+      description: |
+        Разбор ответа **предлагает** решение, а применяет его человек:
+        подтверждение слота — основание выпускать рейс. Непонятый ответ
+        возвращает отказ с пояснением, и тогда диспетчер указывает решение
+        и время сам.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text:
+                  type: string
+                  description: Текст ответа координатора
+                status:
+                  type: string
+                  enum: [confirmed, rejected]
+                confirmedTimeUtc: { type: [string, 'null'], format: date-time }
+      responses:
+        '200':
+          description: Ответ применён
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Slot' }
+        '400': { $ref: '#/components/responses/BadRequest' }
+        '404': { $ref: '#/components/responses/NotFound' }
+        '409':
+          description: По слоту уже получен ответ (`SLOT_ALREADY_ANSWERED`)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   # ─────────────────────────────── ЗАЯВКИ НА УСЛУГИ ─────────────────────────────
 
@@ -2862,6 +2928,7 @@ components:
         - IDEMPOTENCY_KEY_CONFLICT
         - MESSAGE_ALREADY_SENT
         - INBOX_ALREADY_APPLIED
+        - SLOT_ALREADY_ANSWERED
         - SCHEDULE_CONFLICT
         - INTEGRATION_UNAVAILABLE
         - DEMO_ONLY_OPERATION
