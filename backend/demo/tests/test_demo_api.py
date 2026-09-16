@@ -22,8 +22,9 @@ from counterparties.models import Client
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from accounts.models import Organization, User
     from rest_framework.test import APIClient
+
+    from accounts.models import Organization
 
 pytestmark = pytest.mark.django_db
 
