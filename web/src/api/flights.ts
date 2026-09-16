@@ -251,6 +251,46 @@ export function useFlightTransition(id: string) {
   });
 }
 
+/**
+ * Переход статуса одного рейса, без привязки к хуку.
+ *
+ * Нужен массовым действиям: хук заводится на идентификатор, а пачка
+ * обходит рейсы по очереди — у каждого свой автомат и свои условия,
+ * и рейс, который не может перейти, не должен отменять переход остальных.
+ */
+export async function transitionFlight(input: {
+  id: string;
+  transition: string;
+  reasonCode?: string;
+  comment?: string;
+}): Promise<Flight> {
+  const { id, ...body } = input;
+  return request(`/flights/${id}/status`, flightSchema, { method: 'POST', body });
+}
+
+/**
+ * Выгрузка суточного плана в XLSX `[ТЗ 3.1.1]`.
+ *
+ * Отбор передаётся тот же, что у списка: файл обязан совпадать с таблицей
+ * на экране. Собирает файл сервер и отдаёт подписанную ссылку.
+ */
+export function useExportSchedule() {
+  return useMutation({
+    mutationFn: (filters: FlightFilters) =>
+      request(`/flights/export?${toQuery(filters)}`, exportTicketSchema, {
+        method: 'POST',
+        idempotencyKey: newIdempotencyKey(),
+      }),
+  });
+}
+
+const exportTicketSchema = z.object({
+  taskId: z.string(),
+  status: z.enum(['queued', 'running', 'ready', 'failed']),
+  downloadUrl: z.string().nullable(),
+  expiresAt: z.string().nullable(),
+});
+
 export function useUpdateFlight(id: string) {
   const queryClient = useQueryClient();
 

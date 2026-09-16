@@ -248,8 +248,7 @@ export function useUpdateMessageTemplate() {
 const previewSchema = z.object({
   subject: z.string(),
   body: z.string(),
-  // Без значения по умолчанию: сервер поле возвращает всегда, а `default`
-  // сделал бы его необязательным в выводимом типе.
+  // Поле обязательное: сервер возвращает его всегда, в том числе пустым.
   missing: z.array(z.string()),
 });
 

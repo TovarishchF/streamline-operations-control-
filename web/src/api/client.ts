@@ -98,7 +98,10 @@ interface RequestOptions {
 
 export async function request<T>(
   path: string,
-  schema: z.ZodType<T>,
+  // Схема объявлена по **разобранному** типу: у `z.ZodType<T>` вход
+  // и выход совпадают, и схема со значениями по умолчанию выводила бы
+  // тип входа — с необязательными полями там, где сервер их всегда шлёт.
+  schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   options: RequestOptions = {},
 ): Promise<T> {
   const { method = 'GET', body, idempotencyKey, signal, skipRefresh = false } = options;

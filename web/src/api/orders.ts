@@ -122,6 +122,26 @@ export function useFlightOrders(flightId: string | undefined): UseQueryResult<Se
   });
 }
 
+/** Заявки рейса одним запросом, без привязки к хуку: нужно массовым действиям. */
+export async function fetchFlightOrders(flightId: string): Promise<ServiceOrderRow[]> {
+  const response = await request(
+    `/flights/${flightId}/services`,
+    z.object({ data: z.array(serviceOrderSchema) }),
+  );
+  return response.data;
+}
+
+/** Назначение поставщика черновику заявки `[ТЗ 3.3.2]`. */
+export async function assignOrderVendor(input: {
+  id: string;
+  vendorId: string;
+}): Promise<ServiceOrderRow> {
+  return request(`/service-orders/${input.id}`, serviceOrderSchema, {
+    method: 'PATCH',
+    body: { vendorId: input.vendorId },
+  });
+}
+
 export function useServiceOrders(params: {
   vendorId?: string;
   status?: string;

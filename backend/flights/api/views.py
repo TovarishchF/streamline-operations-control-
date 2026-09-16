@@ -22,7 +22,7 @@ from accounts.permissions import Permission
 from audit.api.views import AuditEntrySerializer
 from audit.models import AuditEntityType, AuditEntry
 from catalog.models import Service
-from core.api.idempotency import IdempotentCreateMixin
+from core.api.idempotency import IdempotencyMixin, IdempotentCreateMixin
 from core.api.permissions import HasRolePermission
 from core.api.serializers import ErrorResponseSerializer
 from core.api.viewsets import SocViewSetMixin, TenantScopedViewSet
@@ -30,6 +30,7 @@ from counterparties.models import Client, Vendor
 from fleet.models import Aircraft
 from flights.api.serializers import (
     ConflictSerializer,
+    ExportTicketSerializer,
     FlightCreateSerializer,
     FlightListSerializer,
     FlightRequestSerializer,
@@ -294,6 +295,90 @@ class FlightViewSet(
             entity_type=AuditEntityType.FLIGHT, entity_id=flight.pk
         )
         return Response({"data": AuditEntrySerializer(entries, many=True).data})
+
+
+class ScheduleExportView(IdempotencyMixin, APIView):
+    """`POST /api/v1/flights/export` `[ТЗ 3.1.1]`.
+
+    Отбор берётся из тех же параметров, что и список: файл обязан совпадать
+    с таблицей на экране. Повторное использование `FlightViewSet.get_queryset`
+    здесь было бы удобнее, но потянуло бы за собой фильтрацию по арендатору
+    вьюсета — а выгрузка расписания порталам не отдаётся вовсе.
+    """
+
+    permission_classes: Any = (HasRolePermission,)
+    required_permissions: ClassVar[dict[str, Any]] = {"POST": Permission.SCHEDULE_VIEW}
+
+    @extend_schema(
+        summary="Выгрузка суточного плана в XLSX",
+        request=None,
+        responses={202: ExportTicketSerializer},
+        tags=["flights"],
+    )
+    def post(self, request: Request) -> Response:
+        # Право на расписание есть и у портальных ролей: клиент видит свои
+        # рейсы. Но выгрузка собирает выборку целиком, и права здесь мало —
+        # нужен ещё фильтр арендатора, которого у одиночной вьюхи нет.
+        # Отказ портальной роли закрывает протечку по построению
+        # (`BACKEND.md § 3.7`); свои рейсы клиент видит в своём портале.
+        from accounts.permissions import TENANT_SCOPED_ROLES
+
+        if str(getattr(request.user, "role", "")) in TENANT_SCOPED_ROLES:
+            from rest_framework.exceptions import PermissionDenied
+
+            raise PermissionDenied
+
+        def produce() -> Response:
+            from core import clock
+            from core.services import storage
+            from flights.services import export as schedule_export
+
+            produced = schedule_export.export_schedule(self._selection(request))
+            return Response(
+                {
+                    "taskId": f"schedule-{clock.now():%Y%m%d%H%M%S}",
+                    "status": "ready",
+                    "downloadUrl": produced.url,
+                    "expiresAt": clock.now()
+                    + timedelta(seconds=storage.DOWNLOAD_URL_TTL_SECONDS),
+                },
+                status=status.HTTP_202_ACCEPTED,
+            )
+
+        return self.idempotent(request, produce)
+
+    def _selection(self, request: Request) -> QuerySet[Flight]:
+        """Выборка по тем же параметрам, что и `GET /flights`."""
+        from django.db.models import Q
+
+        params = request.query_params
+        queryset = Flight.objects.all()
+
+        if params.get("status"):
+            queryset = queryset.filter(status__in=params["status"].split(","))
+        if params.get("clientId"):
+            queryset = queryset.filter(client_id=params["clientId"])
+        if params.get("aircraftId"):
+            queryset = queryset.filter(aircraft_id=params["aircraftId"])
+        if params.get("from"):
+            queryset = queryset.filter(std_utc__gte=params["from"])
+        if params.get("to"):
+            queryset = queryset.filter(std_utc__lte=params["to"])
+        if params.get("airport"):
+            icao = params["airport"].upper()
+            queryset = queryset.filter(Q(dep_icao=icao) | Q(arr_icao=icao))
+        if params.get("type"):
+            queryset = queryset.filter(type=params["type"])
+        if params.get("search"):
+            needle = params["search"].strip()
+            queryset = queryset.filter(
+                Q(number__icontains=needle)
+                | Q(dep_icao__istartswith=needle)
+                | Q(arr_icao__istartswith=needle)
+                | Q(client__name__icontains=needle)
+                | Q(aircraft__registration__icontains=needle)
+            )
+        return queryset.order_by("std_utc")
 
 
 class ScheduleConflictsView(APIView):

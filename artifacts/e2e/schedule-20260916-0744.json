@@ -1,0 +1,435 @@
+{
+  "config": {
+    "configFile": "/work/e2e/playwright.docker.config.ts",
+    "rootDir": "/work/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../artifacts/e2e/schedule-20260916-0744.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/work/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/work/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.49.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "schedule.spec.ts",
+      "file": "schedule.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Суточный план",
+          "file": "schedule.spec.ts",
+          "line": 47,
+          "column": 6,
+          "specs": [
+            {
+              "title": "кнопка выгрузки отдаёт подписанную ссылку на книгу",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "timedOut",
+                      "duration": 90406,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 27,
+                            "line": 55
+                          },
+                          "message": "Error: page.waitForResponse: Test timeout of 90000ms exceeded.\n\n  53 |     await openTable(page);\n  54 |\n> 55 |     const exported = page.waitForResponse(\n     |                           ^\n  56 |       (response) =>\n  57 |         response.url().includes('/api/v1/flights/export') &&\n  58 |         response.request().method() === 'POST',\n    at /work/e2e/schedule.spec.ts:55:27"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 62,
+                            "line": 61
+                          },
+                          "message": "Error: locator.click: Test timeout of 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Экспорт XLSX' })\u001b[22m\n\n\n  59 |     );\n  60 |     const popup = page.waitForEvent('popup');\n> 61 |     await page.getByRole('button', { name: 'Экспорт XLSX' }).click();\n     |                                                              ^\n  62 |\n  63 |     const response = await exported;\n  64 |     expect(response.status(), 'сервер не собрал выгрузку').toBe(202);\n    at /work/e2e/schedule.spec.ts:61:62"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T04:45:18.215Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-кно-f788f-подписанную-ссылку-на-книгу-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-кно-f788f-подписанную-ссылку-на-книгу-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-c0a6a380c9625b8b66de",
+              "file": "schedule.spec.ts",
+              "line": 52,
+              "column": 3
+            },
+            {
+              "title": "выгрузка уносит отбор экрана, а не всё подряд",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "timedOut",
+                      "duration": 91353,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 27,
+                            "line": 84
+                          },
+                          "message": "Error: page.waitForResponse: Test timeout of 90000ms exceeded.\n\n  82 |     );\n  83 |\n> 84 |     const exported = page.waitForResponse(\n     |                           ^\n  85 |       (response) =>\n  86 |         response.url().includes('/api/v1/flights/export') &&\n  87 |         response.request().method() === 'POST',\n    at /work/e2e/schedule.spec.ts:84:27"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 62,
+                            "line": 90
+                          },
+                          "message": "Error: locator.click: Test timeout of 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Экспорт XLSX' })\u001b[22m\n\n\n  88 |     );\n  89 |     const popup = page.waitForEvent('popup');\n> 90 |     await page.getByRole('button', { name: 'Экспорт XLSX' }).click();\n     |                                                              ^\n  91 |\n  92 |     const response = await exported;\n  93 |     expect(response.status()).toBe(202);\n    at /work/e2e/schedule.spec.ts:90:62"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T04:46:57.246Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-выг-1bbf1-тбор-экрана-а-не-всё-подряд-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-выг-1bbf1-тбор-экрана-а-не-всё-подряд-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-07d7108ff28e5d04c5d2",
+              "file": "schedule.spec.ts",
+              "line": 75,
+              "column": 3
+            },
+            {
+              "title": "массовые действия недоступны без выбора",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "failed",
+                      "duration": 8463,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m()\u001b[22m\n\nLocator: getByRole('button', { name: 'Сменить статус' })\nExpected: disabled\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeDisabled with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Сменить статус' })\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m()\u001b[22m\n\nLocator: getByRole('button', { name: 'Сменить статус' })\nExpected: disabled\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeDisabled with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Сменить статус' })\u001b[22m\n\n    at /work/e2e/schedule.spec.ts:103:72",
+                        "matcherResult": {
+                          "message": "\u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m()\u001b[22m\n\nLocator: getByRole('button', { name: 'Сменить статус' })\nExpected: disabled\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeDisabled with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Сменить статус' })\u001b[22m\n",
+                          "pass": false,
+                          "actual": "enabled",
+                          "name": "toBeDisabled",
+                          "expected": "disabled",
+                          "log": [
+                            "  - expect.toBeDisabled with timeout 5000ms",
+                            "  - waiting for getByRole('button', { name: 'Сменить статус' })"
+                          ],
+                          "timeout": 5000
+                        },
+                        "location": {
+                          "file": "/work/e2e/schedule.spec.ts",
+                          "column": 72,
+                          "line": 103
+                        },
+                        "snippet": "  101 |     await openTable(page);\n  102 |\n> 103 |     await expect(page.getByRole('button', { name: 'Сменить статус' })).toBeDisabled();\n      |                                                                        ^\n  104 |     await expect(page.getByRole('button', { name: 'Назначить поставщика' })).toBeDisabled();\n  105 |   });\n  106 |"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 72,
+                            "line": 103
+                          },
+                          "message": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeDisabled\u001b[2m()\u001b[22m\n\nLocator: getByRole('button', { name: 'Сменить статус' })\nExpected: disabled\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeDisabled with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for getByRole('button', { name: 'Сменить статус' })\u001b[22m\n\n\n  101 |     await openTable(page);\n  102 |\n> 103 |     await expect(page.getByRole('button', { name: 'Сменить статус' })).toBeDisabled();\n      |                                                                        ^\n  104 |     await expect(page.getByRole('button', { name: 'Назначить поставщика' })).toBeDisabled();\n  105 |   });\n  106 |\n    at /work/e2e/schedule.spec.ts:103:72"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T04:48:39.035Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-53e34-ствия-недоступны-без-выбора-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-53e34-ствия-недоступны-без-выбора-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/schedule.spec.ts",
+                        "column": 72,
+                        "line": 103
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-9379d38902b33c3dc1cf",
+              "file": "schedule.spec.ts",
+              "line": 100,
+              "column": 3
+            },
+            {
+              "title": "массовая смена статуса отчитывается по каждому рейсу",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "timedOut",
+                      "duration": 90572,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 64,
+                            "line": 117
+                          },
+                          "message": "Error: locator.click: Test timeout of 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for getByRole('button', { name: 'Сменить статус' })\u001b[22m\n\n\n  115 |     await expect(page.getByText('Выбрано рейсов: 3')).toBeVisible();\n  116 |\n> 117 |     await page.getByRole('button', { name: 'Сменить статус' }).click();\n      |                                                                ^\n  118 |     const form = dialog(page);\n  119 |     await pickOption(form, page, 'Переход', 'Взять в работу');\n  120 |     await form.getByRole('button', { name: 'Применить' }).click();\n    at /work/e2e/schedule.spec.ts:117:64"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T04:48:56.532Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-9f00d-читывается-по-каждому-рейсу-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-9f00d-читывается-по-каждому-рейсу-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-b63e334c07af69053183",
+              "file": "schedule.spec.ts",
+              "line": 107,
+              "column": 3
+            },
+            {
+              "title": "массовое назначение поставщика спрашивает поставщика",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "failed",
+                      "duration": 8904,
+                      "error": {
+                        "message": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('.ant-modal-content').getByText('черновикам заявок')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.ant-modal-content').getByText('черновикам заявок')\u001b[22m\n",
+                        "stack": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('.ant-modal-content').getByText('черновикам заявок')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.ant-modal-content').getByText('черновикам заявок')\u001b[22m\n\n    at /work/e2e/schedule.spec.ts:136:55",
+                        "matcherResult": {
+                          "message": "\u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('.ant-modal-content').getByText('черновикам заявок')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.ant-modal-content').getByText('черновикам заявок')\u001b[22m\n",
+                          "pass": false,
+                          "actual": "hidden",
+                          "name": "toBeVisible",
+                          "expected": "visible",
+                          "log": [
+                            "  - expect.toBeVisible with timeout 5000ms",
+                            "  - waiting for locator('.ant-modal-content').getByText('черновикам заявок')"
+                          ],
+                          "timeout": 5000
+                        },
+                        "location": {
+                          "file": "/work/e2e/schedule.spec.ts",
+                          "column": 55,
+                          "line": 136
+                        },
+                        "snippet": "  134 |\n  135 |     const form = dialog(page);\n> 136 |     await expect(form.getByText('черновикам заявок')).toBeVisible();\n      |                                                       ^\n  137 |     await form.getByRole('button', { name: 'Применить' }).click();\n  138 |     // Без поставщика действие не запускается\n  139 |     await expect(form.locator('.ant-form-item-explain-error').first()).toBeVisible();"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/schedule.spec.ts",
+                            "column": 55,
+                            "line": 136
+                          },
+                          "message": "Error: \u001b[31mTimed out 5000ms waiting for \u001b[39m\u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoBeVisible\u001b[2m()\u001b[22m\n\nLocator: locator('.ant-modal-content').getByText('черновикам заявок')\nExpected: visible\nReceived: <element(s) not found>\nCall log:\n\u001b[2m  - expect.toBeVisible with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.ant-modal-content').getByText('черновикам заявок')\u001b[22m\n\n\n  134 |\n  135 |     const form = dialog(page);\n> 136 |     await expect(form.getByText('черновикам заявок')).toBeVisible();\n      |                                                       ^\n  137 |     await form.getByRole('button', { name: 'Применить' }).click();\n  138 |     // Без поставщика действие не запускается\n  139 |     await expect(form.locator('.ant-form-item-explain-error').first()).toBeVisible();\n    at /work/e2e/schedule.spec.ts:136:55"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T04:50:35.812Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-e1346-вщика-спрашивает-поставщика-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/schedule-Суточный-план-мас-e1346-вщика-спрашивает-поставщика-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/schedule.spec.ts",
+                        "column": 55,
+                        "line": 136
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "0c763654641d7f9e8f11-2a9d7ff79b3a5bb91dfd",
+              "file": "schedule.spec.ts",
+              "line": 129,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-16T04:45:09.385Z",
+    "duration": 335892.809,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 5,
+    "flaky": 0
+  }
+}

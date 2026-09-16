@@ -112,8 +112,7 @@ export function useCreateUser() {
 const demoResultSchema = z.object({
   action: z.enum(['seed', 'reset', 'purge']),
   counts: z.record(z.number().int()),
-  // Без значения по умолчанию: сервер поле возвращает всегда, а default
-  // сделал бы его необязательным в выводимом типе.
+  // Поле обязательное: сервер возвращает его всегда, в том числе пустым.
   message: z.string(),
 });
 

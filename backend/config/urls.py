@@ -53,6 +53,7 @@ from flights.api.views import (
     FlightTemplateViewSet,
     FlightViewSet,
     ScheduleConflictsView,
+    ScheduleExportView,
     SlotViewSet,
 )
 from orders.api.views import ServiceOrderViewSet
@@ -114,6 +115,7 @@ api_v1: list[URLPattern | URLResolver] = [
         name="attachment-confirm",
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
+    path("flights/export", ScheduleExportView.as_view(), name="flight-export"),
     path("demo/seed", DemoSeedView.as_view(), name="demo-seed"),
     path("demo/reset", DemoResetView.as_view(), name="demo-reset"),
     path("demo/purge", DemoPurgeView.as_view(), name="demo-purge"),

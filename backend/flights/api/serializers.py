@@ -257,6 +257,15 @@ class FlightRequestSerializer(serializers.ModelSerializer):  # type: ignore[type
         )
 
 
+class ExportTicketSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`ExportTicket` из контракта. Форма та же, что у выгрузки отчётов."""
+
+    taskId = serializers.CharField()  # noqa: N815
+    status = serializers.ChoiceField(choices=["queued", "running", "ready", "failed"])
+    downloadUrl = serializers.CharField(allow_null=True)  # noqa: N815
+    expiresAt = serializers.DateTimeField(allow_null=True)  # noqa: N815
+
+
 class SlotSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     airportIcao = serializers.CharField(source="airport_icao")  # noqa: N815
     flightId = serializers.CharField(source="flight_id")  # noqa: N815

@@ -116,7 +116,7 @@ def _sheet_title(name: str) -> str:
     return " ".join(cleaned.split())[:31].strip()
 
 
-def _render_xlsx(spec: Definition, result: dict[str, Any]) -> bytes:
+def render_xlsx(spec: Definition, result: dict[str, Any]) -> bytes:
     from openpyxl import Workbook
     from openpyxl.styles import Alignment, Font
 
@@ -268,7 +268,7 @@ def _render_pdf(spec: Definition, result: dict[str, Any]) -> bytes:
 # раздел `<Parameters>` требует схема, и вызывается он отдельно.
 RENDERERS: dict[str, Callable[[Definition, dict[str, Any]], bytes]] = {
     PDF: _render_pdf,
-    XLSX: _render_xlsx,
+    XLSX: render_xlsx,
     CSV: _render_csv,
     XML: _render_xml,
 }

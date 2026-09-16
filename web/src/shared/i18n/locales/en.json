@@ -965,11 +965,23 @@
     "vendor": "Vendor"
   },
   "schedule": {
+    "bulkAllDone": "Applied to all flights ({{count}})",
+    "bulkApply": "Apply",
+    "bulkDone": "Applied",
+    "bulkFailed": "Refused",
+    "bulkHint": "The action is applied to the selected flights ({{count}}) one by one. A flight that cannot move does not cancel the others.",
+    "bulkNoDrafts": "No draft orders",
+    "bulkOk": "Done",
+    "bulkPartly": "Applied to {{done}} of {{total}}",
+    "bulkResult": "Applied to {{done}} of {{total}}",
     "bulkStatus": "Change status",
+    "bulkTransition": "Transition",
     "bulkVendor": "Assign vendor",
+    "bulkVendorHint": "The vendor is assigned to draft orders of the selected flights.",
     "conflictHint": "A conflict does not block saving but requires confirmation with a reason. The reason is written to the audit log.",
     "conflictsFound": "Schedule conflicts: {{count}}",
     "emptyFiltered": "No flights match the filters",
+    "exportFailed": "Could not export the schedule",
     "exportXlsx": "Export to XLSX",
     "filterLowMargin": "Margin below threshold",
     "filterUnconfirmed": "Has unconfirmed services",
@@ -984,6 +996,7 @@
     "scaleWeek": "Week",
     "searchPlaceholder": "Number, client, aircraft, airport",
     "selectedActions": "Bulk actions:",
+    "selectedCount": "Flights selected: {{count}}",
     "table": "Table"
   },
   "service": {

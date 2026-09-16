@@ -1,6 +1,7 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Input, Radio, Row, Segmented, Select, Space, Tag, Tooltip, Typography,
+  Alert, App, Button, Card, Col, Input, Radio, Row, Segmented, Select, Space, Tag, Tooltip,
+  Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined, PlusOutlined, WarningOutlined } from '@ant-design/icons';
@@ -8,7 +9,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useAirports } from '@/api/catalog';
-import { useFlights, useScheduleConflicts, type FlightRow } from '@/api/flights';
+import {
+  useExportSchedule,
+  useFlights,
+  useScheduleConflicts,
+  type FlightRow,
+} from '@/api/flights';
+import { ApiError } from '@/api/client';
 import type { FlightStatus } from '@/api/types';
 import { useClients } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
@@ -18,6 +25,7 @@ import {
   EmptyState, FlightStatusTag, Mono, PercentText, UtcTime,
 } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { BulkActionsModal } from './BulkActionsModal';
 import { GanttBoard, type ScaleKey } from './GanttBoard';
 
 const STATUSES: FlightStatus[] = [
@@ -57,6 +65,11 @@ export function SchedulePage(): JSX.Element {
   const [view, setView] = useState<'gantt' | 'table'>('gantt');
   const [scale, setScale] = useState<ScaleKey>('day');
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [selected, setSelected] = useState<string[]>([]);
+  const [bulkMode, setBulkMode] = useState<'status' | 'vendor' | null>(null);
+
+  const { message } = App.useApp();
+  const exportSchedule = useExportSchedule();
 
   const query = useFlights({
     search: filters.search.trim(),
@@ -77,6 +90,24 @@ export function SchedulePage(): JSX.Element {
     base.setUTCHours(base.getUTCHours() - (scale === 'day' ? 4 : scale === 'threeDays' ? 12 : 24), 0, 0, 0);
     return base;
   }, [nowUtc, scale]);
+
+  const runExport = async (): Promise<void> => {
+    try {
+      const ticket = await exportSchedule.mutateAsync({
+        search: filters.search.trim(),
+        status: filters.statuses.join(','),
+        ...(filters.clientId ? { clientId: filters.clientId } : {}),
+        ...(filters.airport ? { airport: filters.airport } : {}),
+      });
+      if (ticket.downloadUrl) {
+        window.open(ticket.downloadUrl, '_blank', 'noopener');
+      }
+    } catch (error) {
+      void message.error(
+        error instanceof ApiError ? error.message : t('schedule.exportFailed'),
+      );
+    }
+  };
 
   const filtered = useMemo(() => {
     const rows = query.data?.data ?? [];
@@ -335,21 +366,46 @@ export function SchedulePage(): JSX.Element {
             dataSource={filtered}
             scroll={{ x: 1100 }}
             pagination={{ pageSize: 25, showSizeChanger: true, size: 'small' }}
-            rowSelection={{ type: 'checkbox' }}
+            rowSelection={{
+              type: 'checkbox',
+              selectedRowKeys: selected,
+              onChange: (keys) => { setSelected(keys.map(String)); },
+            }}
             locale={{ emptyText: <EmptyState description={t('schedule.emptyFiltered')} /> }}
             footer={() => (
               <Space size={8} wrap>
                 <Typography.Text type="secondary">
-                  {t('schedule.selectedActions')}
+                  {selected.length > 0
+                    ? t('schedule.selectedCount', { count: selected.length })
+                    : t('schedule.selectedActions')}
                 </Typography.Text>
-                <Button size="small" icon={<ExportOutlined />}>
+                {/* Выгрузка берёт отбор экрана, а не выделение: в файл уходит
+                    та же таблица, которую человек видит. */}
+                <Button
+                  size="small"
+                  icon={<ExportOutlined />}
+                  loading={exportSchedule.isPending}
+                  onClick={() => { void runExport(); }}
+                >
                   {t('schedule.exportXlsx')}
                 </Button>
                 <Can permission="flight.status">
-                  <Button size="small">{t('schedule.bulkStatus')}</Button>
+                  <Button
+                    size="small"
+                    disabled={selected.length === 0}
+                    onClick={() => { setBulkMode('status'); }}
+                  >
+                    {t('schedule.bulkStatus')}
+                  </Button>
                 </Can>
                 <Can permission="vendor.assign">
-                  <Button size="small">{t('schedule.bulkVendor')}</Button>
+                  <Button
+                    size="small"
+                    disabled={selected.length === 0}
+                    onClick={() => { setBulkMode('vendor'); }}
+                  >
+                    {t('schedule.bulkVendor')}
+                  </Button>
                 </Can>
               </Space>
             )}
@@ -357,6 +413,15 @@ export function SchedulePage(): JSX.Element {
         </Card>
       )}
       </QueryState>
+
+      <BulkActionsModal
+        mode={bulkMode}
+        flights={filtered.filter((flight) => selected.includes(flight.id))}
+        onClose={() => {
+          setBulkMode(null);
+          setSelected([]);
+        }}
+      />
     </Space>
   );
 }

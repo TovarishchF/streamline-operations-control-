@@ -152,7 +152,7 @@ def test_xlsx_money_cells_are_numbers(spec: Any, financial_result: dict[str, Any
     """Суммы в таблице должны складываться средствами Excel."""
     from openpyxl import load_workbook
 
-    workbook = load_workbook(BytesIO(export._render_xlsx(spec, financial_result)))
+    workbook = load_workbook(BytesIO(export.render_xlsx(spec, financial_result)))
     sheet = workbook.active
     assert sheet is not None
 
@@ -169,7 +169,7 @@ def test_xlsx_money_cells_are_numbers(spec: Any, financial_result: dict[str, Any
 def test_xlsx_totals_match_the_report(spec: Any, financial_result: dict[str, Any]) -> None:
     from openpyxl import load_workbook
 
-    workbook = load_workbook(BytesIO(export._render_xlsx(spec, financial_result)))
+    workbook = load_workbook(BytesIO(export.render_xlsx(spec, financial_result)))
     sheet = workbook.active
     assert sheet is not None
 
@@ -269,7 +269,7 @@ def test_demo_stand_marks_every_format(
 
     assert export.DEMO_NOTE.encode() in export._render_csv(spec, financial_result)
 
-    workbook = load_workbook(BytesIO(export._render_xlsx(spec, financial_result)))
+    workbook = load_workbook(BytesIO(export.render_xlsx(spec, financial_result)))
     sheet = workbook.active
     assert sheet is not None
     assert "DEMO" in str(sheet.cell(row=1, column=1).value)
