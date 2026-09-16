@@ -461,6 +461,47 @@ paths:
                         type: array
                         items: { $ref: '#/components/schemas/AuditEntry' }
 
+  /flights/export:
+    post:
+      tags: [flights]
+      summary: Выгрузка суточного плана в XLSX `[ТЗ 3.1.1]`
+      description: |
+        Выгружается то, что видно на экране: отбор задаётся теми же параметрами,
+        что и `GET /flights`. Отдельный набор фильтров у выгрузки означал бы файл,
+        не совпадающий с таблицей.
+      x-idempotency: optional
+      parameters:
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: clientId
+          in: query
+          schema: { type: string }
+        - name: aircraftId
+          in: query
+          schema: { type: string }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: airport
+          in: query
+          schema: { $ref: '#/components/schemas/IcaoCode' }
+        - name: type
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '202':
+          description: Файл собран, ссылка на загрузку
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExportTicket' }
+
   /flights/conflicts:
     get:
       tags: [flights]
