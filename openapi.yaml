@@ -2539,6 +2539,74 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/User' }
 
+  /demo/seed:
+    post:
+      tags: [admin]
+      summary: Генерация демонстрационного набора `[ТЗ этап 2]`
+      description: |
+        Доступна **только** при `DEMO_DATA=true` (ADR-008): в боевом режиме
+        придуманные контрагенты в базе недопустимы. Генератор детерминирован:
+        одно и то же зерно даёт один и тот же набор, чтобы снимки экранов
+        и разговор с заказчиком воспроизводились.
+
+        Набор дополняет существующий, а не заменяет его: для замены есть
+        `/demo/reset`.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DemoSeedRequest' }
+      responses:
+        '200':
+          description: Набор сгенерирован
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DemoResult' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /demo/reset:
+    post:
+      tags: [admin]
+      summary: Пересоздание демонстрационного набора
+      description: |
+        Удаляет демонстрационные записи и генерирует набор заново. Записи
+        журнала действий не удаляются: таблица аудита только пополняется
+        (`BACKEND § 3.9`), а записи генератора отличимы по `source: seed`.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DemoSeedRequest' }
+      responses:
+        '200':
+          description: Набор пересоздан
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DemoResult' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /demo/purge:
+    post:
+      tags: [admin]
+      summary: Очистка демонстрационных данных
+      description: |
+        Удаляются **только** записи с `isDemo`. Это возможно потому, что
+        ссылки «настоящая запись → демонстрационная» запрещены на уровне базы
+        (ADR-016).
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Демонстрационные записи удалены
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DemoResult' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
   /audit:
     get:
       tags: [admin]
@@ -2907,6 +2975,28 @@ components:
             total: { type: integer }
             page: { type: integer }
             perPage: { type: integer }
+
+    DemoSeedRequest:
+      type: object
+      properties:
+        seed:
+          type: integer
+          description: |
+            Зерно генератора. Одно и то же зерно даёт один и тот же набор.
+          default: 20260913
+
+    DemoResult:
+      type: object
+      required: [action, counts]
+      properties:
+        action:
+          type: string
+          enum: [seed, reset, purge]
+        counts:
+          type: object
+          description: Что создано либо удалено, по видам записей
+          additionalProperties: { type: integer }
+        message: { type: string }
 
     ErrorCode:
       type: string
