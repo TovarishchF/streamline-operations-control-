@@ -1,0 +1,247 @@
+{
+  "config": {
+    "configFile": "/work/e2e/playwright.docker.config.ts",
+    "rootDir": "/work/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../artifacts/e2e/templates-20260916-0936.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/work/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/work/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.49.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "templates.spec.ts",
+      "file": "templates.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Шаблоны рейсов",
+          "file": "templates.spec.ts",
+          "line": 48,
+          "column": 6,
+          "specs": [
+            {
+              "title": "реестр шаблонов приходит с сервера",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3949,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T06:37:24.904Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1772d640e91cdbbb6eb8-dd15282a78a411e5f2f7",
+              "file": "templates.spec.ts",
+              "line": 54,
+              "column": 3
+            },
+            {
+              "title": "кнопка «Создать шаблон» заводит шаблон",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 5815,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T06:37:29.017Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1772d640e91cdbbb6eb8-3ddffd06b1c7d51c83e9",
+              "file": "templates.spec.ts",
+              "line": 65,
+              "column": 3
+            },
+            {
+              "title": "кнопка «Сгенерировать» создаёт серию рейсов",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "timedOut",
+                      "duration": 91423,
+                      "error": {
+                        "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m",
+                        "stack": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                      },
+                      "errors": [
+                        {
+                          "message": "\u001b[31mTest timeout of 90000ms exceeded.\u001b[39m"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/templates.spec.ts",
+                            "column": 28,
+                            "line": 123
+                          },
+                          "message": "Error: page.waitForResponse: Test timeout of 90000ms exceeded.\n\n  121 |     await page.keyboard.press('Enter');\n  122 |\n> 123 |     const generated = page.waitForResponse(\n      |                            ^\n  124 |       (response) =>\n  125 |         response.url().includes('/generate') && response.request().method() === 'POST',\n  126 |     );\n    at /work/e2e/templates.spec.ts:123:28"
+                        },
+                        {
+                          "location": {
+                            "file": "/work/e2e/templates.spec.ts",
+                            "column": 69,
+                            "line": 127
+                          },
+                          "message": "Error: locator.click: Test timeout of 90000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('.ant-modal-content').getByRole('button', { name: 'Сгенерировать серию' })\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"button\" class=\"ant-btn css-dev-only-do-not-override-1qzz5uw ant-btn-primary ant-btn-color-primary ant-btn-variant-solid\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m    - waiting 20ms\u001b[22m\n\u001b[2m    2 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m      - element is not enabled\u001b[22m\n\u001b[2m    - retrying click action\u001b[22m\n\u001b[2m      - waiting 100ms\u001b[22m\n\u001b[2m    170 × waiting for element to be visible, enabled and stable\u001b[22m\n\u001b[2m        - element is not enabled\u001b[22m\n\u001b[2m      - retrying click action\u001b[22m\n\u001b[2m        - waiting 500ms\u001b[22m\n\n\n  125 |         response.url().includes('/generate') && response.request().method() === 'POST',\n  126 |     );\n> 127 |     await form.getByRole('button', { name: 'Сгенерировать серию' }).click();\n      |                                                                     ^\n  128 |\n  129 |     const response = await generated;\n  130 |     expect(response.status(), 'сервер не сгенерировал серию').toBe(201);\n    at /work/e2e/templates.spec.ts:127:69"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T06:37:34.842Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/templates-Шаблоны-рейсов-к-73072-овать»-создаёт-серию-рейсов-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/templates-Шаблоны-рейсов-к-73072-овать»-создаёт-серию-рейсов-desktop/trace.zip"
+                        }
+                      ]
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "1772d640e91cdbbb6eb8-12e252f92f9aff5c7b98",
+              "file": "templates.spec.ts",
+              "line": 105,
+              "column": 3
+            },
+            {
+              "title": "генерация без периода не запускается",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "passed",
+                      "duration": 2673,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-16T06:39:18.225Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1772d640e91cdbbb6eb8-0333b6651952a427441d",
+              "file": "templates.spec.ts",
+              "line": 139,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-16T06:37:13.937Z",
+    "duration": 127193.56799999998,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}
