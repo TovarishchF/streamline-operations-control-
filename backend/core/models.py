@@ -128,6 +128,9 @@ class Settings(SingletonModel):
     quote_number_mask = models.CharField(max_length=64, default="SOC-Q-{YYYY}-{NNNN}")
     invoice_number_mask = models.CharField(max_length=64, default="SOC-I-{YYYY}-{NNNN}")
     payable_number_mask = models.CharField(max_length=64, default="SOC-P-{YYYY}-{NNNN}")
+    # Номер сообщения координатору слота (ADR-026): на него ссылается
+    # ответ координатора, и по нему ответ связывается с запросом.
+    slot_message_mask = models.CharField(max_length=64, default="SCR-{YYYY}-{NNNN}")
 
     # Контракты
     contract_expiry_reminders = models.JSONField(default=list)

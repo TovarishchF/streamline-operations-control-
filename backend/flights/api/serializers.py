@@ -271,8 +271,36 @@ class SlotSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         model = Slot
         fields = (
             "id", "airportIcao", "flightId", "kind", "requestedTimeUtc",
-            "confirmedTimeUtc", "status", "messageRef",
+            "confirmedTimeUtc", "status", "messageRef", "comment",
         )
+
+
+class SlotCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`SlotCreate` из контракта."""
+
+    flightId = serializers.CharField()  # noqa: N815
+    airportIcao = serializers.RegexField(r"^[A-Za-z]{4}$")  # noqa: N815
+    kind = serializers.ChoiceField(choices=["arrival", "departure"])
+    requestedTimeUtc = serializers.DateTimeField()  # noqa: N815
+
+
+class SlotMessageSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Черновик сообщения координатору."""
+
+    messageRef = serializers.CharField()  # noqa: N815
+    text = serializers.CharField()
+
+
+class SlotAnswerSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Ответ координатора: текст письма и/или решение диспетчера."""
+
+    text = serializers.CharField(required=False, allow_blank=True, default="")
+    status = serializers.ChoiceField(
+        choices=["confirmed", "rejected"], required=False, allow_blank=True, default=""
+    )
+    confirmedTimeUtc = serializers.DateTimeField(  # noqa: N815
+        required=False, allow_null=True, default=None
+    )
 
 
 def conflict_payload(flight: Flight, item: conflict_detector.Conflict) -> dict[str, Any]:

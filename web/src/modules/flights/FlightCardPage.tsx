@@ -57,7 +57,7 @@ export function FlightCardPage(): JSX.Element {
   const fleet = useFleet().data?.data ?? [];
   const clients = useClients().data?.data ?? [];
   const allConflicts = useScheduleConflicts().data?.data ?? [];
-  const allSlots = useSlots(id).data?.data ?? [];
+  const allSlots = useSlots({ flightId: id }).data?.data ?? [];
 
   // Маржа появится вместе с биллингом (M7): до тех пор она берётся
   // из набора для макетов и на настоящих рейсах отсутствует.

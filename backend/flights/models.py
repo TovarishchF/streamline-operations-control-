@@ -329,6 +329,9 @@ class Slot(BaseModel):
         max_length=16, choices=SlotStatus.choices, default=SlotStatus.REQUESTED, db_index=True
     )
     message_number = models.CharField(max_length=64, blank=True)
+    # Выдержка из ответа координатора: по ней видно, на каком основании
+    # слот подтверждён или отклонён, без похода в почту.
+    comment = models.TextField(blank=True)
 
     class Meta:
         verbose_name = _("Слот")

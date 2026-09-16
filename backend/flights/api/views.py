@@ -38,12 +38,16 @@ from flights.api.serializers import (
     FlightTransitionSerializer,
     FlightUpdateSerializer,
     GenerateSeriesSerializer,
+    SlotAnswerSerializer,
+    SlotCreateSerializer,
+    SlotMessageSerializer,
     SlotSerializer,
     conflict_payload,
 )
 from flights.models import Flight, FlightRequest, FlightTemplate, Slot
 from flights.services import conflicts as conflict_detector
 from flights.services import generation, planning, transitions
+from flights.services import slots as slot_services
 from orders.api.serializers import ServiceOrderCreateSerializer, ServiceOrderSerializer
 from orders.models import ServiceOrder
 from orders.services import orders as order_services
@@ -433,7 +437,16 @@ class FlightRequestViewSet(
 
 @extend_schema_view(
     list=extend_schema(summary="Реестр слотов", tags=["flights"]),
-    create=extend_schema(summary="Зарегистрировать слот", tags=["flights"]),
+    create=extend_schema(
+        summary="Запрос слота",
+        request=SlotCreateSerializer,
+        responses={
+            201: SlotSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+        },
+        tags=["flights"],
+    ),
 )
 class SlotViewSet(
     SocViewSetMixin,
@@ -449,13 +462,96 @@ class SlotViewSet(
     сообщений SCR — M14.
     """
 
-    queryset = Slot.objects.select_related("flight")
+    queryset = Slot.objects.select_related("flight", "flight__aircraft__type")
     serializer_class = SlotSerializer
     idempotency = "optional"
     required_permissions: ClassVar[dict[str, Any]] = {
         "list": Permission.SCHEDULE_VIEW,
         "create": Permission.FLIGHT_EDIT,
+        "scr": Permission.FLIGHT_EDIT,
+        "apply": Permission.FLIGHT_EDIT,
     }
+
+    def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        def produce() -> Response:
+            payload = SlotCreateSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+            data = payload.validated_data
+
+            flight = Flight.objects.filter(pk=data["flightId"]).first()
+            if flight is None:
+                return Response(
+                    {
+                        "error": {
+                            "code": "NOT_FOUND",
+                            "message": "Рейс не найден",
+                            "details": {"flightId": data["flightId"]},
+                        }
+                    },
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            slot = slot_services.request_slot(
+                flight=flight,
+                airport_icao=data["airportIcao"],
+                slot_type=data["kind"],
+                requested_utc=data["requestedTimeUtc"],
+                actor=cast(User, request.user),
+            )
+            return Response(SlotSerializer(slot).data, status=status.HTTP_201_CREATED)
+
+        return self.idempotent(request, produce)
+
+    @extend_schema(
+        summary="Черновик сообщения SCR",
+        request=None,
+        responses={200: SlotMessageSerializer, 404: ErrorResponseSerializer},
+        tags=["flights"],
+    )
+    @action(detail=True, methods=["post"])
+    def scr(self, request: Request, pk: str | None = None) -> Response:
+        """Собирает черновик сообщения координатору (ADR-026).
+
+        Сообщение не уходит само: подключения к слот-координации нет,
+        и это инструмент подготовки переписки. Диспетчер правит текст
+        и отправляет его сам.
+        """
+        slot, text = slot_services.prepare_scr(
+            slot=self.get_object(), actor=cast(User, request.user)
+        )
+        return Response({"messageRef": slot.message_number, "text": text})
+
+    @extend_schema(
+        summary="Применение ответа координатора",
+        request=SlotAnswerSerializer,
+        responses={
+            200: SlotSerializer,
+            400: ErrorResponseSerializer,
+            404: ErrorResponseSerializer,
+            409: ErrorResponseSerializer,
+        },
+        tags=["flights"],
+    )
+    @action(detail=True, methods=["post"])
+    def apply(self, request: Request, pk: str | None = None) -> Response:
+        """Применяет ответ координатора `[ТЗ 3.1.1]`."""
+        slot = self.get_object()
+
+        def produce() -> Response:
+            payload = SlotAnswerSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+            data = payload.validated_data
+
+            applied = slot_services.apply_answer(
+                slot=slot,
+                actor=cast(User, request.user),
+                status=data["status"],
+                confirmed_utc=data["confirmedTimeUtc"],
+                text=data["text"],
+            )
+            return Response(SlotSerializer(applied).data)
+
+        return self.idempotent(request, produce)
 
     def get_queryset(self) -> QuerySet[Slot]:
         queryset = super().get_queryset()

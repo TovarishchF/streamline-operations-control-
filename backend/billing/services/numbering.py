@@ -25,11 +25,16 @@ if TYPE_CHECKING:
 QUOTE = "quote"
 INVOICE = "invoice"
 PAYABLE = "payable"
+# Сообщение координатору слота — не документ, но номер ему нужен той же
+# природы: на него ссылаются в ответе, и дыра в нумерации мешает
+# связать ответ с запросом (ADR-026).
+SLOT = "slot"
 
 MASK_FIELD = {
     QUOTE: "quote_number_mask",
     INVOICE: "invoice_number_mask",
     PAYABLE: "payable_number_mask",
+    SLOT: "slot_message_mask",
 }
 
 

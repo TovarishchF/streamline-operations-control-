@@ -93,6 +93,9 @@ SENT_MESSAGE_SHARE = 0.7
 # Сколько событий положить в колокольчик.
 DEMO_NOTIFICATIONS = 6
 
+# Доля слотов, ожидающих ответа координатора.
+PENDING_SLOT_SHARE = 0.3
+
 VENDOR_NAMES: dict[str, tuple[str, ...]] = {
     "fuel": ("Топливная Компания Восток", "Аэро Фьюэл Сервис", "Нефтепродукт Аэро", "Крыло-Ойл"),
     "handling": ("Хэндлинг Групп", "Аэросервис Столица", "Терминал Плюс", "Грин Гейт"),
@@ -681,15 +684,19 @@ class Command(BaseCommand):
         ).values_list("icao", flat=True)
         for icao in coordinated:
             is_departure = icao == flight.dep_icao
+            moment = flight.std_utc if is_departure else flight.sta_utc
+            # Часть слотов ещё ждёт ответа координатора: реестр, где всё
+            # подтверждено, не показывает ни ожидания, ни разбора ответа.
+            pending = rnd.random() < PENDING_SLOT_SHARE
             Slot.objects.get_or_create(
                 flight=flight,
                 airport_icao=icao,
                 type=SlotType.DEPARTURE if is_departure else SlotType.ARRIVAL,
                 defaults={
-                    "requested_utc": flight.std_utc if is_departure else flight.sta_utc,
-                    "confirmed_utc": flight.std_utc if is_departure else flight.sta_utc,
-                    "status": SlotStatus.CONFIRMED,
-                    "message_number": f"SCR{rnd.randint(1000, 9999)}",
+                    "requested_utc": moment,
+                    "confirmed_utc": None if pending else moment,
+                    "status": SlotStatus.REQUESTED if pending else SlotStatus.CONFIRMED,
+                    "message_number": "" if pending else f"SCR-{moment:%Y}-{rnd.randint(1, 9999):04d}",
                     "is_demo": True,
                     "data_source": DataSource.SYNTHETIC,
                 },

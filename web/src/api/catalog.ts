@@ -106,14 +106,23 @@ export function useAirports(params: {
   search?: string;
   page?: number;
   perPage?: number;
+  /** Только координируемые: там, где слот-координации нет, слот не запрашивают. */
+  coordinatedOnly?: boolean;
 }): UseQueryResult<Paged<Airport>> {
   const query = new URLSearchParams();
   if (params.search) query.set('search', params.search);
+  if (params.coordinatedOnly) query.set('isCoordinated', 'true');
   query.set('page', String(params.page ?? 1));
   query.set('perPage', String(params.perPage ?? 50));
 
   return useQuery({
-    queryKey: ['airports', params.search ?? '', params.page ?? 1, params.perPage ?? 50],
+    queryKey: [
+      'airports',
+      params.search ?? '',
+      params.page ?? 1,
+      params.perPage ?? 50,
+      params.coordinatedOnly ?? false,
+    ],
     queryFn: ({ signal }) =>
       request(`/airports?${query.toString()}`, pagedSchema(airportSchema), { signal }),
     staleTime: REFERENCE_STALE_MS,

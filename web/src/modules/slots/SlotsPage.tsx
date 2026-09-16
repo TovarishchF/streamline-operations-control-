@@ -1,14 +1,18 @@
-import type { JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { Alert, Button, Card, Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { Slot } from '@/api/types';
-import { FLIGHT_BY_ID, SLOTS } from '@/mocks/flights';
-import { AIRPORT_BY_ICAO } from '@/mocks/reference';
+import { useAirportsByIcao } from '@/api/catalog';
+import { useFlights } from '@/api/flights';
+import { useSlots, type SlotRow } from '@/api/slots';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+
+import { ScrDrawer } from './ScrDrawer';
+import { SlotAnswerModal } from './SlotAnswerModal';
+import { SlotFormModal } from './SlotFormModal';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   requested: 'progress', confirmed: 'done', rejected: 'critical', cancelled: 'cancelled',
@@ -26,14 +30,29 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
 export function SlotsPage(): JSX.Element {
   const { t } = useTranslation();
 
-  const columns: DataColumns<Slot> = [
+  const [formOpen, setFormOpen] = useState(false);
+  const [scrSlot, setScrSlot] = useState<SlotRow | null>(null);
+  const [answerSlot, setAnswerSlot] = useState<SlotRow | null>(null);
+
+  const slots = useSlots({});
+  const rows = slots.data?.data ?? [];
+
+  // Номер рейса и название аэропорта — из справочников, а не из строки слота:
+  // слот хранит связь, а не копию названия.
+  const flights = useFlights({});
+  const flightNumber = new Map(
+    (flights.data?.data ?? []).map((flight) => [flight.id, flight.number]),
+  );
+  const airports = useAirportsByIcao(rows.map((row) => row.airportIcao));
+
+  const columns: DataColumns<SlotRow> = [
     {
       title: t('flight.airport'), dataIndex: 'airportIcao', width: 190,
       render: (value: string) => (
         <Space direction="vertical" size={0}>
           <Mono>{value}</Mono>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {AIRPORT_BY_ICAO.get(value)?.name.ru}
+            {airports[value]?.name.ru}
           </Typography.Text>
         </Space>
       ),
@@ -42,7 +61,7 @@ export function SlotsPage(): JSX.Element {
       title: t('flight.number'), dataIndex: 'flightId', width: 120,
       render: (value: string) => (
         <Link to={`/flights/${value}`}>
-          <Mono>{FLIGHT_BY_ID.get(value)?.number ?? value}</Mono>
+          <Mono>{flightNumber.get(value) ?? value}</Mono>
         </Link>
       ),
     },
@@ -76,15 +95,21 @@ export function SlotsPage(): JSX.Element {
     },
     {
       title: t('slots.comment'), dataIndex: 'comment', ellipsis: true,
-      render: (value: string | null) => value ?? <Typography.Text type="secondary">—</Typography.Text>,
+      render: (value: string | null) =>
+        value ? value : <Typography.Text type="secondary">—</Typography.Text>,
     },
     {
-      title: t('common.actions'), key: 'actions', sortable: false, width: 190, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 230, fixed: 'right',
       render: (_, row) => (
         <Space size={4} wrap>
-          <Button size="small">{t('slots.buildScr')}</Button>
+          <Button size="small" onClick={() => { setScrSlot(row); }}>
+            {t('slots.buildScr')}
+          </Button>
+          {/* Ответ применяют один раз: подтверждённый слот не переписывают. */}
           {row.status === 'requested' ? (
-            <Button size="small" type="primary">{t('slots.applyAnswer')}</Button>
+            <Button size="small" type="primary" onClick={() => { setAnswerSlot(row); }}>
+              {t('slots.applyAnswer')}
+            </Button>
           ) : null}
         </Space>
       ),
@@ -95,7 +120,9 @@ export function SlotsPage(): JSX.Element {
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
       <Space style={{ width: '100%', justifyContent: 'space-between' }} wrap>
         <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.slots')}</Typography.Title>
-        <Button type="primary">{t('slots.newRequest')}</Button>
+        <Button type="primary" onClick={() => { setFormOpen(true); }}>
+          {t('slots.newRequest')}
+        </Button>
       </Space>
 
       <Alert
@@ -105,13 +132,20 @@ export function SlotsPage(): JSX.Element {
         description={t('slots.noPublicApiHint')}
       />
 
+      {slots.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
+
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<Slot>
-          size="small" rowKey="id" columns={columns} dataSource={SLOTS}
-          pagination={false} scroll={{ x: 1250 }}
+        <DataTable<SlotRow>
+          size="small" rowKey="id" columns={columns} dataSource={rows}
+          loading={slots.isFetching}
+          pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1290 }}
           locale={{ emptyText: <EmptyState description={t('slots.empty')} /> }}
         />
       </Card>
+
+      <SlotFormModal open={formOpen} onClose={() => { setFormOpen(false); }} />
+      <ScrDrawer slot={scrSlot} onClose={() => { setScrSlot(null); }} />
+      <SlotAnswerModal slot={answerSlot} onClose={() => { setAnswerSlot(null); }} />
     </Space>
   );
 }

@@ -78,7 +78,7 @@
 | T-3.2.1-03 | 3.2.1 | Наземное обслуживание: техобслуживание, уборка, трапы, буксировка | позиции категории `handling` в `shared/reference/services.json` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
 | T-3.2.1-04 | 3.2.1 | Кейтеринг — бортовое питание | позиции категории `catering` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
 | T-3.2.1-05 | 3.2.1 | Транспорт: автобусы для экипажа и пассажиров, VIP-трансферы | позиции категории `transport` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
-| T-3.2.1-06 | 3.2.1 | Разрешительные документы: пермиты на пролёт, слоты | категория `permits` + `Slot` (ADR-026) | `GET /slots` | `/slots` | `test_permit_and_slot` | M4 | план |
+| T-3.2.1-06 | 3.2.1 | Разрешительные документы: пермиты на пролёт, слоты | категория `permits` + `Slot` (ADR-026) | `GET /slots` | `/slots` | `test_applying_an_answer_moves_the_slot` | M4 | реализовано |
 | T-3.2.1-07 | 3.2.1 | Противообледенительная обработка с привязкой к погодным условиям | категория `deicing`, адаптер `WX`, правило ADR-029 | `GET /catalog/services` | мастер заказа | `test_deicing_weather_rule` | M5, M13 | план |
 | T-3.2.1-08 | 3.2.1 | Заказ кейтеринга через специализированные системы | адаптер `VENDOR_API` | `GET /integrations` | `/admin/integrations` | `test_adapter_vendor_api_stub` | M14 | план (stub, G-12) |
 | T-3.2.2-01 | 3.2.2 | Выбор услуг из каталога при создании рейса | мастер заказа услуги | `POST /flights/{id}/services` | `/flights/:id/services` | Playwright `order-service` | M5, M10 | план |
@@ -207,7 +207,7 @@
 | T-4.1-10 | 4.1 | Кластеризация для отказоустойчивости | реплика с ручным переключением (ADR-001, `INFRA § 7`) | — | — | испытание переключения | M15 | план |
 | T-4.2-01 | 4.2 | REST API для интеграции с внешними системами | DRF + `openapi.yaml`, `/api/v1` | все | `/api-docs` | `schemathesis` | M1–M15 | в работе |
 | T-4.2-02 | 4.2 | Интеграция с 1С: счета, платежи, списания | адаптер `ONEC` (OData) | `POST /integrations/ONEC/test` | `/admin/integrations` | `test_adapter_onec_cassette` | M14 | план (stub до доступа) |
-| T-4.2-03 | 4.2 | Системы аэропортов: слоты | реестр слотов + сообщения SCR (ADR-026) | `GET /slots` | `/slots` | `test_slot_message_format` | M14 | план (публичного API нет) |
+| T-4.2-03 | 4.2 | Системы аэропортов: слоты | реестр слотов, черновик SCR и разбор ответа (ADR-026) | `GET /slots` | `/slots` | `test_scr_carries_the_slot_details` | M14 | реализовано (формат сверяется с образцами заказчика, G-34) |
 | T-4.2-04 | 4.2 | Системы аэропортов: статус обслуживания | ведётся вручную в реестре поставщиков | — | `/vendors/:id` | — | M6 | вне объёма (нет источника) |
 | T-4.2-05 | 4.2 | Системы поставщиков: обмен заявками и подтверждениями | портал поставщика + `MAILBOT` + `VENDOR_API` | `/portal/vendor/*` | портал поставщика | `test_adapter_mailbot_stub` | M8, M14 | план |
 | T-4.2-06 | 4.2 | IATA BDG для стандартизации биллинговых данных | выгрузка IS-XML (ADR-032) | `POST /reports/{code}/export` | `/reports` | `test_export_isxml` | M14 | требует решения (G-03) |
