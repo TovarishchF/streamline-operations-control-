@@ -12,7 +12,7 @@
 
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from django.db import models
 from django.utils.translation import gettext_lazy as _
@@ -375,3 +375,193 @@ class DocumentLine(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.description}: {self.amount} {self.currency}"
+
+
+class PayableStatus(models.TextChoices):
+    """Состояния заявки на оплату `[ТЗ 3.4.2]` (`DOMAIN.md § 6`)."""
+
+    PENDING = "pending", _("Ожидает согласования")
+    APPROVED = "approved", _("Согласована")
+    SCHEDULED = "scheduled", _("В плане платежей")
+    PAID = "paid", _("Оплачена")
+    DISPUTED = "disputed", _("Спорная")
+    CANCELLED = "cancelled", _("Отменена")
+
+
+class Payable(BaseModel):
+    """Заявка на оплату поставщику `[ТЗ 3.4.2]` (`SPEC.md § 7.3`).
+
+    Заводится автоматически при переходе услуги в «Выполнена»
+    (`DOMAIN.md § 5.2`): к этому моменту известны и факт оказания,
+    и фактическая стоимость.
+
+    Срок оплаты считается от **снимка** условий контракта, а не от карточки
+    поставщика: контракт мог смениться, а обязательство возникло на прежних
+    условиях (ADR-025, `CLAUDE.md § 3` п. 5).
+    """
+
+    id_prefix: ClassVar[str] = "pay"
+
+    number = models.CharField(max_length=64, blank=True, db_index=True)
+    vendor = models.ForeignKey(
+        "counterparties.Vendor", on_delete=models.PROTECT, related_name="payables"
+    )
+    # Заявок на оплату может покрывать несколько услуг: группировка
+    # настраивается (`SPEC.md § 7.3`). Связь «многие ко многим», а не одна
+    # заявка на услугу, именно поэтому.
+    service_orders = models.ManyToManyField(
+        "orders.ServiceOrder", related_name="payables", blank=True
+    )
+
+    amount = models.DecimalField(max_digits=18, decimal_places=4)
+    currency = models.CharField(max_length=3)
+    due_date = models.DateTimeField(db_index=True)
+
+    status = models.CharField(
+        max_length=16, choices=PayableStatus.choices, default=PayableStatus.PENDING,
+        db_index=True,
+    )
+    approved_at = models.DateTimeField(null=True, blank=True)
+    approved_by = models.ForeignKey(
+        "accounts.User",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="approved_payables",
+    )
+
+    vendor_invoice = models.ForeignKey(
+        "billing.VendorInvoice",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="payables",
+    )
+
+    class Meta:
+        verbose_name = _("Заявка на оплату")
+        verbose_name_plural = _("Заявки на оплату")
+        ordering = ("due_date", "-created_at")
+        constraints = (
+            models.CheckConstraint(
+                condition=models.Q(amount__gte=0),
+                name="payable_amount_not_negative",
+                violation_error_message=_("Сумма заявки на оплату не может быть отрицательной"),
+            ),
+            # Дата согласования обязательна там, где согласование
+            # состоялось. Спорная и отменённая заявка согласование
+            # не проходили: сверка находит расхождение **до** оплаты,
+            # и требовать от неё даты согласования значило бы запретить
+            # спорить, пока не согласуешь.
+            models.CheckConstraint(
+                condition=(
+                    ~models.Q(status__in=["approved", "scheduled", "paid"])
+                    | models.Q(approved_at__isnull=False)
+                ),
+                name="payable_approved_has_date",
+                violation_error_message=_(
+                    "Согласованная заявка обязана нести дату согласования"
+                ),
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.number or self.pk}: {self.amount} {self.currency}"
+
+    def is_overdue(self, at: Any = None) -> bool:
+        """Просрочена ли оплата.
+
+        Оплаченная и отменённая не просрочены никогда: срок к ним
+        уже не относится.
+        """
+        from core.clock import now
+
+        if self.status in (PayableStatus.PAID, PayableStatus.CANCELLED):
+            return False
+        return (at or now()) > self.due_date
+
+
+class VendorInvoice(BaseModel):
+    """Счёт поставщика для сверки `[ТЗ 3.4.2]` (`DOMAIN.md § 6`).
+
+    Строки счёта хранятся отдельной моделью, а результат сверки — снимком
+    в JSON: он посчитан на момент импорта по тогдашним заявкам, и
+    пересчитывать его при показе значило бы показывать другую сверку,
+    чем ту, по которой принимали решения.
+    """
+
+    id_prefix: ClassVar[str] = "vin"
+
+    vendor = models.ForeignKey(
+        "counterparties.Vendor", on_delete=models.PROTECT, related_name="invoices"
+    )
+    number = models.CharField(max_length=64)
+    issued_at = models.DateTimeField()
+    currency = models.CharField(max_length=3)
+
+    # Форма `ReconciliationResult` из контракта.
+    reconciliation = models.JSONField(default=dict, blank=True)
+    # Коды поставщика, которым не нашлось соответствия (ADR-024).
+    unmapped_codes = models.JSONField(default=list, blank=True)
+
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Счёт поставщика")
+        verbose_name_plural = _("Счета поставщиков")
+        ordering = ("-issued_at", "-created_at")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("vendor", "number"), name="unique_vendor_invoice_number"
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.vendor_id} {self.number}"
+
+
+class VendorInvoiceLine(BaseModel):
+    """Строка счёта поставщика.
+
+    `service_code` — код в **его** номенклатуре, как он прислал. Наш
+    `service` проставляется сопоставлением (ADR-024) и может остаться
+    пустым: неопознанный код — повод завести соответствие, а не повод
+    отказать в импорте счёта.
+    """
+
+    id_prefix: ClassVar[str] = "vil"
+
+    invoice = models.ForeignKey(
+        VendorInvoice, on_delete=models.CASCADE, related_name="lines"
+    )
+    position = models.PositiveSmallIntegerField(
+        help_text=_("Номер строки в счёте: на него ссылается расхождение")
+    )
+
+    airport_icao = models.CharField(max_length=4)
+    service_date = models.DateTimeField()
+    service_code = models.CharField(max_length=64)
+    service = models.ForeignKey(
+        "catalog.Service",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="vendor_invoice_lines",
+    )
+
+    quantity = models.DecimalField(max_digits=18, decimal_places=4)
+    unit_price = models.DecimalField(max_digits=18, decimal_places=4)
+    amount = models.DecimalField(max_digits=18, decimal_places=4)
+
+    class Meta:
+        verbose_name = _("Строка счёта поставщика")
+        verbose_name_plural = _("Строки счетов поставщиков")
+        ordering = ("invoice", "position")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("invoice", "position"), name="unique_vendor_invoice_line_position"
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.position}. {self.service_code} {self.amount}"

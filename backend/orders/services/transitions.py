@@ -279,3 +279,11 @@ def _announce(order: ServiceOrder, name: str, actor: User | None) -> None:
             comms_events.order_sla_breached(order)
     elif name == "reject":
         comms_events.order_answered(order, confirmed=False, actor=actor)
+    elif name == "finish":
+        # Услуга оказана — возникло обязательство перед поставщиком
+        # (`DOMAIN.md § 5.2`). Заявка на оплату заводится здесь, а не при
+        # выставлении счёта клиенту: платить поставщику надо независимо
+        # от того, выставили ли мы счёт.
+        from billing.services import payables
+
+        payables.create_for_order(order=order, actor=actor)

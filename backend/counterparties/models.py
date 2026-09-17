@@ -299,3 +299,45 @@ class VendorContract(PaymentTermsMixin, BaseModel):
         if self.terminated_at is not None and self.terminated_at <= moment:
             return False
         return self.valid_from <= moment <= self.valid_to
+
+
+class VendorServiceMapping(BaseModel):
+    """Соответствие номенклатуры поставщика каталогу (ADR-024) `[ТЗ 3.4.2]`.
+
+    Без него сверка не отработает ни на одном настоящем счёте: у каждого
+    поставщика своя номенклатура, а ключ сопоставления опирается на код
+    услуги (`DOMAIN.md § 7.7`).
+
+    Справочник заполняется решениями оператора при первом импорте: это
+    не распознавание по наименованию, а запомненное решение — предсказуемо
+    и объяснимо, в отличие от эвристики.
+    """
+
+    id_prefix: ClassVar[str] = "vsm"
+
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.CASCADE, related_name="service_mappings"
+    )
+    # Код в номенклатуре поставщика, как он приходит в счёте.
+    vendor_code = models.CharField(max_length=64)
+    vendor_name = models.CharField(max_length=255, blank=True)
+    service = models.ForeignKey(
+        "catalog.Service", on_delete=models.PROTECT, related_name="vendor_mappings"
+    )
+
+    class Meta:
+        verbose_name = _("Соответствие номенклатуры")
+        verbose_name_plural = _("Соответствия номенклатуры")
+        ordering = ("vendor", "vendor_code")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("vendor", "vendor_code"),
+                name="unique_vendor_service_code",
+                violation_error_message=_(
+                    "Для этого кода поставщика соответствие уже заведено"
+                ),
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.vendor_code} → {self.service_id}"

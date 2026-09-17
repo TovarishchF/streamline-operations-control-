@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, cast
 
 from django.db.models import Prefetch, QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
@@ -32,9 +32,16 @@ from counterparties.api.serializers import (
     VendorContractSerializer,
     VendorCreateSerializer,
     VendorSerializer,
+    VendorServiceMappingSerializer,
     payment_terms_to_fields,
 )
-from counterparties.models import Client, Contact, Vendor, VendorContract
+from counterparties.models import (
+    Client,
+    Contact,
+    Vendor,
+    VendorContract,
+    VendorServiceMapping,
+)
 
 
 @extend_schema_view(
@@ -322,3 +329,57 @@ class VendorContractViewSet(
             )
 
         return self.idempotent(request, produce)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Сопоставление номенклатуры поставщика с каталогом", tags=["counterparties"]
+    ),
+    create=extend_schema(
+        summary="Добавление соответствия",
+        request=VendorServiceMappingSerializer,
+        responses={201: VendorServiceMappingSerializer, 400: ErrorResponseSerializer},
+        tags=["counterparties"],
+    ),
+)
+class VendorServiceMappingViewSet(
+    SocViewSetMixin,
+    IdempotentCreateMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,  # type: ignore[type-arg]
+):
+    """`/api/v1/vendor-service-mappings` (ADR-024) `[ТЗ 3.4.2]`.
+
+    Справочник заполняется решениями оператора при разборе счёта:
+    это не распознавание по наименованию, а запомненное решение —
+    предсказуемо и объяснимо.
+    """
+
+    queryset = VendorServiceMapping.objects.select_related("vendor", "service")
+    serializer_class = VendorServiceMappingSerializer
+    idempotency = "required"
+    required_permissions: ClassVar[dict[str, Any]] = {
+        "list": Permission.BILLING_RECONCILIATION,
+        "create": Permission.BILLING_RECONCILIATION,
+    }
+
+    def get_queryset(self) -> QuerySet[VendorServiceMapping]:
+        queryset: QuerySet[VendorServiceMapping] = super().get_queryset()
+        vendor_id = self.request.query_params.get("vendorId")
+        if vendor_id:
+            queryset = queryset.filter(vendor_id=vendor_id)
+        return queryset
+
+    def perform_create(self, serializer: Any) -> None:
+        from audit import services as audit
+        from audit.models import AuditEntityType
+
+        mapping = serializer.save()
+        audit.record(
+            entity_type=AuditEntityType.VENDOR,
+            entity_id=mapping.vendor_id,
+            action="service_mapping_added",
+            actor=cast(User, self.request.user),
+            after=audit.snapshot(mapping),
+        )

@@ -22,6 +22,7 @@ from counterparties.models import (
     Vendor,
     VendorCertificate,
     VendorContract,
+    VendorServiceMapping,
 )
 
 
@@ -305,5 +306,44 @@ class VendorContractCreateSerializer(serializers.Serializer):  # type: ignore[ty
         ).exists():
             raise serializers.ValidationError(
                 {"number": f"У этого поставщика уже есть договор № {attrs['number']}"}
+            )
+        return attrs
+
+
+class VendorServiceMappingSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
+    """`VendorServiceMapping` из контракта (ADR-024)."""
+
+    vendorId = serializers.CharField(source="vendor_id")  # noqa: N815
+    vendorCode = serializers.CharField(source="vendor_code", max_length=64)  # noqa: N815
+    vendorName = serializers.CharField(  # noqa: N815
+        source="vendor_name", required=False, allow_blank=True, default=""
+    )
+    serviceId = serializers.CharField(source="service_id")  # noqa: N815
+
+    class Meta:
+        model = VendorServiceMapping
+        fields = ("id", "vendorId", "vendorCode", "vendorName", "serviceId")
+
+    def validate_vendorCode(self, value: str) -> str:  # noqa: N802
+        """Код без обрамляющих пробелов.
+
+        Сопоставление идёт по коду, и «FUEL » с пробелом не совпал бы
+        с «FUEL» — а для человека это один и тот же код.
+        """
+        return value.strip()
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        """Один код поставщика — одно соответствие.
+
+        Проверка здесь, а не только ограничением базы: нарушение
+        ограничения приходит пятисотой ошибкой, а оператору нужно
+        внятное сообщение под полем.
+        """
+        exists = VendorServiceMapping.objects.filter(
+            vendor_id=attrs["vendor_id"], vendor_code=attrs["vendor_code"]
+        ).exists()
+        if exists:
+            raise serializers.ValidationError(
+                {"vendorCode": "Для этого кода поставщика соответствие уже заведено"}
             )
         return attrs

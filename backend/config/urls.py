@@ -29,6 +29,12 @@ from accounts.api.views import (
 )
 from audit.api.views import AuditViewSet
 from billing.api.documents import InvoiceViewSet, QuoteViewSet
+from billing.api.payables import (
+    PayableViewSet,
+    ReconciliationDetailView,
+    ReconciliationImportView,
+    ReconciliationResolveView,
+)
 from billing.api.views import FxRatesView
 from catalog.api.views import (
     AircraftTypeViewSet,
@@ -45,7 +51,12 @@ from comms.api.views import (
 )
 from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
 from core.api.views import ClockView, HealthView
-from counterparties.api.views import ClientViewSet, VendorContractViewSet, VendorViewSet
+from counterparties.api.views import (
+    ClientViewSet,
+    VendorContractViewSet,
+    VendorServiceMappingViewSet,
+    VendorViewSet,
+)
 from demo.api.views import DemoPurgeView, DemoResetView, DemoSeedView
 from fleet.api.views import AircraftViewSet
 from flights.api.views import (
@@ -83,6 +94,12 @@ router.register("contracts", VendorContractViewSet, basename="contract")
 router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("quotes", QuoteViewSet, basename="quote")
 router.register("invoices", InvoiceViewSet, basename="invoice")
+router.register("payables", PayableViewSet, basename="payable")
+router.register(
+    "vendor-service-mappings",
+    VendorServiceMappingViewSet,
+    basename="vendor-service-mapping",
+)
 router.register("audit", AuditViewSet, basename="audit")
 router.register("notifications", NotificationViewSet, basename="notification")
 router.register("outbox", OutboxViewSet, basename="outbox")
@@ -108,6 +125,21 @@ api_v1: list[URLPattern | URLResolver] = [
     path("clock", ClockView.as_view(), name="clock"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
+    path(
+        "reconciliation/import",
+        ReconciliationImportView.as_view(),
+        name="reconciliation-import",
+    ),
+    path(
+        "reconciliation/<str:pk>",
+        ReconciliationDetailView.as_view(),
+        name="reconciliation-detail",
+    ),
+    path(
+        "reconciliation/<str:pk>/resolve",
+        ReconciliationResolveView.as_view(),
+        name="reconciliation-resolve",
+    ),
     path("attachments", AttachmentCreateView.as_view(), name="attachment-create"),
     path(
         "attachments/<str:attachment_id>/confirm",
