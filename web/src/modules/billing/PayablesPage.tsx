@@ -1,12 +1,14 @@
-import { useMemo, useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Tag, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import {
+  Alert, App, Button, Card, Col, Popconfirm, Row, Select, Space, Tag, Typography,
+} from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import type { PayableItem } from '@/api/types';
-import { PAYABLES } from '@/mocks/billing';
-import { VENDORS } from '@/mocks/counterparties';
+import { useApprovePayable, usePayables, type PayableRow } from '@/api/billing';
+import { ApiError } from '@/api/client';
+import { useVendors } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
 import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
@@ -25,24 +27,36 @@ const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
  */
 export function PayablesPage(): JSX.Element {
   const { t } = useTranslation();
+  const { message } = App.useApp();
   const [vendorId, setVendorId] = useState<string | undefined>();
   const [status, setStatus] = useState<string | undefined>();
   const [overdueOnly, setOverdueOnly] = useState(false);
 
-  const filtered = useMemo(
-    () =>
-      PAYABLES.filter((item) => {
-        if (vendorId && item.vendorId !== vendorId) return false;
-        if (status && item.status !== status) return false;
-        if (overdueOnly && !item.isOverdue) return false;
-        return true;
-      }),
-    [vendorId, status, overdueOnly],
-  );
+  // Отбор выполняет сервер: реестр листается постранично, и выкачивать
+  // его целиком ради фильтра нельзя.
+  const query = usePayables({
+    ...(vendorId ? { vendorId } : {}),
+    ...(status ? { status } : {}),
+    overdue: overdueOnly,
+  });
+  const approve = useApprovePayable();
+  const vendors = useVendors().data?.data ?? [];
 
-  const overdueCount = PAYABLES.filter((p) => p.isOverdue).length;
+  const rows = query.data?.data ?? [];
+  const overdueCount = rows.filter((item) => item.isOverdue).length;
 
-  const columns: DataColumns<PayableItem> = [
+  const confirmApproval = async (id: string): Promise<void> => {
+    try {
+      await approve.mutateAsync(id);
+      void message.success(t('finance.approved'));
+    } catch (error) {
+      void message.error(
+        error instanceof ApiError ? error.message : t('common.saveFailed'),
+      );
+    }
+  };
+
+  const columns: DataColumns<PayableRow> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
       render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
@@ -92,7 +106,21 @@ export function PayablesPage(): JSX.Element {
       render: (_, row) =>
         row.status === 'pending' ? (
           <Can permission="billing.payables.edit">
-            <Button size="small" type="primary">{t('finance.approve')}</Button>
+            {/* Согласование — обязательство заплатить: подтверждается
+                отдельным шагом, а не одним нажатием в таблице. */}
+            <Popconfirm
+              title={t('finance.approveConfirm', {
+                amount: `${row.amount.amount} ${row.amount.currency}`,
+                vendor: row.vendorName,
+              })}
+              okText={t('common.yes')}
+              cancelText={t('common.no')}
+              onConfirm={() => { void confirmApproval(row.id); }}
+            >
+              <Button size="small" type="primary" loading={approve.isPending}>
+                {t('finance.approve')}
+              </Button>
+            </Popconfirm>
           </Can>
         ) : null,
     },
@@ -112,7 +140,7 @@ export function PayablesPage(): JSX.Element {
             <Select
               allowClear showSearch optionFilterProp="label" style={{ width: '100%' }}
               placeholder={t('service.vendor')} value={vendorId} onChange={setVendorId}
-              options={VENDORS.map((v) => ({ value: v.id, label: v.name }))}
+              options={vendors.map((vendor) => ({ value: vendor.id, label: vendor.name }))}
             />
           </Col>
           <Col xs={12} md={6}>
@@ -131,8 +159,9 @@ export function PayablesPage(): JSX.Element {
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<PayableItem>
-          size="small" rowKey="id" columns={columns} dataSource={filtered}
+        <DataTable<PayableRow>
+          size="small" rowKey="id" columns={columns} dataSource={rows}
+          loading={query.isFetching}
           pagination={{ pageSize: 20, size: 'small' }} scroll={{ x: 1050 }}
           locale={{ emptyText: <EmptyState /> }}
         />
