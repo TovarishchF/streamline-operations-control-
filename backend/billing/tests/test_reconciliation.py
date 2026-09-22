@@ -37,6 +37,7 @@ if TYPE_CHECKING:
 
 pytestmark = pytest.mark.django_db
 
+LIST_URL = "/api/v1/reconciliation"
 IMPORT_URL = "/api/v1/reconciliation/import"
 MAPPINGS_URL = "/api/v1/vendor-service-mappings"
 
@@ -585,6 +586,58 @@ def test_unknown_discrepancy_index_is_not_found(
         headers=idempotent("rec-idx-00002"),
     )
     assert response.status_code == status.HTTP_404_NOT_FOUND
+
+
+# ─────────────────────────── Реестр сверок ───────────────────────────
+
+
+def test_imported_invoice_is_listed(
+    as_role: Callable[..., APIClient], completed_order: ServiceOrder, vendor_alpha: Vendor
+) -> None:
+    """Без реестра импортированный счёт терялся бы после перезагрузки экрана."""
+    api = as_role(Role.FINANCE)
+    api.post(
+        IMPORT_URL,
+        invoice_payload([line(completed_order)], vendor=vendor_alpha, number="V-30"),
+        format="json",
+        headers=idempotent("rec-list-0001"),
+    )
+
+    rows = api.get(LIST_URL).json()["data"]
+    assert [row["number"] for row in rows] == ["V-30"]
+    # Реестр отдаёт ту же форму, что и карточка: экран рисует список
+    # и разбор расхождений одним кодом.
+    assert rows[0]["reconciliation"]["discrepancies"] == []
+    assert rows[0]["lines"][0]["serviceCode"] == completed_order.service.code
+
+
+def test_list_is_filtered_by_vendor(
+    as_role: Callable[..., APIClient],
+    completed_order: ServiceOrder,
+    vendor_alpha: Vendor,
+    organization: Any,
+) -> None:
+    from counterparties.models import Vendor as VendorModel
+
+    other = VendorModel.objects.create(organization=organization, name="Другой Поставщик")
+    api = as_role(Role.FINANCE)
+    api.post(
+        IMPORT_URL,
+        invoice_payload([line(completed_order)], vendor=vendor_alpha, number="V-31"),
+        format="json",
+        headers=idempotent("rec-list-0002"),
+    )
+
+    assert len(api.get(f"{LIST_URL}?vendorId={vendor_alpha.pk}").json()["data"]) == 1
+    assert api.get(f"{LIST_URL}?vendorId={other.pk}").json()["data"] == []
+
+
+def test_vendor_portal_does_not_see_reconciliation(
+    as_role: Callable[..., APIClient], completed_order: ServiceOrder, vendor_alpha: Vendor
+) -> None:
+    """Сверка — внутренний разбор расхождений, а не переписка с поставщиком."""
+    api = as_role(Role.VENDOR, vendor=vendor_alpha)
+    assert api.get(LIST_URL).status_code == status.HTTP_403_FORBIDDEN
 
 
 # ─────────────────────────── Импорт ───────────────────────────

@@ -16,7 +16,7 @@ from typing import Any, ClassVar, cast
 
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from rest_framework import mixins, serializers, status
+from rest_framework import generics, mixins, serializers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -28,6 +28,7 @@ from billing.models import Payable, VendorInvoice
 from billing.services import payables as payable_services
 from billing.services import reconciliation as reconciliation_services
 from core.api.idempotency import IdempotencyMixin
+from core.api.pagination import SocPagination
 from core.api.permissions import HasRolePermission
 from core.api.serializers import ErrorResponseSerializer
 from core.api.viewsets import TenantScopedViewSet
@@ -197,6 +198,32 @@ class PayableViewSet(
             return Response(PayableSerializer(approved).data)
 
         return self.idempotent(request, produce)
+
+
+@extend_schema_view(
+    get=extend_schema(summary="Импортированные счета поставщиков", tags=["billing"]),
+)
+class ReconciliationListView(generics.ListAPIView):  # type: ignore[type-arg]
+    """`GET /api/v1/reconciliation` `[ТЗ 3.4.2]`.
+
+    Реестр выполненных сверок. Без него импортированный счёт был бы
+    доступен только по идентификатору из ответа на импорт и терялся бы
+    при перезагрузке экрана.
+    """
+
+    serializer_class = VendorInvoiceSerializer
+    pagination_class = SocPagination
+    permission_classes: Any = (HasRolePermission,)
+    required_permissions: ClassVar[dict[str, Any]] = {
+        "GET": Permission.BILLING_RECONCILIATION
+    }
+
+    def get_queryset(self) -> QuerySet[VendorInvoice]:
+        queryset = VendorInvoice.objects.select_related("vendor").prefetch_related("lines")
+        vendor_id = self.request.query_params.get("vendorId")
+        if vendor_id:
+            queryset = queryset.filter(vendor_id=vendor_id)
+        return queryset
 
 
 class ReconciliationImportView(IdempotencyMixin, APIView):

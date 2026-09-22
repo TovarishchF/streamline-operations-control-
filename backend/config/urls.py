@@ -33,6 +33,7 @@ from billing.api.payables import (
     PayableViewSet,
     ReconciliationDetailView,
     ReconciliationImportView,
+    ReconciliationListView,
     ReconciliationResolveView,
 )
 from billing.api.views import FxRatesView
@@ -125,6 +126,7 @@ api_v1: list[URLPattern | URLResolver] = [
     path("clock", ClockView.as_view(), name="clock"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
+    path("reconciliation", ReconciliationListView.as_view(), name="reconciliation-list"),
     path(
         "reconciliation/import",
         ReconciliationImportView.as_view(),
