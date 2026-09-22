@@ -20,6 +20,7 @@ import {
 } from '@/api/documents';
 import { useFlight } from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
+import { useDemoMode } from '@/shared/auth/session';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
 
@@ -35,6 +36,7 @@ import { NotFoundPage } from '@/modules/misc/NotFoundPage';
  */
 export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.Element {
   const { t } = useTranslation();
+  const demoMode = useDemoMode();
   const { message, modal } = App.useApp();
   const { id } = useParams<{ id: string }>();
   // Причина аннулирования живёт снаружи диалога: содержимое диалога
@@ -181,7 +183,7 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
                     ? t(`quoteStatus.${document.status}`)
                     : t(`invoiceStatus.${document.status}`)}
                 </Tag>
-                {document.isDemo ? <Tag color="orange">DEMO</Tag> : null}
+                {demoMode && document.isDemo ? <Tag color="orange">DEMO</Tag> : null}
               </Space>
               <Space size={10} wrap>
                 <Typography.Text type="secondary">{client?.name}</Typography.Text>
@@ -232,7 +234,7 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
         <Alert type="info" showIcon message={t('finance.immutableNotice')} />
       ) : null}
 
-      {document.isDemo ? (
+      {demoMode && document.isDemo ? (
         <Alert type="warning" showIcon message={t('finance.demoWatermarkNotice')} />
       ) : null}
 

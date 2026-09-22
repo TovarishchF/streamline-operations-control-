@@ -13,6 +13,7 @@ import { Alert, Empty, Skeleton, Space, Tag, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import type { Money } from '@/api/types';
+import { useDemoMode } from '@/shared/auth/session';
 import {
   FLIGHT_STATUS_TOKENS,
   SERVICE_ORDER_STATUS_TOKENS,
@@ -255,10 +256,16 @@ export function ErrorState({ code, onRetry }: { code?: string; onRetry?: () => v
 
 // ─────────────────────────── Прочее ───────────────────────────
 
-/** Подпись «источник данных» — честность происхождения (`CLAUDE.md § 4`). */
+/**
+ * Подпись «источник данных» — честность происхождения (`CLAUDE.md § 4`).
+ *
+ * Выводится только на демонстрационном стенде: в боевом режиме помечать
+ * нечего, все записи настоящие.
+ */
 export function DataSourceTag({ source }: { source: string | undefined }) {
   const { t } = useTranslation();
-  if (source !== 'synthetic') return null;
+  const demoMode = useDemoMode();
+  if (!demoMode || source !== 'synthetic') return null;
   return (
     <Tooltip title={t('demo.syntheticHint')}>
       <Tag color="purple" style={{ margin: 0 }}>

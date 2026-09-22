@@ -13,6 +13,7 @@ import { useSlots } from '@/api/slots';
 import { MARGINS } from '@/mocks/flights';
 import { useFlightOrders } from '@/api/orders';
 import { Can } from '@/shared/auth/Can';
+import { useDemoMode } from '@/shared/auth/session';
 import { formatUtcOffset, utcOffsetHours } from '@/shared/format/timezone';
 import { QueryState } from '@/shared/ui/QueryState';
 import {
@@ -45,6 +46,7 @@ function localAt(timezone: string | undefined, iso: string): { time: string; off
 
 export function FlightCardPage(): JSX.Element {
   const { t } = useTranslation();
+  const demoMode = useDemoMode();
   const navigate = useNavigate();
   const { id, tab } = useParams<{ id: string; tab?: string }>();
   const [contextOpen, setContextOpen] = useState(false);
@@ -370,11 +372,13 @@ export function FlightCardPage(): JSX.Element {
               <Descriptions.Item label={t('common.updatedAt')}>
                 <DateText value={flight.updatedAt} />
               </Descriptions.Item>
-              <Descriptions.Item label={t('common.dataSource')}>
-                <Tooltip title={t('demo.syntheticHint')}>
-                  <Tag color="purple">{t('demo.synthetic')}</Tag>
-                </Tooltip>
-              </Descriptions.Item>
+              {demoMode ? (
+                <Descriptions.Item label={t('common.dataSource')}>
+                  <Tooltip title={t('demo.syntheticHint')}>
+                    <Tag color="purple">{t('demo.synthetic')}</Tag>
+                  </Tooltip>
+                </Descriptions.Item>
+              ) : null}
             </Descriptions>
           </Card>
         </Space>

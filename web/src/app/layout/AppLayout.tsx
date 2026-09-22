@@ -6,16 +6,14 @@ import { useTranslation } from 'react-i18next';
 
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
-import { useCurrentUser, usePermissionMap, useSession } from '@/shared/auth/session';
+import {
+  useCurrentUser, useDemoMode, usePermissionMap, useSession,
+} from '@/shared/auth/session';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { useNotifications } from '@/api/comms';
 import { NAV_GROUPS } from './navigation';
 import { NotificationCentre } from './NotificationCentre';
 import { DemoClockPanel } from './DemoClockPanel';
-
-// На M2 макеты всегда работают на сгенерированных данных. На M11 признак
-// придёт с сервера в /auth/me как demoMode (ADR-008).
-const IS_DEMO: boolean = true;
 
 function LocaleSwitch(): JSX.Element {
   const { t, i18n } = useTranslation();
@@ -80,11 +78,15 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissionMap();
+  const demoMode = useDemoMode();
 
   const items = useMemo(
     () =>
       NAV_GROUPS.map((group) => {
-        const visible = group.items.filter((item) => permissions[item.permission] === true);
+        const visible = group.items.filter(
+          (item) =>
+            permissions[item.permission] === true && (demoMode || item.demoOnly !== true),
+        );
         if (visible.length === 0) return null;
         return {
           key: group.key,
@@ -96,7 +98,7 @@ function Sidebar({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
           })),
         };
       }).filter((group): group is NonNullable<typeof group> => group !== null),
-    [permissions, t],
+    [permissions, demoMode, t],
   );
 
   // Подсветка пункта: самый длинный совпадающий префикс, иначе на карточке
@@ -130,6 +132,7 @@ export function AppLayout(): JSX.Element {
   // Непрочитанные считает сервер своей выборкой: колокольчик показывает
   // ровно то, что лежит в центре уведомлений.
   const unread = useNotifications(true).data?.meta.total ?? 0;
+  const demoMode = useDemoMode();
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -163,7 +166,7 @@ export function AppLayout(): JSX.Element {
           </Typography.Text>
         </Link>
 
-        {IS_DEMO && (
+        {demoMode && (
           <Tooltip title={t('app.demoTooltip')}>
             <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
               {t('app.demoBadge')}
@@ -173,9 +176,11 @@ export function AppLayout(): JSX.Element {
 
         <div style={{ flex: 1 }} />
 
-        <span className="soc-hide-sm">
-          <DemoClockPanel />
-        </span>
+        {demoMode && (
+          <span className="soc-hide-sm">
+            <DemoClockPanel />
+          </span>
+        )}
 
         <Tooltip title={t('clock.utcHint')}>
           <Space size={4} className="soc-hide-sm">

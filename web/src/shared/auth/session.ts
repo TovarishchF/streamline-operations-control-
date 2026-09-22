@@ -167,6 +167,21 @@ export function useTwoFactorSetupRequired(): boolean {
   return useSession((state) => state.profile?.twoFactorSetupRequired === true);
 }
 
+/**
+ * Режим демонстрационного стенда — приходит с сервера (`/auth/me`, ADR-008).
+ *
+ * От него зависят все пометки о происхождении данных: значок в шапке,
+ * подписи «синтетические», отметка `DEMO` на документах и отчётах.
+ * При `DEMO_DATA=false` интерфейс не выводит ничего из этого
+ * (`CLAUDE.md § 4`), и серверные выгрузки тоже идут без пометок.
+ *
+ * Признак не хранится на клиенте отдельной константой: маркировка,
+ * которую можно включить мимо сервера, ничего не гарантирует.
+ */
+export function useDemoMode(): boolean {
+  return useSession((state) => state.profile?.demoMode === true);
+}
+
 export function usePermission(permission: Permission): boolean {
   return useSession((state) => state.profile?.permissions[permission] === true);
 }

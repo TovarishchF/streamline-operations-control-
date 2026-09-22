@@ -4,6 +4,7 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import { useFxRates } from '@/api/billing';
+import { useDemoMode } from '@/shared/auth/session';
 import { useClock } from '@/shared/clock/useClock';
 import { DateText, Mono } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
@@ -55,6 +56,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }): JSX.
  */
 export function FxPage(): JSX.Element {
   const { t } = useTranslation();
+  const demoMode = useDemoMode();
   const { nowUtc } = useClock();
   const query = useFxRates(nowUtc);
 
@@ -134,11 +136,13 @@ export function FxPage(): JSX.Element {
                           </Typography.Text>
                         </Space>
                       </Descriptions.Item>
-                      <Descriptions.Item label={t('common.dataSource')}>
-                        <Tag color={live ? 'green' : 'purple'}>
-                          {live ? t('demo.live') : t('demo.synthetic')}
-                        </Tag>
-                      </Descriptions.Item>
+                      {demoMode ? (
+                        <Descriptions.Item label={t('common.dataSource')}>
+                          <Tag color={live ? 'green' : 'purple'}>
+                            {live ? t('demo.live') : t('demo.synthetic')}
+                          </Tag>
+                        </Descriptions.Item>
+                      ) : null}
                     </Descriptions>
                   </Card>
                 </Col>

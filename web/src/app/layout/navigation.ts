@@ -12,6 +12,8 @@ export interface NavItem {
   path: string;
   labelKey: string;
   permission: Permission;
+  /** Пункт демонстрационного стенда: вне `DEMO_DATA=true` не выводится. */
+  demoOnly?: boolean;
 }
 
 export interface NavGroup {
@@ -82,7 +84,9 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: 'integrations', path: '/admin/integrations', labelKey: 'nav.integrations', permission: 'admin' },
       { key: 'sla', path: '/admin/sla', labelKey: 'nav.sla', permission: 'admin' },
       { key: 'performance', path: '/admin/performance', labelKey: 'nav.performance', permission: 'admin' },
-      { key: 'demo-data', path: '/admin/demo-data', labelKey: 'nav.demoData', permission: 'admin' },
+      // Управление наполнением стенда. Вне `DEMO_DATA=true` сервер
+      // отказывает всем трём командам, и пункт не выводится.
+      { key: 'demo-data', path: '/admin/demo-data', labelKey: 'nav.demoData', permission: 'admin', demoOnly: true },
       { key: 'api-docs', path: '/api-docs', labelKey: 'nav.apiDocs', permission: 'admin' },
     ],
   },

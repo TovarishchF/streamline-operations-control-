@@ -26,6 +26,7 @@ import {
   type ReportSubscription,
 } from '@/api/reports';
 import type { ServiceCategory } from '@/api/types';
+import { useDemoMode } from '@/shared/auth/session';
 import { DataTable } from '@/shared/ui/DataTable';
 import { EmptyState, MoneyText, Mono, PercentText, UtcTime } from '@/shared/ui/primitives';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
@@ -332,6 +333,7 @@ function TotalsRow({ result }: { result: ReportResult }): JSX.Element | null {
 /** Построитель конкретного отчёта `[ТЗ 3.6.1]` с выгрузкой `[ТЗ 3.6.3]`. */
 export function ReportViewPage(): JSX.Element {
   const { t, i18n } = useTranslation();
+  const demoMode = useDemoMode();
   const { message } = App.useApp();
   const { code } = useParams<{ code: string }>();
 
@@ -493,7 +495,7 @@ export function ReportViewPage(): JSX.Element {
         </Form>
       </Card>
 
-      {report.data?.isDemo ? (
+      {demoMode && report.data?.isDemo ? (
         <Alert type="info" showIcon message={t('reports.demoMarkNotice')} />
       ) : null}
 
