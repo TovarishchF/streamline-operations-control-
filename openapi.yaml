@@ -1869,6 +1869,34 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/PayableItem' }
 
+  /reconciliation:
+    get:
+      tags: [billing]
+      summary: Импортированные счета поставщиков `[ТЗ 3.4.2]`
+      description: |
+        Реестр выполненных сверок. Без него импортированный счёт был бы
+        доступен только по идентификатору, полученному в ответе на импорт,
+        и терялся бы при перезагрузке экрана.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - name: vendorId
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Страница счетов со сверкой
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/VendorInvoice' }
+
   /reconciliation/import:
     post:
       tags: [billing]
