@@ -253,6 +253,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    # Состав и алфавит пароля. Стоят здесь, а не в форме регистрации:
+    # правило обязано быть одним для регистрации, смены пароля и заведения
+    # учётной записи администратором.
+    {"NAME": "accounts.password_policy.ComplexityValidator"},
+    {"NAME": "accounts.password_policy.AllowedCharactersValidator"},
 ]
 
 LOGIN_FAILURE_LIMIT = 5
