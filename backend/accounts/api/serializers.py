@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from accounts.models import RegistrationRequest, Role, User
 from accounts.permissions import permission_map
+from core.reference import country_codes
 
 
 class UserSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
@@ -181,6 +182,20 @@ class RegistrationSubmitSerializer(serializers.Serializer):  # type: ignore[type
         except DjangoValidationError as error:
             raise serializers.ValidationError(list(error.messages)) from error
         return value
+
+    def validate_country(self, value: str) -> str:
+        """Код страны — из справочника, а не любые две буквы.
+
+        Справочник общий с клиентом: выпадающий список на экране и
+        проверка здесь обязаны опираться на один перечень.
+        """
+        if not value:
+            return value
+
+        code = value.strip().upper()
+        if code not in country_codes():
+            raise serializers.ValidationError("Неизвестный код страны.")
+        return code
 
     def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
         if attrs["kind"] == "vendor" and not attrs.get("specializations"):
