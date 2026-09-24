@@ -227,7 +227,10 @@ export function VendorPricesPage(): JSX.Element {
     {
       title: t('flight.airport'),
       dataIndex: 'airportIcao',
-      width: 90,
+      // «Аэропорт» в IBM Plex Sans шире прежнего системного шрифта и в 90 px
+      // разрывался посередине слова. Подпись не сокращается ради ширины —
+      // расширяется колонка.
+      width: 110,
       sorter: (a, b) => a.airportIcao.localeCompare(b.airportIcao),
       render: (value: string) => <Mono>{value}</Mono>,
     },

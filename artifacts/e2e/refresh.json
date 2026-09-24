@@ -1,0 +1,1721 @@
+{
+  "config": {
+    "configFile": "/work/e2e/playwright.docker.config.ts",
+    "rootDir": "/work/e2e",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "../artifacts/e2e/refresh.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 15000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/work/e2e/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {},
+        "id": "desktop",
+        "name": "desktop",
+        "testDir": "/work/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 90000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "version": "1.49.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "screenshots.spec.ts",
+      "file": "screenshots.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Экраны",
+          "file": "screenshots.spec.ts",
+          "line": 107,
+          "column": 6,
+          "specs": [
+            {
+              "title": "01-schedule-gantt",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 5726,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:17:44.668Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-35aaf5898eb51e56abe6",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "02-flight-card",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3899,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:17:50.560Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-d291dfa8ca015deb8408",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "03-flight-services",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3761,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:17:54.467Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-c3b4e3027d19878ca2fa",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "04-flight-finance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3494,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:17:58.236Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-b2f7410ce9bc9bd3e562",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "05-flight-documents",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3489,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:01.738Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-f0055e0cc3424231e384",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "06-flight-history",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3538,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:05.235Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-981c32b32222c2356821",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "07-flight-new",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2666,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:08.784Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-81c2beb08b3448c38f1b",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "08-templates",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2676,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:11.457Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-0ffd577b15dd8514e185",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "09-requests",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2765,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:14.148Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-129da97ba28d09eca32b",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "10-slots",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3588,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:16.921Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-1bfe3b3d223672c47d14",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "11-catalog-services",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 3020,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:20.519Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-134298640947593f3756",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "12-catalog-prices",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2665,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:23.547Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-11468c5082d881184b68",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "13-vendors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2646,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:26.221Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-4cf7cb0bed4167c29d06",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "14-vendor-card",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2876,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:28.872Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-04d537ad8fe0cd955589",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "15-contracts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2426,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:31.755Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-1d5723d4309d6773dfd9",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "16-clients",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2397,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:34.188Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-0c9095c8b86f6c0b220d",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "17-client-tariffs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "passed",
+                      "duration": 2599,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:36.592Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-8749f9b76ada7bdf1f7c",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "18-fleet",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "status": "failed",
+                      "duration": 3339,
+                      "error": {
+                        "message": "Error: ошибки консоли на /fleet:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: ошибки консоли на /fleet:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at Mono (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at Cell2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at BodyRow (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at Body (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at Spin (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at InternalTable (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at Item3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (/work/e2e/http:/172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at AppLayout (/work/e2e/http:/172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (/work/e2e/http:/172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at App (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (/work/e2e/http:/172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n    at /work/e2e/screenshots.spec.ts:142:81",
+                        "matcherResult": {
+                          "actual": [
+                            "Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)"
+                          ],
+                          "expected": [],
+                          "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                          "name": "toEqual",
+                          "pass": false
+                        },
+                        "location": {
+                          "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                          "column": 24,
+                          "line": 31
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                            "column": 24,
+                            "line": 31
+                          },
+                          "message": "Error: ошибки консоли на /fleet:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at FleetPage (http://172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at Mono (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at Cell2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at BodyRow (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at Body (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at Spin (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at InternalTable (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at Item3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at FleetPage (/work/e2e/http:/172.18.0.4:5173/src/modules/fleet/FleetPage.tsx?t=1790064945956:37:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at AppLayout (/work/e2e/http:/172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (/work/e2e/http:/172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at App (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (/work/e2e/http:/172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n    at /work/e2e/screenshots.spec.ts:142:81"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:39.198Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-18-fleet-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-18-fleet-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                        "column": 24,
+                        "line": 31
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-8273ed4138bfb4bb2e3f",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "19-airports",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 1,
+                      "status": "failed",
+                      "duration": 3057,
+                      "error": {
+                        "message": "Error: ошибки консоли на /airports:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: ошибки консоли на /airports:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at Mono (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at Cell2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at BodyRow (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at Body (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at Spin (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at InternalTable (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at Item3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (/work/e2e/http:/172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at AppLayout (/work/e2e/http:/172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (/work/e2e/http:/172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at App (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (/work/e2e/http:/172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n    at /work/e2e/screenshots.spec.ts:142:81",
+                        "matcherResult": {
+                          "actual": [
+                            "Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)"
+                          ],
+                          "expected": [],
+                          "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                          "name": "toEqual",
+                          "pass": false
+                        },
+                        "location": {
+                          "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                          "column": 24,
+                          "line": 31
+                        }
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                            "column": 24,
+                            "line": 31
+                          },
+                          "message": "Error: ошибки консоли на /airports:\nWarning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \n    at span\n    at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at td\n    at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at tr\n    at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at tbody\n    at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at table\n    at div\n    at div\n    at div\n    at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at div\n    at div\n    at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at div\n    at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at div\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at div\n    at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at main\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at Content\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at div\n    at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at Layout\n    at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at div\n    at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  -  1\u001b[39m\n\u001b[31m+ Received  + 71\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Warning: %s is deprecated in StrictMode. %s was passed an instance of %s which is inside StrictMode. Instead, add a ref directly to the element you want to reference. Learn more about using refs safely here: https://reactjs.org/link/strict-mode-find-node%s findDOMNode findDOMNode DomWrapper4 \u001b[39m\n\u001b[31m+     at span\u001b[39m\n\u001b[31m+     at Mono (http://172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\u001b[39m\n\u001b[31m+     at Tooltip2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\u001b[39m\n\u001b[31m+     at td\u001b[39m\n\u001b[31m+     at Cell2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\u001b[39m\n\u001b[31m+     at tr\u001b[39m\n\u001b[31m+     at BodyRow (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at tbody\u001b[39m\n\u001b[31m+     at Body (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\u001b[39m\n\u001b[31m+     at table\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at DomWrapper4 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\u001b[39m\n\u001b[31m+     at SingleObserver (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\u001b[39m\n\u001b[31m+     at ResizeObserver3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\u001b[39m\n\u001b[31m+     at Provider2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\u001b[39m\n\u001b[31m+     at Table (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\u001b[39m\n\u001b[31m+     at ImmutableComponent2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Spin (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at InternalTable (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\u001b[39m\n\u001b[31m+     at Table2 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\u001b[39m\n\u001b[31m+     at DataTable (http://172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\u001b[39m\n\u001b[31m+     at QueryState (http://172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at Item3 (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\u001b[39m\n\u001b[31m+     at AirportsPage (http://172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Outlet (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\u001b[39m\n\u001b[31m+     at main\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\u001b[39m\n\u001b[31m+     at Content\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\u001b[39m\n\u001b[31m+     at Layout\u001b[39m\n\u001b[31m+     at AppLayout (http://172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\u001b[39m\n\u001b[31m+     at RenderedRoute (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\u001b[39m\n\u001b[31m+     at Routes (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\u001b[39m\n\u001b[31m+     at AppRoutes (http://172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\u001b[39m\n\u001b[31m+     at Router (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\u001b[39m\n\u001b[31m+     at BrowserRouter (http://172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\u001b[39m\n\u001b[31m+     at div\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\u001b[39m\n\u001b[31m+     at LocaleProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\u001b[39m\n\u001b[31m+     at MotionWrapper (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\u001b[39m\n\u001b[31m+     at ProviderChildren (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\u001b[39m\n\u001b[31m+     at ConfigProvider (http://172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\u001b[39m\n\u001b[31m+     at QueryClientProvider (http://172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\u001b[39m\n\u001b[31m+     at App (http://172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at Mono (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632:31:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22136:24\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:22789:34\n    at Tooltip2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28271:32)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:28933:16\n    at Cell2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75777:5)\n    at BodyRow (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76176:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at Body (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:76296:5)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75581:7)\n    at DomWrapper4 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1325:5)\n    at SingleObserver (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1339:24)\n    at ResizeObserver3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:1416:24)\n    at Provider2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75475:22)\n    at Table (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:77300:31)\n    at ImmutableComponent2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:75553:37)\n    at Spin (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:67109:16)\n    at InternalTable (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84162:16)\n    at Table2 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:84497:35)\n    at DataTable (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/DataTable.tsx:136:3)\n    at QueryState (/work/e2e/http:/172.18.0.4:5173/src/shared/ui/QueryState.tsx?t=1790063980632:21:3)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:45872:16\n    at Item3 (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60586:5)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:60622:16\n    at AirportsPage (/work/e2e/http:/172.18.0.4:5173/src/modules/airports/AirportsPage.tsx?t=1790063980632:32:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Outlet (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4475:26)\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65237:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at /work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:65256:16\n    at AppLayout (/work/e2e/http:/172.18.0.4:5173/src/app/layout/AppLayout.tsx?t=1790065067236:174:17)\n    at RenderedRoute (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4069:5)\n    at Routes (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4539:5)\n    at AppRoutes (/work/e2e/http:/172.18.0.4:5173/src/app/router.tsx?t=1790065067236:79:18)\n    at Router (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:4482:15)\n    at BrowserRouter (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/react-router-dom.js?v=0c2a5d1c:5228:5)\n    at App (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:20779:16)\n    at LocaleProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:3740:13)\n    at MotionWrapper (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6257:5)\n    at ProviderChildren (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6362:5)\n    at ConfigProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/antd.js?v=0c2a5d1c:6648:27)\n    at QueryClientProvider (/work/e2e/http:/172.18.0.4:5173/node_modules/.vite/deps/@tanstack_react-query.js?v=0c2a5d1c:2829:3)\n    at App (/work/e2e/http:/172.18.0.4:5173/src/app/App.tsx?t=1790065067236:34:20)\n    at /work/e2e/screenshots.spec.ts:142:81"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:18:55.540Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-19-airports-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-19-airports-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/http:/172.18.0.4:5173/src/shared/ui/primitives.tsx?t=1790063980632",
+                        "column": 24,
+                        "line": 31
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-d10704502033b9495004",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "20-quotes",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 2924,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:10.248Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-7f86d848297cab3fe945",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "21-quote-card",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 2691,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:13.274Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-f1763a08b8ff9c77961e",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "22-invoices",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "passed",
+                      "duration": 2464,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:15.972Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-c35cc62c0272ee166a26",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "23-invoice-card",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 2,
+                      "status": "failed",
+                      "duration": 532,
+                      "error": {
+                        "message": "Error: в справочнике invoices пусто: выполните make seed-demo",
+                        "stack": "Error: в справочнике invoices пусто: выполните make seed-demo\n    at anyId (/work/e2e/helpers/session.ts:187:11)\n    at /work/e2e/screenshots.spec.ts:129:44",
+                        "location": {
+                          "file": "/work/e2e/helpers/session.ts",
+                          "column": 11,
+                          "line": 187
+                        },
+                        "snippet": "   at helpers/session.ts:187\n\n  185 |   const first = body.data[0];\n  186 |   if (!first) {\n> 187 |     throw new Error(`в справочнике ${resource} пусто: выполните make seed-demo`);\n      |           ^\n  188 |   }\n  189 |   return first.id;\n  190 | }"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/helpers/session.ts",
+                            "column": 11,
+                            "line": 187
+                          },
+                          "message": "Error: в справочнике invoices пусто: выполните make seed-demo\n\n   at helpers/session.ts:187\n\n  185 |   const first = body.data[0];\n  186 |   if (!first) {\n> 187 |     throw new Error(`в справочнике ${resource} пусто: выполните make seed-demo`);\n      |           ^\n  188 |   }\n  189 |   return first.id;\n  190 | }\n    at anyId (/work/e2e/helpers/session.ts:187:11)\n    at /work/e2e/screenshots.spec.ts:129:44"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:18.444Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-23-invoice-card-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-23-invoice-card-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/helpers/session.ts",
+                        "column": 11,
+                        "line": 187
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-2ab66d2cf310056d9906",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "24-payables",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2779,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:30.023Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-9bc776dde7fabd00b473",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "25-reconciliation",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2481,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:32.901Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-1f8babcbe9a4dfa0842c",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "26-fx",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2350,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:35.389Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-87f5430164f7338936eb",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "27-outbox",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2398,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:37.747Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-a936a7b564791e533224",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "28-inbox",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2629,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:40.158Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-314a710c8672d0e3be75",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "29-message-templates",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2577,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:42.796Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-5c4f0cb09449ad9572eb",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "30-reports",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2404,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:45.380Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-44a8063eacd19e9a21f9",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "31-report-financial",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2376,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:47.791Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-21e1290b964059575f46",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "32-dashboard-dispatcher",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2745,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:50.175Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-7bf7fb9ebe437fbabb21",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "33-dashboard-manager",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2582,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:52.927Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-eb78c01f374c7c662e4d",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "34-admin-users",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2444,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:55.517Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-08049da09ffde5cb990b",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "35-admin-audit",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "passed",
+                      "duration": 2728,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:19:57.966Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-027f90e150837914e8f9",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "36-admin-integrations",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 3,
+                      "status": "failed",
+                      "duration": 4000,
+                      "error": {
+                        "message": "Error: ошибки консоли на /admin/integrations:\nFailed to load resource: the server responded with a status of 401 (Unauthorized)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to load resource: the server responded with a status of 401 (Unauthorized)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                        "stack": "Error: ошибки консоли на /admin/integrations:\nFailed to load resource: the server responded with a status of 401 (Unauthorized)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to load resource: the server responded with a status of 401 (Unauthorized)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n    at /work/e2e/screenshots.spec.ts:142:81",
+                        "matcherResult": {
+                          "actual": [
+                            "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+                          ],
+                          "expected": [],
+                          "message": "\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to load resource: the server responded with a status of 401 (Unauthorized)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m",
+                          "name": "toEqual",
+                          "pass": false
+                        },
+                        "location": {
+                          "file": "/work/e2e/screenshots.spec.ts",
+                          "column": 81,
+                          "line": 142
+                        },
+                        "snippet": "  140 |       await page.screenshot({ path: file, fullPage: true });\n  141 |\n> 142 |       expect(errors, `ошибки консоли на ${screen.path}:\\n${errors.join('\\n')}`).toEqual([]);\n      |                                                                                 ^\n  143 |\n  144 |       // Адаптив от 360 px: горизонтального скролла быть не должно\n  145 |       if (testInfo.project.name === 'mobile') {"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "/work/e2e/screenshots.spec.ts",
+                            "column": 81,
+                            "line": 142
+                          },
+                          "message": "Error: ошибки консоли на /admin/integrations:\nFailed to load resource: the server responded with a status of 401 (Unauthorized)\n\n\u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoEqual\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // deep equality\u001b[22m\n\n\u001b[32m- Expected  - 1\u001b[39m\n\u001b[31m+ Received  + 3\u001b[39m\n\n\u001b[32m- Array []\u001b[39m\n\u001b[31m+ Array [\u001b[39m\n\u001b[31m+   \"Failed to load resource: the server responded with a status of 401 (Unauthorized)\",\u001b[39m\n\u001b[31m+ ]\u001b[39m\n\n  140 |       await page.screenshot({ path: file, fullPage: true });\n  141 |\n> 142 |       expect(errors, `ошибки консоли на ${screen.path}:\\n${errors.join('\\n')}`).toEqual([]);\n      |                                                                                 ^\n  143 |\n  144 |       // Адаптив от 360 px: горизонтального скролла быть не должно\n  145 |       if (testInfo.project.name === 'mobile') {\n    at /work/e2e/screenshots.spec.ts:142:81"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:00.700Z",
+                      "attachments": [
+                        {
+                          "name": "screenshot",
+                          "contentType": "image/png",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-36-admin-integrations-desktop/test-failed-1.png"
+                        },
+                        {
+                          "name": "trace",
+                          "contentType": "application/zip",
+                          "path": "/work/e2e/test-results/screenshots-Экраны-36-admin-integrations-desktop/trace.zip"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "/work/e2e/screenshots.spec.ts",
+                        "column": 81,
+                        "line": 142
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-6c8aabd52610f3b46c54",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "37-admin-sla",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2597,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:15.800Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-fdd1f83cba39f7ddcd9c",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "38-admin-performance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2519,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:18.499Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-710010c3642f51541c19",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "39-admin-demo-data",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2406,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:21.026Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-73199e18ffc0ebb03f63",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "40-api-docs",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2378,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:23.439Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-91a946d54af42ffa640b",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "41-portal-client-flights",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2503,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:25.825Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-5187a26899a92dfb892a",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "42-portal-client-request",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2499,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:28.332Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-bf82cab8589db75114ec",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "43-portal-client-documents",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2465,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:30.839Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-11a25d3ada8eca3e4d9b",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "44-portal-vendor-orders",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2560,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:33.311Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-1edcec21b1d301a58fc1",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "45-portal-vendor-performance",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2586,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:35.882Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-03c1d32c7cf7c9025469",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            },
+            {
+              "title": "46-portal-vendor-payables",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 90000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "desktop",
+                  "projectName": "desktop",
+                  "results": [
+                    {
+                      "workerIndex": 4,
+                      "status": "passed",
+                      "duration": 2512,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-22T08:20:38.482Z",
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "677a4938ef65bfc6a6e5-573171ab6715845c2998",
+              "file": "screenshots.spec.ts",
+              "line": 109,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-22T08:17:32.805Z",
+    "duration": 188637.669,
+    "expected": 42,
+    "skipped": 0,
+    "unexpected": 4,
+    "flaky": 0
+  }
+}
