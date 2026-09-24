@@ -7,13 +7,15 @@
 
 from __future__ import annotations
 
+from typing import ClassVar
+
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.clock import now
-from core.models import make_id
+from core.models import BaseModel, make_id
 
 
 class Role(models.TextChoices):
@@ -208,3 +210,139 @@ class BackupCode(models.Model):
         if not self.created_at:
             self.created_at = now()
         super().save(*args, **kwargs)  # type: ignore[arg-type]
+
+
+class RegistrationKind(models.TextChoices):
+    """Кем представляется зарегистрировавшийся `[ТЗ 4.3]`."""
+
+    CLIENT = "client", _("Клиент")
+    VENDOR = "vendor", _("Поставщик")
+
+
+class RegistrationStatus(models.TextChoices):
+    """Состояние заявки на регистрацию.
+
+    Почта подтверждается до рассмотрения: разбирать заявки с несуществующих
+    адресов — работа впустую, а ответить по ним всё равно некуда.
+    """
+
+    EMAIL_PENDING = "email_pending", _("Ожидает подтверждения почты")
+    PENDING = "pending", _("На согласовании")
+    APPROVED = "approved", _("Одобрена")
+    REJECTED = "rejected", _("Отклонена")
+
+
+class RegistrationRequest(BaseModel):
+    """Заявка на регистрацию `[ТЗ 4.3]` (ADR-037).
+
+    Клиент регистрируется сам: после подтверждения почты заявка одобряется
+    без участия человека, и создаются карточка заказчика и учётная запись.
+    Заказчик при этом не видит ничего, кроме собственных рейсов, — изоляция
+    обеспечена фильтром по арендатору на сервере, а рейсов у новой карточки
+    нет вовсе.
+
+    Поставщик так не может: взять его в работу — решение о закупке, а не
+    о доступе. Его заявка уходит руководителю, и учётная запись появляется
+    только после одобрения.
+
+    Пароль хранится хэшем с момента подачи: заявка может пролежать в очереди
+    неделю, и всё это время пароль в открытом виде лежал бы в базе.
+    """
+
+    id_prefix: ClassVar[str] = "reg"
+
+    organization = models.ForeignKey(
+        Organization, on_delete=models.CASCADE, related_name="registration_requests"
+    )
+    kind = models.CharField(max_length=8, choices=RegistrationKind.choices, db_index=True)
+    status = models.CharField(
+        max_length=16,
+        choices=RegistrationStatus.choices,
+        default=RegistrationStatus.EMAIL_PENDING,
+        db_index=True,
+    )
+
+    # ── Контакт ──────────────────────────────────────────────────────────
+    contact_name = models.CharField(max_length=255)
+    email = models.EmailField(db_index=True)
+    phone = models.CharField(max_length=32, blank=True)
+    password_hash = models.CharField(max_length=128, editable=False)
+
+    # ── Организация заявителя ────────────────────────────────────────────
+    company_name = models.CharField(max_length=255)
+    legal_name = models.CharField(max_length=500, blank=True)
+    country = models.CharField(max_length=2, blank=True, help_text=_("ISO 3166-1 alpha-2"))
+    tax_id = models.CharField(max_length=32, blank=True, help_text=_("ИНН или аналог"))
+    website = models.CharField(max_length=255, blank=True)
+
+    # ── Только для поставщика ────────────────────────────────────────────
+    specializations = models.JSONField(
+        default=list, blank=True, help_text=_("Категории услуг по ТЗ 3.2.1")
+    )
+    coverage_airports = models.JSONField(
+        default=list, blank=True, help_text=_("Коды ИКАО, где поставщик работает")
+    )
+    comment = models.TextField(blank=True)
+
+    # ── Подтверждение почты ──────────────────────────────────────────────
+    # Хранится хэш: ссылка из письма — это одноразовый пароль.
+    email_token_hash = models.CharField(max_length=128, editable=False, blank=True)
+    email_confirmed_at = models.DateTimeField(null=True, blank=True)
+
+    # ── Решение ──────────────────────────────────────────────────────────
+    decided_at = models.DateTimeField(null=True, blank=True)
+    decided_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="decided_registrations",
+    )
+    decision_reason = models.TextField(blank=True)
+
+    created_user = models.OneToOneField(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="registration",
+    )
+    created_client = models.ForeignKey(
+        "counterparties.Client",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+    created_vendor = models.ForeignKey(
+        "counterparties.Vendor",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+    )
+
+    class Meta:
+        verbose_name = _("Заявка на регистрацию")
+        verbose_name_plural = _("Заявки на регистрацию")
+        ordering = ("-created_at",)
+        constraints = (
+            # Одна незакрытая заявка на адрес: иначе повторное нажатие
+            # «Зарегистрироваться» заводит очередь дублей на согласование.
+            models.UniqueConstraint(
+                fields=("email",),
+                condition=models.Q(status__in=("email_pending", "pending")),
+                name="one_open_registration_per_email",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    ~models.Q(status__in=("approved", "rejected"))
+                    | models.Q(decided_at__isnull=False)
+                ),
+                name="registration_decision_has_date",
+                violation_error_message=_("Решение по заявке обязано нести дату."),
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.company_name} ({self.get_kind_display()})"

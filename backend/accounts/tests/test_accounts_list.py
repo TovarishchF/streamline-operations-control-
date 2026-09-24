@@ -42,7 +42,7 @@ def test_the_list_never_carries_a_password(api: APIClient, dispatcher: User) -> 
 
 
 def response_text(api: APIClient) -> str:
-    return api.get(URL).content.decode("utf-8").lower()
+    return str(api.get(URL).content.decode("utf-8")).lower()
 
 
 @override_settings(DEMO_ACCOUNTS=False)

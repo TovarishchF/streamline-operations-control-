@@ -24,6 +24,9 @@ from accounts.api.views import (
     MeView,
     PasswordChangeView,
     RefreshView,
+    RegistrationConfirmView,
+    RegistrationRequestViewSet,
+    RegistrationView,
     TwoFactorSetupView,
     TwoFactorView,
     UserViewSet,
@@ -111,6 +114,9 @@ router.register(
     "report-subscriptions", ReportSubscriptionViewSet, basename="report-subscription"
 )
 router.register("users", UserViewSet, basename="user")
+router.register(
+    "registration-requests", RegistrationRequestViewSet, basename="registration-request"
+)
 
 auth_urls: list[URLPattern | URLResolver] = [
     path("login", LoginView.as_view(), name="login"),
@@ -120,6 +126,12 @@ auth_urls: list[URLPattern | URLResolver] = [
     path("logout", LogoutView.as_view(), name="logout"),
     path("me", MeView.as_view(), name="me"),
     path("accounts", AccountListView.as_view(), name="auth-accounts"),
+    path("register", RegistrationView.as_view(), name="auth-register"),
+    path(
+        "register/confirm",
+        RegistrationConfirmView.as_view(),
+        name="auth-register-confirm",
+    ),
     path("password", PasswordChangeView.as_view(), name="password"),
 ]
 

@@ -13,6 +13,7 @@ from django.conf import settings
 from django.db.models import QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -20,22 +21,33 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts import services
+from accounts import registration, services
 from accounts.api.serializers import (
     DemoAccountListSerializer,
     LoginSerializer,
     MeSerializer,
     PasswordChangeSerializer,
     RefreshSerializer,
+    RegistrationConfirmSerializer,
+    RegistrationDecisionSerializer,
+    RegistrationRequestSerializer,
+    RegistrationSubmitSerializer,
     TwoFactorSerializer,
     UserCreateSerializer,
     UserSerializer,
 )
-from accounts.models import Role, User
+from accounts.models import (
+    Organization,
+    RegistrationKind,
+    RegistrationRequest,
+    RegistrationStatus,
+    Role,
+    User,
+)
 from accounts.permissions import Permission
 from audit import services as audit
 from audit.models import AuditEntityType
-from core.api.idempotency import IdempotentCreateMixin
+from core.api.idempotency import IdempotencyMixin, IdempotentCreateMixin
 from core.api.serializers import (
     ErrorResponseSerializer,
     LoginResponseSerializer,
@@ -329,3 +341,177 @@ class UserViewSet(
             after={"role": Role(user.role).value, "email": user.email},
         )
         return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+
+class RegistrationView(APIView):
+    """`POST /api/v1/auth/register` `[ТЗ 4.3]` (ADR-037).
+
+    Открытый эндпоинт: регистрируется тот, у кого учётной записи ещё нет.
+    Ответ **не различает** занятый и свободный адрес почты и не сообщает,
+    существует ли такой контрагент: иначе форма регистрации превращается
+    в справочник клиентуры.
+    """
+
+    authentication_classes: Any = ()
+    permission_classes: Any = (AllowAny,)
+
+    @extend_schema(
+        summary="Регистрация заказчика или поставщика",
+        request=RegistrationSubmitSerializer,
+        responses={202: dict, 400: ErrorResponseSerializer},
+        tags=["auth"],
+    )
+    def post(self, request: Request) -> Response:
+        payload = RegistrationSubmitSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+
+        organization = Organization.objects.order_by("created_at").first()
+        if organization is None:
+            return Response(
+                {
+                    "error": {
+                        "code": "NOT_FOUND",
+                        "message": "Организация не настроена",
+                        "details": {},
+                    }
+                },
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        existing = RegistrationRequest.objects.filter(
+            email=data["email"].lower(),
+            status__in=(RegistrationStatus.EMAIL_PENDING, RegistrationStatus.PENDING),
+        ).exists()
+        taken = User.objects.filter(email__iexact=data["email"]).exists()
+
+        if not existing and not taken:
+            created, token = registration.submit(
+                organization=organization,
+                kind=data["kind"],
+                contact_name=data["contactName"],
+                email=data["email"],
+                password=data["password"],
+                phone=data["phone"],
+                company_name=data["companyName"],
+                legal_name=data["legalName"],
+                country=data["country"],
+                tax_id=data["taxId"],
+                website=data["website"],
+                specializations=data["specializations"],
+                coverage_airports=data["coverageAirports"],
+                comment=data["comment"],
+            )
+            registration.send_confirmation(
+                request=created,
+                token=token,
+                base_url=request.build_absolute_uri("/").rstrip("/"),
+            )
+
+        # Ответ одинаков во всех трёх случаях: завели, адрес занят, заявка
+        # уже подана. Перебор адресов через форму регистрации ничего не даёт.
+        return Response(
+            {"status": "email_sent", "kind": data["kind"]},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class RegistrationConfirmView(APIView):
+    """`POST /api/v1/auth/register/confirm` `[ТЗ 4.3]`."""
+
+    authentication_classes: Any = ()
+    permission_classes: Any = (AllowAny,)
+
+    @extend_schema(
+        summary="Подтверждение адреса почты",
+        request=RegistrationConfirmSerializer,
+        responses={200: dict, 404: ErrorResponseSerializer, 409: ErrorResponseSerializer},
+        tags=["auth"],
+    )
+    def post(self, request: Request) -> Response:
+        payload = RegistrationConfirmSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+
+        confirmed = registration.confirm_email(
+            request_id=data["requestId"], token=data["token"]
+        )
+        return Response({"status": confirmed.status, "kind": confirmed.kind})
+
+
+@extend_schema_view(
+    list=extend_schema(summary="Заявки поставщиков на согласование", tags=["accounts"]),
+)
+class RegistrationRequestViewSet(
+    IdempotencyMixin,
+    SocViewSetMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,  # type: ignore[type-arg]
+):
+    """`/api/v1/registration-requests` `[ТЗ 4.3]`.
+
+    Очередь руководителя: заявки заказчиков закрываются подтверждением
+    почты и сюда не попадают.
+    """
+
+    serializer_class = RegistrationRequestSerializer
+    # Одобрение заводит поставщика и учётную запись: повтор с тем же ключом
+    # обязан вернуть первый ответ, а не завести второго поставщика.
+    idempotency = "required"
+    required_permissions: ClassVar[dict[str, Any]] = {
+        "list": Permission.ADMIN,
+        "approve": Permission.ADMIN,
+        "reject": Permission.ADMIN,
+    }
+
+    def get_queryset(self) -> QuerySet[RegistrationRequest]:
+        if self.action == "list":
+            return cast(QuerySet[RegistrationRequest], registration.pending_for_review())
+
+        # Решение ищется среди всех заявок поставщиков, а не только
+        # ожидающих: по уже рассмотренной нужно ответить «уже рассмотрена»,
+        # а не «не найдена» — второе отправит оператора искать опечатку.
+        return (
+            RegistrationRequest.objects.filter(kind=RegistrationKind.VENDOR)
+            .select_related("decided_by")
+            .order_by("created_at")
+        )
+
+    @extend_schema(
+        summary="Одобрение заявки поставщика",
+        request=None,
+        responses={200: RegistrationRequestSerializer, 409: ErrorResponseSerializer},
+        tags=["accounts"],
+    )
+    @action(detail=True, methods=["post"])
+    def approve(self, request: Request, pk: str | None = None) -> Response:
+        target = self.get_object()
+
+        def produce() -> Response:
+            approved = registration.approve(request=target, actor=cast(User, request.user))
+            return Response(RegistrationRequestSerializer(approved).data)
+
+        return self.idempotent(request, produce)
+
+    @extend_schema(
+        summary="Отклонение заявки поставщика",
+        request=RegistrationDecisionSerializer,
+        responses={200: RegistrationRequestSerializer, 409: ErrorResponseSerializer},
+        tags=["accounts"],
+    )
+    @action(detail=True, methods=["post"])
+    def reject(self, request: Request, pk: str | None = None) -> Response:
+        target = self.get_object()
+
+        def produce() -> Response:
+            payload = RegistrationDecisionSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+
+            rejected = registration.reject(
+                request=target,
+                actor=cast(User, request.user),
+                reason=payload.validated_data["reason"],
+            )
+            return Response(RegistrationRequestSerializer(rejected).data)
+
+        return self.idempotent(request, produce)
