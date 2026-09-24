@@ -10,6 +10,7 @@
  * Хранение токенов — ADR-034: access только в памяти вкладки, refresh
  * в `localStorage` с ротацией и отзывом прежнего при каждом обновлении.
  */
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { z } from 'zod';
 
 import { request } from './client';
@@ -75,6 +76,33 @@ export type TwoFactorSetup = z.infer<typeof twoFactorSetupSchema>;
 
 /** Проверка формы: сервер и клиент используют один и тот же профиль. */
 export type ProfileFromContract = MeResponse;
+
+export const demoAccountSchema = z.object({
+  username: z.string(),
+  name: z.string(),
+  role: z.string(),
+});
+
+export type DemoAccount = z.infer<typeof demoAccountSchema>;
+
+export const demoAccountsSchema = z.object({ data: z.array(demoAccountSchema) });
+
+/**
+ * Учётные записи для экрана входа `[ТЗ 4.3]` (ADR-013).
+ *
+ * Экономит набор логина, когда стенд показывают нескольким людям подряд.
+ * Паролей в ответе нет: список не заменяет вход, а лишь подставляет логин.
+ * Вне `DEMO_ACCOUNTS=true` сервер отдаёт пустой список, и выбор не выводится.
+ */
+export function useDemoAccounts(): UseQueryResult<DemoAccount[]> {
+  return useQuery({
+    queryKey: ['auth-accounts'],
+    queryFn: async ({ signal }) =>
+      (await request('/auth/accounts', demoAccountsSchema, { signal })).data,
+    staleTime: 5 * 60_000,
+    retry: false,
+  });
+}
 
 export function login(username: string, password: string): Promise<LoginResponse> {
   return request('/auth/login', loginResponseSchema, {

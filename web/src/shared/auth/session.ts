@@ -47,6 +47,16 @@ interface SessionState {
 /** Временный токен между шагами входа: в хранилище не попадает. */
 let twoFactorToken: string | null = null;
 
+/**
+ * Восстановление сессии, уже идущее прямо сейчас.
+ *
+ * `StrictMode` монтирует дерево дважды, и `restore()` вызывался двумя
+ * эффектами подряд. Обновление отзывает прежний refresh (ADR-034),
+ * поэтому второй вызов шёл с уже отозванным токеном: гонка изредка
+ * заканчивалась 401 и сбросом сессии.
+ */
+let restoring: Promise<void> | null = null;
+
 export const useSession = create<SessionState>()(
   persist(
     (set, get) => {
@@ -100,17 +110,24 @@ export const useSession = create<SessionState>()(
         },
 
         restore: async () => {
+          if (restoring) return restoring;
+
           const token = get().refreshToken;
           if (!token) {
             set({ status: 'anonymous' });
             return;
           }
           set({ status: 'restoring' });
-          try {
-            await apply(await refreshRequest(token));
-          } catch {
-            clear();
-          }
+          restoring = (async () => {
+            try {
+              await apply(await refreshRequest(token));
+            } catch {
+              clear();
+            } finally {
+              restoring = null;
+            }
+          })();
+          return restoring;
         },
 
         reloadProfile: async () => {
