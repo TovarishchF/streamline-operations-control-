@@ -176,6 +176,37 @@ paths:
       responses:
         '204': { description: Выход выполнен }
 
+  /auth/accounts:
+    get:
+      tags: [auth]
+      summary: Учётные записи стенда для экрана входа
+      description: |
+        Экономит набор логина, когда стенд показывают нескольким людям подряд.
+        Отдаёт только имя, логин и роль: паролей в ответе нет и быть не может —
+        вход остаётся настоящим, обход аутентификации запрещён (ADR-013).
+
+        Вне `DEMO_ACCOUNTS=true` список пуст: перечень действующих сотрудников
+        организации не является публичными данными.
+      security: []
+      responses:
+        '200':
+          description: Список учётных записей, возможно пустой
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [username, name, role]
+                      properties:
+                        username: { type: string }
+                        name: { type: string }
+                        role: { $ref: '#/components/schemas/Role' }
+
   /auth/me:
     get:
       tags: [auth]
