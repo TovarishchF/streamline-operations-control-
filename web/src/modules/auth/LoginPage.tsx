@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useDemoAccounts, type DemoAccount } from '@/api/auth';
+import { RegistrationModal } from './RegistrationModal';
 import { ApiError } from '@/api/client';
 import { SOC_COLORS, SOC_RADIUS } from '@/app/theme';
 import { useSession } from '@/shared/auth/session';
@@ -33,6 +34,7 @@ export function LoginPage(): JSX.Element {
   // Пришли по «Сменить сотрудника» — список сотрудников стоит над формой:
   // выбирают из него, а не набирают логин заново.
   const switching = useSearchParams()[0].get('switch') === '1';
+  const [registering, setRegistering] = useState(false);
 
   const [step, setStep] = useState<'credentials' | 'twoFactor'>('credentials');
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +104,7 @@ export function LoginPage(): JSX.Element {
           {step === 'credentials' ? (
             <Form
               form={form}
+              name="login"
               layout="vertical"
               onFinish={(values: { username: string; password: string }) => {
                 void handle(async () => {
@@ -131,6 +134,23 @@ export function LoginPage(): JSX.Element {
               <Button type="primary" htmlType="submit" size="large" block loading={busy}>
                 {t('auth.signIn')}
               </Button>
+
+              <Space size={6} style={{ marginTop: 12 }}>
+                <Typography.Text type="secondary" style={{ fontSize: 13 }}>
+                  {t('register.haveNoAccount')}
+                </Typography.Text>
+                {/* Настоящая кнопка, а не `<a>` без адреса: ссылка без
+                    `href` не получает фокус, и клавиатура её пропускает. */}
+                <Button
+                  type="link"
+                  style={{ padding: 0, height: 'auto' }}
+                  onClick={() => {
+                    setRegistering(true);
+                  }}
+                >
+                  {t('register.openForm')}
+                </Button>
+              </Space>
 
               {accounts.length > 0 && !switching ? (
                 <Space direction="vertical" size={6} style={{ width: '100%', marginTop: 16 }}>
@@ -194,6 +214,13 @@ export function LoginPage(): JSX.Element {
           )}
         </Space>
       </Card>
+
+      <RegistrationModal
+        open={registering}
+        onClose={() => {
+          setRegistering(false);
+        }}
+      />
     </Layout>
   );
 }

@@ -12,6 +12,8 @@ import {
 } from '@/shared/auth/session';
 import { HOME_BY_ROLE } from './layout/navigation';
 
+import { RegistrationConfirmPage } from '@/modules/auth/RegistrationConfirmPage';
+import { RegistrationQueuePage } from '@/modules/admin/RegistrationQueuePage';
 import { LoginPage } from '@/modules/auth/LoginPage';
 import { TwoFactorSetupPage } from '@/modules/auth/TwoFactorSetupPage';
 import { SchedulePage } from '@/modules/schedule/SchedulePage';
@@ -90,6 +92,7 @@ export function AppRoutes(): JSX.Element {
     return (
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register/confirm" element={<RegistrationConfirmPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     );
@@ -164,6 +167,7 @@ export function AppRoutes(): JSX.Element {
           <Route path="/dashboards/manager" element={<ManagerDashboard />} />
 
           <Route path="/admin/users" element={<UsersPage />} />
+          <Route path="/admin/registrations" element={<RegistrationQueuePage />} />
           <Route path="/admin/audit" element={<AuditPage />} />
           <Route path="/admin/integrations" element={<IntegrationsPage />} />
           <Route path="/admin/sla" element={<SlaPage />} />

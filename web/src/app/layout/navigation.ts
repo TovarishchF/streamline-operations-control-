@@ -232,6 +232,12 @@ export const NAV_GROUPS: NavGroup[] = [
             permission: 'admin',
           },
           { key: 'users', path: '/admin/users', labelKey: 'nav.users', permission: 'admin' },
+          {
+            key: 'registrations',
+            path: '/admin/registrations',
+            labelKey: 'nav.registrationQueue',
+            permission: 'admin',
+          },
           { key: 'audit', path: '/admin/audit', labelKey: 'nav.audit', permission: 'audit.view' },
           { key: 'sla', path: '/admin/sla', labelKey: 'nav.sla', permission: 'admin' },
           {

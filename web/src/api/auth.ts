@@ -10,10 +10,13 @@
  * Хранение токенов — ADR-034: access только в памяти вкладки, refresh
  * в `localStorage` с ротацией и отзывом прежнего при каждом обновлении.
  */
-import { useQuery, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation, useQuery, useQueryClient, type UseQueryResult,
+} from '@tanstack/react-query';
 import { z } from 'zod';
 
-import { request } from './client';
+import { pagedSchema, type Paged } from './catalog';
+import { newIdempotencyKey, request } from './client';
 import type { MeResponse, Role } from './types';
 
 export const tokenPairSchema = z.object({
@@ -101,6 +104,111 @@ export function useDemoAccounts(): UseQueryResult<DemoAccount[]> {
       (await request('/auth/accounts', demoAccountsSchema, { signal })).data,
     staleTime: 5 * 60_000,
     retry: false,
+  });
+}
+
+// ─────────────────────────── Регистрация ───────────────────────────
+
+export interface RegistrationInput {
+  kind: 'client' | 'vendor';
+  contactName: string;
+  email: string;
+  phone?: string;
+  password: string;
+  companyName: string;
+  legalName?: string;
+  country?: string;
+  taxId?: string;
+  website?: string;
+  specializations?: string[];
+  coverageAirports?: string[];
+  comment?: string;
+}
+
+export const registrationAcceptedSchema = z.object({
+  status: z.literal('email_sent'),
+  kind: z.enum(['client', 'vendor']),
+});
+
+/**
+ * Регистрация заказчика или поставщика `[ТЗ 4.3]` (ADR-037).
+ *
+ * Ответ одинаков независимо от того, свободен адрес или занят: перебирать
+ * чужие адреса через форму регистрации нельзя. Поэтому экран после подачи
+ * говорит «проверьте почту», а не «учётная запись создана».
+ */
+export function useRegister() {
+  return useMutation({
+    mutationFn: (input: RegistrationInput) =>
+      request('/auth/register', registrationAcceptedSchema, {
+        method: 'POST',
+        body: input,
+      }),
+  });
+}
+
+export const registrationConfirmedSchema = z.object({
+  status: z.enum(['email_pending', 'pending', 'approved', 'rejected']),
+  kind: z.enum(['client', 'vendor']),
+});
+
+export function useConfirmRegistration() {
+  return useMutation({
+    mutationFn: (input: { requestId: string; token: string }) =>
+      request('/auth/register/confirm', registrationConfirmedSchema, {
+        method: 'POST',
+        body: input,
+      }),
+  });
+}
+
+export const registrationRequestSchema = z.object({
+  id: z.string(),
+  kind: z.enum(['client', 'vendor']),
+  status: z.enum(['email_pending', 'pending', 'approved', 'rejected']),
+  contactName: z.string(),
+  email: z.string(),
+  phone: z.string().default(''),
+  companyName: z.string(),
+  legalName: z.string().default(''),
+  country: z.string().default(''),
+  taxId: z.string().default(''),
+  website: z.string().default(''),
+  specializations: z.array(z.string()).default([]),
+  coverageAirports: z.array(z.string()).default([]),
+  comment: z.string().default(''),
+  emailConfirmedAt: z.string().nullable(),
+  createdAt: z.string(),
+  decisionReason: z.string().default(''),
+});
+
+export type RegistrationRequestRow = z.infer<typeof registrationRequestSchema>;
+
+/** Очередь руководителя: только поставщики. */
+export function useRegistrationRequests(): UseQueryResult<Paged<RegistrationRequestRow>> {
+  return useQuery({
+    queryKey: ['registration-requests'],
+    queryFn: ({ signal }) =>
+      request('/registration-requests?perPage=100', pagedSchema(registrationRequestSchema), {
+        signal,
+      }),
+  });
+}
+
+export function useDecideRegistration(decision: 'approve' | 'reject') {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { id: string; reason?: string }) =>
+      request(`/registration-requests/${input.id}/${decision}`, registrationRequestSchema, {
+        method: 'POST',
+        idempotencyKey: newIdempotencyKey(),
+        ...(decision === 'reject' ? { body: { reason: input.reason ?? '' } } : {}),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['registration-requests'] });
+      void queryClient.invalidateQueries({ queryKey: ['vendors'] });
+    },
   });
 }
 
