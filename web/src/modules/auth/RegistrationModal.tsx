@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useRegister, type RegistrationInput } from '@/api/auth';
 import { ApiError } from '@/api/client';
 import { SOC_COLORS, SOC_RADIUS } from '@/app/theme';
+import { CountrySelect } from '@/shared/ui/CountrySelect';
 
 /**
  * Регистрация заказчика или поставщика `[ТЗ 4.3]` (ADR-037).
@@ -22,6 +23,77 @@ import { SOC_COLORS, SOC_RADIUS } from '@/app/theme';
  * иначе форма регистрации превращается в справочник клиентуры.
  */
 
+/** Правила, которым обязан удовлетворять пароль. Повторяют серверную политику. */
+const SPECIAL = '!@#$%^&*()-_=+[]{}:;,.?~';
+
+const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+const DIGITS = '0123456789';
+
+/** Проверка множеством, а не регулярным выражением: знаки препинания
+ *  внутри класса символов требуют экранирования, и правило, которое
+ *  легко сломать опечаткой, здесь не нужно. */
+const ALLOWED = new Set([...LETTERS.split(''), ...DIGITS.split(''), ...SPECIAL.split('')]);
+
+interface Rule {
+  key: string;
+  ok: (value: string) => boolean;
+}
+
+const RULES: Rule[] = [
+  { key: 'length', ok: (v) => v.length >= 12 },
+  { key: 'letter', ok: (v) => /[A-Za-z]/.test(v) },
+  { key: 'digit', ok: (v) => /[0-9]/.test(v) },
+  { key: 'special', ok: (v) => v.split('').some((c) => SPECIAL.includes(c)) },
+  { key: 'allowed', ok: (v) => v.split('').every((c) => ALLOWED.has(c)) },
+];
+
+function passwordProblems(value: string, t: (key: string) => string): string[] {
+  if (!value) return [];
+  return RULES.filter((rule) => !rule.ok(value)).map((rule) =>
+    t(`register.passwordRule.${rule.key}`),
+  );
+}
+
+/**
+ * Список требований с отметкой выполненных.
+ *
+ * Показывать их все сразу, а не по одному при отказе: подбирать пароль
+ * методом проб, получая по одной претензии за попытку, — худший способ
+ * узнать правило.
+ */
+function PasswordRules({ value = '' }: { value?: string }): JSX.Element {
+  const { t } = useTranslation();
+  return (
+    <Space direction="vertical" size={2} style={{ marginTop: 4 }}>
+      {RULES.map((rule) => {
+        const done = value.length > 0 && rule.ok(value);
+        return (
+          <Space key={rule.key} size={6}>
+            <span
+              aria-hidden="true"
+              style={{
+                display: 'inline-block',
+                width: 6,
+                height: 6,
+                borderRadius: 999,
+                background: done ? SOC_COLORS.brand : SOC_COLORS.borderStrong,
+              }}
+            />
+            <Typography.Text
+              style={{
+                fontSize: 12,
+                color: done ? SOC_COLORS.ink : SOC_COLORS.inkSecondary,
+              }}
+            >
+              {t(`register.passwordRule.${rule.key}`)}
+            </Typography.Text>
+          </Space>
+        );
+      })}
+    </Space>
+  );
+}
+
 type Kind = 'client' | 'vendor';
 
 const CATEGORIES = [
@@ -30,6 +102,7 @@ const CATEGORIES = [
 
 interface FormValues {
   contactName: string;
+  passwordRepeat: string;
   email: string;
   phone?: string;
   password: string;
@@ -96,6 +169,9 @@ export function RegistrationModal({
   const [sent, setSent] = useState(false);
 
   const register = useRegister();
+  // Наблюдение за полем — хук, и вызывать его внутри ветки разметки
+  // нельзя: порядок хуков обязан совпадать от отрисовки к отрисовке.
+  const typedPassword = Form.useWatch<string>('password', form);
 
   const close = (): void => {
     setSent(false);
@@ -198,15 +274,18 @@ export function RegistrationModal({
               name="companyName"
               rules={[{ required: true, message: t('register.companyRequired') }]}
             >
-              <Input />
+              <Input placeholder={t('register.companyPlaceholder')} />
             </Form.Item>
 
             <Space size={8} style={{ width: '100%' }} align="start">
               <Form.Item label={t('register.legalName')} name="legalName" style={{ flex: 1 }}>
-                <Input />
+                <Input placeholder={t('register.legalPlaceholder')} />
               </Form.Item>
               <Form.Item label={t('register.country')} name="country">
-                <Input maxLength={2} style={{ width: 90, textTransform: 'uppercase' }} />
+                <CountrySelect
+                  placeholder={t('register.countryPlaceholder')}
+                  style={{ width: 240 }}
+                />
               </Form.Item>
             </Space>
 
@@ -222,6 +301,7 @@ export function RegistrationModal({
                 >
                   <Select
                     mode="multiple"
+                    placeholder={t('register.specializationsPlaceholder')}
                     options={CATEGORIES.map((code) => ({
                       value: code,
                       label: t(`serviceCategory.${code}`),
@@ -234,11 +314,15 @@ export function RegistrationModal({
                   name="coverageAirports"
                   extra={t('register.coverageHint')}
                 >
-                  <Select mode="tags" tokenSeparators={[',', ' ']} />
+                  <Select
+                    mode="tags"
+                    tokenSeparators={[',', ' ']}
+                    placeholder={t('register.coveragePlaceholder')}
+                  />
                 </Form.Item>
 
                 <Form.Item label={t('register.taxId')} name="taxId">
-                  <Input maxLength={32} />
+                  <Input maxLength={32} placeholder={t('register.taxIdPlaceholder')} />
                 </Form.Item>
               </>
             ) : null}
@@ -255,7 +339,7 @@ export function RegistrationModal({
               name="contactName"
               rules={[{ required: true, message: t('register.contactRequired') }]}
             >
-              <Input autoComplete="name" />
+              <Input autoComplete="name" placeholder={t('register.contactPlaceholder')} />
             </Form.Item>
 
             <Space size={8} style={{ width: '100%' }} align="start">
@@ -268,25 +352,67 @@ export function RegistrationModal({
                   { type: 'email', message: t('register.emailInvalid') },
                 ]}
               >
-                <Input autoComplete="email" />
+                <Input autoComplete="email" placeholder={t('register.emailPlaceholder')} />
               </Form.Item>
               <Form.Item label={t('register.phone')} name="phone">
-                <Input autoComplete="tel" style={{ width: 170 }} />
+                <Input
+                  autoComplete="tel"
+                  style={{ width: 170 }}
+                  placeholder={t('register.phonePlaceholder')}
+                />
               </Form.Item>
             </Space>
 
+            {/* Требования повторяют серверную политику
+                (`accounts/password_policy.py`). Проверка здесь — чтобы
+                не отправлять форму заведомо зря; решает всё равно сервер. */}
             <Form.Item
               label={t('register.password')}
               name="password"
-              rules={[{ required: true, message: t('register.passwordRequired') }]}
-              extra={t('register.passwordHint')}
+              rules={[
+                { required: true, message: t('register.passwordRequired') },
+                {
+                  validator: (_rule, value: string | undefined) => {
+                    const problems = passwordProblems(value ?? '', t);
+                    return problems.length > 0
+                      ? Promise.reject(new Error(problems[0]))
+                      : Promise.resolve();
+                  },
+                },
+              ]}
+              extra={<PasswordRules value={typedPassword} />}
             >
-              <Input.Password autoComplete="new-password" />
+              <Input.Password
+                autoComplete="new-password"
+                placeholder={t('register.passwordPlaceholder')}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label={t('register.passwordRepeat')}
+              name="passwordRepeat"
+              // Зависимость нужна, чтобы повтор перепроверялся при правке
+              // самого пароля, а не только при вводе повтора.
+              dependencies={['password']}
+              rules={[
+                { required: true, message: t('register.passwordRepeatRequired') },
+                {
+                  validator: (_rule, value: string | undefined) =>
+                    value === form.getFieldValue('password')
+                      ? Promise.resolve()
+                      : Promise.reject(new Error(t('register.passwordMismatch'))),
+                },
+              ]}
+            >
+              <Input.Password
+                autoComplete="new-password"
+                placeholder={t('register.passwordRepeatPlaceholder')}
+              />
             </Form.Item>
 
             {kind === 'vendor' ? (
               <Form.Item label={t('register.comment')} name="comment">
-                <Input.TextArea rows={2} />
+                <Input.TextArea rows={2} placeholder={t('register.commentPlaceholder')} />
               </Form.Item>
             ) : null}
 
