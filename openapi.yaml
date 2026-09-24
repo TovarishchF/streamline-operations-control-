@@ -176,6 +176,143 @@ paths:
       responses:
         '204': { description: Выход выполнен }
 
+  /auth/register:
+    post:
+      tags: [auth]
+      summary: Регистрация заказчика или поставщика `[ТЗ 4.3]`
+      x-idempotency: optional
+      description: |
+        Открытый эндпоинт: регистрируется тот, у кого учётной записи ещё нет.
+
+        Заказчик получает доступ сразу после подтверждения адреса — чужих
+        данных он не видит, а своих у новой карточки нет. Поставщик так
+        не может: взять его в работу — решение о закупке, и заявка уходит
+        руководителю (ADR-037).
+
+        Ответ **одинаков** независимо от того, свободен адрес или занят:
+        иначе форма регистрации превращается в справочник клиентуры.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegistrationSubmit' }
+      responses:
+        '202':
+          description: Заявка принята, письмо подтверждения отправлено
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, kind]
+                properties:
+                  status: { type: string, enum: [email_sent] }
+                  kind: { type: string, enum: [client, vendor] }
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /auth/register/confirm:
+    post:
+      tags: [auth]
+      summary: Подтверждение адреса почты
+      x-idempotency: optional
+      description: |
+        Ссылка из письма одноразовая: в базе лежит её хэш, после перехода
+        он стирается. Повторный переход по той же ссылке ошибкой не является —
+        письмо могли открыть дважды.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [requestId, token]
+              properties:
+                requestId: { type: string }
+                token: { type: string }
+      responses:
+        '200':
+          description: Адрес подтверждён
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status, kind]
+                properties:
+                  status:
+                    type: string
+                    enum: [email_pending, pending, approved, rejected]
+                  kind: { type: string, enum: [client, vendor] }
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /registration-requests:
+    get:
+      tags: [accounts]
+      summary: Заявки поставщиков на согласование `[ТЗ 4.3]`
+      description: |
+        Очередь руководителя. Заявки заказчиков закрываются подтверждением
+        почты и сюда не попадают.
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+      responses:
+        '200':
+          description: Страница заявок
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PagedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/RegistrationRequest' }
+
+  /registration-requests/{id}/approve:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [accounts]
+      summary: Одобрение заявки поставщика
+      description: Создаёт карточку поставщика и учётную запись.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      responses:
+        '200':
+          description: Заявка одобрена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RegistrationRequest' }
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /registration-requests/{id}/reject:
+    parameters: [{ $ref: '#/components/parameters/PathId' }]
+    post:
+      tags: [accounts]
+      summary: Отклонение заявки поставщика
+      description: Причина сообщается заявителю.
+      x-idempotency: required
+      parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string }
+      responses:
+        '200':
+          description: Заявка отклонена
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RegistrationRequest' }
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /auth/accounts:
     get:
       tags: [auth]
@@ -3013,6 +3150,64 @@ components:
           schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   schemas:
+
+    RegistrationSubmit:
+      type: object
+      required: [kind, contactName, email, password, companyName]
+      properties:
+        kind:
+          type: string
+          enum: [client, vendor]
+          description: Кем представляется заявитель.
+        contactName: { type: string, maxLength: 255 }
+        email: { type: string, format: email }
+        phone: { type: string, maxLength: 32 }
+        password:
+          type: string
+          writeOnly: true
+          description: Политика паролей та же, что при смене пароля.
+        companyName: { type: string, maxLength: 255 }
+        legalName: { type: string, maxLength: 500 }
+        country: { type: string, maxLength: 2 }
+        taxId: { type: string, maxLength: 32, description: ИНН или аналог }
+        website: { type: string, maxLength: 255 }
+        specializations:
+          type: array
+          description: Категории услуг по ТЗ 3.2.1. Для поставщика обязательны.
+          items: { $ref: '#/components/schemas/ServiceCategory' }
+        coverageAirports:
+          type: array
+          items: { type: string, pattern: '^[A-Za-z]{4}$' }
+        comment: { type: string }
+
+    RegistrationRequest:
+      type: object
+      required: [id, kind, status, contactName, email, companyName, createdAt]
+      description: Заявка на регистрацию. Пароля в ответе нет.
+      properties:
+        id: { type: string }
+        kind: { type: string, enum: [client, vendor] }
+        status:
+          type: string
+          enum: [email_pending, pending, approved, rejected]
+        contactName: { type: string }
+        email: { type: string, format: email }
+        phone: { type: string }
+        companyName: { type: string }
+        legalName: { type: string }
+        country: { type: string }
+        taxId: { type: string }
+        website: { type: string }
+        specializations:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceCategory' }
+        coverageAirports:
+          type: array
+          items: { type: string }
+        comment: { type: string }
+        emailConfirmedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time }
+        decisionReason: { type: string }
 
     # ───────────────────────────── ОБЩИЕ ТИПЫ ─────────────────────────────
 
