@@ -72,6 +72,8 @@ export function usePayables(params: {
   vendorId?: string;
   status?: string;
   overdue?: boolean;
+  /** Выборка запрашивается только тем, у кого есть право на раздел. */
+  enabled?: boolean;
 }): UseQueryResult<Paged<PayableRow>> {
   const query = new URLSearchParams({ perPage: '200' });
   if (params.vendorId) query.set('vendorId', params.vendorId);
@@ -82,6 +84,7 @@ export function usePayables(params: {
     queryKey: ['payables', query.toString()],
     queryFn: ({ signal }) =>
       request(`/payables?${query.toString()}`, pagedSchema(payableSchema), { signal }),
+    enabled: params.enabled ?? true,
   });
 }
 

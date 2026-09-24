@@ -1,17 +1,18 @@
-import { useMemo, useState, type JSX } from 'react';
-import { Badge, Button, Drawer, Dropdown, Layout, Menu, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import {
+  Badge, Button, Drawer, Dropdown, Layout, Select, Space, Tag, Tooltip, Typography,
+} from 'antd';
 import { BellOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
-import {
-  useCurrentUser, useDemoMode, usePermissionMap, useSession,
-} from '@/shared/auth/session';
-import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { useCurrentUser, useDemoMode, useSession } from '@/shared/auth/session';
+import { SOC_COLORS, SOC_DENSITY } from '@/app/theme';
 import { useNotifications } from '@/api/comms';
-import { NAV_GROUPS } from './navigation';
+import { NavRail } from './NavRail';
+import { SectionTabs } from './SectionTabs';
 import { NotificationCentre } from './NotificationCentre';
 import { DemoClockPanel } from './DemoClockPanel';
 
@@ -46,7 +47,21 @@ function UserMenu(): JSX.Element | null {
 
   if (!user) return null;
 
+  // «Сменить сотрудника» — это выход и новый вход, а не подмена роли:
+  // обход аутентификации запрещён (ADR-013). От обычного выхода отличается
+  // тем, куда приводит: на вход со списком учётных записей, а не на пустую
+  // форму.
   const items = [
+    {
+      key: 'switchUser',
+      label: t('auth.switchUser'),
+      onClick: () => {
+        void signOut().then(() => {
+          navigate('/login?switch=1');
+        });
+      },
+    },
+    { type: 'divider' as const },
     {
       key: 'signOut',
       label: t('auth.signOut'),
@@ -74,54 +89,6 @@ function UserMenu(): JSX.Element | null {
   );
 }
 
-function Sidebar({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
-  const { t } = useTranslation();
-  const location = useLocation();
-  const permissions = usePermissionMap();
-  const demoMode = useDemoMode();
-
-  const items = useMemo(
-    () =>
-      NAV_GROUPS.map((group) => {
-        const visible = group.items.filter(
-          (item) =>
-            permissions[item.permission] === true && (demoMode || item.demoOnly !== true),
-        );
-        if (visible.length === 0) return null;
-        return {
-          key: group.key,
-          label: t(group.labelKey),
-          type: 'group' as const,
-          children: visible.map((item) => ({
-            key: item.path,
-            label: <Link to={item.path}>{t(item.labelKey)}</Link>,
-          })),
-        };
-      }).filter((group): group is NonNullable<typeof group> => group !== null),
-    [permissions, demoMode, t],
-  );
-
-  // Подсветка пункта: самый длинный совпадающий префикс, иначе на карточке
-  // рейса подсвечивался бы и «Суточный план», и ничего.
-  const selected = useMemo(() => {
-    const paths = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.path));
-    const match = paths
-      .filter((p) => location.pathname === p || location.pathname.startsWith(`${p}/`))
-      .sort((a, b) => b.length - a.length)[0];
-    return match ? [match] : [];
-  }, [location.pathname]);
-
-  return (
-    <Menu
-      mode="inline"
-      items={items}
-      selectedKeys={selected}
-      onClick={onNavigate}
-      style={{ borderInlineEnd: 'none', height: '100%' }}
-    />
-  );
-}
-
 export function AppLayout(): JSX.Element {
   const { t } = useTranslation();
   const { nowUtc, shifted } = useClock();
@@ -135,14 +102,19 @@ export function AppLayout(): JSX.Element {
   const demoMode = useDemoMode();
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <Layout className="soc" style={{ minHeight: '100vh' }}>
+      {/* Обвязка несёт знак заказчика и потому тёмная. Полоса 52 px:
+          выше она отнимала бы строки у суточного плана, ради которых
+          вся плотность и выбиралась. */}
       <Layout.Header
+        className="soc-chrome"
         style={{
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          background: '#fff',
-          borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}`,
+          height: SOC_DENSITY.chromeHeight,
+          lineHeight: `${String(SOC_DENSITY.chromeHeight)}px`,
+          background: SOC_COLORS.brandInk,
           paddingInline: 16,
           position: 'sticky',
           top: 0,
@@ -160,11 +132,29 @@ export function AppLayout(): JSX.Element {
           aria-label={t('nav.menu')}
         />
 
-        <Link to="/" style={{ color: 'inherit' }}>
-          <Typography.Text strong style={{ fontSize: 16 }}>
-            {t('app.name')}
-          </Typography.Text>
+        {/* Белая версия знака — на brand-ink, цветная остаётся для белого
+            фона и бланка документа. Красный из знака в интерфейсе не
+            используется: там он означает критический статус. */}
+        <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
+          <img
+            src="/brand/streamline-fs-white.png"
+            alt={t('app.fullName')}
+            style={{ height: 26, width: 'auto', display: 'block' }}
+          />
         </Link>
+
+        <span
+          aria-hidden="true"
+          style={{ width: 1, height: 22, background: SOC_COLORS.brandInkLine }}
+          className="soc-hide-sm"
+        />
+
+        <Typography.Text
+          className="soc-hide-sm"
+          style={{ color: SOC_COLORS.onBrandInk, fontSize: 13, fontWeight: 500 }}
+        >
+          {t('app.chromeTitle')}
+        </Typography.Text>
 
         {demoMode && (
           <Tooltip title={t('app.demoTooltip')}>
@@ -184,7 +174,9 @@ export function AppLayout(): JSX.Element {
 
         <Tooltip title={t('clock.utcHint')}>
           <Space size={4} className="soc-hide-sm">
-            <Typography.Text style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+            <Typography.Text
+              style={{ fontFamily: "'JetBrains Mono', monospace", color: SOC_COLORS.onBrandInk }}
+            >
               {formatUtc(nowUtc)}
             </Typography.Text>
             {shifted && (
@@ -213,16 +205,22 @@ export function AppLayout(): JSX.Element {
       </Layout.Header>
 
       <Layout>
+        {/* Навигация переехала на светлый рельс: контраст отдан данным,
+            а не обвязке. */}
         <Layout.Sider
-          width={228}
+          width={SOC_DENSITY.railWidth}
           theme="light"
           className="soc-sider"
-          style={{ borderInlineEnd: `1px solid ${STATUS_TOKENS.neutral.border}` }}
+          style={{
+            background: SOC_COLORS.surface,
+            borderInlineEnd: `1px solid ${SOC_COLORS.border}`,
+          }}
         >
-          <Sidebar />
+          <NavRail />
         </Layout.Sider>
 
-        <Layout.Content style={{ padding: 16, minWidth: 0 }}>
+        <Layout.Content style={{ padding: SOC_DENSITY.contentPadding, minWidth: 0 }}>
+          <SectionTabs />
           <Outlet />
         </Layout.Content>
       </Layout>
@@ -237,7 +235,7 @@ export function AppLayout(): JSX.Element {
         styles={{ body: { padding: 0 } }}
         title={t('app.name')}
       >
-        <Sidebar
+        <NavRail
           onNavigate={() => {
             setDrawerOpen(false);
           }}

@@ -320,7 +320,12 @@ export const flightRequestSchema = z.object({
 
 export type FlightRequest = z.infer<typeof flightRequestSchema>;
 
-export function useFlightRequests(status?: string): UseQueryResult<Paged<FlightRequest>> {
+export function useFlightRequests(
+  status?: string,
+  // Выборка запрашивается только тем, у кого есть право: иначе рельс
+  // со счётчиком отправлял бы запрос с каждого экрана и получал 403.
+  enabled = true,
+): UseQueryResult<Paged<FlightRequest>> {
   const query = new URLSearchParams({ perPage: '100' });
   if (status) query.set('status', status);
 
@@ -330,6 +335,7 @@ export function useFlightRequests(status?: string): UseQueryResult<Paged<FlightR
       request(`/flight-requests?${query.toString()}`, pagedSchema(flightRequestSchema), {
         signal,
       }),
+    enabled,
   });
 }
 

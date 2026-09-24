@@ -1,12 +1,14 @@
 import type { JSX } from 'react';
-import { Button, Dropdown, Layout, Menu, Tag, Tooltip, Typography, Select } from 'antd';
+import {
+  Button, ConfigProvider, Dropdown, Layout, Menu, Tag, Tooltip, Typography, Select,
+} from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useCurrentUser, useSession } from '@/shared/auth/session';
+import { portalTheme, SOC_COLORS } from '@/app/theme';
+import { useCurrentUser, useDemoMode, useSession } from '@/shared/auth/session';
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
-import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
 
 /**
@@ -23,6 +25,7 @@ export function PortalLayout(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { nowUtc } = useClock();
+  const demoMode = useDemoMode();
   useClockTicker();
 
   const items =
@@ -51,39 +54,50 @@ export function PortalLayout(): JSX.Element {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    <ConfigProvider theme={portalTheme}>
+      <Layout className="soc" style={{ minHeight: '100vh' }}>
+      {/* Кабинет заказчика видит знак поставщика услуги, а не служебное
+          сокращение: это его подрядчик, а не внутренняя система. */}
       <Layout.Header
+        className="soc-chrome"
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: 12,
-          background: '#fff',
-          borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}`,
-          paddingInline: 16,
+          gap: 14,
+          height: 64,
+          lineHeight: '64px',
+          background: SOC_COLORS.brandInk,
+          paddingInline: 24,
         }}
       >
-        <Typography.Text strong style={{ fontSize: 16 }}>
-          {t('app.name')}
-        </Typography.Text>
-        <Tag color="blue" style={{ margin: 0 }}>
-          {user?.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
-        </Tag>
-        <Tooltip title={t('app.demoTooltip')}>
-          <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
-            {t('app.demoBadge')}
-          </Tag>
-        </Tooltip>
-
-        <Menu
-          mode="horizontal"
-          items={items}
-          selectedKeys={[location.pathname]}
-          style={{ flex: 1, borderBottom: 'none', minWidth: 0 }}
+        <img
+          src="/brand/streamline-fs-white.png"
+          alt={t('app.fullName')}
+          style={{ height: 26, width: 'auto', display: 'block' }}
         />
+
+        <span
+          aria-hidden="true"
+          style={{ width: 1, height: 24, background: SOC_COLORS.brandInkLine }}
+        />
+
+        <Typography.Text style={{ color: SOC_COLORS.onBrandInk, fontSize: 14, fontWeight: 500 }}>
+          {user?.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
+        </Typography.Text>
+
+        {demoMode && (
+          <Tooltip title={t('app.demoTooltip')}>
+            <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
+              {t('app.demoBadge')}
+            </Tag>
+          </Tooltip>
+        )}
+
+        <div style={{ flex: 1 }} />
 
         <Typography.Text
           className="soc-hide-sm"
-          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+          style={{ fontFamily: "'JetBrains Mono', monospace", color: SOC_COLORS.onBrandInkMuted }}
         >
           {formatUtc(nowUtc)}
         </Typography.Text>
@@ -107,9 +121,27 @@ export function PortalLayout(): JSX.Element {
         </Dropdown>
       </Layout.Header>
 
-      <Layout.Content style={{ padding: 16, maxWidth: 1280, width: '100%', margin: '0 auto' }}>
+      {/* Навигация — на светлом рельсе под обвязкой: контраст отдан
+          содержимому, а не полосе с названием. */}
+      <nav
+        style={{
+          background: SOC_COLORS.surface,
+          borderBottom: `1px solid ${SOC_COLORS.border}`,
+          paddingInline: 24,
+        }}
+      >
+        <Menu
+          mode="horizontal"
+          items={items}
+          selectedKeys={[location.pathname]}
+          style={{ borderBottom: 'none', minWidth: 0 }}
+        />
+      </nav>
+
+      <Layout.Content style={{ padding: 24, maxWidth: 1148, width: '100%', margin: '0 auto' }}>
         <Outlet />
       </Layout.Content>
-    </Layout>
+      </Layout>
+    </ConfigProvider>
   );
 }
