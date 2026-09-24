@@ -169,18 +169,44 @@ export function DateText({ value }: { value: string | null | undefined }) {
 
 // ─────────────────────────────── Статусы ───────────────────────────────
 
+/**
+ * Статус — пара «тег и точка» («Основа 2.0»).
+ *
+ * Точка несёт тот же цвет, что и текст: тон заливки от этого спокойнее,
+ * а отличие статуса читается с двух метров — диспетчер смотрит на план
+ * не только в упор. Форма — пилюля; цвет берётся только из токена,
+ * объявлять свой цвет статуса компонент не вправе (`CLAUDE.md § 10`).
+ */
 function TokenTag({ token, label }: { token: StatusToken; label: string }) {
   const style = STATUS_TOKENS[token];
   return (
     <Tag
       style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        // Высота 22 px: пилюля помещается в строку таблицы 30 px,
+        // не растягивая её.
+        height: 22,
+        lineHeight: '20px',
         color: style.color,
         background: style.background,
         borderColor: style.border,
+        borderRadius: 999,
         margin: 0,
         fontWeight: 500,
       }}
     >
+      <span
+        aria-hidden="true"
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: 999,
+          background: style.color,
+          flexShrink: 0,
+        }}
+      />
       {label}
     </Tag>
   );

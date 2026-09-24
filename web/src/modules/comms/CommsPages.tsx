@@ -14,7 +14,7 @@ import {
   type OutboxMessageRow,
 } from '@/api/comms';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
-import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
+import { EmptyState, Mono, UtcTime, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
 import { ApplyInboxModal } from './ApplyInboxModal';
@@ -67,12 +67,12 @@ export function OutboxPage(): JSX.Element {
     {
       title: t('comms.status'), dataIndex: 'status', width: 140,
       render: (value: string, row) => {
-        const token = STATUS_TOKENS[OUTBOX_TOKEN[value] ?? 'neutral'];
         return (
           <Space size={4}>
-            <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-              {t(`outboxStatus.${value}`)}
-            </Tag>
+            <GenericStatusTag
+              token={OUTBOX_TOKEN[value] ?? 'neutral'}
+              label={t(`outboxStatus.${value}`)}
+            />
             {row.attempts > 1 ? <Mono>×{row.attempts}</Mono> : null}
           </Space>
         );

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import type { Discrepancy, VendorInvoice } from '@/api/types';
 import { VENDOR_INVOICES } from '@/mocks/billing';
 import { VENDOR_BY_ID } from '@/mocks/counterparties';
-import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { DateText, EmptyState, MoneyText, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
 const DISCREPANCY_TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
@@ -47,11 +47,11 @@ export function ReconciliationPage(): JSX.Element {
       dataIndex: 'kind',
       width: 210,
       render: (value: string) => {
-        const token = STATUS_TOKENS[DISCREPANCY_TOKEN[value] ?? 'warning'];
         return (
-          <Tag style={{ color: token.color, background: token.background, borderColor: token.border }}>
-            {t(`discrepancyKind.${value}`)}
-          </Tag>
+          <GenericStatusTag
+            token={DISCREPANCY_TOKEN[value] ?? 'warning'}
+            label={t(`discrepancyKind.${value}`)}
+          />
         );
       },
     },

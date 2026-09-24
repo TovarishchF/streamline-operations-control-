@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Segmented, Space, Tag, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Col, Row, Segmented, Space, Tooltip, Typography } from 'antd';
 import { PaperClipOutlined, PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useContracts, useVendors, type VendorContractRow } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
-import { DateText, EmptyState, Mono } from '@/shared/ui/primitives';
+import { DateText, EmptyState, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { ContractFormModal } from './ContractFormModal';
@@ -143,12 +143,7 @@ export function ContractsPage(): JSX.Element {
     {
       title: t('contract.status'), dataIndex: 'status', width: 140,
       render: (value: string) => {
-        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
-        return (
-          <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-            {t(`contractStatus.${value}`)}
-          </Tag>
-        );
+        return <GenericStatusTag token={TOKEN[value] ?? 'neutral'} label={t(`contractStatus.${value}`)} />;
       },
     },
   ];

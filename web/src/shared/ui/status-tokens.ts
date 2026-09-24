@@ -8,25 +8,30 @@
  *
  * Названия токенов совпадают с полем `token` в `shared/state-machines/*.json`,
  * что позволяет красить любой статус, не зная его семантики.
+ *
+ * Пары перебраны в «Основе 2.0» под контраст текста на своей заливке
+ * не ниже 4.5:1: в прежней палитре готовность давала 2.2:1, завершение
+ * 3.4:1, предупреждение 3.3:1 — на плотной таблице это не читается.
+ * Смысл цвета не менялся, восемь смыслов остались теми же.
  */
 
 export const STATUS_TOKENS = {
   /** Создано, но работа не начата */
-  neutral: { color: '#8c8c8c', background: '#fafafa', border: '#d9d9d9' },
+  neutral: { color: '#5b6779', background: '#f2f5f8', border: '#dde3ea' },
   /** Идёт подготовка */
-  progress: { color: '#1677ff', background: '#e6f4ff', border: '#91caff' },
+  progress: { color: '#0f5fd1', background: '#eaf2ff', border: '#bcd6ff' },
   /** Готово к следующему шагу */
-  ready: { color: '#52c41a', background: '#f6ffed', border: '#b7eb8f' },
+  ready: { color: '#0d6e7a', background: '#e6f6f8', border: '#b3e0e6' },
   /** Выполняется прямо сейчас */
-  active: { color: '#722ed1', background: '#f9f0ff', border: '#d3adf7' },
+  active: { color: '#6b34c9', background: '#f2ecfd', border: '#dccbf8' },
   /** Успешно завершено */
-  done: { color: '#389e0d', background: '#f6ffed', border: '#b7eb8f' },
+  done: { color: '#1d7a45', background: '#eaf7ef', border: '#bbe5c9' },
   /** Отменено пользователем */
-  cancelled: { color: '#595959', background: '#f5f5f5', border: '#d9d9d9' },
+  cancelled: { color: '#4e5867', background: '#f1f3f6', border: '#d8dee6' },
   /** Требует немедленного внимания: AOG, отказ поставщика, нарушение SLA */
-  critical: { color: '#cf1322', background: '#fff1f0', border: '#ffa39e' },
+  critical: { color: '#c1121f', background: '#fdecec', border: '#f6c2c2' },
   /** Предупреждение: низкая маржа, приближение дедлайна, истекающий контракт */
-  warning: { color: '#d46b08', background: '#fff7e6', border: '#ffd591' },
+  warning: { color: '#a85a05', background: '#fff4e2', border: '#f6d9a8' },
 } as const;
 
 export type StatusToken = keyof typeof STATUS_TOKENS;

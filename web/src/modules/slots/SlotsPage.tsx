@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { useAirportsByIcao } from '@/api/catalog';
 import { useFlights } from '@/api/flights';
 import { useSlots, type SlotRow } from '@/api/slots';
-import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
+import { EmptyState, Mono, UtcTime, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
 import { ScrDrawer } from './ScrDrawer';
@@ -80,12 +80,7 @@ export function SlotsPage(): JSX.Element {
     {
       title: t('slots.status'), dataIndex: 'status', width: 150,
       render: (value: string) => {
-        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
-        return (
-          <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-            {t(`slotStatus.${value}`)}
-          </Tag>
-        );
+        return <GenericStatusTag token={TOKEN[value] ?? 'neutral'} label={t(`slotStatus.${value}`)} />;
       },
     },
     {

@@ -3,6 +3,7 @@ import { Space, Tooltip, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
+import { SOC_COLORS, SOC_RADIUS } from '@/app/theme';
 import { useFleet } from '@/api/fleet';
 import type { FlightRow } from '@/api/flights';
 import { useClock } from '@/shared/clock/useClock';
@@ -107,9 +108,9 @@ export function GanttBoard({
       : null;
 
   return (
-    <div style={{ display: 'flex', border: `1px solid ${STATUS_TOKENS.neutral.border}`, borderRadius: 4, overflow: 'hidden' }}>
+    <div style={{ display: 'flex', border: `1px solid ${STATUS_TOKENS.neutral.border}`, borderRadius: SOC_RADIUS.panel, overflow: 'hidden' }}>
       {/* Колонка бортов остаётся на месте при прокрутке шкалы */}
-      <div style={{ width: LABEL_WIDTH, flexShrink: 0, borderInlineEnd: `1px solid ${STATUS_TOKENS.neutral.border}`, background: '#fafafa' }}>
+      <div style={{ width: LABEL_WIDTH, flexShrink: 0, borderInlineEnd: `1px solid ${STATUS_TOKENS.neutral.border}`, background: SOC_COLORS.surfaceSunken }}>
         <div style={{ height: 28, borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}` }} />
         {rows.map((row) =>
           row.kind === 'group' ? (
@@ -118,7 +119,7 @@ export function GanttBoard({
               style={{
                 height: ROW_HEIGHT, display: 'flex', alignItems: 'center', paddingInline: 8,
                 fontSize: 11, textTransform: 'uppercase', letterSpacing: 0.4,
-                color: '#8c8c8c', background: '#f0f0f0',
+                color: SOC_COLORS.inkTertiary, background: SOC_COLORS.surfaceLine,
                 borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}`,
               }}
             >
@@ -153,14 +154,14 @@ export function GanttBoard({
       <div ref={scrollRef} style={{ overflowX: 'auto', flex: 1 }}>
         <div style={{ width: boardWidth, position: 'relative' }}>
           {/* Шкала времени. Подпись зоны обязательна (CLAUDE.md § 10). */}
-          <div style={{ height: 28, position: 'relative', borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}`, background: '#fafafa' }}>
+          <div style={{ height: 28, position: 'relative', borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}`, background: SOC_COLORS.surfaceSunken }}>
             {hourMarks.map(({ left, at, step }) => (
               <div
                 key={left}
                 style={{
                   position: 'absolute', left, top: 0, height: '100%',
                   borderInlineStart: `1px solid ${STATUS_TOKENS.neutral.border}`,
-                  paddingInlineStart: 4, fontSize: 11, color: '#8c8c8c',
+                  paddingInlineStart: 4, fontSize: 11, color: SOC_COLORS.inkTertiary,
                   fontFamily: "'JetBrains Mono', monospace", whiteSpace: 'nowrap',
                 }}
               >
@@ -173,7 +174,7 @@ export function GanttBoard({
 
           {rows.map((row) => {
             if (row.kind === 'group') {
-              return <div key={row.key} style={{ height: ROW_HEIGHT, background: '#f0f0f0', borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}` }} />;
+              return <div key={row.key} style={{ height: ROW_HEIGHT, background: SOC_COLORS.surfaceLine, borderBottom: `1px solid ${STATUS_TOKENS.neutral.border}` }} />;
             }
 
             const rowFlights = flights.filter((f) =>
@@ -238,10 +239,13 @@ export function GanttBoard({
                 background: STATUS_TOKENS.critical.color, pointerEvents: 'none', zIndex: 5,
               }}
             >
+              {/* Подпись лежит в линии шириной 2 px: без nowrap она
+                  разваливалась в столбик по одной букве. */}
               <Typography.Text
                 style={{
-                  position: 'absolute', top: 0, left: 3, fontSize: 10,
-                  color: STATUS_TOKENS.critical.color, background: '#fff', paddingInline: 2,
+                  position: 'absolute', top: 0, left: 3, fontSize: 10, whiteSpace: 'nowrap',
+                  color: STATUS_TOKENS.critical.color, background: SOC_COLORS.surface,
+                  paddingInline: 2, borderRadius: SOC_RADIUS.bar,
                 }}
               >
                 {t('schedule.now')}

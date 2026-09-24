@@ -3,6 +3,7 @@ import { Alert, Card, Col, Descriptions, Row, Space, Tag, Typography } from 'ant
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
+import { SOC_COLORS } from '@/app/theme';
 import { useFxRates } from '@/api/billing';
 import { useDemoMode } from '@/shared/auth/session';
 import { useClock } from '@/shared/clock/useClock';
@@ -21,7 +22,7 @@ function Sparkline({ values, color }: { values: number[]; color: string }): JSX.
   if (values.length < 2) {
     return (
       <svg width={280} height={52} role="img" aria-hidden>
-        <line x1={0} y1={26} x2={280} y2={26} stroke="#d9d9d9" strokeDasharray="3 3" />
+        <line x1={0} y1={26} x2={280} y2={26} stroke={SOC_COLORS.border} strokeDasharray="3 3" />
       </svg>
     );
   }

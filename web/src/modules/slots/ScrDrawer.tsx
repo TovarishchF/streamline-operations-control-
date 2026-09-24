@@ -3,6 +3,7 @@ import { Alert, App, Button, Drawer, Space, Typography } from 'antd';
 import { CopyOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
+import { SOC_COLORS } from '@/app/theme';
 import { useBuildScr, type SlotRow } from '@/api/slots';
 import { Mono } from '@/shared/ui/primitives';
 
@@ -115,7 +116,7 @@ function Input({
         lineHeight: 1.5,
         padding: 12,
         borderRadius: 6,
-        border: '1px solid #d9d9d9',
+        border: `1px solid ${SOC_COLORS.border}`,
         resize: 'vertical',
       }}
     />

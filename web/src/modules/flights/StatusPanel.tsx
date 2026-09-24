@@ -118,7 +118,9 @@ export function StatusPanel({
   return (
     <Space direction="vertical" size={10} style={{ width: '100%' }}>
       <Space size={16} wrap align="start" style={{ width: '100%' }}>
-        <div style={{ flex: 1, minWidth: 280, maxWidth: 620 }}>
+        {/* Шести шагам нужна ширина: в 620 px «Запланирован» и «Готов
+            к вылету» резались многоточием до «Запланирс». */}
+        <div style={{ flex: 1, minWidth: 280, maxWidth: 880 }}>
           {offMainLine ? (
             <Alert
               type={flight.status === 'aog' ? 'error' : 'info'}
@@ -130,6 +132,7 @@ export function StatusPanel({
             <Steps
               size="small"
               current={currentIndex}
+              labelPlacement="vertical"
               items={MAIN_LINE.map((state) => ({ title: t(`flightStatus.${state}`) }))}
             />
           )}

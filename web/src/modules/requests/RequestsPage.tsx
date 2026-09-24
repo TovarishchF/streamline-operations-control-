@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, App, Button, Card, Input, Modal, Segmented, Space, Tag, Typography } from 'antd';
+import { Alert, App, Button, Card, Input, Modal, Segmented, Space, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +14,7 @@ import {
 } from '@/api/flights';
 import { QueryState } from '@/shared/ui/QueryState';
 import { Can } from '@/shared/auth/Can';
-import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
+import { EmptyState, Mono, UtcTime, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
@@ -81,12 +81,12 @@ export function RequestsPage(): JSX.Element {
     {
       title: t('request.status'), dataIndex: 'status', width: 190,
       render: (value: string, row) => {
-        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
         return (
           <Space direction="vertical" size={2}>
-            <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-              {t(`requestStatus.${value}`)}
-            </Tag>
+            <GenericStatusTag
+              token={TOKEN[value] ?? 'neutral'}
+              label={t(`requestStatus.${value}`)}
+            />
             {row.createdFlightId ? (
               <Link to={`/flights/${row.createdFlightId}`} style={{ fontSize: 12 }}>
                 {t('request.createdFlight')}

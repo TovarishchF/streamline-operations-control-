@@ -9,7 +9,7 @@ import type { Aircraft } from '@/api/types';
 import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
 import { AircraftFormModal } from './AircraftFormModal';
-import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { EmptyState, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
@@ -61,12 +61,7 @@ export function FleetPage(): JSX.Element {
     {
       title: t('fleet.status'), dataIndex: 'status', width: 160,
       render: (value: string) => {
-        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
-        return (
-          <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-            {t(`aircraftStatus.${value}`)}
-          </Tag>
-        );
+        return <GenericStatusTag token={TOKEN[value] ?? 'neutral'} label={t(`aircraftStatus.${value}`)} />;
       },
     },
     {

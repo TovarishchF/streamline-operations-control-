@@ -18,32 +18,32 @@
       @bottom-center {
         content: "{{ title }} {{ number }} · {% trans "страница" %} " counter(page) " / " counter(pages);
         font-size: 8pt;
-        color: #8c8c8c;
+        color: #6b7687;
       }
     }
 
     body {
       font-family: "DejaVu Sans", sans-serif;
       font-size: 9.5pt;
-      color: #1f1f1f;
+      color: #101828;
     }
 
-    h1 { font-size: 15pt; margin: 0 0 2mm; }
+    h1 { font-size: 15pt; margin: 0 0 2mm; color: #0d2b4e; letter-spacing: -0.2pt; }
 
     .meta { width: 100%; margin-bottom: 6mm; }
     .meta td { padding: 0.6mm 0; vertical-align: top; }
-    .meta .label { color: #595959; width: 34mm; }
+    .meta .label { color: #566173; width: 34mm; }
 
     table.lines { width: 100%; border-collapse: collapse; }
     table.lines th {
-      background: #fafafa;
-      border-bottom: 0.4mm solid #d9d9d9;
+      background: #f7f9fb;
+      border-bottom: 0.4mm solid #dde3ea;
       padding: 2mm 1.5mm;
       text-align: left;
       font-size: 8.5pt;
     }
     table.lines td {
-      border-bottom: 0.2mm solid #f0f0f0;
+      border-bottom: 0.2mm solid #edf1f5;
       padding: 1.8mm 1.5mm;
     }
     /* Суммы и количества моноширинным: колонка цифр обязана быть ровной */
@@ -51,7 +51,7 @@
 
     table.totals { margin-left: auto; margin-top: 5mm; }
     table.totals td { padding: 1.2mm 2mm; }
-    table.totals .grand td { font-weight: bold; border-top: 0.4mm solid #1f1f1f; }
+    table.totals .grand td { font-weight: bold; border-top: 0.4mm solid #0d2b4e; }
 
     /* Водяной знак стенда. Печатается под содержимым, чтобы не мешать
        чтению, но так, что его нельзя не заметить. */
@@ -61,14 +61,14 @@
       left: 12%;
       transform: rotate(-28deg);
       font-size: 60pt;
-      color: rgba(192, 57, 43, 0.12);
+      color: rgba(193, 18, 31, 0.12);
       font-weight: bold;
       letter-spacing: 6pt;
       z-index: -1;
     }
     .demo-note {
-      border: 0.3mm solid #c0392b;
-      color: #c0392b;
+      border: 0.3mm solid #c1121f;
+      color: #c1121f;
       padding: 2mm 3mm;
       margin-bottom: 5mm;
       font-size: 8.5pt;

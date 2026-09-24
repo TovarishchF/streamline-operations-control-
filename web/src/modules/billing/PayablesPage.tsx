@@ -10,7 +10,7 @@ import { useApprovePayable, usePayables, type PayableRow } from '@/api/billing';
 import { ApiError } from '@/api/client';
 import { useVendors } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
-import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { DateText, EmptyState, MoneyText, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
@@ -84,12 +84,7 @@ export function PayablesPage(): JSX.Element {
     {
       title: t('finance.status'), dataIndex: 'status', width: 150,
       render: (value: string) => {
-        const token = STATUS_TOKENS[TOKEN[value] ?? 'neutral'];
-        return (
-          <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-            {t(`payableStatus.${value}`)}
-          </Tag>
-        );
+        return <GenericStatusTag token={TOKEN[value] ?? 'neutral'} label={t(`payableStatus.${value}`)} />;
       },
     },
     {

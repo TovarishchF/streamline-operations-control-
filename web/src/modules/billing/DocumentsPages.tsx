@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Tag, Tooltip, Typography } from 'antd';
+import { Alert, Button, Card, Col, Row, Select, Space, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
@@ -15,7 +15,7 @@ import { useClients } from '@/api/counterparties';
 import { useFlights } from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
-import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
+import { DateText, EmptyState, MoneyText, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { DocumentFormModal } from './DocumentFormModal';
@@ -40,12 +40,7 @@ function StatusTag({
   prefix: string;
 }): JSX.Element {
   const { t } = useTranslation();
-  const token = STATUS_TOKENS[map[status] ?? 'neutral'];
-  return (
-    <Tag style={{ color: token.color, background: token.background, borderColor: token.border, margin: 0 }}>
-      {t(`${prefix}.${status}`)}
-    </Tag>
-  );
+  return <GenericStatusTag token={map[status] ?? 'neutral'} label={t(`${prefix}.${status}`)} />;
 }
 
 /**
