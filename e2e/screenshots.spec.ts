@@ -2,7 +2,7 @@ import { expect, test, type ConsoleMessage } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { anyFlightId, signInAs } from './helpers/session';
+import { anyFlightId, anyId, signInAs } from './helpers/session';
 
 /**
  * Съёмка экранов и проверка, что они отрисовываются без ошибок.
@@ -82,12 +82,25 @@ const PORTAL_SCREENS: Array<{ name: string; path: string; role: string }> = [
   { name: '46-portal-vendor-payables', path: '/portal/vendor/payables', role: 'usr_vendor' },
 ];
 
+/** Карточки, адрес которых содержит идентификатор записи из набора. */
+const CARD_IDS: Array<[string, string, string]> = [
+  ['ven_003', 'vendors', 'usr_disp1'],
+  ['cli_001', 'clients', 'usr_disp1'],
+  ['qt_002', 'quotes', 'usr_fin'],
+  ['inv_001', 'invoices', 'usr_fin'],
+];
+
 /** Шум сторонних библиотек, не относящийся к нашему коду. */
 function isRelevantError(message: ConsoleMessage): boolean {
   if (message.type() !== 'error') return false;
   const text = message.text();
   // React предупреждает о совместимости antd v5 с React 19 — не наш дефект
   if (text.includes('[antd: compatible]')) return false;
+  // `findDOMNode` зовёт внутренний ResizeObserver самого antd под StrictMode.
+  // Починить это можно только в antd; своего кода в стеке вызова нет.
+  // Текст приходит с подстановками React (`%s`), поэтому ищем по имени
+  // метода, а не по собранной фразе.
+  if (text.includes('findDOMNode')) return false;
   return true;
 }
 
@@ -106,11 +119,18 @@ test.describe('Экраны', () => {
 
       await signInAs(page, screen.role ?? 'usr_disp1');
 
-      // Экраны рейса адресуются идентификатором существующего рейса:
-      // расписание теперь настоящее, и выдуманный идентификатор даёт 404.
-      const path = screen.path.includes('flt_002')
-        ? screen.path.replace('flt_002', await anyFlightId(page))
-        : screen.path;
+      // Карточки адресуются идентификатором существующей записи: данные
+      // теперь настоящие, и выдуманный идентификатор даёт 404, по которому
+      // снимок экрана не показывает ничего.
+      let path = screen.path;
+      if (path.includes('flt_002')) {
+        path = path.replace('flt_002', await anyFlightId(page));
+      }
+      for (const [placeholder, resource, role] of CARD_IDS) {
+        if (path.includes(placeholder)) {
+          path = path.replace(placeholder, await anyId(page, resource, role));
+        }
+      }
       await page.goto(path, { waitUntil: 'networkidle' });
 
       // Экран считается открывшимся, когда появился основной контейнер

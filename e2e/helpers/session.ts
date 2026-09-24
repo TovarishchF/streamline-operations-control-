@@ -164,3 +164,27 @@ export async function anyFlightId(page: Page, status = 'in_work'): Promise<strin
   }
   return first.id;
 }
+
+/**
+ * Первый идентификатор из списочного эндпоинта.
+ *
+ * Набор пересоздаётся генератором, и записанный в испытании `ven_003`
+ * перестаёт существовать после первой же пересборки стенда. Снимок экрана,
+ * сделанный по 404, ничего не показывает, а испытание при этом зелёное —
+ * поэтому идентификатор берётся с сервера, а не из памяти.
+ */
+export async function anyId(page: Page, resource: string, roleKey = 'usr_disp1'): Promise<string> {
+  const tokens = await obtainTokens(page, ACCOUNTS[roleKey] ?? 'karpov.demo');
+  const response = await page.request.get(`${API}/${resource}?perPage=1`, {
+    headers: { Authorization: `Bearer ${tokens.access}` },
+  });
+  if (!response.ok()) {
+    throw new Error(`${resource}: HTTP ${String(response.status())}`);
+  }
+  const body = (await response.json()) as { data: { id: string }[] };
+  const first = body.data[0];
+  if (!first) {
+    throw new Error(`в справочнике ${resource} пусто: выполните make seed-demo`);
+  }
+  return first.id;
+}
