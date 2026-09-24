@@ -18,6 +18,7 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView
 from rest_framework.routers import DefaultRouter
 
 from accounts.api.views import (
+    AccountListView,
     LoginView,
     LogoutView,
     MeView,
@@ -118,6 +119,7 @@ auth_urls: list[URLPattern | URLResolver] = [
     path("refresh", RefreshView.as_view(), name="refresh"),
     path("logout", LogoutView.as_view(), name="logout"),
     path("me", MeView.as_view(), name="me"),
+    path("accounts", AccountListView.as_view(), name="auth-accounts"),
     path("password", PasswordChangeView.as_view(), name="password"),
 ]
 

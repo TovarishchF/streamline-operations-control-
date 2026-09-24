@@ -123,3 +123,21 @@ class PasswordChangeSerializer(serializers.Serializer):  # type: ignore[type-arg
         except DjangoValidationError as error:
             raise serializers.ValidationError(list(error.messages)) from error
         return value
+
+
+class DemoAccountSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Учётная запись в списке экрана входа.
+
+    Пароля здесь нет: список экономит набор логина, а не заменяет вход.
+    """
+
+    username = serializers.CharField()
+    name = serializers.CharField()
+    role = serializers.CharField()
+
+
+class DemoAccountListSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    # `ListSerializer` в поле формы: у `Serializer` атрибут `data` объявлен
+    # как готовый словарь ответа, и переопределение его полем — конфликт имён,
+    # а не ошибка. Форма ответа описана контрактом.
+    data = DemoAccountSerializer(many=True)  # type: ignore[assignment]
