@@ -75,8 +75,9 @@ function UserMenu(): JSX.Element | null {
 
   return (
     <Dropdown menu={{ items }} trigger={['click']}>
-      {/* Имя урезается по ширине: настоящие имена с отчеством длиннее
-          выдуманных и на узком экране распирали шапку. */}
+      {/* Ширина по содержимому: имя с отчеством и должность читаются
+          целиком. Урезание включается только тогда, когда кнопка начинает
+          выдавливать часы и уведомления. */}
       <Button size="small" icon={<UserOutlined />} className="soc-user-button">
         <Space size={4}>
           <span className="soc-user-name">{user.name}</span>
