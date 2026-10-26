@@ -6,10 +6,6 @@
 
 Данные берутся из построенного результата и не пересчитываются: то, что
 человек видит на экране, и то, что уходит в файл, обязано совпадать.
-
-Маркировка демонстрационного режима — по правилам `SPEC.md § 8.6`
-с поправкой ADR-008: отчёт со стенда опознаётся как отчёт со стенда
-в любом формате, включая CSV и XML, где водяной знак нарисовать негде.
 """
 
 from __future__ import annotations
@@ -24,7 +20,6 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
 from core import clock
-from core.demo_marking import DEMO_NOTE as DEMO_NOTE_TEXT
 from core.exceptions import DomainError
 from core.services import storage
 from reports import definitions
@@ -45,11 +40,6 @@ MIME = {
     CSV: "text/csv",
     XML: "application/xml",
 }
-
-# Пометка для форматов без оформления. Первой строкой, чтобы её нельзя
-# было не заметить при любом способе открытия файла. Текст один на все
-# выгрузки системы (`core.demo_marking`), здесь только переиспользуется.
-DEMO_NOTE = DEMO_NOTE_TEXT
 
 # Пространство имён внутренней схемы отчётов (ADR-032). Схема лежит
 # в `shared/reference/xsd/soc-report-v1.xsd` и проверяется тестом.
@@ -81,9 +71,6 @@ def _render_csv(spec: Definition, result: dict[str, Any]) -> bytes:
     # Точка с запятой: Excel в русской локали разбирает по ней, а запятая
     # в нём же оказывается разделителем дробной части.
     writer = csv.writer(buffer, delimiter=";", quoting=csv.QUOTE_MINIMAL)
-
-    if result["isDemo"]:
-        writer.writerow([DEMO_NOTE])
 
     writer.writerow([column.ru for column in spec.columns])
     for row in result["rows"]:
@@ -127,12 +114,6 @@ def render_xlsx(spec: Definition, result: dict[str, Any]) -> bytes:
 
     bold = Font(bold=True)
     row_index = 1
-
-    if result["isDemo"]:
-        sheet.cell(row=row_index, column=1, value=DEMO_NOTE).font = Font(
-            bold=True, color="C0392B"
-        )
-        row_index += 2
 
     for index, column in enumerate(spec.columns, start=1):
         cell = sheet.cell(row=row_index, column=index, value=column.ru)
@@ -190,16 +171,10 @@ def _render_xml(
         code=result["code"],
         generatedAt=result["generatedAt"],
         currency=result["currency"],
-        demo="true" if result["isDemo"] else "false",
     )
 
     def child(parent: Any, tag: str, **attributes: str) -> Any:
         return etree.SubElement(parent, f"{{{XML_NAMESPACE}}}{tag}", **attributes)
-
-    if result["isDemo"]:
-        # Признак стенда в самом документе: получатель выгрузки
-        # не должен гадать, настоящие ли это данные.
-        child(root, "Note").text = DEMO_NOTE
 
     if params:
         parameters = child(root, "Parameters")
@@ -258,7 +233,6 @@ def _render_pdf(spec: Definition, result: dict[str, Any]) -> bytes:
             "rows": result["rows"],
             "totals": result["totals"],
             "generated_at": result["generatedAt"],
-            "is_demo": result["isDemo"],
         },
     )
     return bytes(HTML(string=html).write_pdf())

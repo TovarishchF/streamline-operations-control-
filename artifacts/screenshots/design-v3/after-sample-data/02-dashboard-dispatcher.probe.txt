@@ -1,0 +1,46 @@
+search           x       643                                          │ 746
+kbd              x       905                                          │ 1007
+clock            x       1092                                         │ 1078
+clock            w       151                                          │ 165
+bell             font    400 13.3333px/normal Arial                   │ 400 16px/normal Arial
+content          h       844                                          │ 1114
+page title       x       264                                          │ ∅
+page title       y       76                                           │ ∅
+page title       w       392                                          │ ∅
+page title       h       36                                           │ ∅
+page title       pad     0px                                          │ ∅
+page title       radius  0px                                          │ ∅
+page title       font    600 30px/36px Geologica                      │ ∅
+page title       color   rgb(12, 21, 38)                              │ ∅
+page title       bg      rgba(0, 0, 0, 0)                             │ ∅
+page title       border  0px rgb(12, 21, 38)                          │ ∅
+page title       exists  true                                         │ false
+page meta        y       116                                          │ 92
+page meta        w       392                                          │ 151
+btn secondary    y       100                                          │ 76
+btn primary      y       100                                          │ 76
+btn primary      border  1px rgb(0, 71, 152)                          │ 1px rgba(0, 0, 0, 0)
+kpi              y       152                                          │ 128
+kpi label        y       169                                          │ 145
+kpi value        y       196                                          │ 172
+kpi value        w       38                                           │ 18
+kpi foot         y       240                                          │ 216
+card             y       294                                          │ 270
+card             h       276                                          │ 474
+card head        y       295                                          │ 271
+card head        pad     12px 16px                                    │ 0px 16px
+card head        radius  0px                                          │ 12px 12px 0px 0px
+card head        font    400 13px/20px "Golos Text"                   │ 600 16px/24.6154px "Golos Text"
+card title       y       309                                          │ 285
+card title       w       158                                          │ 579
+card body        y       347                                          │ 323
+card body        h       222                                          │ 420
+card body        radius  0px                                          │ 0px 0px 12px 12px
+strip            y       363                                          │ 339
+strip id         y       364                                          │ 340
+strip no         y       374                                          │ 350
+strip icao       y       375                                          │ 351
+strip eta        y       395                                          │ 371
+pill sm          y       373                                          │ 349
+attention row    y       347                                          │ 323
+attention btn    y       372                                          │ 348

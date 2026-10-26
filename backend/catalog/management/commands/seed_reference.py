@@ -209,7 +209,7 @@ class Command(BaseCommand):
             obj = existing.get(row[key])
             if obj is None:
                 model._default_manager.create(
-                    **row, data_source=DataSource.IMPORTED, is_demo=False
+                    **row, data_source=DataSource.IMPORTED, is_generated=False
                 )
                 created += 1
                 continue

@@ -75,7 +75,7 @@ export const serviceOrderSchema = z.object({
   replacedOrderId: z.string().nullable(),
   documents: z.array(attachmentRefSchema).default([]),
   dataSource: z.string(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type ServiceOrderRow = z.infer<typeof serviceOrderSchema>;

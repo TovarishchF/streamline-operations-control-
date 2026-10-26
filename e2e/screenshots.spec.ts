@@ -17,7 +17,7 @@ import { anyFlightId, anyId, signInAs } from './helpers/session';
  *
  * С M3 экраны справочников работают на настоящем API, а вход — настоящий,
  * поэтому прогон требует поднятого окружения (`make up`) и наполненного
- * набора (`make seed-reference`, `make seed-demo`). Снимок экрана,
+ * набора (`make seed-reference`, `make seed-sample`). Снимок экрана,
  * нарисованного по недоступным данным, никому не нужен.
  */
 
@@ -69,7 +69,7 @@ const INTERNAL_SCREENS: Array<{ name: string; path: string; role?: string }> = [
   { name: '36-admin-integrations', path: '/admin/integrations', role: 'usr_admin' },
   { name: '37-admin-sla', path: '/admin/sla', role: 'usr_admin' },
   { name: '38-admin-performance', path: '/admin/performance', role: 'usr_admin' },
-  { name: '39-admin-demo-data', path: '/admin/demo-data', role: 'usr_admin' },
+  { name: '39-admin-sample-data', path: '/admin/sample-data', role: 'usr_admin' },
   { name: '40-api-docs', path: '/api-docs', role: 'usr_admin' },
 ];
 

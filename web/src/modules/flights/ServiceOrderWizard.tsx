@@ -20,6 +20,7 @@ import type { ServiceCategory } from '@/api/types';
 import { useClock } from '@/shared/clock/useClock';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
   'fuel',
@@ -384,9 +385,6 @@ export function ServiceOrderWizard({
 
         {step === 2 ? (
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
-            {serverChecks.length > 0 ? (
-              <Alert type="warning" showIcon message={t('service.checksFromServer')} />
-            ) : null}
 
             <List
               size="small"
@@ -431,7 +429,7 @@ export function ServiceOrderWizard({
             ) : null}
 
             {!blockingFailed ? (
-              <Alert type="info" showIcon message={t('service.whatHappensNext')} />
+              <Notice id="service.whatHappensNext" type="info" showIcon message={t('service.whatHappensNext')} />
             ) : null}
           </Space>
         ) : null}

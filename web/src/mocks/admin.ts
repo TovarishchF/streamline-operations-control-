@@ -3,8 +3,7 @@
  *
  * `CLAUDE.md § 4`:
  * — записи аудита от генератора помечены `source: 'seed'` и автором
- *   «System (демо-генератор)», они визуально отличаются и не выдаются
- *   за действия людей;
+ *   «Система (генератор данных)» и не выдаются за действия людей;
  * — `/admin/integrations` показывает **фактический** режим подключения.
  */
 import type {
@@ -57,9 +56,9 @@ const AUDIT_SEEDS: AuditSeed[] = [
   { action: 'discrepancy_resolved', entityType: 'reconciliation', entityId: 'vinv_002', actor: 'Зайцева Ольга', role: 'finance', source: 'user', hours: -26, after: { resolution: 'accept_theirs' } },
   { action: 'login', entityType: 'user', entityId: 'usr_fin', actor: 'Зайцева Ольга', role: 'finance', source: 'user', hours: -27 },
   { action: 'permissions_changed', entityType: 'user', entityId: 'usr_disp2', actor: 'Волкова Анна', role: 'admin', source: 'user', hours: -30, before: { role: 'dispatcher' }, after: { role: 'dispatcher', twoFactorEnabled: true } },
-  { action: 'seed_generated', entityType: 'settings', entityId: 'demo', actor: 'System (демо-генератор)', role: 'admin', source: 'seed', hours: -48, comment: 'Сгенерирован демонстрационный набор, seed 20260913' },
-  { action: 'seed_generated', entityType: 'flight', entityId: 'flt_001', actor: 'System (демо-генератор)', role: 'admin', source: 'seed', hours: -48 },
-  { action: 'seed_generated', entityType: 'vendor', entityId: 'ven_001', actor: 'System (демо-генератор)', role: 'admin', source: 'seed', hours: -48 },
+  { action: 'seed_generated', entityType: 'settings', entityId: 'sample', actor: 'Система (генератор данных)', role: 'admin', source: 'seed', hours: -48, comment: 'Сгенерирован набор данных, seed 20260913' },
+  { action: 'seed_generated', entityType: 'flight', entityId: 'flt_001', actor: 'Система (генератор данных)', role: 'admin', source: 'seed', hours: -48 },
+  { action: 'seed_generated', entityType: 'vendor', entityId: 'ven_001', actor: 'Система (генератор данных)', role: 'admin', source: 'seed', hours: -48 },
 ];
 
 export const AUDIT: AuditEntry[] = AUDIT_SEEDS.map((seed, index) => ({

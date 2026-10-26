@@ -130,7 +130,7 @@ def create_order(
         quantity=quantity,
         attributes=attributes,
         override_reason=override_reason,
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
 
     if vendor is None:
@@ -142,7 +142,7 @@ def create_order(
             actor=actor,
             after=audit.snapshot(order),
             comment=_("Черновик без поставщика"),
-            is_demo=order.is_demo,
+            is_generated=order.is_generated,
         )
         return order
 
@@ -205,7 +205,7 @@ def create_order(
             if soft
             else ""
         ),
-        is_demo=order.is_demo,
+        is_generated=order.is_generated,
     )
 
     # Заявка ушла поставщику — письмо ставится в очередь. Отправка уходит
@@ -248,7 +248,7 @@ def assign_vendor(*, order: ServiceOrder, vendor: Vendor, actor: User) -> Servic
         actor=actor,
         before=before,
         after=audit.snapshot(order),
-        is_demo=order.is_demo,
+        is_generated=order.is_generated,
     )
     return order
 
@@ -290,7 +290,7 @@ def reassign(
         after=audit.snapshot(replacement),
         comment=_("Взамен заявки %(id)s: %(comment)s")
         % {"id": order.pk, "comment": comment or "—"},
-        is_demo=replacement.is_demo,
+        is_generated=replacement.is_generated,
     )
     return replacement
 
@@ -323,6 +323,6 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
         actor=actor,
         before=before,
         after=audit.snapshot(order),
-        is_demo=order.is_demo,
+        is_generated=order.is_generated,
     )
     return order

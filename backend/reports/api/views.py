@@ -59,7 +59,6 @@ class ReportResultSerializer(serializers.Serializer):  # type: ignore[type-arg]
     code = serializers.CharField()
     generatedAt = serializers.DateTimeField()  # noqa: N815
     currency = serializers.CharField()
-    isDemo = serializers.BooleanField()  # noqa: N815
     columns = serializers.ListField(child=serializers.DictField())
     rows = serializers.ListField(child=serializers.DictField())
     totals = serializers.DictField()

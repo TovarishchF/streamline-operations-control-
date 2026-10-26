@@ -3,10 +3,7 @@
 
    Шаблон Django, а не вёрстка в коде: печатные формы правятся без
    пересборки приложения (BACKEND.md § 8). CSS Paged Media — потому что
-   WeasyPrint умеет колонтитулы и нумерацию страниц только через него.
-
-   Отметка DEMO наносится при DEMO_DATA=true (ADR-008): выгрузка со стенда
-   не должна быть неотличима от настоящей. #}
+   WeasyPrint умеет колонтитулы и нумерацию страниц только через него. #}
 <html lang="ru">
 <head>
   <meta charset="utf-8">
@@ -53,36 +50,9 @@
     table.totals td { padding: 1.2mm 2mm; }
     table.totals .grand td { font-weight: bold; border-top: 0.4mm solid #0d2b4e; }
 
-    /* Водяной знак стенда. Печатается под содержимым, чтобы не мешать
-       чтению, но так, что его нельзя не заметить. */
-    .demo-mark {
-      position: fixed;
-      top: 45%;
-      left: 12%;
-      transform: rotate(-28deg);
-      font-size: 60pt;
-      color: rgba(193, 18, 31, 0.12);
-      font-weight: bold;
-      letter-spacing: 6pt;
-      z-index: -1;
-    }
-    .demo-note {
-      border: 0.3mm solid #c1121f;
-      color: #c1121f;
-      padding: 2mm 3mm;
-      margin-bottom: 5mm;
-      font-size: 8.5pt;
-    }
   </style>
 </head>
 <body>
-
-{% if is_demo %}
-  <div class="demo-mark">DEMO</div>
-  <div class="demo-note">
-    {% trans "Документ сформирован на демонстрационном стенде и не является финансовым документом." %}
-  </div>
-{% endif %}
 
 <h1>{{ title }} {{ number }}</h1>
 

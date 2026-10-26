@@ -1,5 +1,5 @@
 import { useMemo, useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Typography } from 'antd';
+import { Button, Card, Col, Row, Select, Space, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -22,8 +22,8 @@ const ENTITY_TYPES = [
  * (ADR-033). Экран доступен администратору и руководителю, остальным сервер
  * отвечает 403.
  *
- * Записи от демонстрационного генератора помечены `seed` и визуально
- * отличаются — они не выдаются за действия людей (`CLAUDE.md § 4`).
+ * Записи генератора данных помечены `seed` и подписаны системой —
+ * они не выдаются за действия людей (`CLAUDE.md § 4`).
  */
 export function AuditPage(): JSX.Element {
   const { t } = useTranslation();
@@ -82,8 +82,6 @@ export function AuditPage(): JSX.Element {
         </Col>
       </Row>
 
-      <Alert type="info" showIcon message={t('audit.immutableNotice')} />
-
       <Card size="small" styles={{ body: { padding: 10 } }}>
         <Row gutter={[8, 8]}>
           <Col xs={12} md={8}>
@@ -115,7 +113,6 @@ export function AuditPage(): JSX.Element {
             <DataTable<AuditEntryRow>
               size="small" rowKey="id" columns={columns} dataSource={rows}
               scroll={{ x: 1200 }}
-              rowClassName={(row) => (row.source === 'seed' ? 'soc-row-seed' : '')}
               locale={{ emptyText: <EmptyState /> }}
               pagination={{
                 size: 'small',

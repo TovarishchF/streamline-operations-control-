@@ -2,7 +2,7 @@
  * Рейсы, заявки на услуги, слоты, конфликты расписания.
  *
  * Набор содержит обязательные «интересные» случаи из `SPEC.md § 11`, без них
- * демонстрация плоская: отказ поставщика с переназначением, нарушение SLA,
+ * показ плоский: отказ поставщика с переназначением, нарушение SLA,
  * отрицательная маржа, борт в AOG, конфликт расписания, рейс в валюте,
  * отличной от валюты поставщика.
  *
@@ -121,7 +121,7 @@ function buildOrders(flight: Flight, index: number): ServiceOrder[] {
       const markup = flight.billingCurrency === price.price.currency ? 1.18 : 1.12;
 
       // Статус заявки согласован со статусом рейса: несогласованность
-      // выглядела бы как ошибка системы, а не как демонстрация.
+      // выглядела бы как ошибка системы.
       let status: ServiceOrder['status'] = 'confirmed';
       if (flight.status === 'planned') status = 'draft';
       else if (flight.status === 'in_work') status = seq % 3 === 0 ? 'ordered' : 'confirmed';
@@ -185,7 +185,7 @@ function buildOrders(flight: Flight, index: number): ServiceOrder[] {
             }]
           : [],
         dataSource: 'synthetic',
-        isDemo: true,
+        isGenerated: true,
       });
     }
   }
@@ -316,7 +316,7 @@ for (let index = 0; index < 56; index += 1) {
     templateId: index % 11 === 0 ? 'tpl_001' : null,
     remarks: null,
     dataSource: 'synthetic',
-    isDemo: true,
+    isGenerated: true,
     createdAt: daysFromNow(-20),
     updatedAt: daysFromNow(-1),
   };
@@ -377,7 +377,7 @@ export const FLIGHT_LIST: FlightListItem[] = built.map(({ flight, orders, margin
   unconfirmedServicesCount: orders.filter((o) => o.status === 'ordered' || o.status === 'draft').length,
   marginPercent: margin.marginPercent,
   hasConflicts: flight.id === 'flt_025' || flight.id === 'flt_026',
-  isDemo: true,
+  isGenerated: true,
 }));
 
 // ─────────────────────────── Конфликты ───────────────────────────

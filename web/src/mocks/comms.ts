@@ -69,7 +69,7 @@ export const OUTBOX: OutboxMessage[] = FLIGHTS.slice(0, 26).map((flight, index) 
       ? [{ name: vendor?.name ?? '', address: vendor?.contacts?.[0]?.email ?? '', locale: 'ru' }]
       : [{ name: client?.contacts?.[0]?.name ?? '', address: client?.contacts?.[0]?.email ?? '', locale: client?.defaultLocale ?? 'ru' }],
     templateCode,
-    subject: `[DEMO] ${template.subject.replace('{{flight.number}}', flight.number).replace('{{invoice.number}}', 'SOC-I-2026-0107').replace('{{contract.number}}', 'Д-2025/102')}`,
+    subject: template.subject.replace('{{flight.number}}', flight.number).replace('{{invoice.number}}', 'SOC-I-2026-0107').replace('{{contract.number}}', 'Д-2025/102'),
     body: template.body
       .replace(/\{\{flight\.number\}\}/g, flight.number)
       .replace('{{flight.route}}', `${flight.depIcao} → ${flight.arrIcao}`)

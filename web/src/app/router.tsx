@@ -43,7 +43,7 @@ import { ManagerDashboard } from '@/modules/dashboards/ManagerDashboard';
 import { ClientFlightsPage, ClientDocumentsPage, ClientRequestPage } from '@/modules/portals/ClientPortal';
 import { VendorOrdersPage } from '@/modules/portals/VendorOrdersPage';
 import { VendorPerformancePage, VendorPayablesPage } from '@/modules/portals/VendorPortal';
-import { UsersPage, SlaPage, DemoDataPage, ApiDocsPage } from '@/modules/admin/AdminPages';
+import { UsersPage, SlaPage, SampleDataPage, ApiDocsPage } from '@/modules/admin/AdminPages';
 import { AuditPage } from '@/modules/admin/AuditPage';
 import { IntegrationsPage } from '@/modules/admin/IntegrationsPage';
 import { PerformancePage } from '@/modules/admin/PerformancePage';
@@ -172,7 +172,7 @@ export function AppRoutes(): JSX.Element {
           <Route path="/admin/integrations" element={<IntegrationsPage />} />
           <Route path="/admin/sla" element={<SlaPage />} />
           <Route path="/admin/performance" element={<PerformancePage />} />
-          <Route path="/admin/demo-data" element={<DemoDataPage />} />
+          <Route path="/admin/sample-data" element={<SampleDataPage />} />
           <Route path="/api-docs" element={<ApiDocsPage />} />
 
           <Route path="*" element={<NotFoundPage />} />

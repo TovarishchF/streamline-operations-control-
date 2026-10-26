@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>StatusPill · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>
+  .wrap { padding: 20px; display: grid; gap: 18px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .k { font: 500 12px/16px var(--font-sans); color: var(--ink-3); width: 100%; }
+</style>
+<div class="wrap">
+  <div class="row"><span class="k">Рейс · flight.json</span>
+    <span class="ct-pill">Запланирован</span>
+    <span class="ct-pill ct-pill--progress">В работе</span>
+    <span class="ct-pill ct-pill--ready">Готов к вылету</span>
+    <span class="ct-pill ct-pill--active">В полёте</span>
+    <span class="ct-pill ct-pill--done">Завершён</span>
+    <span class="ct-pill ct-pill--cancelled">Отменён</span>
+    <span class="ct-pill ct-pill--critical">AOG</span>
+  </div>
+  <div class="row"><span class="k">Заявка на услугу · service-order.json</span>
+    <span class="ct-pill ct-pill--sm">Черновик</span>
+    <span class="ct-pill ct-pill--sm ct-pill--progress">Заказана</span>
+    <span class="ct-pill ct-pill--sm ct-pill--ready">Подтверждена</span>
+    <span class="ct-pill ct-pill--sm ct-pill--active">Выполняется</span>
+    <span class="ct-pill ct-pill--sm ct-pill--done">Выполнена</span>
+    <span class="ct-pill ct-pill--sm ct-pill--critical">Отклонена</span>
+  </div>
+  <div class="row"><span class="k">Предупреждения и коды</span>
+    <span class="ct-pill ct-pill--warning">Маржа 4,2 %</span>
+    <span class="ct-pill ct-pill--warning">Допуск истекает 28.10</span>
+    <span class="ct-tag">CL60</span><span class="ct-tag">UUDD</span><span class="ct-tag">RVSM</span>
+  </div>
+</div>
+</body></html>

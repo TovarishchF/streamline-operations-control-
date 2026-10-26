@@ -8,6 +8,7 @@ import { useCreateInvoice, useCreateQuote, useQuotes } from '@/api/documents';
 import { useFlights } from '@/api/flights';
 import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { Notice } from '@/shared/ui/Notice';
 
 interface FormValues {
   flightId: string;
@@ -101,7 +102,8 @@ export function DocumentFormModal({
       destroyOnClose
     >
       <Form<FormValues> form={form} layout="vertical" requiredMark preserve={false}>
-        <Alert
+        <Notice
+          id={`finance.build.${kind}`}
           type="info"
           showIcon
           message={

@@ -201,6 +201,21 @@ export function useMarkNotificationRead() {
   });
 }
 
+/** «Прочитать всё» — одним запросом, сервер отмечает только свои уведомления. */
+export function useMarkAllNotificationsRead() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () =>
+      request('/notifications/read-all', z.object({ updated: z.number().int() }), {
+        method: 'POST',
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+    },
+  });
+}
+
 // ─────────────────────────── Шаблоны ───────────────────────────
 
 const localizedSchema = z.object({ ru: z.string(), en: z.string() });

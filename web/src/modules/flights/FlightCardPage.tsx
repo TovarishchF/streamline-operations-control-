@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, Button, Card, Col, Descriptions, Divider, Drawer, Row, Space, Tabs, Tag, Tooltip, Typography,
+  Alert, Button, Card, Col, Descriptions, Divider, Drawer, Row, Space, Tabs, Tag, Typography,
 } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -13,7 +13,6 @@ import { useSlots } from '@/api/slots';
 import { MARGINS } from '@/mocks/flights';
 import { useFlightOrders } from '@/api/orders';
 import { Can } from '@/shared/auth/Can';
-import { useDemoMode } from '@/shared/auth/session';
 import { formatUtcOffset, utcOffsetHours } from '@/shared/format/timezone';
 import { QueryState } from '@/shared/ui/QueryState';
 import {
@@ -21,6 +20,7 @@ import {
 } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
+import { Notice } from '@/shared/ui/Notice';
 import { FlightServicesTab } from './FlightServicesTab';
 import { FlightFinanceTab } from './FlightFinanceTab';
 import { FlightDocumentsTab } from './FlightDocumentsTab';
@@ -46,7 +46,6 @@ function localAt(timezone: string | undefined, iso: string): { time: string; off
 
 export function FlightCardPage(): JSX.Element {
   const { t } = useTranslation();
-  const demoMode = useDemoMode();
   const navigate = useNavigate();
   const { id, tab } = useParams<{ id: string; tab?: string }>();
   const [contextOpen, setContextOpen] = useState(false);
@@ -283,7 +282,8 @@ export function FlightCardPage(): JSX.Element {
       ) : null}
 
       {belowThreshold ? (
-        <Alert
+        <Notice
+          id={`finance.lowMargin:${flight.id}`}
           type="warning"
           showIcon
           message={t('finance.lowMarginTitle', {
@@ -372,13 +372,6 @@ export function FlightCardPage(): JSX.Element {
               <Descriptions.Item label={t('common.updatedAt')}>
                 <DateText value={flight.updatedAt} />
               </Descriptions.Item>
-              {demoMode ? (
-                <Descriptions.Item label={t('common.dataSource')}>
-                  <Tooltip title={t('demo.syntheticHint')}>
-                    <Tag color="purple">{t('demo.synthetic')}</Tag>
-                  </Tooltip>
-                </Descriptions.Item>
-              ) : null}
             </Descriptions>
           </Card>
         </Space>

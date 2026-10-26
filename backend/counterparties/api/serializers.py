@@ -129,14 +129,14 @@ class ClientSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     creditLimit = serializers.SerializerMethodField()  # noqa: N815
     contacts = ContactSerializer(many=True, read_only=True)
     dataSource = serializers.CharField(source="data_source", read_only=True)  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo", read_only=True)  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated", read_only=True)  # noqa: N815
 
     class Meta:
         model = Client
         fields = (
             "id", "name", "legalName", "country", "settlementCurrency",
             "paymentTerms", "contacts", "defaultLocale", "creditLimit",
-            "isActive", "dataSource", "isDemo",
+            "isActive", "dataSource", "isGenerated",
         )
 
     def get_paymentTerms(self, obj: Client) -> dict[str, Any]:  # noqa: N802
@@ -197,7 +197,7 @@ class VendorSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     manualQualityScore = serializers.IntegerField(source="manual_quality_score")  # noqa: N815
     exchangeMethod = serializers.CharField(source="exchange_method")  # noqa: N815
     dataSource = serializers.CharField(source="data_source", read_only=True)  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo", read_only=True)  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated", read_only=True)  # noqa: N815
 
     class Meta:
         model = Vendor
@@ -205,7 +205,7 @@ class VendorSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
             "id", "name", "legalName", "country", "settlementCurrency",
             "specializations", "coverage", "paymentTerms", "contacts",
             "certificates", "exchangeMethod", "manualQualityScore",
-            "isActive", "dataSource", "isDemo",
+            "isActive", "dataSource", "isGenerated",
         )
 
     def get_paymentTerms(self, obj: Vendor) -> dict[str, Any]:  # noqa: N802

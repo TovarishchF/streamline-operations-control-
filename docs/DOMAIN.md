@@ -26,7 +26,7 @@ interface Entity {
   id: Id;
   createdAt: IsoUtc;
   updatedAt: IsoUtc;
-  isDemo: boolean;                       // для seed_demo --purge
+  isGenerated: boolean;                  // для seed_sample --purge
   dataSource: 'synthetic' | 'user' | 'imported' | 'live';   // происхождение, ADR-010
 }
 ```
@@ -620,8 +620,8 @@ interface AuditEntry {
 ```
 
 Записи неизменяемы: слайс аудита имеет только `append`. Diff «было/стало» считается
-на отображении, а не хранится готовым текстом. Записи `source: 'seed'` в интерфейсе
-помечены отдельным тегом и автором `System (демо-генератор)`.
+на отображении, а не хранится готовым текстом. Записи `source: 'seed'` подписаны
+автором `Система (генератор данных)` и не выдаются за действия людей.
 
 ---
 
@@ -696,7 +696,7 @@ interface Settings {
   vendorSuggestWeights: { price: string; rating: string; proximity: string };
   contractExpiryReminders: number[];     // [30, 15, 7]
   mockLatencyMs: { min: number; max: number };
-  demoTimeScale: 1 | 60 | 600;
-  autoConfirmVendorPercent: number;      // доля заявок, подтверждаемых демо-генератором
+  modelTimeScale: 1 | 60 | 600;          // ускорение модельного времени (ADR-014)
+  autoConfirmVendorPercent: number;      // доля заявок, подтверждаемых генератором данных
 }
 ```

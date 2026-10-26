@@ -357,13 +357,13 @@ class TestMe:
         assert response.data["permissions"]["flight.create"] is True
         assert response.data["permissions"]["catalog.edit"] is False
 
-    def test_demo_marker_reflects_the_setting(
+    def test_sample_data_flag_reflects_the_setting(
         self, as_role: Callable[..., APIClient], settings: object
     ) -> None:
-        """ADR-008: маркировка стенда зависит только от `DEMO_DATA`."""
+        """ADR-008: признак режима генератора зависит только от `SAMPLE_DATA`."""
         api = as_role(Role.DISPATCHER)
 
-        assert api.get(reverse("v1:me")).data["demoMode"] is False
+        assert api.get(reverse("v1:me")).data["sampleData"] is False
 
 
 @pytest.mark.django_db

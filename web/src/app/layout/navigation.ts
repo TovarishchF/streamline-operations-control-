@@ -8,17 +8,19 @@
  *
  * Рельс несёт девять пунктов в трёх группах — состав задан дизайн-системой
  * «Streamline SOC» (карточка `NavRail`). Экраны, не попавшие в девятку,
- * достижимы вкладками внутри своего раздела: длинный список разделов
- * диспетчер перечитывает каждый раз, а вкладки внутри раздела — один раз.
+ * раскрываются под пунктом своего раздела: длинный список разделов
+ * диспетчер перечитывал бы каждый раз, а подпункты видит только в нужном.
  */
 import type { Permission } from '@/shared/auth/permissions';
 
-/** Экран внутри раздела: вкладка на странице раздела. */
+/** Экран внутри раздела: подпункт рельса под пунктом раздела. */
 export interface NavChild {
   key: string;
   path: string;
   labelKey: string;
   permission: Permission;
+  /** Экран генератора данных: вне `SAMPLE_DATA=true` не выводится. */
+  sampleDataOnly?: boolean;
 }
 
 export interface NavItem {
@@ -29,8 +31,8 @@ export interface NavItem {
   permission: Permission;
   /** Имя значка `@ant-design/icons` без суффикса `Outlined`. */
   icon: string;
-  /** Пункт демонстрационного стенда: вне `DEMO_DATA=true` не выводится. */
-  demoOnly?: boolean;
+  /** Пункт генератора данных: вне `SAMPLE_DATA=true` не выводится. */
+  sampleDataOnly?: boolean;
   children?: NavChild[];
 }
 
@@ -247,10 +249,11 @@ export const NAV_GROUPS: NavGroup[] = [
             permission: 'admin',
           },
           {
-            key: 'demo-data',
-            path: '/admin/demo-data',
-            labelKey: 'nav.demoData',
+            key: 'sample-data',
+            path: '/admin/sample-data',
+            labelKey: 'nav.sampleData',
             permission: 'admin',
+            sampleDataOnly: true,
           },
           { key: 'api-docs', path: '/api-docs', labelKey: 'nav.apiDocs', permission: 'admin' },
         ],

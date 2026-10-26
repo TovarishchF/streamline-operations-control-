@@ -5,13 +5,13 @@ import { signInAs } from './helpers/session';
 /**
  * Кнопки администрирования `[ТЗ 4.3, этап 2]`.
  *
- * Заведение пользователя и управление демонстрационным набором. Проверяется
+ * Заведение пользователя и управление набором генератора данных. Проверяется
  * работа за кнопкой: пользователь появляется на сервере, а генерация
  * отчитывается тем, что создала.
  *
- * Очистка и пересоздание здесь **не нажимаются**: они уносят со стенда всё,
- * на чём работают остальные испытания. Их поведение проверено тестами
- * сервера, включая запрет в боевом режиме и сохранность настоящих записей.
+ * Очистка и пересоздание здесь **не нажимаются**: они уносят всё, на чём
+ * работают остальные испытания. Их поведение проверено тестами сервера,
+ * включая запрет при выключенном генераторе и сохранность введённых записей.
  */
 
 /** Суффикс прогона: логин уникален, повторный запуск не должен падать на себе. */
@@ -88,11 +88,11 @@ test.describe('Администрирование', () => {
   });
 
   test('кнопка «Сгенерировать» отчитывается тем, что создала', async ({ page }) => {
-    await page.goto('/admin/demo-data', { waitUntil: 'networkidle' });
+    await page.goto('/admin/sample-data', { waitUntil: 'networkidle' });
 
     const generated = page.waitForResponse(
       (response) =>
-        response.url().includes('/api/v1/demo/seed') &&
+        response.url().includes('/api/v1/sample-data/generate') &&
         response.request().method() === 'POST',
     );
     await page.getByRole('button', { name: 'Сгенерировать' }).click();
@@ -104,7 +104,7 @@ test.describe('Администрирование', () => {
       action: string;
       counts: Record<string, number>;
     };
-    expect(body.action).toBe('seed');
+    expect(body.action).toBe('generate');
     expect(Object.keys(body.counts).length).toBeGreaterThan(0);
 
     // Числа видны на экране, а не только вернулись в ответе
@@ -112,15 +112,15 @@ test.describe('Администрирование', () => {
   });
 
   test('очистка и пересоздание спрашивают подтверждение', async ({ page }) => {
-    await page.goto('/admin/demo-data', { waitUntil: 'networkidle' });
+    await page.goto('/admin/sample-data', { waitUntil: 'networkidle' });
 
-    await page.getByRole('button', { name: 'Очистить демо-записи' }).click();
+    await page.getByRole('button', { name: 'Очистить записи генератора' }).click();
     const confirmation = page.locator('.ant-modal-confirm');
     await expect(confirmation).toBeVisible();
     // Подтверждение говорит, что именно останется
     await expect(confirmation.getByText('журнал действий остаются')).toBeVisible();
 
-    // Отказываемся: стенд нужен остальным испытаниям
+    // Отказываемся: набор нужен остальным испытаниям
     await confirmation.getByRole('button', { name: 'Отмена' }).click();
     await expect(confirmation).toBeHidden();
   });

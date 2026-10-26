@@ -20,9 +20,9 @@ venv/
 # результат сборки лежит в shared/reference/ и в репозиторий попадает он.
 .cache/
 
-# Ссылки otpauth демонстрационного стенда: учётные данные вымышленных
+# Ссылки otpauth пользователей генератора данных: учётные данные вымышленных
 # пользователей, но в репозитории им всё равно не место (CLAUDE.md § 3 п. 8).
-artifacts/demo-2fa.json
+artifacts/sample-2fa.json
 .coverage
 coverage.xml
 htmlcov/

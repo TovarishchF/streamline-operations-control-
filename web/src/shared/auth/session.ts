@@ -185,18 +185,14 @@ export function useTwoFactorSetupRequired(): boolean {
 }
 
 /**
- * Режим демонстрационного стенда — приходит с сервера (`/auth/me`, ADR-008).
+ * Режим генератора данных — приходит с сервера (`/auth/me`, ADR-008).
  *
- * От него зависят все пометки о происхождении данных: значок в шапке,
- * подписи «синтетические», отметка `DEMO` на документах и отчётах.
- * При `DEMO_DATA=false` интерфейс не выводит ничего из этого
- * (`CLAUDE.md § 4`), и серверные выгрузки тоже идут без пометок.
- *
- * Признак не хранится на клиенте отдельной константой: маркировка,
- * которую можно включить мимо сервера, ничего не гарантирует.
+ * Открывает экран генератора данных и управление модельным временем.
+ * Признак не хранится на клиенте отдельной константой: режим, который
+ * можно включить мимо сервера, ничего не гарантирует.
  */
-export function useDemoMode(): boolean {
-  return useSession((state) => state.profile?.demoMode === true);
+export function useSampleDataMode(): boolean {
+  return useSession((state) => state.profile?.sampleData === true);
 }
 
 export function usePermission(permission: Permission): boolean {

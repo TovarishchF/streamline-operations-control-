@@ -1,12 +1,15 @@
-import { useMemo, type JSX } from 'react';
-import { Typography } from 'antd';
+import { useEffect, useMemo, useState, type JSX } from 'react';
+import { Popover, Tooltip } from 'antd';
 import {
   ApiOutlined,
   BarChartOutlined,
   BookOutlined,
   DollarOutlined,
+  DownOutlined,
   EnvironmentOutlined,
   InboxOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
   MailOutlined,
   ScheduleOutlined,
   TeamOutlined,
@@ -16,21 +19,18 @@ import { useTranslation } from 'react-i18next';
 
 import { usePayables } from '@/api/billing';
 import { useFlightRequests } from '@/api/flights';
-import { useHealth } from '@/api/system';
-import { SOC_COLORS, SOC_DENSITY, SOC_RADIUS } from '@/app/theme';
-import { useDemoMode, usePermissionMap } from '@/shared/auth/session';
+import { useSampleDataMode, usePermissionMap } from '@/shared/auth/session';
 import { NAV_GROUPS, NAV_PATHS, type NavItem } from './navigation';
 
 /**
- * Светлый рельс навигации.
+ * Рельс навигации (дизайн-система v3, карточка NavRail).
  *
- * Во второй версии дизайн-системы рельс переехал с `brand-ink` на `surface`:
- * тёмно-синий блок шириной 216 px забирал внимание весь рабочий день,
- * а сообщать ему нечего — навигация неподвижна. Тёмное осталось полосе
- * со знаком.
+ * Рельс — единственная тёмная насыщенная область (`chrome`): рамка вокруг
+ * данных. Внутри области содержимого цвет означает только состояние.
  *
  * Девять пунктов в трёх группах — состав задан системой. Экраны, не попавшие
- * в девятку, живут вкладками внутри раздела (`SectionTabs`).
+ * в девятку, раскрываются под пунктом своего раздела после нажатия на него;
+ * в свёрнутом рельсе — всплывающим списком справа от значка.
  *
  * Пункт — настоящая ссылка: `div` с обработчиком клавиатура пропускает.
  */
@@ -74,20 +74,25 @@ function useRailBadges(): Record<string, string | undefined> {
   };
 }
 
-function visibleItems(
+export function visibleItems(
   permissions: Readonly<Record<string, boolean>>,
-  demoMode: boolean,
+  sampleData: boolean,
 ): { key: string; labelKey: string; items: NavItem[] }[] {
   return NAV_GROUPS.map((group) => ({
     key: group.key,
     labelKey: group.labelKey,
     // Пункт виден, если роль имеет право хотя бы на один его экран:
     // раздел из одних недоступных вкладок — тупик.
-    items: group.items.filter((item) => {
-      if (item.demoOnly === true && !demoMode) return false;
-      const screens = [item, ...(item.children ?? [])];
-      return screens.some((screen) => permissions[screen.permission] === true);
-    }),
+    items: group.items
+      .filter((item) => {
+        if (item.sampleDataOnly === true && !sampleData) return false;
+        const screens = [item, ...(item.children ?? [])];
+        return screens.some((screen) => permissions[screen.permission] === true);
+      })
+      .map((item) => ({
+        ...item,
+        children: item.children?.filter((child) => child.sampleDataOnly !== true || sampleData),
+      })),
   })).filter((group) => group.items.length > 0);
 }
 
@@ -103,133 +108,197 @@ export function activePath(pathname: string): string | null {
   return match ?? null;
 }
 
-export function NavRail({ onNavigate }: { onNavigate?: () => void }): JSX.Element {
+/** Крошки шапки: раздел рельса и экран внутри него. */
+export function breadcrumb(pathname: string): { sectionKey: string; pageKey: string } | null {
+  const current = activePath(pathname);
+  if (current === null) return null;
+  for (const group of NAV_GROUPS) {
+    for (const item of group.items) {
+      const child = (item.children ?? []).find((c) => c.path === current);
+      // Первый экран раздела зовётся как сам раздел: «Суточный план /
+      // Суточный план» ничего не говорит, над ней стоит группа рельса.
+      if (child && child.labelKey === item.labelKey) {
+        return { sectionKey: group.labelKey, pageKey: child.labelKey };
+      }
+      if (child) return { sectionKey: item.labelKey, pageKey: child.labelKey };
+      if (item.path === current) return { sectionKey: group.labelKey, pageKey: item.labelKey };
+    }
+  }
+  return null;
+}
+
+/**
+ * Рельс навигации на тёмной полосе (карточка NavRail дизайн-системы).
+ *
+ * Свёрнутый (64 px) — только значки с подсказкой, счётчики превращаются
+ * в точки, знак заменяется словом SOC: уменьшенный знак не читается.
+ */
+export function NavRail({
+  collapsed = false,
+  onToggleCollapsed,
+  onNavigate,
+}: {
+  collapsed?: boolean;
+  onToggleCollapsed?: () => void;
+  onNavigate?: () => void;
+}): JSX.Element {
   const { t } = useTranslation();
   const location = useLocation();
   const permissions = usePermissionMap();
-  const demoMode = useDemoMode();
+  const sampleData = useSampleDataMode();
   const badges = useRailBadges();
-  // Версия берётся с сервера, а не пишется в разметке: подпись, которую
-  // забыли обновить, хуже отсутствующей.
-  const health = useHealth();
 
   const groups = useMemo(
-    () => visibleItems(permissions, demoMode),
-    [permissions, demoMode],
+    () => visibleItems(permissions, sampleData),
+    [permissions, sampleData],
   );
 
   const current = activePath(location.pathname);
+  const activeKey = groups
+    .flatMap((group) => group.items)
+    .find(
+      (item) =>
+        item.path === current || (item.children ?? []).some((child) => child.path === current),
+    )?.key;
+
+  // Раскрыт раздел, в котором пользователь находится; переход в другой
+  // раздел сворачивает прежний. Повторное нажатие на раскрытый — сворачивает.
+  const [openKey, setOpenKey] = useState(activeKey);
+  useEffect(() => {
+    setOpenKey(activeKey);
+  }, [activeKey, location.pathname]);
 
   return (
-    <nav
-      aria-label={t('nav.menu')}
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        height: '100%',
-        padding: 12,
-        gap: 14,
-        overflowY: 'auto',
-      }}
-    >
-      {groups.map((group) => (
-        <div key={group.key} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {/* Заголовок группы набирается прописными в разметке, а не токеном:
-              в русском прописная кириллица шире латиницы, и длинное слово
-              распирало бы рельс. */}
-          <Typography.Text
-            style={{
-              padding: '0 10px 4px',
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: '0.06em',
-              color: SOC_COLORS.inkTertiary,
-            }}
-          >
-            {t(group.labelKey).toLocaleUpperCase('ru')}
-          </Typography.Text>
+    <div className="soc-rail__inner">
+      {/* Белая версия знака — только на тёмной обвязке. */}
+      <Link to="/" className="soc-rail__brand" onClick={onNavigate}>
+        {collapsed ? (
+          <span className="soc-rail__soc">{t('app.name')}</span>
+        ) : (
+          <>
+            <img src="/brand/streamline-fs-white.png" alt={t('app.fullName')} />
+            <span className="soc-rail__product">{t('app.name')}</span>
+          </>
+        )}
+      </Link>
 
-          {group.items.map((item) => {
-            const isActive =
-              current !== null &&
-              (item.path === current ||
-                (item.children ?? []).some((child) => child.path === current));
-            const badge = badges[item.key];
+      <nav aria-label={t('nav.menu')} className="soc-rail__nav">
+        {groups.map((group) => (
+          <div key={group.key} className="soc-rail__group">
+            <div className="soc-rail__label">{t(group.labelKey)}</div>
 
-            return (
-              <Link
-                key={item.key}
-                to={item.path}
-                onClick={onNavigate}
-                aria-current={isActive ? 'page' : undefined}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 8,
-                  height: SOC_DENSITY.controlHeight,
-                  paddingInline: 10,
-                  borderRadius: SOC_RADIUS.control,
-                  // Активный пункт несёт подложку, границу и цвет действия.
-                  // Полоса-акцент слева не используется.
-                  background: isActive ? SOC_COLORS.brand100 : 'transparent',
-                  border: `1px solid ${isActive ? SOC_COLORS.brand200 : 'transparent'}`,
-                  color: isActive ? SOC_COLORS.brand : SOC_COLORS.inkSecondary,
-                  fontWeight: isActive ? 500 : 400,
-                  textDecoration: 'none',
-                }}
-              >
-                <span style={{ fontSize: 16, display: 'flex' }} aria-hidden="true">
-                  {ICONS[item.icon]}
-                </span>
-                <span
-                  style={{
-                    flex: 1,
-                    minWidth: 0,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}
+            {group.items.map((item) => {
+              const isActive =
+                current !== null &&
+                (item.path === current ||
+                  (item.children ?? []).some((child) => child.path === current));
+              const badge = badges[item.key];
+              const label = t(item.labelKey);
+              // Подпункты — только когда их больше одного: один ничего
+              // не добавляет к самому пункту.
+              const children = (item.children ?? []).filter(
+                (child) => permissions[child.permission] === true,
+              );
+              const sectioned = children.length > 1;
+              const expandable = !collapsed && sectioned;
+              const open = expandable && openKey === item.key;
+              const childLink = (
+                child: (typeof children)[number],
+                className: string,
+                hidden = false,
+              ): JSX.Element => (
+                <Link
+                  key={child.key}
+                  to={child.path}
+                  onClick={onNavigate}
+                  tabIndex={hidden ? -1 : undefined}
+                  aria-current={child.path === current ? 'page' : undefined}
+                  className={child.path === current ? `${className} is-active` : className}
                 >
-                  {t(item.labelKey)}
-                </span>
-                {badge !== undefined ? (
-                  // Счётчик моноширинный: 6 и 18 не должны менять ширину пункта.
-                  <span
-                    style={{
-                      fontFamily: "'JetBrains Mono', monospace",
-                      fontSize: 11,
-                      color: isActive ? SOC_COLORS.brand : SOC_COLORS.inkTertiary,
-                    }}
-                  >
-                    {badge}
+                  {t(child.labelKey)}
+                </Link>
+              );
+
+              const link = (
+                <Link
+                  key={item.key}
+                  to={item.path}
+                  onClick={() => {
+                    if (expandable) setOpenKey(open && isActive ? undefined : item.key);
+                    // Выдвижная панель закрывается, только когда раскрывать нечего:
+                    // иначе подпункты исчезли бы вместе с ней.
+                    if (!expandable) onNavigate?.();
+                  }}
+                  aria-current={isActive ? 'page' : undefined}
+                  aria-expanded={expandable ? open : undefined}
+                  aria-label={collapsed ? label : undefined}
+                  className={isActive ? 'soc-rail__item is-active' : 'soc-rail__item'}
+                >
+                  <span className="soc-rail__icon" aria-hidden="true">
+                    {ICONS[item.icon]}
                   </span>
-                ) : null}
-              </Link>
-            );
-          })}
-        </div>
-      ))}
+                  {collapsed ? null : <span className="soc-rail__text">{label}</span>}
+                  {badge !== undefined ? <span className="soc-count">{badge}</span> : null}
+                  {expandable ? <DownOutlined className="soc-rail__chevron" aria-hidden /> : null}
+                </Link>
+              );
 
-      <div style={{ flex: 1 }} />
+              if (collapsed && sectioned) {
+                // Подпункты свёрнутого рельса — во всплывающем списке:
+                // иначе экраны раздела были бы недостижимы.
+                return (
+                  <Popover
+                    key={item.key}
+                    title={label}
+                    placement="rightTop"
+                    arrow={false}
+                    trigger={['hover', 'focus']}
+                    classNames={{ root: 'soc-rail-flyout' }}
+                    content={
+                      <div className="soc-rail-flyout__list">
+                        {children.map((child) => childLink(child, 'soc-rail-flyout__item'))}
+                      </div>
+                    }
+                  >
+                    {link}
+                  </Popover>
+                );
+              }
+              if (collapsed) {
+                return (
+                  <Tooltip key={item.key} title={label} placement="right">
+                    {link}
+                  </Tooltip>
+                );
+              }
+              if (!expandable) return link;
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 2,
-          padding: '8px 10px 0',
-          borderTop: `1px solid ${SOC_COLORS.surfaceLine}`,
-          fontSize: 11,
-          color: SOC_COLORS.inkTertiary,
-        }}
-      >
-        {demoMode ? <span>{t('nav.footDemo')}</span> : null}
-        {health.data ? (
-          <span style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-            SOC {health.data.version}
-          </span>
-        ) : null}
-      </div>
-    </nav>
+              return (
+                <div key={item.key} className={open ? 'soc-rail__section is-open' : 'soc-rail__section'}>
+                  {link}
+                  {/* Высота анимируется через grid-template-rows: 0fr → 1fr. */}
+                  <div className="soc-rail__sub" aria-hidden={!open}>
+                    <div className="soc-rail__sub-inner">
+                      {children.map((child) => childLink(child, 'soc-rail__subitem', !open))}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </nav>
+
+      {onToggleCollapsed ? (
+        <button type="button" className="soc-rail__toggle" onClick={onToggleCollapsed}>
+          {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+          {collapsed ? (
+            <span className="sr-only">{t('nav.expand')}</span>
+          ) : (
+            <span>{t('nav.collapse')}</span>
+          )}
+        </button>
+      ) : null}
+    </div>
   );
 }

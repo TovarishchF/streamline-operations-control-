@@ -343,9 +343,8 @@ def sla_breaches(params: dict[str, Any]) -> list[dict[str, Any]]:
 def flight_audit(params: dict[str, Any]) -> list[dict[str, Any]]:
     """Выгрузка из аудита по рейсам и заявкам за период `[ТЗ 3.6.1]`.
 
-    Записи генератора демонстрационных данных помечены автором
-    «System (демо-генератор)» и за действия людей не выдаются
-    (`CLAUDE.md § 4`).
+    Записи генератора данных помечены автором «Система (генератор данных)»
+    и за действия людей не выдаются (`CLAUDE.md § 4`).
     """
     start, end = _window(params)
     queryset = AuditEntry.objects.filter(
@@ -381,8 +380,6 @@ BUILDERS: dict[str, Callable[[dict[str, Any]], list[dict[str, Any]]]] = {
 
 def build(code: str, params: dict[str, Any]) -> dict[str, Any]:
     """Результат отчёта в форме `ReportResult` из контракта."""
-    from django.conf import settings
-
     spec = definitions.definition(code)
     builder = BUILDERS[code]
     rows = builder(params)
@@ -391,8 +388,6 @@ def build(code: str, params: dict[str, Any]) -> dict[str, Any]:
         "code": code,
         "generatedAt": clock.now().isoformat(),
         "currency": params.get("currency") or "RUB",
-        # Отчёт со стенда помечается как отчёт со стенда (`CLAUDE.md § 4`)
-        "isDemo": bool(settings.DEMO_DATA),
         "columns": spec.columns_to_contract(),
         "rows": rows,
         "totals": totals_for(spec, rows),

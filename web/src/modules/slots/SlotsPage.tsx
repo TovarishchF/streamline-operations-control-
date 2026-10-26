@@ -120,13 +120,6 @@ export function SlotsPage(): JSX.Element {
         </Button>
       </Space>
 
-      <Alert
-        type="info"
-        showIcon
-        message={t('slots.noPublicApiNotice')}
-        description={t('slots.noPublicApiHint')}
-      />
-
       {slots.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
 
       <Card size="small" styles={{ body: { padding: 0 } }}>

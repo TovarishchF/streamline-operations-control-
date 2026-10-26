@@ -73,7 +73,7 @@ def test_finance_creates_client_and_sees_it_in_registry(
     assert body["contacts"][0]["email"] == "finance@yasnyi-bereg.test"
     # Запись введена человеком, а не сгенерирована (`CLAUDE.md § 4`)
     assert body["dataSource"] == "user"
-    assert body["isDemo"] is False
+    assert body["isGenerated"] is False
 
     listed = api.get(CLIENTS_URL)
     assert [row["id"] for row in listed.json()["data"]] == [body["id"]]

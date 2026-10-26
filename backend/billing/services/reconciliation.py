@@ -355,7 +355,7 @@ def import_invoice(
             "discrepancies": len(result["discrepancies"]),
             "unmappedCodes": unmapped,
         },
-        is_demo=invoice.is_demo,
+        is_generated=invoice.is_generated,
     )
     return invoice
 
@@ -430,7 +430,7 @@ def resolve(
         before=before,
         after=discrepancies[index],
         comment=comment,
-        is_demo=invoice.is_demo,
+        is_generated=invoice.is_generated,
     )
     return invoice
 

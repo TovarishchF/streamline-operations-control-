@@ -79,7 +79,7 @@ export const quoteSchema = z.object({
   fees: z.array(z.record(z.unknown())).default([]),
   totals: totalsSchema,
   voidedByDocId: z.string().nullable(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type QuoteRow = z.infer<typeof quoteSchema>;
@@ -111,7 +111,7 @@ export const invoiceSchema = z.object({
   paidAmount: moneySchema,
   planFactComparison: z.array(planFactSchema).default([]),
   voidedByDocId: z.string().nullable(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type InvoiceRow = z.infer<typeof invoiceSchema>;

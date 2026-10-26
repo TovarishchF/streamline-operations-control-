@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Card, Col, Radio, Row, Space, Statistic, Tag, Tooltip, Typography } from 'antd';
+import { Card, Col, Radio, Row, Space, Statistic, Tag, Tooltip, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
@@ -10,6 +10,7 @@ import { MARGINS } from '@/mocks/flights';
 import { usePermission } from '@/shared/auth/session';
 import { MoneyText, Mono, PercentText } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 /**
  * Финансовая сводка рейса `[ТЗ 3.4.3]`.
@@ -111,7 +112,8 @@ export function FlightFinanceTab({
       </Space>
 
       {mode === 'mixed' && margin?.planPortionPercent ? (
-        <Alert
+        <Notice
+          id="finance.mixed"
           type="info"
           showIcon
           message={t('finance.mixedNotice', {

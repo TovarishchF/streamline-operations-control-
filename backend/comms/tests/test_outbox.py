@@ -69,25 +69,27 @@ def test_enqueued_message_records_the_actual_channel_mode(db: None) -> None:
     assert message.status == OutboxStatus.QUEUED
 
 
-def test_demo_stand_marks_the_subject(db: None, settings: Any) -> None:
-    """`SPEC.md § 8.6`: письмо со стенда опознаётся получателем."""
-    settings.DEMO_DATA = True
+def test_sample_data_mode_marks_the_record_not_the_subject(db: None, settings: Any) -> None:
+    """В режиме генератора письмо помечается для чистки, тема не меняется."""
+    settings.SAMPLE_DATA = True
     message = outbox.enqueue(
         channel=MessageChannel.EMAIL,
         to=[{"name": "Поставщик", "address": "ops@vendor.test"}],
         subject="Заявка на обслуживание",
         body="Текст",
     )
-    assert message.subject.startswith("[DEMO] ")
+    assert message.subject == "Заявка на обслуживание"
+    assert message.is_generated
 
-    settings.DEMO_DATA = False
+    settings.SAMPLE_DATA = False
     production = outbox.enqueue(
         channel=MessageChannel.EMAIL,
         to=[{"name": "Поставщик", "address": "ops@vendor.test"}],
         subject="Заявка на обслуживание",
         body="Текст",
     )
-    assert not production.subject.startswith("[DEMO]")
+    assert production.subject == "Заявка на обслуживание"
+    assert not production.is_generated
 
 
 def test_template_is_rendered_into_the_message(

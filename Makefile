@@ -3,7 +3,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help up down logs migrate makemigrations shell superuser \
-        seed-reference seed-demo demo-reset setup-beat \
+        seed-reference seed-sample sample-reset setup-beat \
         api-schema api-types lint types test test-e2e test-load test-restore check \
         venv install format
 
@@ -29,7 +29,7 @@ help:  ## Список команд
 
 # ─────────────────────────── Окружение ───────────────────────────
 
-up:  ## Поднять окружение (PROFILE=dev|demo|prod)
+up:  ## Поднять окружение (PROFILE=dev|sample|prod)
 	$(COMPOSE) --profile $(PROFILE) up -d
 	@echo "API: http://localhost:8000/api/v1/health   Веб: http://localhost:5173"
 	@echo "Почта (dev): http://localhost:8025"
@@ -66,12 +66,12 @@ seed-reference:  ## Справочники: аэропорты, типы ВС, �
 setup-beat:  ## Расписание фоновых задач (BACKEND § 5). Идемпотентна.
 	$(MANAGE) setup_periodic_tasks
 
-seed-demo:  ## Демонстрационный набор (только при DEMO_DATA=true)
-	$(MANAGE) seed_demo --seed 20260912
+seed-sample:  ## Набор генератора данных (только при SAMPLE_DATA=true)
+	$(MANAGE) seed_sample --seed 20260912
 
-demo-reset:  ## Сброс и перегенерация демо-данных
-	$(MANAGE) seed_demo --purge
-	$(MANAGE) seed_demo --seed 20260912
+sample-reset:  ## Очистка и перегенерация набора генератора
+	$(MANAGE) seed_sample --purge
+	$(MANAGE) seed_sample --seed 20260912
 
 # ─────────────────────────── Контракт API ───────────────────────────
 

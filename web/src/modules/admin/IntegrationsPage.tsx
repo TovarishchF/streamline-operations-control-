@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Space, Tabs, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Space, Tabs, Tag, Tooltip, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
@@ -7,6 +7,7 @@ import type { IntegrationLogEntry, IntegrationStatus } from '@/api/types';
 import { INTEGRATIONS, INTEGRATION_LOG } from '@/mocks/admin';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 /**
  * Состояние внешних подключений `[ТЗ 4.2]`.
@@ -128,7 +129,8 @@ export function IntegrationsPage(): JSX.Element {
         {t('nav.integrations')}
       </Typography.Title>
 
-      <Alert
+      <Notice
+        id={`integrations.stub:${String(stubCount)}`}
         type="info"
         showIcon
         message={t('integrations.honestyNotice', { count: stubCount, total: INTEGRATIONS.length })}
@@ -136,7 +138,8 @@ export function IntegrationsPage(): JSX.Element {
       />
 
       {unhealthy.length > 0 ? (
-        <Alert
+        <Notice
+          id={`integrations.unhealthy:${String(unhealthy.length)}`}
           type="warning"
           showIcon
           message={t('integrations.unhealthyCount', { count: unhealthy.length })}

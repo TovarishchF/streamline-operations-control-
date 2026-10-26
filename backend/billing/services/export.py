@@ -5,9 +5,7 @@
 источник истины, который рано или поздно разойдётся с первым.
 
 Файл кладётся в объектное хранилище, наружу отдаётся подписанная ссылка
-со сроком жизни. При `DEMO_DATA=true` на документ наносится отметка `DEMO`
-(ADR-008, `SPEC.md § 8.6`): выгрузка со стенда не должна быть неотличима
-от настоящей.
+со сроком жизни.
 """
 
 from __future__ import annotations
@@ -16,12 +14,10 @@ from decimal import Decimal
 from io import BytesIO
 from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 
 from core import clock
-from core.demo_marking import DEMO_NOTE
 from core.exceptions import DomainError
 from core.services import storage
 
@@ -74,10 +70,6 @@ def _context(document: Quote | Invoice, *, kind: str) -> dict[str, Any]:
         "vat_total": document.vat_amount,
         "grand_total": document.total_amount,
         "due_date": getattr(document, "due_date", None),
-        # Отметка стенда наносится по настройке, а не по признаку записи:
-        # на стенде помечается всё, включая документы по введённым вручную
-        # данным (`CLAUDE.md § 4`).
-        "is_demo": bool(settings.DEMO_DATA),
         "generated_at": clock.now(),
     }
 
@@ -100,13 +92,6 @@ def _render_xlsx(context: dict[str, Any]) -> bytes:
 
     bold = Font(bold=True)
     row = 1
-
-    if context["is_demo"]:
-        # Текст пометки задан `SPEC.md § 8.6` и один на все выгрузки системы.
-        sheet.cell(row=row, column=1, value=DEMO_NOTE).font = Font(
-            bold=True, color="C0392B"
-        )
-        row += 2
 
     for label, value in (
         (str(context["title"]), context["number"]),

@@ -57,7 +57,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     billingCurrency = serializers.CharField(source="billing_currency")  # noqa: N815
     fxSnapshot = serializers.JSONField(source="fx_snapshot")  # noqa: N815
     templateId = serializers.CharField(source="template_id", allow_null=True)  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo")  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated")  # noqa: N815
     createdAt = serializers.DateTimeField(source="created_at")  # noqa: N815
     updatedAt = serializers.DateTimeField(source="updated_at")  # noqa: N815
 
@@ -75,7 +75,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
             "availableTransitions", "blockedTransitions", "statusReason",
             "isInternational", "paxCount", "crew", "distanceNm", "blockTimeMin",
             "fuelPlanKg", "billingCurrency", "fxSnapshot", "templateId", "remarks",
-            "isDemo", "createdAt", "updatedAt",
+            "isGenerated", "createdAt", "updatedAt",
         )
 
     def get_fields(self) -> dict[str, serializers.Field]:  # type: ignore[type-arg]
@@ -132,7 +132,7 @@ class FlightListSerializer(serializers.ModelSerializer):  # type: ignore[type-ar
     unconfirmedServicesCount = serializers.SerializerMethodField()  # noqa: N815
     marginPercent = serializers.SerializerMethodField()  # noqa: N815
     hasConflicts = serializers.SerializerMethodField()  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo")  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated")  # noqa: N815
 
     class Meta:
         model = Flight
@@ -140,7 +140,7 @@ class FlightListSerializer(serializers.ModelSerializer):  # type: ignore[type-ar
             "id", "number", "clientId", "clientName", "aircraftId",
             "aircraftRegistration", "type", "depIcao", "arrIcao", "stdUtc", "staUtc",
             "status", "unconfirmedServicesCount", "marginPercent", "hasConflicts",
-            "isDemo",
+            "isGenerated",
         )
 
     def get_aircraftRegistration(self, obj: Flight) -> str | None:  # noqa: N802

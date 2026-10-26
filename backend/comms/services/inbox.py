@@ -1,8 +1,8 @@
 """Разбор входящих внешних событий `[ТЗ 3.2.2]` (`SPEC.md § 8.3`).
 
 Правила разбора живут здесь, а не в адаптере: письмо может прийти
-из почтового ящика, из портала поставщика или от демонстрационного
-генератора, а разбирать их нужно одинаково.
+из почтового ящика, из портала поставщика или от генератора данных,
+а разбирать их нужно одинаково.
 
 Разбор **предлагает**, а не решает. Даже опознанное письмо не меняет
 статус заявки само: `INTEGRATIONS.md § 3.3` прямо говорит, что полностью
@@ -23,8 +23,7 @@ from django.utils.translation import gettext as _
 
 from audit import services as audit
 from comms.models import InboxMessage, MessageChannel
-from core import clock
-from core.demo_marking import is_demo as demo_mode
+from core import clock, sample_data
 from core.exceptions import DomainError
 
 if TYPE_CHECKING:
@@ -112,9 +111,9 @@ def ingest(mail: IncomingMail, *, channel: str = MessageChannel.EMAIL) -> InboxM
         suggested_action=action,
         external_id=mail.external_id,
         data_source=DataSource.LIVE if live else DataSource.SYNTHETIC,
-        # Запись стенда помечается как запись стенда, иначе её не отличить
-        # от настоящей и не убрать чисткой (`CLAUDE.md § 4`).
-        is_demo=demo_mode(),
+        # Запись, сделанная в режиме генератора, помечается: иначе её
+        # не убрать чисткой `seed_sample --purge` (`CLAUDE.md § 4`).
+        is_generated=sample_data.enabled(),
     )
 
 

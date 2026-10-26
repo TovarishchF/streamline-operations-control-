@@ -1,75 +1,142 @@
 /* Глобальные стили.
-   CLAUDE.md § 10: самописного CSS-фреймворка нет, база — тема Ant Design
-   через ConfigProvider. Здесь только то, что темой не выражается.
+   База — тема Ant Design через ConfigProvider (`theme.ts`). Здесь только
+   то, что темой не выражается: шрифты, переменные и тонкий слой правил.
 
-   Имена свойств совпадают с `tokens.json` дизайн-системы «Streamline SOC»,
-   версия 2. Компонент, которому нужен цвет статуса, берёт
-   `var(--status-ready-fg)`, а не хекс: один статус не может быть разного
-   цвета в Gantt, в таблице, в теге и в мобильном приложении. */
+   Значения — дизайн-система «Streamline Contrail» v3
+   (`docs/design/guidelines/20-ant-design.md`), эталон — макеты
+   `docs/design/mockups/`. Имена переменных совпадают с `tokens.json`.
+   Компонент, которому нужен цвет статуса, берёт `var(--status-ready-fg)`,
+   а не хекс. Ниже блока переменных хексов нет. */
+
+/* Шрифты свои: серверы заказчика в России, комплект ставится без выхода
+   в интернет. Все три — переменные woff2 с полной кириллицей (OFL). */
+@font-face {
+  font-family: 'Golos Text';
+  src: url('/fonts/GolosText-Variable.woff2') format('woff2');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geologica';
+  src: url('/fonts/Geologica-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('/fonts/JetBrainsMono-Variable.woff2') format('woff2');
+  font-weight: 100 800;
+  font-display: swap;
+}
 
 :root {
-  --brand-ink: #0d2b4e;
-  --brand-ink-raised: #173f6b;
-  --brand-ink-line: rgba(255, 255, 255, 0.16);
-  --on-brand-ink: #ffffff;
-  --on-brand-ink-muted: rgba(255, 255, 255, 0.72);
-  --brand-mark-red: #bf131b;
-
-  --brand-500: #0f5fd1;
-  --brand-600: #0a4aa6;
-  --brand-100: #eaf2ff;
-  --brand-200: #bcd6ff;
-
-  --surface-page: #f2f5f8;
+  --canvas: #f3f5f9;
   --surface: #ffffff;
-  --surface-sunken: #f7f9fb;
-  --surface-line: #edf1f5;
-
-  --border: #dde3ea;
-  --border-control: #7f8ea2;
-  --border-strong: #c3ccd6;
-
-  --ink: #101828;
-  --ink-secondary: #566173;
-  --ink-tertiary: #6b7687;
-  --ink-quiet: #97a2b2;
-  --ink-disabled: #aab4c2;
-
-  --focus-ring: #0f5fd1;
-  --focus-ring-on-ink: #7fb0ff;
-
-  --status-neutral-fg: #5b6779;
-  --status-neutral-bg: #f2f5f8;
-  --status-neutral-border: #dde3ea;
-  --status-progress-fg: #0f5fd1;
-  --status-progress-bg: #eaf2ff;
-  --status-progress-border: #bcd6ff;
-  --status-ready-fg: #0d6e7a;
-  --status-ready-bg: #e6f6f8;
-  --status-ready-border: #b3e0e6;
-  --status-active-fg: #6b34c9;
-  --status-active-bg: #f2ecfd;
-  --status-active-border: #dccbf8;
-  --status-done-fg: #1d7a45;
-  --status-done-bg: #eaf7ef;
-  --status-done-border: #bbe5c9;
-  --status-cancelled-fg: #4e5867;
-  --status-cancelled-bg: #f1f3f6;
-  --status-cancelled-border: #d8dee6;
-  --status-critical-fg: #c1121f;
-  --status-critical-bg: #fdecec;
-  --status-critical-border: #f6c2c2;
-  --status-warning-fg: #a85a05;
-  --status-warning-bg: #fff4e2;
-  --status-warning-border: #f6d9a8;
-
-  --row-critical: #fdeded;
-  --row-current: #eef4ff;
-  --row-seed: #f6f1fe;
-
-  --shadow-overlay: 0 8px 24px -6px rgba(16, 24, 40, 0.12),
-    0 2px 6px -2px rgba(16, 24, 40, 0.08);
-  --shadow-sticky: 0 2px 8px -4px rgba(16, 24, 40, 0.16);
+  --surface-raised: #ffffff;
+  --surface-sunken: #f7f8fb;
+  --surface-hover: #eff3f9;
+  --surface-selected: #e7effb;
+  --line: #e2e7ef;
+  --line-strong: #cdd5e1;
+  --control-border: #7d8ba1;
+  --ink: #0c1526;
+  --ink-2: #4a566c;
+  --ink-3: #636e86;
+  --ink-disabled: #a3adbd;
+  --brand: #004798;
+  --brand-hover: #003a7e;
+  --brand-press: #002e64;
+  --on-brand: #ffffff;
+  --brand-soft: #e6eef9;
+  --brand-soft-ink: #003a7e;
+  --chrome: #0a1f3f;
+  --chrome-raised: #132c55;
+  --chrome-active: #1d3c6e;
+  --chrome-line: #22385f;
+  --on-chrome: #ffffff;
+  --on-chrome-muted: #9fb1cf;
+  --chrome-accent: #7fb2ff;
+  --mark-red: #bf131b;
+  --on-mark-red: #ffffff;
+  --badge: #c8202a;
+  --on-badge: #ffffff;
+  --mark-blue: #004798;
+  --focus: #1a66d9;
+  --status-neutral-fg: #4a566c;
+  --status-neutral-bg: #eef1f6;
+  --status-neutral-line: #d9dfe8;
+  --status-neutral-dot: #8a96aa;
+  --status-progress-fg: #0a4fb4;
+  --status-progress-bg: #e6eefc;
+  --status-progress-line: #c2d5f6;
+  --status-progress-dot: #2f6fe0;
+  --status-ready-fg: #0a6670;
+  --status-ready-bg: #e0f4f5;
+  --status-ready-line: #b0dfe3;
+  --status-ready-dot: #12a1ad;
+  --status-active-fg: #5a2fbf;
+  --status-active-bg: #f0eafd;
+  --status-active-line: #d9cbf8;
+  --status-active-dot: #7c4dff;
+  --status-done-fg: #156b3c;
+  --status-done-bg: #e4f4ea;
+  --status-done-line: #b7e1c6;
+  --status-done-dot: #22a35a;
+  --status-cancelled-fg: #545e6e;
+  --status-cancelled-bg: #f0f2f5;
+  --status-cancelled-line: #d8dde5;
+  --status-cancelled-dot: #a0a9b8;
+  --status-critical-fg: #b0121c;
+  --status-critical-bg: #fdeaeb;
+  --status-critical-line: #f5c0c3;
+  --status-critical-dot: #e5323b;
+  --status-warning-fg: #8f4c05;
+  --status-warning-bg: #fff1da;
+  --status-warning-line: #f3d29b;
+  --status-warning-dot: #e8940f;
+  --row-critical: #fff3f3;
+  --chart-1: #004798;
+  --chart-2: #12a1ad;
+  --chart-3: #e8940f;
+  --chart-4: #7c4dff;
+  --chart-5: #8a96aa;
+  --chart-grid: #e8ecf2;
+  --shadow-sticky: 0 1px 0 #e2e7ef, 0 4px 8px -6px rgba(12,21,38,0.18);
+  --shadow-pop: 0 12px 28px -8px rgba(12,21,38,0.18), 0 2px 6px -2px rgba(12,21,38,0.10);
+  --shadow-modal: 0 32px 64px -16px rgba(12,21,38,0.30), 0 0 0 1px rgba(12,21,38,0.06);
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-pill: 999px;
+  --control-h-sm: 28px;
+  --control-h: 32px;
+  --control-h-lg: 40px;
+  --row-h: 36px;
+  --row-h-compact: 32px;
+  --topbar-h: 56px;
+  --rail-w: 240px;
+  --rail-w-collapsed: 64px;
+  --gantt-row-h: 40px;
+  --gantt-bar-h: 26px;
+  --icon: 16px;
+  --icon-sm: 14px;
+  --font-display: "Geologica", "Golos Text", "Segoe UI", system-ui, sans-serif;
+  --font-sans: "Golos Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
 
   /* Суммы всегда с табличными цифрами: свойство включено на корне,
      а не расставляется по месту — иначе колонка сумм дёргается
@@ -85,27 +152,22 @@ body,
 }
 
 body {
-  font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: var(--surface-page);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 20px;
+  background: var(--canvas);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Подсветка строк по смыслу статуса, а не по декоративности.
-   Больше подсветок не вводится. */
+/* Подсветка строк по смыслу, а не по декоративности. Их три,
+   больше подсветок не вводится. */
 .soc-row-critical > td {
   background: var(--row-critical) !important;
 }
 
 .soc-row-current > td {
-  background: var(--row-current) !important;
-}
-
-/* Записи демо-генератора визуально отличаются: они не выдаются
-   за действия людей (CLAUDE.md § 4). Курсив — только у них. */
-.soc-row-seed > td {
-  background: var(--row-seed) !important;
-  font-style: italic;
+  background: var(--surface-selected) !important;
 }
 
 /* Фокус виден всегда: клавиатурная навигация по основным действиям —
@@ -113,53 +175,13 @@ body {
    модальные окна и выпадающие списки Ant Design рисуются порталом в конце
    документа и внутрь этого класса не попадают. */
 :focus-visible {
-  outline: 2px solid var(--focus-ring);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 
 /* Подчёркивание — только у ссылки при наведении. */
 .soc a:hover {
   text-decoration: underline;
-}
-
-/* Адаптив от 360 px: на узких экранах боковая навигация убирается
-   в выдвижную панель, кнопка меню появляется в шапке */
-.soc-burger {
-  display: none;
-}
-
-@media (max-width: 900px) {
-  .soc-sider {
-    display: none;
-  }
-
-  .soc-burger {
-    display: inline-flex;
-  }
-}
-
-/* На узком экране из шапки убирается всё, кроме названия, уведомлений
-   и переключателя пользователя: иначе шапка не помещается в 360 px
-   и появляется горизонтальный скролл всей страницы. */
-@media (max-width: 700px) {
-  .soc-hide-sm {
-    display: none !important;
-  }
-
-  .ant-layout-header {
-    padding-inline: 8px !important;
-  }
-
-  .ant-layout-content {
-    padding: 8px !important;
-  }
-}
-
-/* Ни один основной экран не должен давать горизонтальный скролл документа:
-   прокручиваются сами таблицы, а не страница целиком. */
-.ant-layout-content {
-  min-width: 0;
-  overflow-x: clip;
 }
 
 /* Ant Design добавляет колонке времени отступ снизу, чтобы любой элемент
@@ -197,50 +219,28 @@ body {
 }
 
 .ant-table-thead > tr > th:hover .soc-resize-handle::after {
-  background: var(--border-strong);
+  background: var(--line-strong);
+}
+
+/* Поиск по подстроке в фильтре колонки. */
+.soc-table-filter {
+  display: grid;
+  gap: 8px;
+  width: 240px;
+  padding: 8px;
+}
+
+.soc-table-filter .ant-space {
+  justify-content: flex-end;
+}
+
+.soc-filter-icon.is-active {
+  color: var(--brand);
 }
 
 /* Плотные таблицы: диспетчер смотрит в экран по 12 часов */
 .ant-table-tbody > tr > td {
   padding-block: 5px !important;
-}
-
-/* Кнопка пользователя в шапке.
-   Имя с отчеством не должно растягивать шапку: на узком экране оно
-   урезается многоточием, полное видно во всплывающей подсказке браузера. */
-/* Кнопка пользователя в шапке.
-
-   Ширина по содержимому: имя с отчеством и должность должны читаться
-   целиком. Предел — треть полосы: дальше кнопка выдавливала бы часы
-   и уведомления, которые диспетчер смотрит чаще, чем собственное имя.
-   Ниже `screen-narrow` имя урезается до 96 px, как в дизайн-системе:
-   на 360 px полоса не вмещает даже фамилию. */
-.soc-user-button {
-  max-width: 33vw;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.soc-user-name {
-  display: inline-block;
-  /* Не фиксированная ширина, а предел: кнопка растёт под содержимое,
-     и «Илья Дмитриевич Карпов» помещается целиком. Прежние 150 px
-     обрезали почти любое настоящее имя с отчеством. */
-  max-width: 320px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: bottom;
-}
-
-@media (max-width: 700px) {
-  .soc-user-button {
-    max-width: 40vw;
-  }
-
-  .soc-user-name {
-    max-width: 96px;
-  }
 }
 
 /* Заголовки таблиц при изменении ширины.
@@ -272,41 +272,29 @@ body {
   padding-inline-end: 12px !important;
 }
 
-/* Заголовки: отрицательный трекинг появляется с 21 px. На теле 13/20 он
-   съедал бы различимость букв, ради которой выбран IBM Plex Sans. */
-h1.ant-typography,
-.ant-typography h1 {
-  letter-spacing: -0.02em;
-}
-
-h2.ant-typography,
-.ant-typography h2 {
-  letter-spacing: -0.015em;
-}
-
 /* Обвязка несёт знак заказчика и потому тёмная. Всё, что в неё попадает,
    читается на brand-ink, а не на белом. */
 .soc-chrome .ant-btn:not(.ant-btn-primary) {
-  color: var(--on-brand-ink-muted);
+  color: var(--on-chrome-muted);
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--brand-ink-line);
+  border-color: var(--chrome-line);
 }
 
 .soc-chrome .ant-btn:not(.ant-btn-primary):hover {
-  color: var(--on-brand-ink);
+  color: var(--on-chrome);
   background: rgba(255, 255, 255, 0.18);
   border-color: rgba(255, 255, 255, 0.28);
 }
 
 .soc-chrome .ant-select:not(.ant-select-customize-input) .ant-select-selector {
-  color: var(--on-brand-ink-muted);
+  color: var(--on-chrome-muted);
   background: rgba(255, 255, 255, 0.1);
-  border-color: var(--brand-ink-line);
+  border-color: var(--chrome-line);
 }
 
 .soc-chrome .ant-select-arrow,
 .soc-chrome .ant-badge-count {
-  color: var(--on-brand-ink-muted);
+  color: var(--on-chrome-muted);
 }
 
 /* Внутри обвязки ссылка не подчёркивается: там нет текста-ссылки,
@@ -332,4 +320,1746 @@ h2.ant-typography,
 
 .ant-steps-label-vertical .ant-steps-item-content {
   width: 110px;
+}
+
+/* Заголовки переносятся ровными строками, а не «длинная плюс сирота». */
+h1,
+h2,
+h3,
+h4 {
+  text-wrap: balance;
+}
+
+/* ══════════════════════════ Обвязка ══════════════════════════════════
+   Карточки AppShell, NavRail, TopBar дизайн-системы. Тёмная только полоса
+   навигации слева (`chrome`): она и есть рамка. Шапка — на `surface`,
+   чтобы тёмное читалось одной вертикальной полосой. */
+
+.soc-shell {
+  min-height: 100vh;
+}
+
+.soc-rail.ant-layout-sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  background: var(--chrome);
+  color: var(--on-chrome);
+}
+
+.soc-rail__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--chrome);
+  color: var(--on-chrome);
+}
+
+/* Блок знака высотой с шапку: нижние границы сходятся в одну линию. */
+.soc-rail__brand {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--topbar-h);
+  padding: 0 16px;
+  border-bottom: 1px solid var(--chrome-line);
+  color: var(--on-chrome);
+  text-decoration: none;
+}
+
+.soc-rail__brand img {
+  height: 30px;
+  width: auto;
+  display: block;
+}
+
+.soc-rail__product {
+  padding-left: 10px;
+  border-left: 1px solid var(--chrome-line);
+  font: 600 11px/14px var(--font-sans);
+  letter-spacing: 0.04em;
+  color: var(--on-chrome-muted);
+}
+
+/* В свёрнутом рельсе знак не сжимается, а заменяется словом. */
+.soc-rail__soc {
+  width: 100%;
+  text-align: center;
+  font: 600 13px/1 var(--font-display);
+  color: var(--on-chrome);
+}
+
+.soc-rail__nav {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  padding: 12px 10px;
+  overflow-y: auto;
+}
+
+.soc-rail__group {
+  display: grid;
+  gap: 2px;
+}
+
+.soc-rail__label {
+  padding: 0 10px 6px;
+  font: 600 11px/16px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--on-chrome-muted);
+}
+
+.soc-rail__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font: 500 13px/20px var(--font-sans);
+  color: var(--on-chrome-muted);
+  text-decoration: none;
+  transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.soc .soc-rail__item:hover {
+  background: var(--chrome-raised);
+  color: var(--on-chrome);
+  text-decoration: none;
+}
+
+/* Текущий пункт — единственный залитый. */
+.soc-rail__item.is-active {
+  background: var(--chrome-active);
+  color: var(--on-chrome);
+  font-weight: 600;
+}
+
+.soc-rail__item.is-active .soc-rail__icon {
+  color: var(--chrome-accent);
+}
+
+.soc-rail__item:focus-visible,
+.soc-rail__toggle:focus-visible,
+.soc-rail__brand:focus-visible {
+  outline-color: var(--chrome-accent);
+}
+
+.soc-rail__icon {
+  display: flex;
+  font-size: var(--icon);
+}
+
+/* Раздел с подпунктами: стрелка поворачивается, подпункты выпадают.
+   Высота анимируется через grid-template-rows — без замера в скрипте. */
+.soc-rail__chevron {
+  font-size: 10px;
+  transition: transform 0.16s ease-out;
+}
+
+.soc-rail__section.is-open .soc-rail__chevron {
+  transform: rotate(180deg);
+}
+
+.soc-rail__sub {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition: grid-template-rows 0.16s ease-out, opacity 0.16s ease-out;
+}
+
+.soc-rail__section.is-open .soc-rail__sub {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.soc-rail__sub-inner {
+  display: grid;
+  gap: 2px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.soc-rail__section.is-open .soc-rail__sub-inner {
+  padding: 2px 0 4px;
+}
+
+/* Подпункт выровнен по тексту пункта (поле 10 + значок 16 + зазор 10). */
+.soc-rail__subitem {
+  display: block;
+  height: 32px;
+  padding: 0 10px 0 36px;
+  border-radius: var(--radius-sm);
+  font: 400 13px/32px var(--font-sans);
+  color: var(--on-chrome-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background-color 0.12s ease-out, color 0.12s ease-out;
+}
+
+.soc .soc-rail__subitem:hover {
+  background: var(--chrome-raised);
+  color: var(--on-chrome);
+  text-decoration: none;
+}
+
+/* Текущий подпункт не заливается — залит только пункт раздела. Метка —
+   точка `chrome-accent` под колонкой значков. */
+.soc-rail__subitem {
+  position: relative;
+}
+
+.soc-rail__subitem.is-active {
+  font-weight: 600;
+  color: var(--on-chrome);
+}
+
+.soc-rail__subitem.is-active::before {
+  content: '';
+  position: absolute;
+  top: 13px;
+  left: 15px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--chrome-accent);
+}
+
+.soc-rail__subitem:focus-visible {
+  outline-color: var(--chrome-accent);
+}
+
+/* Подпункты свёрнутого рельса: всплывающий список на `surface-raised`.
+   Он рисуется вне `.soc`, поэтому селекторы без её префикса. */
+.soc-rail-flyout .ant-popover-inner {
+  min-width: 200px;
+  padding: 6px;
+}
+
+.soc-rail-flyout .ant-popover-title {
+  margin: 0;
+  padding: 4px 10px 6px;
+  font: 600 11px/16px var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.soc-rail-flyout__list {
+  display: grid;
+  gap: 2px;
+}
+
+a.soc-rail-flyout__item {
+  display: block;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  font: 400 13px/32px var(--font-sans);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+a.soc-rail-flyout__item:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+a.soc-rail-flyout__item.is-active {
+  background: var(--surface-selected);
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.soc-rail__text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Подвал рельса — переключатель «Свернуть меню» на всю ширину. */
+.soc-rail__toggle {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: 0;
+  border-top: 1px solid var(--chrome-line);
+  background: transparent;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--on-chrome-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.soc-rail__toggle:hover {
+  color: var(--on-chrome);
+}
+
+.soc-rail__toggle .anticon {
+  font-size: var(--icon);
+}
+
+.soc-rail.is-collapsed .soc-rail__item {
+  justify-content: center;
+  padding: 0;
+}
+
+.soc-rail.is-collapsed .soc-rail__brand,
+.soc-rail.is-collapsed .soc-rail__toggle {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+/* Подпись группы прячется, на её месте остаётся разделитель. */
+.soc-rail.is-collapsed .soc-rail__label {
+  height: 1px;
+  margin: 0 10px 6px;
+  padding: 0;
+  overflow: hidden;
+  background: var(--chrome-line);
+  color: transparent;
+}
+
+/* Счётчик: пилюля справа; в свёрнутом рельсе — точка 8 px. */
+.soc-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  background: var(--badge);
+  color: var(--on-badge);
+  font: 600 11px/1 var(--font-sans);
+}
+
+.soc-rail.is-collapsed .soc-count {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  min-width: 0;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  font-size: 0;
+}
+
+/* Выдвижная панель на узких экранах несёт тот же рельс. */
+.soc-rail-drawer .ant-drawer-body {
+  padding: 0;
+  background: var(--chrome);
+}
+
+.soc-main {
+  min-width: 0;
+}
+
+.soc-topbar.ant-layout-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  height: var(--topbar-h);
+  padding: 0 16px 0 24px;
+  font: 400 13px/20px var(--font-sans);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+
+.soc-crumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font: 500 13px/20px var(--font-sans);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+
+.soc-crumbs__page {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.soc-crumbs__sep {
+  color: var(--ink-3);
+}
+
+/* Поиск по всему: поле-кнопка, открывает палитру команд. */
+.soc-search {
+  flex: 0 1 320px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 180px;
+  height: var(--control-h);
+  margin-left: auto;
+  padding: 0 6px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  font: 400 13px/20px var(--font-sans);
+  color: var(--ink-3);
+  text-align: left;
+  cursor: text;
+}
+
+.soc-search .anticon {
+  font-size: var(--icon-sm);
+}
+
+.soc-search__text {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soc-kbd {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  min-width: 20px;
+  padding: 0 5px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-xs);
+  background: var(--surface-sunken);
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-2);
+}
+
+/* Счётчик на колокольчике — та же пилюля, что в рельсе. */
+.soc-iconbtn {
+  position: relative;
+}
+
+.soc-iconbtn .soc-count {
+  position: absolute;
+  top: 1px;
+  right: -1px;
+  box-shadow: 0 0 0 2px var(--surface);
+}
+
+.soc-clock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: var(--control-h);
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font: 500 12px/1 var(--font-mono);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.soc-clock__lt {
+  color: var(--ink-3);
+}
+
+.soc-clock__sep {
+  width: 1px;
+  height: 14px;
+  background: var(--line-strong);
+}
+
+.soc-iconbtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--control-h);
+  height: var(--control-h);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-size: var(--icon);
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.soc-iconbtn:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+
+.soc-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  min-width: 0;
+  padding: 0 6px 0 4px;
+  /* Подложка наведения уходит в поле шапки, текст стоит на месте макета. */
+  margin-right: -6px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.soc-user:hover {
+  background: var(--surface-hover);
+}
+
+.soc-avatar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  background: var(--brand-soft);
+  color: var(--brand-soft-ink);
+  font: 600 12px/1 var(--font-sans);
+}
+
+.soc-user__text {
+  display: grid;
+  min-width: 0;
+}
+
+/* Имя с отчеством читается целиком; предел — чтобы не выдавить часы. */
+.soc-user__name {
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font: 600 13px/16px var(--font-sans);
+  color: var(--ink);
+}
+
+.soc-user__role {
+  font: 400 11px/14px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-content.ant-layout-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 20px;
+  min-width: 0;
+  padding: 20px 24px 32px;
+  /* Ни один основной экран не даёт горизонтальной прокрутки документа:
+     прокручиваются сами таблицы, а не страница целиком. */
+  overflow-x: clip;
+}
+
+/* Кнопка меню — только там, где рельс убран в выдвижную панель. */
+.soc-burger.ant-btn {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .soc-rail.ant-layout-sider {
+    display: none;
+  }
+
+  .soc-burger.ant-btn {
+    display: inline-flex;
+  }
+}
+
+/* На узком экране в шапке остаются кнопка меню, название экрана,
+   колокольчик и аватар: иначе она не помещается в 360 px. */
+@media (max-width: 699px) {
+  .soc-hide-sm {
+    display: none !important;
+  }
+
+  .soc-topbar.ant-layout-header {
+    gap: 8px;
+    padding: 0 8px;
+  }
+
+  .soc-content.ant-layout-content {
+    padding: 16px;
+  }
+
+  .soc-crumbs__section,
+  .soc-crumbs__sep {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .soc-rail__item,
+  .soc-rail__subitem,
+  .soc-rail__sub,
+  .soc-rail__chevron {
+    transition: none;
+  }
+}
+
+/* ═══════════════════════ Данные и компоненты ═════════════════════════
+   Карточки DataText, StatusPill, PageHeader, KpiTile, FlightStrip
+   дизайн-системы. Классы `soc-` повторяют значения `ct-` из
+   `docs/design/components/bundle.css`; размеры — оттуда, а не на глаз. */
+
+/* Идентификатор: номер рейса, регистрация, код ИКАО. */
+.soc-code {
+  font: 500 12px/20px var(--font-mono);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* Номер, открывающий карточку: цвет ссылки, подчёркивание только
+   при наведении. */
+a.soc-code--link,
+.soc a.soc-code--link {
+  color: var(--brand);
+  text-decoration: none;
+}
+
+.soc a.soc-code--link:hover {
+  color: var(--brand-hover);
+  text-decoration: underline;
+}
+
+.soc-quiet {
+  color: var(--ink-3);
+}
+
+/* Значки в кнопках — 14 px, как в карточке Button; строка 20 px. */
+.ant-btn {
+  gap: 6px;
+  line-height: 20px;
+}
+
+.ant-btn .anticon {
+  font-size: var(--icon-sm);
+}
+
+/* ── Пилюля статуса ───────────────────────────────────────────────── */
+.soc-pill {
+  --fg: var(--status-neutral-fg);
+  --bg: var(--status-neutral-bg);
+  --ln: var(--status-neutral-line);
+  --dot: var(--status-neutral-dot);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 9px 0 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--ln);
+  color: var(--fg);
+  font: 500 12px/1 var(--font-sans);
+  white-space: nowrap;
+}
+
+.soc-pill::before {
+  content: '';
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+.soc-pill--sm {
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px 0 6px;
+  font-size: 11px;
+}
+
+.soc-pill--progress { --fg: var(--status-progress-fg); --bg: var(--status-progress-bg); --ln: var(--status-progress-line); --dot: var(--status-progress-dot); }
+.soc-pill--ready { --fg: var(--status-ready-fg); --bg: var(--status-ready-bg); --ln: var(--status-ready-line); --dot: var(--status-ready-dot); }
+.soc-pill--active { --fg: var(--status-active-fg); --bg: var(--status-active-bg); --ln: var(--status-active-line); --dot: var(--status-active-dot); }
+.soc-pill--done { --fg: var(--status-done-fg); --bg: var(--status-done-bg); --ln: var(--status-done-line); --dot: var(--status-done-dot); }
+.soc-pill--cancelled { --fg: var(--status-cancelled-fg); --bg: var(--status-cancelled-bg); --ln: var(--status-cancelled-line); --dot: var(--status-cancelled-dot); }
+.soc-pill--critical { --fg: var(--status-critical-fg); --bg: var(--status-critical-bg); --ln: var(--status-critical-line); --dot: var(--status-critical-dot); font-weight: 600; }
+.soc-pill--warning { --fg: var(--status-warning-fg); --bg: var(--status-warning-bg); --ln: var(--status-warning-line); --dot: var(--status-warning-dot); }
+
+/* «Сейчас в воздухе»: ореол у точки. */
+.soc-pill--active::before {
+  box-shadow: 0 0 0 3px var(--status-active-line);
+}
+
+/* ── Заголовок страницы ───────────────────────────────────────────── */
+.soc-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.soc-page-head__text {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.soc-page-title {
+  margin: 0;
+  font: 600 22px/28px var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.soc-page-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-page-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Карточки ─────────────────────────────────────────────────────── */
+/* Ant Design наезжает телом карточки на линию шапки (−1 px):
+   у макета шапка 52 px и тело начинается под ней. */
+.ant-card .ant-card-head {
+  margin-bottom: 0;
+}
+
+.ant-card .ant-card-head-title {
+  font: 600 16px/24px var(--font-sans);
+}
+
+.ant-card .ant-card-extra {
+  font-size: 13px;
+}
+
+/* ── Плитка KPI ───────────────────────────────────────────────────── */
+.soc-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.soc-kpi {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.soc-kpi__label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-kpi__row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.soc-kpi__value {
+  font: 500 30px/36px var(--font-display);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.soc-kpi__value small {
+  margin-left: 4px;
+  font: 500 14px/20px var(--font-sans);
+  letter-spacing: 0;
+  color: var(--ink-3);
+}
+
+.soc-kpi__value.is-warning {
+  color: var(--status-warning-fg);
+}
+
+.soc-kpi__value.is-critical {
+  color: var(--status-critical-fg);
+}
+
+.soc-kpi__foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 16px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-3);
+}
+
+/* ── Полоса рейса ─────────────────────────────────────────────────── */
+.soc-strip {
+  display: grid;
+  grid-template-columns: 128px minmax(0, 1fr) auto;
+  align-items: stretch;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+
+.soc-strip + .soc-strip {
+  margin-top: 8px;
+}
+
+/* Ячейка номера — как отрывная часть бумажной полосы. */
+.soc-strip__id {
+  display: grid;
+  align-content: center;
+  gap: 2px;
+  padding: 10px 12px;
+  border-right: 1px dashed var(--line-strong);
+  background: var(--surface-sunken);
+}
+
+.soc-strip__no {
+  font: 600 13px/18px var(--font-mono);
+}
+
+.soc-strip__tail {
+  font: 500 11px/16px var(--font-mono);
+  color: var(--ink-2);
+}
+
+.soc-strip__leg {
+  display: grid;
+  grid-template-columns: auto minmax(40px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 14px;
+}
+
+.soc-strip__pt {
+  display: grid;
+  gap: 1px;
+}
+
+.soc-strip__pt--arr {
+  text-align: right;
+}
+
+.soc-strip__icao {
+  font: 600 15px/20px var(--font-mono);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.soc-strip__t {
+  font: 500 11px/14px var(--font-mono);
+  color: var(--ink-3);
+}
+
+.soc-strip__path {
+  height: 18px;
+  color: var(--line-strong);
+}
+
+.soc-strip__path svg {
+  display: block;
+  width: 100%;
+  height: 18px;
+  overflow: visible;
+}
+
+.soc-strip__path path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+.soc-strip__side {
+  display: grid;
+  align-content: center;
+  justify-items: end;
+  gap: 4px;
+  padding: 8px 14px;
+  border-left: 1px solid var(--line);
+}
+
+.soc-strip__eta {
+  font: 600 12px/16px var(--font-mono);
+  color: var(--ink);
+}
+
+.soc-strip__eta.is-soon {
+  color: var(--status-warning-fg);
+}
+
+/* ── Дашборд диспетчера ───────────────────────────────────────────── */
+.soc-dash-cols {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.soc-attention {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.soc-attention li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.soc-attention li:last-child {
+  border-bottom: 0;
+}
+
+.soc-attention__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.soc-attention__title {
+  font-weight: 600;
+}
+
+.soc-attention__note {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--ink-2);
+}
+
+/* Идентификаторы в строке тише текста вокруг — как в макете. */
+.soc-attention__text .soc-code {
+  line-height: 16px;
+  color: var(--ink-2);
+}
+
+/* Планшет: две плитки в ряд и одна колонка карточек; телефон — по одной. */
+@media (max-width: 1199px) {
+  .soc-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .soc-dash-cols {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 699px) {
+  .soc-kpi-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .soc-strip {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .soc-strip__side {
+    grid-column: 1 / -1;
+    grid-auto-flow: column;
+    justify-content: space-between;
+    border-top: 1px solid var(--line);
+    border-left: 0;
+  }
+}
+
+/* Подпись только для чтения с экрана: видна ассистивным технологиям. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Палитра команд ───────────────────────────────────────────────── */
+.soc-palette .ant-modal-content {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-modal);
+}
+
+.soc-palette__input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--ink-3);
+}
+
+.soc-palette__input input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 15px/24px var(--font-sans);
+  color: var(--ink);
+}
+
+.soc-palette__list {
+  display: grid;
+  gap: 2px;
+  max-height: 360px;
+  padding: 8px;
+  overflow: auto;
+}
+
+.soc-palette__group {
+  padding: 10px 10px 4px;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-palette__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 40px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.soc-palette__item.is-active {
+  background: var(--surface-selected);
+}
+
+.soc-palette__ico {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-sunken);
+  color: var(--ink-2);
+}
+
+.soc-palette__item.is-active .soc-palette__ico {
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+.soc-palette__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.soc-palette__context {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-2);
+}
+
+.soc-palette__empty {
+  padding: 24px 10px;
+  text-align: center;
+  color: var(--ink-2);
+}
+
+.soc-palette__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  background: var(--surface-sunken);
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-palette__foot > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Модельное время: часы обведены цветом предупреждения, чтобы смещённую
+   хронологию нельзя было принять за настоящую (ADR-014). */
+.soc-clock.is-shifted {
+  border-color: var(--status-warning-dot);
+}
+
+/* ── Вход ─────────────────────────────────────────────────────────── */
+/* Карточка LoginScreen: панель знака на `chrome`, форма на `canvas`. */
+.soc-login {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--canvas);
+}
+
+.soc-login__brand {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 32px;
+  padding: 40px 48px;
+  background: var(--chrome);
+  color: var(--on-chrome);
+}
+
+/* Знак не растягивается по ширине панели: пропорции файла заказчика
+   не меняются (карточка Logo). */
+.soc-login__brand > img {
+  position: relative;
+  align-self: flex-start;
+  display: block;
+  height: 40px;
+  width: auto;
+}
+
+.soc-login__arcs {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.soc-login__arcs path {
+  fill: none;
+  stroke: var(--chrome-line);
+  stroke-width: 1.5;
+}
+
+.soc-login__arcs path.is-hot {
+  stroke: var(--chrome-accent);
+  stroke-width: 2;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+}
+
+.soc-login__arcs circle {
+  fill: var(--chrome-accent);
+}
+
+.soc-login__claim {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  max-width: 460px;
+}
+
+.soc-login__claim h1 {
+  margin: 0;
+  font: 600 44px/48px var(--font-display);
+  letter-spacing: -0.02em;
+  color: var(--on-chrome);
+  text-wrap: balance;
+}
+
+.soc-login__claim p {
+  margin: 0;
+  font: 400 15px/24px var(--font-sans);
+  color: var(--on-chrome-muted);
+}
+
+.soc-login__stamp {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font: 500 12px/16px var(--font-mono);
+  color: var(--on-chrome-muted);
+}
+
+.soc-login__form-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.soc-login__form {
+  display: grid;
+  gap: 16px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.soc-login__form h2 {
+  margin: 0;
+  font: 600 22px/28px var(--font-display);
+  color: var(--ink);
+}
+
+.soc-login__sub {
+  margin: -8px 0 0;
+  font: 400 13px/20px var(--font-sans);
+  color: var(--ink-2);
+}
+
+/* Поле по карточке Field: подпись 12/16 над полем через 6 px, между
+   полями 16. Селектор отступа подписи повторяет вертикальную раскладку
+   Ant Design, иначе её правило сильнее. */
+.soc-login__form .ant-form-item {
+  margin-bottom: 16px;
+}
+
+.soc-login__form .ant-form-vertical .ant-form-item .ant-form-item-label {
+  padding: 0 0 6px;
+  line-height: 16px;
+}
+
+.soc-login__form .ant-form-item .ant-form-item-label > label {
+  vertical-align: top;
+  font: 500 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-login__help {
+  margin: 24px 0 0;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-login__help .ant-btn-link {
+  height: auto;
+  padding: 0;
+  border: 0;
+  font: inherit;
+}
+
+/* Ниже 900 px панель становится полосой 160 px с одним знаком. */
+@media (max-width: 899px) {
+  .soc-login {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 160px auto;
+  }
+
+  .soc-login__brand {
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .soc-login__claim,
+  .soc-login__stamp {
+    display: none;
+  }
+
+  .soc-login__form-wrap {
+    align-items: flex-start;
+    padding: 32px 16px;
+  }
+}
+
+/* ── Сегменты ─────────────────────────────────────────────────────── */
+/* Карточка Field: дорожка `surface-sunken` в рамке `line`, сегмент 26 px,
+   выбранный — на `surface` с кольцом `line-strong`. Один вид на всех
+   экранах: сегменты переключают представление, а не экран. */
+.ant-segmented {
+  padding: 2px;
+  border: 1px solid var(--line);
+}
+
+.ant-segmented .ant-segmented-group {
+  gap: 2px;
+}
+
+.ant-segmented .ant-segmented-item-label {
+  min-height: 26px;
+  padding: 0 12px;
+  font: 500 12px/26px var(--font-sans);
+}
+
+.ant-segmented .ant-segmented-item-selected {
+  box-shadow: 0 0 0 1px var(--line-strong);
+}
+
+.ant-segmented .ant-segmented-item-selected .ant-segmented-item-label {
+  font-weight: 600;
+}
+
+/* ── Суточный план ────────────────────────────────────────────────── */
+/* Дата плана выглядит как вторичная кнопка: значок, дата полужирным. */
+.soc-plan-date.ant-picker {
+  width: 121px;
+  height: var(--control-h);
+  padding: 0 14px;
+  border-color: var(--control-border);
+}
+
+.soc-plan-date .ant-picker-prefix {
+  margin-inline-end: 6px;
+  font-size: var(--icon-sm);
+}
+
+.soc-plan-date .ant-picker-input > input {
+  font-weight: 600;
+}
+
+/* Карточка Banner: заливка статуса, внутренняя обводка, без цветной
+   кромки слева; значок 18 px, одно действие справа. */
+.soc-banner {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--brand-soft);
+  box-shadow: inset 0 0 0 1px var(--status-progress-line);
+  color: var(--brand-soft-ink);
+}
+
+.soc-banner--warning {
+  background: var(--status-warning-bg);
+  box-shadow: inset 0 0 0 1px var(--status-warning-line);
+  color: var(--status-warning-fg);
+}
+
+.soc-banner--critical {
+  background: var(--status-critical-bg);
+  box-shadow: inset 0 0 0 1px var(--status-critical-line);
+  color: var(--status-critical-fg);
+}
+
+.soc-banner__icon {
+  align-self: center;
+  font-size: 18px;
+}
+
+.soc-banner__body {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.soc-banner__title {
+  font: 600 13px/20px var(--font-sans);
+}
+
+.soc-banner__list {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--ink);
+}
+
+.soc-banner__list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.soc-banner__note {
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-banner > .ant-btn {
+  align-self: flex-start;
+}
+
+/* Фильтры одной строкой на `surface`; переносятся, а не сжимаются. */
+.soc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+/* Включённый фильтр-переключатель — тонированный, как выбранный сегмент. */
+.soc-toggle.is-on.ant-btn {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+  color: var(--brand-soft-ink);
+}
+
+.soc-gantt-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.soc-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 2px;
+  vertical-align: -1px;
+}
+
+/* ── Планшет ──────────────────────────────────────────────────────── */
+/* Карточка GanttBoard. Колонка бортов прилипает слева: на трёх сутках
+   и неделе шкала прокручивается, борта остаются на месте. */
+.soc-gantt {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.soc-gantt__scroll {
+  overflow-x: auto;
+}
+
+.soc-gantt__grid {
+  position: relative;
+}
+
+.soc-gantt__head,
+.soc-gantt__row {
+  display: grid;
+  grid-template-columns: var(--lab) minmax(0, 1fr);
+}
+
+.soc-gantt__head {
+  height: 36px;
+  border-bottom: 1px solid var(--line);
+  background: var(--surface-sunken);
+}
+
+.soc-gantt__scale {
+  position: relative;
+}
+
+.soc-gantt__scale span {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding-left: 6px;
+  border-left: 1px solid var(--line);
+  font: 500 11px/1 var(--font-mono);
+  color: var(--ink-3);
+}
+
+.soc-gantt__row {
+  height: var(--gantt-row-h);
+  border-bottom: 1px solid var(--line);
+}
+
+.soc-gantt__row:last-child {
+  border-bottom: 0;
+}
+
+.soc-gantt__row--group {
+  height: 30px;
+  background: var(--surface-sunken);
+}
+
+.soc-gantt__label {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  padding: 0 12px;
+  border-right: 1px solid var(--line);
+  background: var(--surface);
+  font: 500 12px/1 var(--font-mono);
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.soc-gantt__head .soc-gantt__label {
+  background: var(--surface-sunken);
+  font-family: var(--font-sans);
+}
+
+.soc-gantt__row--group .soc-gantt__label {
+  background: var(--surface-sunken);
+  font: 600 11px/16px var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Длинное название типа не обрывается посреди буквы. */
+.soc-gantt__type {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.soc-gantt__flag {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--status-critical-dot);
+}
+
+.soc-gantt__flag.is-warn {
+  background: var(--status-warning-dot);
+}
+
+.soc-gantt__lane {
+  position: relative;
+  background-image: linear-gradient(to right, var(--chart-grid) 1px, transparent 1px);
+  background-size: calc(100% / var(--ticks)) 100%;
+}
+
+/* Полоса: заливка и обводка статуса, ведущая кромка 3 px цвета точки. */
+.soc-bar {
+  --fg: var(--status-neutral-fg);
+  --bg: var(--status-neutral-bg);
+  --ln: var(--status-neutral-line);
+  --dot: var(--status-neutral-dot);
+  position: absolute;
+  top: calc((var(--gantt-row-h) - var(--gantt-bar-h)) / 2);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 18px;
+  height: var(--gantt-bar-h);
+  overflow: hidden;
+  padding: 0 8px 0 7px;
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  box-shadow: inset 0 0 0 1px var(--ln), inset 3px 0 0 var(--dot);
+  font: 500 11px/1 var(--font-mono);
+  color: var(--fg);
+  white-space: nowrap;
+}
+
+a.soc-bar:hover {
+  filter: brightness(0.97);
+  color: var(--fg);
+}
+
+.soc-bar b {
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.soc-bar--progress { --fg: var(--status-progress-fg); --bg: var(--status-progress-bg); --ln: var(--status-progress-line); --dot: var(--status-progress-dot); }
+.soc-bar--ready { --fg: var(--status-ready-fg); --bg: var(--status-ready-bg); --ln: var(--status-ready-line); --dot: var(--status-ready-dot); }
+.soc-bar--active { --fg: var(--status-active-fg); --bg: var(--status-active-bg); --ln: var(--status-active-line); --dot: var(--status-active-dot); }
+.soc-bar--done { --fg: var(--status-done-fg); --bg: var(--status-done-bg); --ln: var(--status-done-line); --dot: var(--status-done-dot); }
+.soc-bar--cancelled { --fg: var(--status-cancelled-fg); --bg: var(--status-cancelled-bg); --ln: var(--status-cancelled-line); --dot: var(--status-cancelled-dot); text-decoration: line-through; }
+.soc-bar--critical { --fg: var(--status-critical-fg); --bg: var(--status-critical-bg); --ln: var(--status-critical-line); --dot: var(--status-critical-dot); }
+.soc-bar--warning { --fg: var(--status-warning-fg); --bg: var(--status-warning-bg); --ln: var(--status-warning-line); --dot: var(--status-warning-dot); }
+
+.soc-bar.is-conflict {
+  box-shadow: inset 0 0 0 1px var(--ln), inset 3px 0 0 var(--dot), 0 0 0 2px var(--status-critical-dot);
+}
+
+/* Линия «сейчас»: 2 px `mark-red` и метка времени над шкалой. */
+.soc-gantt__now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.soc-now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  border-left: 2px solid var(--mark-red);
+}
+
+.soc-now span {
+  position: absolute;
+  top: 9px;
+  left: -1px;
+  transform: translateX(-50%);
+  padding: 2px 5px;
+  border-radius: var(--radius-xs);
+  background: var(--mark-red);
+  font: 600 10px/1 var(--font-mono);
+  color: var(--on-mark-red);
+  white-space: nowrap;
+}
+
+/* ── Курсы валют ──────────────────────────────────────────────────── */
+/* Биржевой вид: пара и период сверху, последний курс крупно, сводка
+   периода строкой, график с ценовой осью справа. Курсы — суммы, поэтому
+   Golos с табличными цифрами, моноширинный только у кода пары. */
+.soc-fx__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.soc-fx__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.soc-fx__quote {
+  display: grid;
+  gap: 4px;
+  padding: 16px 16px 12px;
+}
+
+.soc-fx__pair {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-fx__pair .soc-code {
+  font-weight: 600;
+}
+
+.soc-fx__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.soc-fx__price {
+  font: 600 32px/40px var(--font-sans);
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.soc-fx__unit {
+  margin-left: 6px;
+  font: 500 14px/20px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-fx__change {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font: 600 13px/20px var(--font-sans);
+  white-space: nowrap;
+}
+
+.soc-fx__change.is-up {
+  color: var(--status-done-fg);
+}
+
+.soc-fx__change.is-down {
+  color: var(--status-critical-fg);
+}
+
+.soc-fx__change.is-flat {
+  color: var(--ink-3);
+}
+
+.soc-fx__change .anticon {
+  font-size: 11px;
+}
+
+.soc-fx__change-note {
+  margin-left: 4px;
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-3);
+}
+
+.soc-fx__stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.soc-fx__stats > div {
+  padding: 10px 16px;
+  border-left: 1px solid var(--line);
+}
+
+.soc-fx__stats > div:first-child {
+  border-left: 0;
+}
+
+.soc-fx__stats dt {
+  font: 400 12px/16px var(--font-sans);
+  color: var(--ink-2);
+}
+
+.soc-fx__stats dd {
+  margin: 2px 0 0;
+  font: 600 14px/20px var(--font-sans);
+  color: var(--ink);
+}
+
+.soc-fx__chart {
+  padding: 8px 0 4px 4px;
+}
+
+@media (max-width: 699px) {
+  .soc-fx__stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .soc-fx__stats > div:nth-child(3) {
+    border-left: 0;
+  }
+
+  .soc-fx__stats > div:nth-child(n + 3) {
+    border-top: 1px solid var(--line);
+  }
 }

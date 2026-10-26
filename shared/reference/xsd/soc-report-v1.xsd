@@ -53,10 +53,6 @@
   <xs:element name="Report">
     <xs:complexType>
       <xs:sequence>
-        <!-- Пометка демонстрационного стенда. Присутствует только
-             при demo="true" (CLAUDE.md § 4). -->
-        <xs:element name="Note" type="xs:string" minOccurs="0"/>
-
         <xs:element name="Parameters" minOccurs="0">
           <xs:complexType>
             <xs:sequence>
@@ -111,7 +107,6 @@
       <xs:attribute name="code" type="xs:NCName" use="required"/>
       <xs:attribute name="generatedAt" type="xs:dateTime" use="required"/>
       <xs:attribute name="currency" type="CurrencyCode" use="required"/>
-      <xs:attribute name="demo" type="xs:boolean" use="required"/>
     </xs:complexType>
   </xs:element>
 

@@ -111,7 +111,7 @@ jobs:
       DATABASE_URL: postgres://soc:soc@localhost:5432/soc
       REDIS_URL: redis://localhost:6379/0
       SECRET_KEY: ci-only-not-a-real-secret
-      DEMO_DATA: 'false'
+      SAMPLE_DATA: 'false'
 
     steps:
       - uses: actions/checkout@v4

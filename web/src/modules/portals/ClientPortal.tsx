@@ -18,6 +18,7 @@ import { useCurrentUser } from '@/shared/auth/session';
 import {
   DateText, EmptyState, FlightStatusTag, MoneyText, Mono, ServiceStatusTag, UtcTime,
 } from '@/shared/ui/primitives';
+import { Notice } from '@/shared/ui/Notice';
 
 /**
  * Портал клиента `[ТЗ 3.5.3]`.
@@ -56,7 +57,7 @@ export function ClientFlightsPage(): JSX.Element {
 
   const columns: DataColumns<ClientPortalFlight> = [
     {
-      title: t('flight.number'), dataIndex: 'number', width: 110,
+      title: t('flight.number'), dataIndex: 'number', filterable: 'text', width: 110,
       render: (value: string) => <Mono>{value}</Mono>,
     },
     {
@@ -101,8 +102,6 @@ export function ClientFlightsPage(): JSX.Element {
         {t('portal.client.flights')}
       </Typography.Title>
 
-      <Alert type="info" showIcon message={t('portal.client.noPurchasePrices')} />
-
       <Card size="small" styles={{ body: { padding: 0 } }}>
         <DataTable<ClientPortalFlight>
           size="small" rowKey="id" columns={columns} dataSource={flights}
@@ -128,7 +127,7 @@ export function ClientRequestPage(): JSX.Element {
         {t('portal.client.newRequest')}
       </Typography.Title>
 
-      <Alert type="info" showIcon message={t('portal.client.requestNotice')} />
+      <Notice id="portal.client.request" type="info" showIcon message={t('portal.client.requestNotice')} />
 
       {submitted ? (
         <Alert
@@ -285,7 +284,7 @@ export function ClientDocumentsPage(): JSX.Element {
       render: (value: string) => <Tag>{t(`finance.${value}`)}</Tag>,
     },
     {
-      title: t('finance.number'), dataIndex: 'number', width: 180,
+      title: t('finance.number'), dataIndex: 'number', filterable: 'text', width: 180,
       render: (value: string) => <Mono>{value}</Mono>,
     },
     {

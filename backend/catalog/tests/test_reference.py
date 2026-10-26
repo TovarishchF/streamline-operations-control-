@@ -137,7 +137,7 @@ class TestSeedReference:
         """`CLAUDE.md § 4`: общедоступные справочные данные — настоящие."""
         call_command("seed_reference", only="vat-rates")
         assert set(VatRate.objects.values_list("data_source", flat=True)) == {DataSource.IMPORTED}
-        assert not VatRate.objects.filter(is_demo=True).exists()
+        assert not VatRate.objects.filter(is_generated=True).exists()
 
     def test_service_categories_are_exactly_those_in_the_specification(self) -> None:
         """ТЗ 3.2.1 перечисляет шесть категорий. Седьмой быть не может."""

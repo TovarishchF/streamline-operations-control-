@@ -1,0 +1,812 @@
+[
+  {
+    "pair": "content",
+    "key": "h",
+    "mockup": 853,
+    "app": 1515
+  },
+  {
+    "pair": "page title",
+    "key": "w",
+    "mockup": 442,
+    "app": 222
+  },
+  {
+    "pair": "page meta",
+    "key": "w",
+    "mockup": 442,
+    "app": 222
+  },
+  {
+    "pair": "page meta",
+    "key": "h",
+    "mockup": 18,
+    "app": 16
+  },
+  {
+    "pair": "meta pill",
+    "key": "x",
+    "mockup": 494,
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "y",
+    "mockup": 108,
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "w",
+    "mockup": 92,
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "h",
+    "mockup": 18,
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "pad",
+    "mockup": "0px 7px 0px 6px",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "radius",
+    "mockup": "999px",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "font",
+    "mockup": "600 11px/11px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "color",
+    "mockup": "rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "bg",
+    "mockup": "rgb(253, 234, 235)",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "border",
+    "mockup": "0px rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "meta pill",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "view seg",
+    "key": "x",
+    "mockup": 984,
+    "app": 983
+  },
+  {
+    "pair": "view seg",
+    "key": "y",
+    "mockup": 94,
+    "app": 92
+  },
+  {
+    "pair": "view seg",
+    "key": "color",
+    "mockup": "rgb(12, 21, 38)",
+    "app": "rgb(74, 86, 108)"
+  },
+  {
+    "pair": "view seg item",
+    "key": "x",
+    "mockup": 987,
+    "app": 986
+  },
+  {
+    "pair": "view seg item",
+    "key": "y",
+    "mockup": 97,
+    "app": 95
+  },
+  {
+    "pair": "view seg item",
+    "key": "pad",
+    "mockup": "0px 12px",
+    "app": "0px"
+  },
+  {
+    "pair": "view seg item",
+    "key": "font",
+    "mockup": "600 12px/12px \"Golos Text\"",
+    "app": "400 13px/20px \"Golos Text\""
+  },
+  {
+    "pair": "btn primary",
+    "key": "y",
+    "mockup": 94,
+    "app": 92
+  },
+  {
+    "pair": "btn primary",
+    "key": "border",
+    "mockup": "1px rgb(0, 71, 152)",
+    "app": "1px rgba(0, 0, 0, 0)"
+  },
+  {
+    "pair": "tabs",
+    "key": "y",
+    "mockup": 146,
+    "app": 144
+  },
+  {
+    "pair": "tab active",
+    "key": "y",
+    "mockup": 146,
+    "app": 144
+  },
+  {
+    "pair": "banner",
+    "key": "x",
+    "mockup": 264,
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "y",
+    "mockup": 207,
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "w",
+    "mockup": 1152,
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "h",
+    "mockup": 116,
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "pad",
+    "mockup": "12px 14px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "radius",
+    "mockup": "8px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "font",
+    "mockup": "400 13px/20px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "color",
+    "mockup": "rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "bg",
+    "mockup": "rgb(253, 234, 235)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "border",
+    "mockup": "0px rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "banner title",
+    "key": "x",
+    "mockup": 308,
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "y",
+    "mockup": 219,
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "w",
+    "mockup": 998,
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "h",
+    "mockup": 20,
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "pad",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "font",
+    "mockup": "600 13px/20px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "color",
+    "mockup": "rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "border",
+    "mockup": "0px rgb(176, 18, 28)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner title",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "banner item",
+    "key": "x",
+    "mockup": 308,
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "y",
+    "mockup": 245,
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "w",
+    "mockup": 998,
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "h",
+    "mockup": 20,
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "pad",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "font",
+    "mockup": "400 13px/20px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "color",
+    "mockup": "rgb(12, 21, 38)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "border",
+    "mockup": "0px rgb(12, 21, 38)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner item",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "banner note",
+    "key": "x",
+    "mockup": 308,
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "y",
+    "mockup": 295,
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "w",
+    "mockup": 998,
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "h",
+    "mockup": 16,
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "pad",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "font",
+    "mockup": "400 12px/16px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "color",
+    "mockup": "rgb(74, 86, 108)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "border",
+    "mockup": "0px rgb(74, 86, 108)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner note",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "banner btn",
+    "key": "x",
+    "mockup": 1318,
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "y",
+    "mockup": 219,
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "w",
+    "mockup": 84,
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "h",
+    "mockup": 28,
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "pad",
+    "mockup": "0px 10px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "radius",
+    "mockup": "6px",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "font",
+    "mockup": "600 12px/20px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "color",
+    "mockup": "rgb(12, 21, 38)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "bg",
+    "mockup": "rgb(255, 255, 255)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "border",
+    "mockup": "1px rgb(125, 139, 161)",
+    "app": "∅"
+  },
+  {
+    "pair": "banner btn",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "filters",
+    "key": "y",
+    "mockup": 343,
+    "app": 205
+  },
+  {
+    "pair": "filter search",
+    "key": "y",
+    "mockup": 356,
+    "app": 218
+  },
+  {
+    "pair": "filter search",
+    "key": "pad",
+    "mockup": "0px 10px",
+    "app": "5px 11px"
+  },
+  {
+    "pair": "filter select",
+    "key": "y",
+    "mockup": 356,
+    "app": 218
+  },
+  {
+    "pair": "filter select",
+    "key": "pad",
+    "mockup": "0px 10px",
+    "app": "1px 22px 1px 3px"
+  },
+  {
+    "pair": "filter chip",
+    "key": "y",
+    "mockup": 358,
+    "app": 220
+  },
+  {
+    "pair": "legend",
+    "key": "y",
+    "mockup": 465,
+    "app": 327
+  },
+  {
+    "pair": "legend",
+    "key": "w",
+    "mockup": 657,
+    "app": 712
+  },
+  {
+    "pair": "scale seg",
+    "key": "y",
+    "mockup": 457,
+    "app": 319
+  },
+  {
+    "pair": "scale seg",
+    "key": "color",
+    "mockup": "rgb(12, 21, 38)",
+    "app": "rgb(74, 86, 108)"
+  },
+  {
+    "pair": "gantt",
+    "key": "y",
+    "mockup": 509,
+    "app": 371
+  },
+  {
+    "pair": "gantt",
+    "key": "h",
+    "mockup": 368,
+    "app": 1168
+  },
+  {
+    "pair": "gantt head",
+    "key": "y",
+    "mockup": 510,
+    "app": 372
+  },
+  {
+    "pair": "gantt head label",
+    "key": "y",
+    "mockup": 510,
+    "app": 372
+  },
+  {
+    "pair": "gantt head label",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "rgb(247, 248, 251)"
+  },
+  {
+    "pair": "scale tick",
+    "key": "y",
+    "mockup": 510,
+    "app": 372
+  },
+  {
+    "pair": "group row",
+    "key": "y",
+    "mockup": 546,
+    "app": 408
+  },
+  {
+    "pair": "group label",
+    "key": "y",
+    "mockup": 546,
+    "app": 408
+  },
+  {
+    "pair": "group label",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "rgb(247, 248, 251)"
+  },
+  {
+    "pair": "row",
+    "key": "y",
+    "mockup": 576,
+    "app": 438
+  },
+  {
+    "pair": "row label",
+    "key": "y",
+    "mockup": 576,
+    "app": 438
+  },
+  {
+    "pair": "row label",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "rgb(255, 255, 255)"
+  },
+  {
+    "pair": "bar",
+    "key": "x",
+    "mockup": 691,
+    "app": 1019
+  },
+  {
+    "pair": "bar",
+    "key": "y",
+    "mockup": 583,
+    "app": 585
+  },
+  {
+    "pair": "bar",
+    "key": "w",
+    "mockup": 121,
+    "app": 185
+  },
+  {
+    "pair": "bar",
+    "key": "color",
+    "mockup": "rgb(10, 102, 112)",
+    "app": "rgb(10, 79, 180)"
+  },
+  {
+    "pair": "bar",
+    "key": "bg",
+    "mockup": "rgb(224, 244, 245)",
+    "app": "rgb(230, 238, 252)"
+  },
+  {
+    "pair": "bar",
+    "key": "border",
+    "mockup": "0px rgb(10, 102, 112)",
+    "app": "0px rgb(10, 79, 180)"
+  },
+  {
+    "pair": "bar number",
+    "key": "x",
+    "mockup": 698,
+    "app": 1026
+  },
+  {
+    "pair": "bar number",
+    "key": "y",
+    "mockup": 591,
+    "app": 593
+  },
+  {
+    "pair": "bar number",
+    "key": "color",
+    "mockup": "rgb(10, 102, 112)",
+    "app": "rgb(10, 79, 180)"
+  },
+  {
+    "pair": "bar number",
+    "key": "border",
+    "mockup": "0px rgb(10, 102, 112)",
+    "app": "0px rgb(10, 79, 180)"
+  },
+  {
+    "pair": "now",
+    "key": "x",
+    "mockup": 619,
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "y",
+    "mockup": 510,
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "w",
+    "mockup": 2,
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "h",
+    "mockup": 366,
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "pad",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "font",
+    "mockup": "400 13px/20px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "color",
+    "mockup": "rgb(12, 21, 38)",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "border",
+    "mockup": "0px rgb(12, 21, 38)",
+    "app": "∅"
+  },
+  {
+    "pair": "now",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "now flag",
+    "key": "x",
+    "mockup": 597,
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "y",
+    "mockup": 519,
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "w",
+    "mockup": 46,
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "h",
+    "mockup": 14,
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "pad",
+    "mockup": "2px 5px",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "radius",
+    "mockup": "4px",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "font",
+    "mockup": "600 10px/10px \"JetBrains Mono\"",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "color",
+    "mockup": "rgb(255, 255, 255)",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "bg",
+    "mockup": "rgb(191, 19, 27)",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "border",
+    "mockup": "0px rgb(255, 255, 255)",
+    "app": "∅"
+  },
+  {
+    "pair": "now flag",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  }
+]

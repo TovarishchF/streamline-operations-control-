@@ -13,9 +13,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.db.models import F
+
 from comms.models import Notification, NotificationSeverity
-from core import clock
-from core.demo_marking import is_demo as demo_mode
+from core import clock, sample_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -53,7 +54,7 @@ def notify(
         title=title[:255],
         body=body,
         link=link[:255],
-        is_demo=demo_mode(),
+        is_generated=sample_data.enabled(),
     )
 
 
@@ -75,6 +76,19 @@ def mark_read(*, notification: Notification) -> Notification:
         notification.read_at = clock.now()
         notification.save(update_fields=["read_at", "updated_at", "version"])
     return notification
+
+
+def mark_all_read(*, user: User) -> int:
+    """Отметка прочтения всех непрочитанных уведомлений пользователя.
+
+    Одним запросом: `update` не вызывает `save`, поэтому служебные поля
+    выставляются здесь же. Уже прочитанные не трогаются — их время
+    прочтения не переписывается. Возвращает число отмеченных.
+    """
+    current = clock.now()
+    return Notification.objects.filter(user=user, read_at__isnull=True).update(
+        read_at=current, updated_at=current, version=F("version") + 1
+    )
 
 
 def unread_count(user: User) -> int:

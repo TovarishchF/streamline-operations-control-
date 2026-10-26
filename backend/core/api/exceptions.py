@@ -23,12 +23,12 @@ from core.exceptions import (
     AccountLocked,
     AuthenticationFailed,
     ContractExpired,
-    DemoOnlyOperation,
     DomainError,
     GuardNotSatisfied,
     IdempotencyKeyRequired,
     IntegrationUnavailable,
     PriceNotFound,
+    SampleDataDisabled,
     ScheduleConflict,
     ServiceCheckFailed,
     TransitionNotAllowed,
@@ -48,7 +48,7 @@ _DOMAIN_STATUS: dict[type[Exception], int] = {
     PriceNotFound: status.HTTP_422_UNPROCESSABLE_ENTITY,
     CurrencyMismatch: status.HTTP_400_BAD_REQUEST,
     IdempotencyKeyRequired: status.HTTP_400_BAD_REQUEST,
-    DemoOnlyOperation: status.HTTP_403_FORBIDDEN,
+    SampleDataDisabled: status.HTTP_403_FORBIDDEN,
     IntegrationUnavailable: status.HTTP_503_SERVICE_UNAVAILABLE,
 }
 

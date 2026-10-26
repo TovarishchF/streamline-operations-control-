@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Space, Tag, Tooltip, Typography } from 'antd';
+import { Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
@@ -41,13 +41,7 @@ export function AuditActor({ entry }: { entry: AuditEntry }): JSX.Element {
   return (
     <Space size={6}>
       <span>{entry.actorName}</span>
-      {entry.source === 'seed' ? (
-        <Tooltip title={t('audit.seedHint')}>
-          <Tag color="purple" style={{ margin: 0 }}>
-            {t('audit.seed')}
-          </Tag>
-        </Tooltip>
-      ) : entry.source === 'system' ? (
+      {entry.source === 'seed' || entry.source === 'system' ? (
         <Tag style={{ margin: 0 }}>{t('audit.system')}</Tag>
       ) : (
         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
@@ -61,8 +55,8 @@ export function AuditActor({ entry }: { entry: AuditEntry }): JSX.Element {
 /**
  * История изменений рейса `[ТЗ 3.1.3]`.
  *
- * Записи от демонстрационного генератора помечены `seed` и визуально
- * отличаются — они не выдаются за действия людей (`CLAUDE.md § 4`).
+ * Записи генератора данных помечены `seed` и подписаны системой —
+ * они не выдаются за действия людей (`CLAUDE.md § 4`).
  */
 export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Element {
   const { t } = useTranslation();
@@ -108,7 +102,6 @@ export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Elemen
       dataSource={entries}
       pagination={false}
       scroll={{ x: 900 }}
-      rowClassName={(row) => (row.source === 'seed' ? 'soc-row-seed' : '')}
       locale={{ emptyText: <EmptyState description={t('audit.emptyForFlight')} /> }}
     />
   );

@@ -20,7 +20,7 @@ export function ClientsPage(): JSX.Element {
 
   const columns: DataColumns<ClientRow> = [
     {
-      title: t('client.name'), dataIndex: 'name', width: 230, fixed: 'left',
+      title: t('client.name'), dataIndex: 'name', filterable: 'text', width: 230, fixed: 'left',
       render: (value: string, row) => (
         <Space direction="vertical" size={0}>
           <Space size={6}>

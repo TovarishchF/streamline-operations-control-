@@ -106,13 +106,6 @@ export function AirportFormModal({
       destroyOnClose
     >
       <Form<FormValues> form={form} layout="vertical" requiredMark preserve={false}>
-        <Alert
-          type="info"
-          showIcon
-          message={t('airport.manualEntryNotice')}
-          style={{ marginBottom: 12 }}
-        />
-
         {banner ? (
           <Alert type="error" showIcon message={banner} style={{ marginBottom: 12 }} />
         ) : null}

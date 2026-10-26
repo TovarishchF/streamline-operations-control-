@@ -20,9 +20,7 @@ from django.utils.translation import gettext as _
 
 from comms.models import MessageChannel, MessageTemplate, OutboxMessage, OutboxStatus
 from comms.services import templates as template_service
-from core import clock
-from core.demo_marking import DEMO_SUBJECT_PREFIX
-from core.demo_marking import is_demo as demo_mode
+from core import clock, sample_data
 from core.exceptions import DomainError
 from core.services import storage
 from integrations.base import get_provider, mode_for, record_exchange
@@ -63,27 +61,21 @@ def enqueue(
     template_code: str = "",
     related: tuple[str, str] | None = None,
     attachment_ids: list[str] | None = None,
-    is_demo: bool = False,
+    is_generated: bool = False,
 ) -> OutboxMessage:
-    """Ставит собранное сообщение в очередь.
-
-    Тема на стенде получает префикс `[DEMO]` (`SPEC.md § 8.6`): письмо,
-    ушедшее с демонстрационного стенда, должно быть опознаваемо получателем,
-    а не только на экране системы.
-    """
-    prefix = DEMO_SUBJECT_PREFIX if demo_mode() else ""
+    """Ставит собранное сообщение в очередь."""
 
     message = OutboxMessage.objects.create(
         channel=channel,
         channel_mode=mode_for(CHANNEL_CODES[channel]) if channel in CHANNEL_CODES else "",
         to=to,
         template_code=template_code,
-        subject=f"{prefix}{subject}"[:255],
+        subject=subject[:255],
         body=body,
         related_entity_type=related[0] if related else "",
         related_entity_id=related[1] if related else "",
         status=OutboxStatus.QUEUED,
-        is_demo=is_demo or demo_mode(),
+        is_generated=is_generated or sample_data.enabled(),
     )
 
     if attachment_ids:
@@ -229,7 +221,7 @@ def send(message: OutboxMessage) -> OutboxMessage:
         delivery = record_exchange(
             code,
             lambda: provider.send(payload),
-            is_demo=message.is_demo,
+            is_generated=message.is_generated,
         )
     except Exception as error:
         return _fail(message, error)

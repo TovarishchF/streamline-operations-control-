@@ -195,19 +195,19 @@ def test_totals_are_the_sum_of_the_rows(
     assert sum(flight.pax_count for flight in flights) in numbers
 
 
-def test_demo_stand_marks_the_file(
+def test_file_starts_with_the_header_in_any_mode(
     as_role: Callable[..., APIClient],
     flights: list[Flight],
     storage_stub: dict[str, Any],
     settings: Any,
 ) -> None:
-    """`SPEC.md § 8.6`: выгрузка со стенда опознаётся как выгрузка со стенда."""
-    settings.DEMO_DATA = True
+    """Выгрузка одинакова в любом режиме: первая строка — заголовки колонок."""
+    settings.SAMPLE_DATA = True
     api = as_role(Role.DISPATCHER)
     api.post(URL, {}, format="json")
 
     first = sheet_of(storage_stub["data"]).cell(row=1, column=1).value
-    assert first is not None and "DEMO" in str(first)
+    assert first == schedule_export.SCHEDULE.columns[0].ru
 
 
 def test_columns_match_the_screen(flights: list[Flight]) -> None:

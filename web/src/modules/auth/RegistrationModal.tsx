@@ -76,13 +76,13 @@ function PasswordRules({ value = '' }: { value?: string }): JSX.Element {
                 width: 6,
                 height: 6,
                 borderRadius: 999,
-                background: done ? SOC_COLORS.brand : SOC_COLORS.borderStrong,
+                background: done ? SOC_COLORS.brand : SOC_COLORS.lineStrong,
               }}
             />
             <Typography.Text
               style={{
                 fontSize: 12,
-                color: done ? SOC_COLORS.ink : SOC_COLORS.inkSecondary,
+                color: done ? SOC_COLORS.ink : SOC_COLORS.ink2,
               }}
             >
               {t(`register.passwordRule.${rule.key}`)}
@@ -141,16 +141,16 @@ function KindCard({
         minWidth: 0,
         textAlign: 'left',
         padding: '10px 12px',
-        borderRadius: SOC_RADIUS.panel,
-        border: `1px solid ${active ? SOC_COLORS.brand200 : SOC_COLORS.border}`,
-        background: active ? SOC_COLORS.brand100 : SOC_COLORS.surface,
+        borderRadius: SOC_RADIUS.lg,
+        border: `1px solid ${active ? SOC_COLORS.brand : SOC_COLORS.line}`,
+        background: active ? SOC_COLORS.brandSoft : SOC_COLORS.surface,
         color: active ? SOC_COLORS.brand : SOC_COLORS.ink,
         font: 'inherit',
         cursor: 'pointer',
       }}
     >
       <div style={{ fontWeight: 500 }}>{title}</div>
-      <div style={{ fontSize: 12, color: SOC_COLORS.inkSecondary, marginTop: 2 }}>{hint}</div>
+      <div style={{ fontSize: 12, color: SOC_COLORS.ink2, marginTop: 2 }}>{hint}</div>
     </button>
   );
 }

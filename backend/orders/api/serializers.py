@@ -67,7 +67,7 @@ class ServiceOrderSerializer(serializers.ModelSerializer):  # type: ignore[type-
 
     documents = serializers.SerializerMethodField()
     dataSource = serializers.CharField(source="data_source")  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo")  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated")  # noqa: N815
 
     class Meta:
         model = ServiceOrder
@@ -80,7 +80,7 @@ class ServiceOrderSerializer(serializers.ModelSerializer):  # type: ignore[type-
             "orderedAt", "confirmedAt", "startedAt", "completedAt",
             "actualStartAt", "actualEndAt",
             "slaConfirmDeadline", "slaBreached", "rejectionReason", "replacedOrderId",
-            "documents", "dataSource", "isDemo",
+            "documents", "dataSource", "isGenerated",
         )
 
     def get_availableTransitions(self, obj: ServiceOrder) -> list[str]:  # noqa: N802

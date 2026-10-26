@@ -78,7 +78,7 @@ def generate(
     until: date,
     *,
     actor: User | None = None,
-    is_demo: bool = False,
+    is_generated: bool = False,
     source: AuditSource = AuditSource.USER,
 ) -> list[Flight]:
     """Создаёт рейсы серии. Уже существующие пропускает.
@@ -102,7 +102,7 @@ def generate(
                 std_utc=moment,
                 template_id=template.pk,
                 actor=actor,
-                is_demo=is_demo,
+                is_generated=is_generated,
                 source=source,
             )
         )

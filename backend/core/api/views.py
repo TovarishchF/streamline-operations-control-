@@ -89,7 +89,7 @@ class ClockView(APIView):
     def get(self, request: Request) -> Response:
         from core.models import Settings
 
-        scale = Settings.get_solo().clock_scale if settings.DEMO_DATA else 1
+        scale = Settings.get_solo().clock_scale if settings.SAMPLE_DATA else 1
         return Response(
             {
                 "nowUtc": clock.now().isoformat().replace("+00:00", "Z"),

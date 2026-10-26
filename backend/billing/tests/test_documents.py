@@ -420,3 +420,42 @@ def test_quote_accepted_by_client(
     assert accepted.status_code == status.HTTP_200_OK, accepted.data
     assert accepted.json()["status"] == QuoteStatus.ACCEPTED
     assert Quote.objects.get(pk=quote_id).status == QuoteStatus.ACCEPTED
+
+
+# ─────────────────────────── Очистка генератора ───────────────────────────
+
+
+def test_generator_purge_removes_documents_of_its_flights(
+    as_role: Callable[..., APIClient],
+    flight: Flight,
+    completed_order: ServiceOrder,
+    settings: Any,
+) -> None:
+    """Очистка генератора убирает и документы по его рейсам.
+
+    Строка документа держит заявку на услугу связью PROTECT: без шага для
+    документов очистка падала, как только по рейсу генератора выставляли счёт.
+    """
+    from django.core.management import call_command
+
+    from billing.models import DocumentLine, Payable
+    from flights.models import Flight as FlightModel
+
+    # Рейс и всё по нему — записи генератора, как после seed_sample.
+    FlightModel.objects.filter(pk=flight.pk).update(is_generated=True)
+    ServiceOrder.objects.filter(flight=flight).update(is_generated=True)
+    Payable.objects.update(is_generated=True)
+
+    created = as_role(Role.FINANCE).post(
+        INVOICES_URL, {"flightId": flight.pk}, format="json", headers=idempotent("gen-inv-0001")
+    )
+    assert created.status_code == status.HTTP_201_CREATED, created.data
+    assert DocumentLine.objects.filter(is_generated=True).exists()
+
+    settings.SAMPLE_DATA = True
+    call_command("seed_sample", purge=True)
+
+    assert not Invoice.objects.exists()
+    assert not DocumentLine.objects.exists()
+    assert not ServiceOrder.objects.filter(pk=completed_order.pk).exists()
+    assert not FlightModel.objects.filter(pk=flight.pk).exists()

@@ -23,6 +23,12 @@ class NotificationSerializer(serializers.ModelSerializer):  # type: ignore[type-
         fields = ("id", "kind", "severity", "title", "body", "link", "readAt", "createdAt")
 
 
+class NotificationReadAllSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Ответ «Прочитать всё»: сколько уведомлений отмечено."""
+
+    updated = serializers.IntegerField()
+
+
 class AttachmentRefSerializer(serializers.Serializer):  # type: ignore[type-arg]
     """`AttachmentRef` из контракта."""
 

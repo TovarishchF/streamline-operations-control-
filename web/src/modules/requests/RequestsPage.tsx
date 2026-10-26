@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, App, Button, Card, Input, Modal, Segmented, Space, Typography } from 'antd';
+import { App, Button, Card, Input, Modal, Segmented, Space, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import { QueryState } from '@/shared/ui/QueryState';
 import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono, UtcTime, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   pending: 'progress', approved: 'done', rejected: 'critical',
@@ -148,7 +149,8 @@ export function RequestsPage(): JSX.Element {
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.requests')}</Typography.Title>
 
       {pending > 0 ? (
-        <Alert
+        <Notice
+          id={`request.pending:${String(pending)}`}
           type="info"
           showIcon
           message={t('request.pendingCount', { count: pending })}

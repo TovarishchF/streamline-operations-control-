@@ -3,7 +3,9 @@ import { Button, Drawer, Empty, List, Space, Spin, Tag, Typography } from 'antd'
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useMarkNotificationRead, useNotifications } from '@/api/comms';
+import {
+  useMarkAllNotificationsRead, useMarkNotificationRead, useNotifications,
+} from '@/api/comms';
 import { UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
@@ -29,6 +31,9 @@ export function NotificationCentre({
   const { t } = useTranslation();
   const notifications = useNotifications();
   const markRead = useMarkNotificationRead();
+  const markAllRead = useMarkAllNotificationsRead();
+  // Непрочитанные считает сервер — та же выборка, что у колокольчика.
+  const unread = useNotifications(true).data?.meta.total ?? 0;
 
   const items = notifications.data?.data ?? [];
 
@@ -39,6 +44,18 @@ export function NotificationCentre({
       width={420}
       open={open}
       onClose={onClose}
+      extra={
+        <Button
+          size="small"
+          disabled={unread === 0}
+          loading={markAllRead.isPending}
+          onClick={() => {
+            markAllRead.mutate();
+          }}
+        >
+          {t('notifications.markAllRead')}
+        </Button>
+      }
     >
       <Spin spinning={notifications.isLoading}>
         {items.length === 0 ? (
