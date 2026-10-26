@@ -12,7 +12,7 @@
 | `план` | запланировано, веха не начата |
 | `в работе` | веха идёт |
 | `реализовано` | реализовано и проверено тестом, указанным в строке |
-| `реализовано (stub)` | функция реализована, внешнее подключение не предоставлено заказчиком; в колонке «Примечание» указано, что требуется для перевода в боевой режим |
+| `реализовано (без подключения)` | функция реализована, внешнее подключение не предоставлено заказчиком; в колонке «Примечание» указано, что требуется для подключения (`CONNECTING.md`). Заглушек нет (ADR-039) |
 | `вне объёма` | не реализуется по согласованию; основание — запись в `GAPS.md` или ADR |
 | `требует решения` | ожидается ответ заказчика, работа заблокирована |
 
@@ -80,7 +80,7 @@
 | T-3.2.1-05 | 3.2.1 | Транспорт: автобусы для экипажа и пассажиров, VIP-трансферы | позиции категории `transport` | `GET /catalog/services` | `/catalog/services` | `catalog/tests/test_reference.py::test_loads_all_datasets` | M3 | реализовано |
 | T-3.2.1-06 | 3.2.1 | Разрешительные документы: пермиты на пролёт, слоты | категория `permits` + `Slot` (ADR-026) | `GET /slots` | `/slots` | `test_applying_an_answer_moves_the_slot` | M4 | реализовано |
 | T-3.2.1-07 | 3.2.1 | Противообледенительная обработка с привязкой к погодным условиям | категория `deicing`, адаптер `WX`, правило ADR-029 | `GET /catalog/services` | мастер заказа | `test_deicing_weather_rule` | M5, M13 | план |
-| T-3.2.1-08 | 3.2.1 | Заказ кейтеринга через специализированные системы | адаптер `VENDOR_API` | `GET /integrations` | `/admin/integrations` | `test_adapter_vendor_api_stub` | M14 | план (stub, G-12) |
+| T-3.2.1-08 | 3.2.1 | Заказ кейтеринга через специализированные системы | адаптер `VENDOR_API` | `GET /integrations` | `/admin/integrations` | `test_adapter_vendor_api` | M14 | план (без подключения, G-12) |
 | T-3.2.2-01 | 3.2.2 | Выбор услуг из каталога при создании рейса | мастер заказа услуги | `POST /flights/{id}/services` | `/flights/:id/services` | Playwright `order-service` | M5, M10 | план |
 | T-3.2.2-02 | 3.2.2 | Автопроверка: доступность услуги в аэропорту | `orders.services.checks.availability` | `POST /flights/{id}/services` | мастер заказа | `test_check_service_unavailable` | M5 | план |
 | T-3.2.2-03 | 3.2.2 | Автопроверка: наличие действующего контракта с поставщиком | `orders.services.checks.contract_valid` | `POST /flights/{id}/services` | мастер заказа | `test_check_contract_expired` | M5 | план |
@@ -153,8 +153,8 @@
 | T-3.5.1-01 | 3.5.1 | Оповещение диспетчеров об изменении статуса рейса | `comms.Notification` kind `flight_status` | `GET /notifications` | колокольчик | `test_flight_status_change_notifies_dispatchers` | M8 | реализовано |
 | T-3.5.1-02 | 3.5.1 | Оповещение о подтверждении или отказе услуги поставщиком | kind `service_confirmed`, `service_rejected` | `GET /notifications` | колокольчик | `test_confirmation_notifies_the_dispatchers` | M8 | реализовано |
 | T-3.5.1-03 | 3.5.1 | Оповещение о приближении дедлайнов | kind `deadline`, Celery Beat | `GET /notifications` | колокольчик | `test_notify_deadline` | M8 | план |
-| T-3.5.1-04 | 3.5.1 | Интеграция с корпоративным мессенджером MAX | адаптер `MSGR` | `GET /integrations` | `/admin/integrations` | `test_adapter_msgr_stub` | M14 | требует решения (G-04) |
-| T-3.5.1-05 | 3.5.1 | Интеграция с e-mail как альтернатива мессенджеру | адаптер `SMTP` | `GET /outbox` | `/communications/outbox` | `test_stub_marks_the_message_sent_but_not_delivered` | M13 | реализовано |
+| T-3.5.1-04 | 3.5.1 | Интеграция с корпоративным мессенджером MAX | адаптер `MSGR` | `GET /integrations` | `/admin/integrations` | `test_adapter_msgr` | M14 | требует решения (G-04) |
+| T-3.5.1-05 | 3.5.1 | Интеграция с e-mail как альтернатива мессенджеру | адаптер `SMTP` | `GET /outbox` | `/communications/outbox` | `test_accepted_letter_is_sent_but_not_delivered` | M13 | реализовано |
 | T-3.5.2-01 | 3.5.2 | Рассылка клиентам: подтверждение рейса | шаблон `flight_confirmed` | `GET /outbox` | `/communications/templates` | `test_reference_carries_every_required_template` | M8 | реализовано |
 | T-3.5.2-02 | 3.5.2 | Рассылка клиентам: изменения в расписании | шаблон `flight_rescheduled` | `GET /outbox` | `/communications/templates` | `test_reference_carries_every_required_template` | M8 | реализовано |
 | T-3.5.2-03 | 3.5.2 | Рассылка клиентам: счёт и закрывающие документы | шаблоны `invoice_issued`, `closing_documents` | `GET /outbox` | `/communications/templates` | `test_issued_invoice_goes_to_the_client` | M8 | реализовано |
@@ -206,15 +206,15 @@
 | T-4.1-09 | 4.1 | БД MSSQL | не реализуется (ADR-001) | — | — | — | — | требует решения (G-01) |
 | T-4.1-10 | 4.1 | Кластеризация для отказоустойчивости | реплика с ручным переключением (ADR-001, `INFRA § 7`) | — | — | испытание переключения | M15 | план |
 | T-4.2-01 | 4.2 | REST API для интеграции с внешними системами | DRF + `openapi.yaml`, `/api/v1` | все | `/api-docs` | `schemathesis` | M1–M15 | в работе |
-| T-4.2-02 | 4.2 | Интеграция с 1С: счета, платежи, списания | адаптер `ONEC` (OData) | `POST /integrations/ONEC/test` | `/admin/integrations` | `test_adapter_onec_cassette` | M14 | план (stub до доступа) |
+| T-4.2-02 | 4.2 | Интеграция с 1С: счета, платежи, списания | адаптер `ONEC` (OData) | `POST /integrations/ONEC/test` | `/admin/integrations` | `test_adapter_onec_cassette` | M14 | план (без подключения до доступа) |
 | T-4.2-03 | 4.2 | Системы аэропортов: слоты | реестр слотов, черновик SCR и разбор ответа (ADR-026) | `GET /slots` | `/slots` | `test_scr_carries_the_slot_details` | M14 | реализовано (формат сверяется с образцами заказчика, G-34) |
 | T-4.2-04 | 4.2 | Системы аэропортов: статус обслуживания | ведётся вручную в реестре поставщиков | — | `/vendors/:id` | — | M6 | вне объёма (нет источника) |
-| T-4.2-05 | 4.2 | Системы поставщиков: обмен заявками и подтверждениями | портал поставщика + `MAILBOT` + `VENDOR_API` | `/portal/vendor/*` | портал поставщика | `test_adapter_mailbot_stub` | M8, M14 | план |
+| T-4.2-05 | 4.2 | Системы поставщиков: обмен заявками и подтверждениями | портал поставщика + `MAILBOT` + `VENDOR_API` | `/portal/vendor/*` | портал поставщика | `test_adapter_mailbot` | M8, M14 | план |
 | T-4.2-06 | 4.2 | IATA BDG для стандартизации биллинговых данных | выгрузка IS-XML (ADR-032) | `POST /reports/{code}/export` | `/reports` | `test_export_isxml` | M14 | требует решения (G-03) |
 | T-4.2-07 | 4.2 | Импорт/экспорт через ODBC-драйверы | реплика только для чтения + представления (ADR-005) | — | — | подключение DBeaver по ODBC | M13 | требует согласования (G-49) |
 | T-4.2-08 | 4.2 | Интеграция с Power BI | те же представления | — | — | построение отчёта в Power BI | M13 | план |
 | T-4.2-09 | 4.2 | Интеграция с Tableau | те же представления | — | — | подключение Tableau | M13 | план |
-| T-4.3-01 | 4.3 | Аутентификация LDAP / Active Directory | адаптер `LDAP`, `django-auth-ldap` | `POST /auth/login` | `/login` | `test_adapter_ldap_stub`, `test_ldap_group_to_role` | M3, M14 | план (stub до доступа) |
+| T-4.3-01 | 4.3 | Аутентификация LDAP / Active Directory | адаптер `LDAP`, `django-auth-ldap` | `POST /auth/login` | `/login` | `test_adapter_ldap`, `test_ldap_group_to_role` | M3, M14 | план (без подключения до доступа) |
 | T-4.3-02 | 4.3 | Двухфакторная аутентификация | TOTP `pyotp`, резервные коды (ADR-013) | `POST /auth/2fa` | `/login` | `accounts/tests/test_auth.py::TestTwoFactor`, `e2e/helpers/session.ts` | M3 | реализовано |
 | T-4.3-03 | 4.3 | Ролевая модель доступа: 6 ролей ТЗ | карта `role → permission`, единая с клиентом | `GET /auth/me` | `/admin/users` | `tests/test_permissions.py`, `tests/test_permission_map.py` | M3 | реализовано |
 | T-4.3-04 | 4.3 | Проверка прав на сервере в каждом эндпоинте | `HasRolePermission`: действие без объявленного права запрещено | все | — | `tests/test_permissions.py::TestEndpointPermissions` | M3 | реализовано |
