@@ -4,7 +4,7 @@
 `core.clock.now()`. Это правило существует по двум причинам:
 
 1. Тесты должны управлять временем, не подменяя системные часы.
-2. Демонстрационный стенд управляет модельным временем на сервере (ADR-014):
+2. Режим генератора данных управляет модельным временем на сервере (ADR-014):
    клиентская перемотка ничего не даёт, потому что автопереходы выполняет Celery
    по серверным часам. Смещение применяется здесь, в одной точке, и автоматически
    действует на guard-ы, фоновые задачи и аудит.
@@ -19,13 +19,13 @@ from datetime import UTC, datetime, timedelta
 from django.conf import settings
 
 
-def _demo_offset() -> timedelta:
+def _model_offset() -> timedelta:
     """Смещение модельного времени.
 
-    Вне демонстрационного режима — всегда ноль: обращения к базе за настройками
+    Вне режима генератора данных — всегда ноль: обращения к базе за настройками
     не происходит, чтобы `now()` оставался дешёвым.
     """
-    if not getattr(settings, "DEMO_DATA", False):
+    if not getattr(settings, "SAMPLE_DATA", False):
         return timedelta(0)
 
     from core.models import Settings  # локальный импорт: избегаем цикла при загрузке
@@ -35,7 +35,7 @@ def _demo_offset() -> timedelta:
 
 def now() -> datetime:
     """Текущее время в UTC с учётом модельного смещения."""
-    return datetime.now(UTC) + _demo_offset()
+    return datetime.now(UTC) + _model_offset()
 
 
 def real_now() -> datetime:
@@ -49,7 +49,7 @@ def real_now() -> datetime:
 
 def is_shifted() -> bool:
     """Включено ли модельное время. Уходит в ответ `/clock` и в записи аудита."""
-    return _demo_offset() != timedelta(0)
+    return _model_offset() != timedelta(0)
 
 
 def today() -> datetime:

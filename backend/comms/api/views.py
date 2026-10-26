@@ -29,6 +29,7 @@ from comms.api.serializers import (
     InboxMessageSerializer,
     MessageTemplateSerializer,
     MessageTemplateUpdateSerializer,
+    NotificationReadAllSerializer,
     NotificationSerializer,
     OutboxMessageSerializer,
     TemplatePreviewSerializer,
@@ -88,6 +89,18 @@ class NotificationViewSet(
     def read(self, request: Request, pk: str | None = None) -> Response:
         notification_service.mark_read(notification=self.get_object())
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @extend_schema(
+        summary="Отметка всех уведомлений прочитанными",
+        request=None,
+        responses={200: NotificationReadAllSerializer},
+        tags=["comms"],
+    )
+    @action(detail=False, methods=["post"], url_path="read-all")
+    def read_all(self, request: Request) -> Response:
+        # ТЗ 3.5.1 — «Прочитать всё»: только свои уведомления, как и выборка.
+        updated = notification_service.mark_all_read(user=cast(User, request.user))
+        return Response({"updated": updated})
 
 
 @extend_schema_view(

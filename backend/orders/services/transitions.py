@@ -257,7 +257,7 @@ def apply_transition(
         ),
         comment=comment or f"{previous_status} → {definition['to']}",
         source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
-        is_demo=order.is_demo,
+        is_generated=order.is_generated,
     )
 
     if source != AuditSource.SEED:

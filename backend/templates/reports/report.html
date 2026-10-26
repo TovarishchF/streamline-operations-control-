@@ -43,34 +43,9 @@
     .num { text-align: right; font-family: "DejaVu Sans Mono", monospace; white-space: nowrap; }
     tfoot td { font-weight: bold; border-top: 0.4mm solid #1f1f1f; }
 
-    .demo-mark {
-      position: fixed;
-      top: 40%;
-      left: 20%;
-      transform: rotate(-24deg);
-      font-size: 64pt;
-      color: rgba(192, 57, 43, 0.10);
-      font-weight: bold;
-      letter-spacing: 8pt;
-      z-index: -1;
-    }
-    .demo-note {
-      border: 0.3mm solid #c0392b;
-      color: #c0392b;
-      padding: 1.6mm 2.5mm;
-      margin-bottom: 4mm;
-      font-size: 8pt;
-    }
   </style>
 </head>
 <body>
-
-{% if is_demo %}
-  <div class="demo-mark">DEMO</div>
-  <div class="demo-note">
-    {% trans "Отчёт сформирован на демонстрационном стенде на искусственных данных." %}
-  </div>
-{% endif %}
 
 <h1>{{ title }}</h1>
 <div class="generated">{% trans "Сформирован" %}: {{ generated_at }}</div>

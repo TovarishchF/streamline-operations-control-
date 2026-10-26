@@ -109,7 +109,7 @@ class IntegrationUnavailable(DomainError):
     code = "INTEGRATION_UNAVAILABLE"
 
 
-class DemoOnlyOperation(DomainError):
-    """Операция доступна только на демонстрационном стенде (ADR-014, ADR-008)."""
+class SampleDataDisabled(DomainError):
+    """Операция доступна только при включённом генераторе данных (ADR-014, ADR-008)."""
 
-    code = "DEMO_ONLY_OPERATION"
+    code = "SAMPLE_DATA_DISABLED"

@@ -14,7 +14,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from core import clock
-from core.demo_marking import is_demo as demo_mode
 from reports.definitions import Column, Definition
 from reports.services import export as report_export
 
@@ -84,9 +83,6 @@ def export_schedule(flights: QuerySet[Flight]) -> report_export.Export:
         "code": SCHEDULE.code,
         "generatedAt": clock.now().isoformat(),
         "currency": "RUB",
-        # Выгрузка со стенда помечается как выгрузка со стенда
-        # (`SPEC.md § 8.6`).
-        "isDemo": demo_mode(),
         "columns": SCHEDULE.columns_to_contract(),
         "rows": rows,
         "totals": report_export_totals(rows),

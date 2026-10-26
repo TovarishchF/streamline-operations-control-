@@ -133,6 +133,41 @@ def test_cannot_mark_someone_elses_notification(
     assert api.post(f"{URL}/{foreign.pk}/read").status_code == status.HTTP_404_NOT_FOUND
 
 
+def test_read_all_marks_only_own_unread(
+    api: APIClient, make_user: Callable[..., User]
+) -> None:
+    """«Прочитать всё» отмечает свои непрочитанные и не трогает чужие."""
+    reader = make_user(Role.DISPATCHER, suffix="reader")
+    stranger = make_user(Role.DISPATCHER, suffix="other")
+    notifications.notify(user=reader, kind="deadline", title="Раз")
+    notifications.notify(user=reader, kind="sla_breach", title="Два")
+    foreign = notifications.notify(user=stranger, kind="deadline", title="Чужое")
+
+    api.force_authenticate(user=reader)
+    response = api.post(f"{URL}/read-all")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.json() == {"updated": 2}
+    assert notifications.unread_count(reader) == 0
+    assert Notification.objects.get(pk=foreign.pk).read_at is None
+
+
+def test_read_all_keeps_earlier_read_time(
+    api: APIClient, make_user: Callable[..., User]
+) -> None:
+    """Уже прочитанное не переписывается, повторный вызов ничего не отмечает."""
+    reader = make_user(Role.DISPATCHER, suffix="reader")
+    read_before = notifications.mark_read(
+        notification=notifications.notify(user=reader, kind="deadline", title="Раньше")
+    )
+    notifications.notify(user=reader, kind="deadline", title="Позже")
+
+    api.force_authenticate(user=reader)
+    assert api.post(f"{URL}/read-all").json() == {"updated": 1}
+    assert Notification.objects.get(pk=read_before.pk).read_at == read_before.read_at
+    assert api.post(f"{URL}/read-all").json() == {"updated": 0}
+
+
 def test_severity_comes_from_the_event_kind(
     make_user: Callable[..., User],
 ) -> None:

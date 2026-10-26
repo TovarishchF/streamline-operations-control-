@@ -66,14 +66,14 @@ class QuoteSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     lines = DocumentLineSerializer(many=True, read_only=True)
     totals = serializers.SerializerMethodField()
     voidedByDocId = serializers.CharField(source="voided_by_id", allow_null=True)  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo")  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated")  # noqa: N815
 
     class Meta:
         model = Quote
         fields = (
             "id", "number", "flightId", "clientId", "status", "issuedAt",
             "validUntil", "currency", "fx", "lines", "fees", "totals",
-            "voidedByDocId", "isDemo",
+            "voidedByDocId", "isGenerated",
         )
 
     def get_number(self, obj: Quote) -> str | None:
@@ -97,14 +97,14 @@ class InvoiceSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
     paidAmount = serializers.SerializerMethodField()  # noqa: N815
     planFactComparison = serializers.JSONField(source="plan_fact_comparison")  # noqa: N815
     voidedByDocId = serializers.CharField(source="voided_by_id", allow_null=True)  # noqa: N815
-    isDemo = serializers.BooleanField(source="is_demo")  # noqa: N815
+    isGenerated = serializers.BooleanField(source="is_generated")  # noqa: N815
 
     class Meta:
         model = Invoice
         fields = (
             "id", "number", "flightId", "clientId", "quoteId", "status",
             "issuedAt", "dueDate", "currency", "fx", "lines", "fees", "totals",
-            "paidAmount", "planFactComparison", "voidedByDocId", "isDemo",
+            "paidAmount", "planFactComparison", "voidedByDocId", "isGenerated",
         )
 
     def get_number(self, obj: Invoice) -> str | None:

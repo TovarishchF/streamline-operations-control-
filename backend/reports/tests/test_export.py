@@ -70,16 +70,8 @@ def financial_result(
     completed_order: ServiceOrder,
     issued_invoice: Invoice,
     period: dict[str, Any],
-    settings: Any,
 ) -> dict[str, Any]:
-    """Отчёт боевого режима.
-
-    Режим задаётся явно, а не наследуется: в демонстрационном файл
-    начинается со строки с пометкой, и все проверки положения ячеек
-    разъехались бы на строку. Разметку стенда проверяют отдельные
-    тесты ниже.
-    """
-    settings.DEMO_DATA = False
+    """Финансовый отчёт за период."""
     return builders.build(definitions.FINANCIAL, period)
 
 
@@ -126,7 +118,6 @@ def test_csv_leaves_missing_value_empty_not_zero(spec: Any) -> None:
         "code": definitions.FINANCIAL,
         "generatedAt": "2026-09-15T00:00:00+00:00",
         "currency": "RUB",
-        "isDemo": False,
         "columns": spec.columns_to_contract(),
         "rows": [
             {
@@ -255,42 +246,27 @@ def test_pdf_is_produced(spec: Any, financial_result: dict[str, Any]) -> None:
     assert len(data) > 1000
 
 
-# ─────────────────────────── Разметка стенда ───────────────────────────
+# ─────────────────────────── Без пометок ───────────────────────────
 
 
-def test_demo_stand_marks_every_format(
-    spec: Any, financial_result: dict[str, Any], period: dict[str, Any]
+def test_exports_carry_no_marking(
+    spec: Any, financial_result: dict[str, Any], period: dict[str, Any], settings: Any
 ) -> None:
-    """ADR-008: стенд опознаётся и там, где водяной знак нарисовать негде."""
+    """Выгрузка одинакова в любом режиме: файл начинается с данных."""
     from lxml import etree
     from openpyxl import load_workbook
 
-    financial_result["isDemo"] = True
-
-    assert export.DEMO_NOTE.encode() in export._render_csv(spec, financial_result)
+    settings.SAMPLE_DATA = True
+    header = ";".join(column.ru for column in spec.columns)
+    assert export._render_csv(spec, financial_result).decode("utf-8-sig").startswith(header)
 
     workbook = load_workbook(BytesIO(export.render_xlsx(spec, financial_result)))
     sheet = workbook.active
     assert sheet is not None
-    assert "DEMO" in str(sheet.cell(row=1, column=1).value)
+    assert sheet.cell(row=1, column=1).value == spec.columns[0].ru
 
     document = etree.fromstring(export._render_xml(spec, financial_result, period))
-    assert document.get("demo") == "true"
-    note = document.find(f"{{{export.XML_NAMESPACE}}}Note")
-    assert note is not None and note.text == export.DEMO_NOTE
-
-
-def test_production_export_has_no_demo_marking(
-    spec: Any, financial_result: dict[str, Any], period: dict[str, Any]
-) -> None:
-    """В боевом режиме маркировки нет (`CLAUDE.md § 4`)."""
-    from lxml import etree
-
-    financial_result["isDemo"] = False
-
-    assert export.DEMO_NOTE.encode() not in export._render_csv(spec, financial_result)
-    document = etree.fromstring(export._render_xml(spec, financial_result, period))
-    assert document.get("demo") == "false"
+    assert set(document.attrib) == {"code", "generatedAt", "currency"}
     assert document.find(f"{{{export.XML_NAMESPACE}}}Note") is None
 
 

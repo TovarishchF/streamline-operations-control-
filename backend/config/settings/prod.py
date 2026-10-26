@@ -12,7 +12,7 @@ import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *
-from .base import AUTHENTICATION_BACKENDS, DEMO_DATA, env
+from .base import AUTHENTICATION_BACKENDS, SAMPLE_DATA, env
 
 DEBUG = False
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
@@ -58,20 +58,20 @@ def _fail(message: str) -> None:
 
 
 # ADR-013: упрощённый вход не должен существовать в боевой сборке.
-_FORBIDDEN_BACKENDS = {"accounts.auth_backends.DemoBypassBackend"}
+_FORBIDDEN_BACKENDS = {"accounts.auth_backends.BypassLoginBackend"}
 if _FORBIDDEN_BACKENDS & set(AUTHENTICATION_BACKENDS):
     _fail(
-        "в AUTHENTICATION_BACKENDS обнаружен демонстрационный бэкенд аутентификации. "
+        "в AUTHENTICATION_BACKENDS обнаружен бэкенд обхода входа. "
         "Обход входа в боевом режиме недопустим (ADR-013)."
     )
 
 if SECRET_KEY.startswith("insecure-"):
     _fail("SECRET_KEY не задан. Заполните переменную окружения из .env.")
 
-# ADR-008: демонстрационные данные в бою — не ошибка конфигурации, но факт,
+# ADR-008: генератор данных в бою — не ошибка конфигурации, но факт,
 # который должен быть виден в журнале при каждом запуске.
-if DEMO_DATA:
+if SAMPLE_DATA:
     sys.stderr.write(
-        "ВНИМАНИЕ: DEMO_DATA=true в боевой конфигурации. Интерфейс и все выгружаемые "
-        "документы будут помечены как демонстрационные.\n"
+        "ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны "
+        "генератор данных и управление модельным временем.\n"
     )

@@ -51,7 +51,7 @@ def sync_rates(on_date: date | None = None) -> int:
         FxRate.objects.update_or_create(
             on_date=rate_set.on_date,
             currency=currency,
-            defaults={"rate": value, "data_source": source, "is_demo": not live},
+            defaults={"rate": value, "data_source": source, "is_generated": not live},
         )
         written += 1
     return written

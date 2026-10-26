@@ -128,14 +128,14 @@ def apply_transition(
         after=audit.snapshot(flight, fields=["status", "atd_utc", "ata_utc"]),
         comment=comment or f"{previous_status} → {definition['to']}",
         source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
 
     # Оповещение диспетчеров `[ТЗ 3.5.1]`. Автомат отвечает за состояние,
     # кому об этом сообщить — решают коммуникации.
     #
     # Переходы генератора не оповещают: он выстраивает историю стенда,
-    # а не совершает события сейчас. Иначе колокольчик после `seed_demo`
+    # а не совершает события сейчас. Иначе колокольчик после `seed_sample`
     # содержал бы сотни записей о прошлом, и настоящее в нём потерялось бы
     # (`CLAUDE.md § 4`).
     if source != AuditSource.SEED:

@@ -358,16 +358,16 @@ def test_flight_status_change_notifies_dispatchers(
     assert notification.link == f"/flights/{flight.pk}"
 
 
-@override_settings(DEMO_DATA=True)
-def test_notification_from_the_stand_is_marked(
+@override_settings(SAMPLE_DATA=True)
+def test_notification_in_sample_data_mode_is_marked(
     flight: Flight, order: ServiceOrder, make_user: Callable[..., User]
 ) -> None:
-    """`CLAUDE.md § 4`: запись со стенда помечается как запись со стенда."""
+    """`CLAUDE.md § 4`: запись, сделанная в режиме генератора, помечается для чистки."""
     from flights.services import transitions as flight_transitions
 
-    make_user(Role.DISPATCHER, suffix="demo")
+    make_user(Role.DISPATCHER, suffix="gen")
     flight_transitions.apply_transition(
         flight, "start", actor=make_user(Role.MANAGER, suffix="act")
     )
 
-    assert Notification.objects.filter(is_demo=True).exists()
+    assert Notification.objects.filter(is_generated=True).exists()

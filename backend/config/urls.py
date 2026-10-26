@@ -62,7 +62,6 @@ from counterparties.api.views import (
     VendorServiceMappingViewSet,
     VendorViewSet,
 )
-from demo.api.views import DemoPurgeView, DemoResetView, DemoSeedView
 from fleet.api.views import AircraftViewSet
 from flights.api.views import (
     FlightRequestViewSet,
@@ -79,6 +78,7 @@ from reports.api.views import (
     ReportExportView,
     ReportSubscriptionViewSet,
 )
+from sampledata.api.views import SampleDataGenerateView, SampleDataPurgeView, SampleDataResetView
 
 router = DefaultRouter(trailing_slash=False)
 # Конфликты объявлены до вьюсета рейсов: иначе «conflicts» разберётся
@@ -164,9 +164,9 @@ api_v1: list[URLPattern | URLResolver] = [
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
     path("flights/export", ScheduleExportView.as_view(), name="flight-export"),
-    path("demo/seed", DemoSeedView.as_view(), name="demo-seed"),
-    path("demo/reset", DemoResetView.as_view(), name="demo-reset"),
-    path("demo/purge", DemoPurgeView.as_view(), name="demo-purge"),
+    path("sample-data/generate", SampleDataGenerateView.as_view(), name="sample-data-generate"),
+    path("sample-data/reset", SampleDataResetView.as_view(), name="sample-data-reset"),
+    path("sample-data/purge", SampleDataPurgeView.as_view(), name="sample-data-purge"),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
     path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),

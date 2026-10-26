@@ -1,8 +1,8 @@
 """Учётные записи для экрана входа `[ТЗ 4.3]` (ADR-013).
 
-Список экономит набор логина, когда стенд показывают нескольким людям
+Список экономит набор логина, когда систему показывают нескольким людям
 подряд. Проверяется ровно то, чем он опасен: что он не отдаёт паролей
-и что вне стенда его нет.
+и что при выключенной настройке его нет.
 """
 
 from __future__ import annotations
@@ -23,7 +23,7 @@ pytestmark = pytest.mark.django_db
 URL = "/api/v1/auth/accounts"
 
 
-@override_settings(DEMO_ACCOUNTS=True)
+@override_settings(LOGIN_ACCOUNT_LIST=True)
 def test_accounts_are_listed_on_the_stand(api: APIClient, dispatcher: User) -> None:
     response = api.get(URL)
 
@@ -32,7 +32,7 @@ def test_accounts_are_listed_on_the_stand(api: APIClient, dispatcher: User) -> N
     assert dispatcher.username in [row["username"] for row in rows]
 
 
-@override_settings(DEMO_ACCOUNTS=True)
+@override_settings(LOGIN_ACCOUNT_LIST=True)
 def test_the_list_never_carries_a_password(api: APIClient, dispatcher: User) -> None:
     """Список экономит набор логина, а не заменяет вход."""
     row = api.get(URL).json()["data"][0]
@@ -45,20 +45,20 @@ def response_text(api: APIClient) -> str:
     return str(api.get(URL).content.decode("utf-8")).lower()
 
 
-@override_settings(DEMO_ACCOUNTS=False)
+@override_settings(LOGIN_ACCOUNT_LIST=False)
 def test_outside_the_stand_the_list_is_empty(api: APIClient, dispatcher: User) -> None:
     """Перечень действующих сотрудников — не публичные данные."""
     assert api.get(URL).json()["data"] == []
 
 
-@override_settings(DEMO_ACCOUNTS=True)
+@override_settings(LOGIN_ACCOUNT_LIST=True)
 def test_the_list_is_open_without_a_token(api: APIClient, dispatcher: User) -> None:
     """Экран входа обращается к нему до входа — иначе он бесполезен."""
     api.credentials()
     assert api.get(URL).status_code == status.HTTP_200_OK
 
 
-@override_settings(DEMO_ACCOUNTS=True)
+@override_settings(LOGIN_ACCOUNT_LIST=True)
 def test_deactivated_account_is_not_offered(api: APIClient, dispatcher: User) -> None:
     """Предлагать вход тем, кому вход закрыт, — приглашение в тупик."""
     dispatcher.is_active = False

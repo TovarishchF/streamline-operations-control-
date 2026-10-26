@@ -23,7 +23,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts import registration, services
 from accounts.api.serializers import (
-    DemoAccountListSerializer,
+    LoginAccountListSerializer,
     LoginSerializer,
     MeSerializer,
     PasswordChangeSerializer,
@@ -188,19 +188,19 @@ class MeView(APIView):
         responses={200: MeSerializer, 401: ErrorResponseSerializer}, tags=["auth"]
     )
     def get(self, request: Request) -> Response:
-        payload = {"user": request.user, "demoMode": settings.DEMO_DATA}
+        payload = {"user": request.user, "sampleData": settings.SAMPLE_DATA}
         return Response(MeSerializer(payload).data)
 
 
 class AccountListView(APIView):
     """`GET /api/v1/auth/accounts`. Учётные записи для экрана входа.
 
-    Стенд показывают нескольким людям подряд, и каждому приходится
+    Систему показывают нескольким людям подряд, и каждому приходится
     вспоминать чужой логин. Список отдаёт **только** имя, логин и роль:
     паролей здесь нет и быть не может — вход остаётся настоящим,
     обход аутентификации запрещён (ADR-013).
 
-    Вне `DEMO_ACCOUNTS=true` список пуст. Перечень действующих сотрудников
+    Вне `LOGIN_ACCOUNT_LIST=true` список пуст. Перечень действующих сотрудников
     организации — не публичные данные.
     """
 
@@ -208,12 +208,12 @@ class AccountListView(APIView):
     permission_classes: Any = (AllowAny,)
 
     @extend_schema(
-        summary="Учётные записи стенда для экрана входа",
-        responses={200: DemoAccountListSerializer},
+        summary="Учётные записи для экрана входа",
+        responses={200: LoginAccountListSerializer},
         tags=["auth"],
     )
     def get(self, request: Request) -> Response:
-        if not settings.DEMO_ACCOUNTS:
+        if not settings.LOGIN_ACCOUNT_LIST:
             return Response({"data": []})
 
         users = User.objects.filter(is_active=True).order_by("role", "username")

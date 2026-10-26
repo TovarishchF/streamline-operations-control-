@@ -10,8 +10,8 @@ from .base import *
 from .base import DATABASES, INTEGRATION_MODES, env
 
 DEBUG = False
-DEMO_DATA = False
-DEMO_TWO_FACTOR_FILE = ""
+SAMPLE_DATA = False
+SAMPLE_TWO_FACTOR_FILE = ""
 
 # Политика второго фактора закреплена, а не берётся из окружения: иначе
 # испытания проверяли бы настройку машины разработчика, а на стенде

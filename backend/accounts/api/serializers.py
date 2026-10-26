@@ -90,7 +90,7 @@ class MeSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
     user = UserSerializer(read_only=True)
     permissions = serializers.SerializerMethodField()
-    demoMode = serializers.BooleanField(read_only=True)  # noqa: N815
+    sampleData = serializers.BooleanField(read_only=True)  # noqa: N815
     twoFactorSetupRequired = serializers.SerializerMethodField()  # noqa: N815
 
     def get_permissions(self, obj: dict[str, Any]) -> dict[str, bool]:
@@ -126,7 +126,7 @@ class PasswordChangeSerializer(serializers.Serializer):  # type: ignore[type-arg
         return value
 
 
-class DemoAccountSerializer(serializers.Serializer):  # type: ignore[type-arg]
+class LoginAccountSerializer(serializers.Serializer):  # type: ignore[type-arg]
     """Учётная запись в списке экрана входа.
 
     Пароля здесь нет: список экономит набор логина, а не заменяет вход.
@@ -137,11 +137,11 @@ class DemoAccountSerializer(serializers.Serializer):  # type: ignore[type-arg]
     role = serializers.CharField()
 
 
-class DemoAccountListSerializer(serializers.Serializer):  # type: ignore[type-arg]
+class LoginAccountListSerializer(serializers.Serializer):  # type: ignore[type-arg]
     # `ListSerializer` в поле формы: у `Serializer` атрибут `data` объявлен
     # как готовый словарь ответа, и переопределение его полем — конфликт имён,
     # а не ошибка. Форма ответа описана контрактом.
-    data = DemoAccountSerializer(many=True)  # type: ignore[assignment]
+    data = LoginAccountSerializer(many=True)  # type: ignore[assignment]
 
 
 class RegistrationSubmitSerializer(serializers.Serializer):  # type: ignore[type-arg]

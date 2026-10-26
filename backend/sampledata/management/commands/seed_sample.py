@@ -1,8 +1,8 @@
-"""Демонстрационный набор данных `[ТЗ этап 2]`.
+"""Набор данных генератора `[ТЗ этап 2]`.
 
-`make seed-demo`. Доступна только при `DEMO_DATA=true` (ADR-008): в боевом
-режиме команда отказывается работать, чтобы придуманные контрагенты
-не оказались в рабочей базе.
+`make seed-sample`. Доступна только при `SAMPLE_DATA=true` (ADR-008): при
+выключенном генераторе команда отказывается работать, чтобы придуманные
+контрагенты не оказались в рабочей базе.
 
 Правила честности (`CLAUDE.md § 4`) соблюдаются буквально:
 
@@ -10,10 +10,11 @@
 * реальны только общедоступные справочные данные — коды аэропортов,
   обозначения типов воздушных судов, коды валют; они приходят
   из `seed_reference` и здесь не выдумываются;
-* каждая запись несёт `is_demo=True` и `data_source='synthetic'`,
-  поэтому её видно в интерфейсе и можно удалить одной командой;
+* каждая запись несёт `is_generated=True` и `data_source='synthetic'`,
+  поэтому её можно удалить одной командой, не задев введённое людьми;
+  пользователи генератора узнаются по адресу в зоне `soc.local`;
 * записи аудита от генератора имеют `source='seed'` и автора
-  «System (демо-генератор)» — они не выдаются за действия людей;
+  «Система (генератор данных)» — они не выдаются за действия людей;
 * набор генерируется относительно текущей даты, а не «историей за год».
 
 Генератор детерминирован: один и тот же `--seed` даёт один и тот же набор.
@@ -36,10 +37,11 @@ from accounts import services as accounts
 from accounts.models import Organization, Role, TimezoneMode, User
 from audit import services as audit
 from audit.models import AuditEntityType, AuditEntry, AuditSource
+from billing.models import DocumentLine, Invoice, Payable, Quote, VendorInvoice
 from catalog.models import AircraftType, Airport, Service, ServiceCategory
 from comms.models import InboxMessage, Notification, OutboxMessage
-from core import clock
-from core.exceptions import DemoOnlyOperation, DomainError
+from core import clock, sample_data
+from core.exceptions import DomainError, SampleDataDisabled
 from core.models import DataSource
 from counterparties.models import Client, Contact, Vendor
 from fleet.models import Aircraft, AircraftApproval, AircraftStatus
@@ -99,14 +101,14 @@ FAILED_MESSAGE_SHARE = 0.1
 SENT_MESSAGE_SHARE = 0.7
 
 # Сколько событий положить в колокольчик.
-DEMO_NOTIFICATIONS = 6
+GENERATED_NOTIFICATIONS = 6
 
 # Доля слотов, ожидающих ответа координатора.
 PENDING_SLOT_SHARE = 0.3
 
-# Регулярные направления стенда: наименование, вылет, прилёт, местный час
+# Регулярные направления набора: наименование, вылет, прилёт, местный час
 # вылета, дни недели по ISO.
-DEMO_TEMPLATES = (
+GENERATED_TEMPLATES = (
     ("Москва — Петербург, будни", "UUWW", "ULLI", 9, (1, 2, 3, 4, 5)),
     ("Москва — Сочи, выходные", "UUDD", "URSS", 11, (6, 7)),
     ("Петербург — Москва, вечерний", "ULLI", "UUWW", 19, (1, 3, 5)),
@@ -120,6 +122,15 @@ VENDOR_NAMES: dict[str, tuple[str, ...]] = {
     "permits": ("Пермит Бюро", "Аэронавигация Консалт"),
     "deicing": ("Антилёд Сервис", "Дайсинг Технологии"),
 }
+
+# Пользователи генератора: логин — фамилия латиницей, адрес — в зоне
+# `soc.local`. По зоне их находит очистка: у пользователя нет признака
+# `is_generated`, а логин без суффикса ничем не отличается от настоящего.
+GENERATED_EMAIL_DOMAIN = "soc.local"
+
+# Общий пароль пользователей генератора. Заведомо известен: набор нужен,
+# чтобы систему смотрели и пробовали, а не чтобы его охраняли.
+GENERATED_PASSWORD = "soc-vhod-2026-parol"  # noqa: S105 — общий пароль набора, не секрет
 
 # Вымышленные сотрудники. Роль «Продажи» не заводится: она ожидает
 # подтверждения заказчиком (ADR-011, G-06).
@@ -141,14 +152,14 @@ REGISTRATION_PREFIXES = ("RA-", "M-", "9H-", "T7-", "VP-B")
 # а выдумывать справочные сведения нельзя (`CLAUDE.md § 4`).
 
 # Доли и пороги генератора вынесены в константы: иначе числа в коде
-# читаются как случайные, а они задают вид демонстрационного набора.
+# читаются как случайные, а они задают вид набора.
 CARGO_EVERY = 6
 SECOND_SPECIALIZATION_SHARE = 0.3
 EXPIRING_APPROVAL_SHARE = 0.4
 AIRCRAFT_COUNT = 26
 
 # Рейсы генерируются относительно текущей даты (CLAUDE.md § 4), а не
-# «историей за год»: стенд должен выглядеть работающим сегодня.
+# «историей за год»: система должна выглядеть работающей сегодня.
 FLIGHTS_BACK_DAYS = 7
 FLIGHTS_FORWARD_DAYS = 14
 FLIGHTS_PER_DAY = 4
@@ -164,36 +175,36 @@ MAINTENANCE_INDEXES = (7, 14)
 
 HOME_BASES = ("UUWW", "UUDD", "UUEE", "ULLI", "USSS", "UNNT", "UWWW", "URSS")
 
-# Направления демонстрационного расписания: настоящие аэропорты, среди них
+# Направления расписания генератора: настоящие аэропорты, среди них
 # международные — иначе не показать проверку разрешительных документов.
-DEMO_ROUTES_ICAO = (
+GENERATED_ROUTES_ICAO = (
     "UUWW", "UUDD", "UUEE", "ULLI", "USSS", "UNNT", "UWWW", "URSS", "UWKD", "UHWW",
     "LFPB", "LSGG", "EGGW", "OMDB", "LTFM", "UACC", "UBBB", "UDYZ",
 )
 
 
 class ReferenceDataMissing(DomainError):
-    """Демонстрационный набор опирается на справочники, а их нет.
+    """Набор генератора опирается на справочники, а их нет.
 
     Молчаливый выход отсюда выглядел бы как успешная генерация пустого
-    набора: команда отработала, а на стенде ничего не появилось.
+    набора: команда отработала, а в системе ничего не появилось.
     """
 
     code = "VALIDATION_ERROR"
 
 
 class Command(BaseCommand):
-    help = "Демонстрационный набор данных (только при DEMO_DATA=true)"
+    help = "Набор данных генератора (только при SAMPLE_DATA=true)"
 
     def add_arguments(self, parser: ArgumentParser) -> None:
         parser.add_argument("--seed", type=int, default=20260913, help="Зерно генератора")
-        parser.add_argument("--purge", action="store_true", help="Удалить демонстрационные записи")
+        parser.add_argument("--purge", action="store_true", help="Удалить записи генератора")
 
     def handle(self, *args: Any, **options: Any) -> None:
-        if not settings.DEMO_DATA:
-            raise DemoOnlyOperation(
-                "Команда доступна только при DEMO_DATA=true: в боевом режиме "
-                "придуманные контрагенты в базе недопустимы (ADR-008)"
+        if not sample_data.enabled():
+            raise SampleDataDisabled(
+                "Команда доступна только при SAMPLE_DATA=true: в рабочей базе "
+                "придуманные контрагенты недопустимы (ADR-008)"
             )
 
         counts = (
@@ -211,34 +222,44 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def purge(self) -> dict[str, int]:
-        """Удаляет только демонстрационные записи.
+        """Удаляет только записи генератора.
 
         Порядок обратен порядку создания: связи защищены `PROTECT`, поэтому
-        сначала уходят пользователи порталов, затем борта и только потом
-        контрагенты, на которых те ссылаются.
+        сначала уходят пользователи порталов и документы, затем рейсы
+        и борта и только потом контрагенты, на которых те ссылаются.
         """
         counts = {
-            "пользователи": User.objects.filter(username__endswith=".demo").delete()[0],
+            "пользователи": User.objects.filter(
+                email__endswith=f"@{GENERATED_EMAIL_DOMAIN}"
+            ).delete()[0],
             # Коммуникации уходят первыми: входящее ссылается на заявку,
             # уведомление — на пользователя.
-            "уведомления": Notification.objects.filter(is_demo=True).delete()[0],
-            "входящие": InboxMessage.objects.filter(is_demo=True).delete()[0],
-            "исходящие": OutboxMessage.objects.filter(is_demo=True).delete()[0],
-            "контакты": Contact.objects.filter(is_demo=True).delete()[0],
-            "заявки клиентов": FlightRequest.objects.filter(is_demo=True).delete()[0],
+            "уведомления": Notification.objects.filter(is_generated=True).delete()[0],
+            "входящие": InboxMessage.objects.filter(is_generated=True).delete()[0],
+            "исходящие": OutboxMessage.objects.filter(is_generated=True).delete()[0],
+            "контакты": Contact.objects.filter(is_generated=True).delete()[0],
+            "заявки клиентов": FlightRequest.objects.filter(is_generated=True).delete()[0],
             # Шаблон держит клиента и тип ВС связями PROTECT, поэтому
             # уходит раньше них.
-            "шаблоны рейсов": FlightTemplate.objects.filter(is_demo=True).delete()[0],
-            "заявки на услуги": ServiceOrder.objects.filter(is_demo=True).delete()[0],
-            "слоты": Slot.objects.filter(is_demo=True).delete()[0],
-            "рейсы": Flight.objects.filter(is_demo=True).delete()[0],
-            "борта": Aircraft.objects.filter(is_demo=True).delete()[0],
-            "клиенты": Client.objects.filter(is_demo=True).delete()[0],
-            "поставщики": Vendor.objects.filter(is_demo=True).delete()[0],
+            "шаблоны рейсов": FlightTemplate.objects.filter(is_generated=True).delete()[0],
+            # Документы по рейсам генератора — тоже записи генератора
+            # (признак наследуется от рейса). Строка держит заявку на услугу
+            # связью PROTECT, поэтому документы уходят раньше заявок.
+            "строки документов": DocumentLine.objects.filter(is_generated=True).delete()[0],
+            "счета клиентам": Invoice.objects.filter(is_generated=True).delete()[0],
+            "котировки": Quote.objects.filter(is_generated=True).delete()[0],
+            "заявки на оплату": Payable.objects.filter(is_generated=True).delete()[0],
+            "счета поставщиков": VendorInvoice.objects.filter(is_generated=True).delete()[0],
+            "заявки на услуги": ServiceOrder.objects.filter(is_generated=True).delete()[0],
+            "слоты": Slot.objects.filter(is_generated=True).delete()[0],
+            "рейсы": Flight.objects.filter(is_generated=True).delete()[0],
+            "борта": Aircraft.objects.filter(is_generated=True).delete()[0],
+            "клиенты": Client.objects.filter(is_generated=True).delete()[0],
+            "поставщики": Vendor.objects.filter(is_generated=True).delete()[0],
             # Журнал неизменяем на уровне базы, и это правильно: удалять
-            # записи аудита нельзя даже генератору. Демонстрационные записи
+            # записи аудита нельзя даже генератору. Записи генератора
             # отличимы по source='seed' и живут до пересоздания базы.
-            "записи журнала": AuditEntry.objects.filter(is_demo=True).count(),
+            "записи журнала": AuditEntry.objects.filter(is_generated=True).count(),
         }
         return counts
 
@@ -260,7 +281,7 @@ class Command(BaseCommand):
         if not Airport.objects.exists():
             raise ReferenceDataMissing(
                 "Справочники пусты. Сначала: make seed-reference — "
-                "демонстрационный набор опирается на настоящие коды аэропортов."
+                "набор генератора опирается на настоящие коды аэропортов."
             )
 
         organization = self._organization()
@@ -316,7 +337,7 @@ class Command(BaseCommand):
                 # выбирается по контакту, и это надо показывать.
                 locale="en" if rnd.random() < ENGLISH_CONTACT_SHARE else "ru",
                 is_primary=True,
-                is_demo=True,
+                is_generated=True,
                 data_source=DataSource.SYNTHETIC,
             )
 
@@ -325,7 +346,7 @@ class Command(BaseCommand):
     ) -> int:
         """Шаблоны регулярных рейсов `[ТЗ 3.1.1]`.
 
-        Регулярные направления — то, ради чего шаблон и заводят. Стенд
+        Регулярные направления — то, ради чего шаблон и заводят. Набор
         без шаблонов не показывает ни их, ни генерацию серии.
 
         Время вылета местное: перевод в UTC делается при генерации серии,
@@ -340,7 +361,7 @@ class Command(BaseCommand):
             return 0
 
         created = 0
-        for index, (name, dep, arr, hour, weekdays) in enumerate(DEMO_TEMPLATES):
+        for index, (name, dep, arr, hour, weekdays) in enumerate(GENERATED_TEMPLATES):
             rnd = self._rnd(seed, f"template:{name}")
             template, is_new = FlightTemplate.objects.get_or_create(
                 name=name,
@@ -352,7 +373,7 @@ class Command(BaseCommand):
                     "arr_icao": arr,
                     "dep_time_local": time(hour, 0),
                     "weekdays": list(weekdays),
-                    "is_demo": True,
+                    "is_generated": True,
                     "data_source": DataSource.SYNTHETIC,
                 },
             )
@@ -364,7 +385,7 @@ class Command(BaseCommand):
         return created
 
     def _communications(self, staff: list[User], seed: int) -> int:
-        """Переписка и уведомления на стенде `[ТЗ 3.5.1, 3.5.2, 3.2.2]`.
+        """Переписка и уведомления набора `[ТЗ 3.5.1, 3.5.2, 3.2.2]`.
 
         Заявки, ожидающие ответа поставщика, оставляются нарочно: без них
         входящие пусты, а именно на них показывается разбор писем.
@@ -379,7 +400,7 @@ class Command(BaseCommand):
 
         # Часть подтверждённых заявок возвращается в «Заказана»: поставщик
         # ещё не ответил. Статус меняется прямой записью, как и остальной
-        # набор генератора, — это данные стенда, а не действие пользователя.
+        # набор генератора, — это данные генератора, а не действие пользователя.
         pending = list(
             ServiceOrder.objects.filter(
                 status=ServiceOrderStatus.CONFIRMED, vendor__isnull=False
@@ -409,7 +430,7 @@ class Command(BaseCommand):
                 ),
                 template_code="order_placed",
                 related=("service_order", order.pk),
-                is_demo=True,
+                is_generated=True,
             )
             # Часть писем уже ушла, часть ещё в очереди, одно — с ошибкой:
             # экран исходящих должен показывать все состояния.
@@ -430,7 +451,7 @@ class Command(BaseCommand):
         dispatchers = [user for user in staff if user.role in (Role.DISPATCHER, Role.MANAGER)]
         for order in ServiceOrder.objects.filter(
             status=ServiceOrderStatus.COMPLETED
-        ).select_related("service", "flight")[:DEMO_NOTIFICATIONS]:
+        ).select_related("service", "flight")[:GENERATED_NOTIFICATIONS]:
             notification_service.notify_many(
                 users=dispatchers,
                 kind="service_confirmed",
@@ -446,13 +467,13 @@ class Command(BaseCommand):
     def _bind_two_factor(self, staff: list[User]) -> None:
         """Привязывает приложение-аутентификатор там, где его требует политика.
 
-        Иначе администратор и финансист на стенде упираются в экран привязки
-        и дальше не проходят: привязать приложение можно только изнутри
-        системы, а приложения у того, кто смотрит стенд, может и не быть.
+        Иначе администратор и финансист упираются в экран привязки и дальше
+        не проходят: привязать приложение можно только изнутри системы,
+        а приложения у того, кто смотрит систему, может и не быть.
 
-        Секрет печатается оператору и складывается в `artifacts/demo-2fa.json`
+        Секрет печатается оператору и складывается в `artifacts/sample-2fa.json`
         — файл не попадает в репозиторий. Это учётные данные вымышленных
-        пользователей демонстрационного стенда, а не боевые.
+        пользователей генератора, а не рабочие.
         """
         bound: dict[str, str] = {}
         for user in staff:
@@ -462,10 +483,10 @@ class Command(BaseCommand):
             bound[user.username] = setup.otpauth_url
             self.stdout.write(f"второй фактор для {user.username}: {setup.otpauth_url}")
 
-        if not bound or not settings.DEMO_TWO_FACTOR_FILE:
+        if not bound or not settings.SAMPLE_TWO_FACTOR_FILE:
             return
 
-        path = Path(settings.DEMO_TWO_FACTOR_FILE)
+        path = Path(settings.SAMPLE_TWO_FACTOR_FILE)
         try:
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(bound, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -484,11 +505,11 @@ class Command(BaseCommand):
         users: list[User] = []
         for full_name, role, timezone in STAFF:
             last, first, patronymic = full_name.split(" ")
-            username = f"{_translit(last).lower()}.demo"
+            username = _translit(last).lower()
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
-                    "email": f"{_translit(last).lower()}@demo.local",
+                    "email": f"{username}@{GENERATED_EMAIL_DOMAIN}",
                     "first_name": f"{first} {patronymic}",
                     "last_name": last,
                     "role": role,
@@ -498,9 +519,9 @@ class Command(BaseCommand):
                 },
             )
             if created:
-                # Пароль общий и заведомо известный: это демонстрационный
-                # стенд, а не боевая система. В бою seed_demo недоступна.
-                user.set_password("demo-stand-2026-parol")
+                # Пароль общий и заведомо известный (GENERATED_PASSWORD).
+                # В рабочей базе seed_sample недоступна.
+                user.set_password(GENERATED_PASSWORD)
                 user.save(update_fields=["password"])
                 _record(AuditEntityType.USER, user.pk, "created", {"role": role})
             users.append(user)
@@ -517,7 +538,7 @@ class Command(BaseCommand):
                     "legal_name": f"ООО «{name}»",
                     "country": "RU",
                     "settlement_currency": rnd.choice(["RUB", "RUB", "RUB", "EUR", "USD"]),
-                    "is_demo": True,
+                    "is_generated": True,
                     "data_source": DataSource.SYNTHETIC,
                 },
             )
@@ -546,7 +567,7 @@ class Command(BaseCommand):
                         "country": "RU",
                         "settlement_currency": "RUB",
                         "specializations": specializations,
-                        "is_demo": True,
+                        "is_generated": True,
                         "data_source": DataSource.SYNTHETIC,
                     },
                 )
@@ -594,7 +615,7 @@ class Command(BaseCommand):
                     "operator": rnd.choice(clients),
                     "status": status,
                     "home_base_icao": rnd.choice(bases),
-                    "is_demo": True,
+                    "is_generated": True,
                     "data_source": DataSource.SYNTHETIC,
                     "notes": "Борт в состоянии AOG: отказ системы кондиционирования"
                     if status == AircraftStatus.AOG
@@ -631,7 +652,7 @@ class Command(BaseCommand):
                 number=f"{kind}-{rnd.randint(10000, 99999)}",
                 valid_from=now - timedelta(days=365),
                 valid_to=now + timedelta(days=days_left),
-                is_demo=True,
+                is_generated=True,
                 data_source=DataSource.SYNTHETIC,
             )
 
@@ -644,12 +665,12 @@ class Command(BaseCommand):
     ) -> list[Flight]:
         """Расписание вокруг сегодняшнего дня.
 
-        Набор подбирается так, чтобы на стенде не приходилось угадывать,
+        Набор подбирается так, чтобы в системе не приходилось угадывать,
         какое сочетание сработает: есть рейсы в каждом состоянии автомата,
         международные и внутренние, с заявками на услуги и без.
         """
         airports = list(
-            Airport.objects.filter(icao__in=DEMO_ROUTES_ICAO).values_list("icao", flat=True)
+            Airport.objects.filter(icao__in=GENERATED_ROUTES_ICAO).values_list("icao", flat=True)
         )
         # По одной услуге на категорию: набор должен покрывать и
         # разрешительные документы, иначе международные рейсы не взлетят.
@@ -676,8 +697,8 @@ class Command(BaseCommand):
                 std = today + timedelta(
                     days=offset, hours=6 + index * 4, minutes=rnd.choice([0, 10, 25, 40])
                 )
-                # Тот же борт в те же часы — это конфликт расписания, а не
-                # демонстрация: пусть он будет заведомо редким и намеренным.
+                # Тот же борт в те же часы — это конфликт расписания:
+                # пусть он будет заведомо редким и намеренным.
                 if Flight.objects.filter(
                     aircraft=machine,
                     std_utc__gte=std - timedelta(hours=6),
@@ -695,7 +716,7 @@ class Command(BaseCommand):
                         ["charter", "charter", "charter", "cargo", "ferry"]
                     ),
                     pax_count=rnd.randint(1, max(1, machine.type.seats)),
-                    is_demo=True,
+                    is_generated=True,
                     source=AuditSource.SEED,
                 )
                 self._advance(flight, services, vendors, rnd, offset)
@@ -712,7 +733,7 @@ class Command(BaseCommand):
     ) -> None:
         """Доводит рейс до состояния, соответствующего его дате.
 
-        Прошедший рейс, висящий в «Запланирован», выглядит поломкой: на стенде
+        Прошедший рейс, висящий в «Запланирован», выглядит поломкой: в системе
         каждая такая мелочь читается как недоделка, а не как условность.
         """
         if not services:
@@ -732,12 +753,12 @@ class Command(BaseCommand):
                     airport_icao=icao,
                     vendor=rnd.choice(vendors) if vendors else None,
                     quantity=rnd.randint(1, 4),
-                    is_demo=True,
+                    is_generated=True,
                     data_source=DataSource.SYNTHETIC,
                 )
 
         # Международный рейс без разрешительного документа не выпускается
-        # (DOMAIN § 5.1). Без этой заявки половина расписания на стенде
+        # (DOMAIN § 5.1). Без этой заявки половина расписания набора
         # застревала бы в «В работе», и понять почему было бы нельзя.
         permit = next(
             (item for item in services if item.category == ServiceCategory.PERMITS), None
@@ -750,7 +771,7 @@ class Command(BaseCommand):
                 airport_icao=flight.dep_icao,
                 vendor=rnd.choice(vendors) if vendors else None,
                 quantity=1,
-                is_demo=True,
+                is_generated=True,
                 data_source=DataSource.SYNTHETIC,
             )
 
@@ -774,7 +795,7 @@ class Command(BaseCommand):
                     "confirmed_utc": None if pending else moment,
                     "status": SlotStatus.REQUESTED if pending else SlotStatus.CONFIRMED,
                     "message_number": reference,
-                    "is_demo": True,
+                    "is_generated": True,
                     "data_source": DataSource.SYNTHETIC,
                 },
             )
@@ -816,7 +837,7 @@ class Command(BaseCommand):
     ) -> list[FlightRequest]:
         """Заявки клиентов в очереди на подтверждение `[ТЗ 3.5.3]`."""
         airports = list(
-            Airport.objects.filter(icao__in=DEMO_ROUTES_ICAO).values_list("icao", flat=True)
+            Airport.objects.filter(icao__in=GENERATED_ROUTES_ICAO).values_list("icao", flat=True)
         )
         if len(airports) < MIN_ROUTE_AIRPORTS:
             return []
@@ -840,7 +861,7 @@ class Command(BaseCommand):
                     "organization": organization,
                     "pax_count": rnd.randint(1, 9),
                     "comment": rnd.choice(comments),
-                    "is_demo": True,
+                    "is_generated": True,
                     "data_source": DataSource.SYNTHETIC,
                 },
             )
@@ -853,23 +874,25 @@ class Command(BaseCommand):
     ) -> None:
         """По одному пользователю портала: без них не показать изоляцию данных."""
         pairs = (
-            ("klient.demo", Role.CLIENT, {"client": clients[0]}),
-            ("postavshchik.demo", Role.VENDOR, {"vendor": vendors[0]}),
+            ("Лебедева Светлана Игоревна", Role.CLIENT, {"client": clients[0]}),
+            ("Захаров Николай Андреевич", Role.VENDOR, {"vendor": vendors[0]}),
         )
-        for username, role, link in pairs:
+        for full_name, role, link in pairs:
+            last, first, patronymic = full_name.split(" ")
+            username = _translit(last).lower()
             user, created = User.objects.get_or_create(
                 username=username,
                 defaults={
-                    "email": f"{username}@demo.local",
-                    "first_name": "Демонстрационный",
-                    "last_name": "Пользователь",
+                    "email": f"{username}@{GENERATED_EMAIL_DOMAIN}",
+                    "first_name": f"{first} {patronymic}",
+                    "last_name": last,
                     "role": role,
                     "organization": organization,
                     **link,
                 },
             )
             if created:
-                user.set_password("demo-stand-2026-parol")
+                user.set_password(GENERATED_PASSWORD)
                 user.save(update_fields=["password"])
                 _record(AuditEntityType.USER, user.pk, "created", {"role": role})
 
@@ -883,7 +906,7 @@ def _record(
         action=action,
         after=after,
         source=AuditSource.SEED,
-        is_demo=True,
+        is_generated=True,
     )
 
 

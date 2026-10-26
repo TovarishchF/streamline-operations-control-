@@ -1,6 +1,7 @@
-"""Управление демонстрационным набором `[ТЗ этап 2]` (ADR-008, ADR-016).
+"""Управление набором данных генератора `[ТЗ этап 2]` (ADR-008, ADR-016).
 
-`/demo/seed`, `/demo/reset`, `/demo/purge` — пути и формы по `openapi.yaml`.
+`/sample-data/generate`, `/sample-data/reset`, `/sample-data/purge` — пути
+и формы по `openapi.yaml`.
 
 Действие выполняется синхронно. Генерация набора занимает секунды,
 а очередь задач здесь только добавила бы вопрос «а она вообще началась?»
@@ -22,36 +23,36 @@ from accounts.permissions import Permission
 from core.api.idempotency import IdempotencyMixin
 from core.api.permissions import HasRolePermission
 from core.api.serializers import ErrorResponseSerializer
-from demo import services as demo
+from sampledata import services as sample
 
 
-class DemoSeedRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
-    """`DemoSeedRequest` из контракта."""
+class SampleDataRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`SampleDataRequest` из контракта."""
 
-    seed = serializers.IntegerField(required=False, default=demo.DEFAULT_SEED)
+    seed = serializers.IntegerField(required=False, default=sample.DEFAULT_SEED)
 
 
-class DemoResultSerializer(serializers.Serializer):  # type: ignore[type-arg]
-    """`DemoResult` из контракта."""
+class SampleDataResultSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`SampleDataResult` из контракта."""
 
-    action = serializers.ChoiceField(choices=[demo.SEED, demo.RESET, demo.PURGE])
+    action = serializers.ChoiceField(choices=[sample.GENERATE, sample.RESET, sample.PURGE])
     counts = serializers.DictField(child=serializers.IntegerField())
     message = serializers.CharField(allow_blank=True)
 
 
-class DemoActionView(IdempotencyMixin, APIView):
+class SampleDataActionView(IdempotencyMixin, APIView):
     """Общее для трёх действий: права, идемпотентность, форма ответа."""
 
     idempotency: ClassVar[str] = "required"
     permission_classes: Any = (HasRolePermission,)
     # Управление набором — право администратора: кнопка «Очистить» убирает
-    # со стенда всё, что показывают заказчику.
+    # из системы всё, что генератор в неё положил.
     required_permissions: ClassVar[dict[str, Any]] = {"default": Permission.ADMIN}
 
     action_name: ClassVar[str] = ""
 
     def _seed(self, request: Request) -> int:
-        payload = DemoSeedRequestSerializer(data=request.data or {})
+        payload = SampleDataRequestSerializer(data=request.data or {})
         payload.is_valid(raise_exception=True)
         return int(payload.validated_data["seed"])
 
@@ -62,53 +63,53 @@ class DemoActionView(IdempotencyMixin, APIView):
         )
 
 
-class DemoSeedView(DemoActionView):
-    """`POST /api/v1/demo/seed`."""
+class SampleDataGenerateView(SampleDataActionView):
+    """`POST /api/v1/sample-data/generate`."""
 
-    action_name = demo.SEED
+    action_name = sample.GENERATE
 
     @extend_schema(
-        summary="Генерация демонстрационного набора",
-        request=DemoSeedRequestSerializer,
-        responses={200: DemoResultSerializer, 403: ErrorResponseSerializer},
+        summary="Генерация набора данных",
+        request=SampleDataRequestSerializer,
+        responses={200: SampleDataResultSerializer, 403: ErrorResponseSerializer},
         tags=["admin"],
     )
     def post(self, request: Request) -> Response:
         seed = self._seed(request)
-        return self.idempotent(request, lambda: self._result(demo.generate(seed)))
+        return self.idempotent(request, lambda: self._result(sample.generate(seed)))
 
 
-class DemoResetView(DemoActionView):
-    """`POST /api/v1/demo/reset`."""
+class SampleDataResetView(SampleDataActionView):
+    """`POST /api/v1/sample-data/reset`."""
 
-    action_name = demo.RESET
+    action_name = sample.RESET
 
     @extend_schema(
-        summary="Пересоздание демонстрационного набора",
-        request=DemoSeedRequestSerializer,
-        responses={200: DemoResultSerializer, 403: ErrorResponseSerializer},
+        summary="Пересоздание набора данных",
+        request=SampleDataRequestSerializer,
+        responses={200: SampleDataResultSerializer, 403: ErrorResponseSerializer},
         tags=["admin"],
     )
     def post(self, request: Request) -> Response:
         seed = self._seed(request)
-        return self.idempotent(request, lambda: self._result(demo.reset(seed)))
+        return self.idempotent(request, lambda: self._result(sample.reset(seed)))
 
 
-class DemoPurgeView(DemoActionView):
-    """`POST /api/v1/demo/purge`."""
+class SampleDataPurgeView(SampleDataActionView):
+    """`POST /api/v1/sample-data/purge`."""
 
-    action_name = demo.PURGE
+    action_name = sample.PURGE
 
     @extend_schema(
-        summary="Очистка демонстрационных данных",
+        summary="Очистка данных генератора",
         request=None,
-        responses={200: DemoResultSerializer, 403: ErrorResponseSerializer},
+        responses={200: SampleDataResultSerializer, 403: ErrorResponseSerializer},
         tags=["admin"],
     )
     def post(self, request: Request) -> Response:
         def produce() -> Response:
             return self._result(
-                demo.purge(),
+                sample.purge(),
                 # Про журнал сказано в ответе, а не только в документации:
                 # администратор нажимает «Очистить» и вправе знать, что
                 # именно не удалилось (`BACKEND.md § 3.9`).

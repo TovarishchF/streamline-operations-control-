@@ -29,15 +29,15 @@ def test_real_now_is_utc() -> None:
     assert clock.real_now().tzinfo == UTC
 
 
-@override_settings(DEMO_DATA=False)
-def test_no_shift_without_demo_mode() -> None:
-    """Вне демонстрационного режима смещение недоступно и БД не опрашивается."""
+@override_settings(SAMPLE_DATA=False)
+def test_no_shift_without_sample_data_mode() -> None:
+    """Вне режима генератора смещение недоступно и БД не опрашивается."""
     assert clock.is_shifted() is False
     delta = abs((clock.now() - clock.real_now()).total_seconds())
     assert delta < 1
 
 
-@override_settings(DEMO_DATA=False)
+@override_settings(SAMPLE_DATA=False)
 def test_today_is_midnight_utc() -> None:
     value = clock.today()
     assert (value.hour, value.minute, value.second, value.microsecond) == (0, 0, 0, 0)
@@ -78,7 +78,7 @@ def _calls_forbidden_clock(tree: ast.AST) -> list[str]:
 def test_domain_code_does_not_call_system_clock(source: Path) -> None:
     """В доменном коде datetime.now() запрещён — только core.clock.now().
 
-    Правило существует, чтобы демонстрационное смещение времени (ADR-014)
+    Правило существует, чтобы смещение модельного времени (ADR-014)
     и тесты применялись в одной точке, а не в сорока.
     """
     tree = ast.parse(source.read_text(encoding="utf-8"))

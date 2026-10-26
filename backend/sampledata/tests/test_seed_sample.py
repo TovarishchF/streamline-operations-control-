@@ -1,21 +1,28 @@
-"""Демонстрационный набор: правила честности `CLAUDE.md § 4`.
+"""Набор генератора данных: правила честности `CLAUDE.md § 4`.
 
-Проверяется не «команда отработала», а то, что стенд остаётся опознаваемым
-как стенд: записи помечены, происхождение проставлено, действия генератора
-не выдаются за действия людей.
+Проверяется не «команда отработала», а то, что данные генератора остаются
+отличимыми от введённых людьми: записи помечены, происхождение проставлено,
+действия генератора не выдаются за действия людей, очистка не трогает чужое.
 """
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 from django.core.management import call_command
 
+from accounts.models import Role, User
 from audit.models import AuditEntry, AuditSource
 from catalog.models import AircraftType, Airport
-from core.exceptions import DemoOnlyOperation
+from core.exceptions import SampleDataDisabled
 from core.models import DataSource
 from counterparties.models import Client, Vendor
 from fleet.models import Aircraft, AircraftStatus
+from sampledata.management.commands.seed_sample import GENERATED_EMAIL_DOMAIN
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 @pytest.fixture
@@ -48,23 +55,23 @@ def reference(db: None) -> None:
 
 
 @pytest.mark.django_db
-def test_command_refuses_outside_demo_mode(reference: None, settings: object) -> None:
-    """ADR-008: в боевом режиме придуманные контрагенты недопустимы."""
-    with pytest.raises(DemoOnlyOperation):
-        call_command("seed_demo")
+def test_command_refuses_when_generator_is_off(reference: None, settings: object) -> None:
+    """ADR-008: в рабочей базе придуманные контрагенты недопустимы."""
+    with pytest.raises(SampleDataDisabled):
+        call_command("seed_sample")
 
 
 @pytest.mark.django_db
 class TestGeneratedSet:
     @pytest.fixture(autouse=True)
-    def _demo_mode(self, settings: object, reference: None) -> None:
-        settings.DEMO_DATA = True  # type: ignore[attr-defined]
-        call_command("seed_demo", seed=20260913)
+    def _sample_data(self, settings: object, reference: None) -> None:
+        settings.SAMPLE_DATA = True  # type: ignore[attr-defined]
+        call_command("seed_sample", seed=20260913)
 
-    def test_every_record_is_marked_as_demonstration(self) -> None:
-        assert not Client.objects.filter(is_demo=False).exists()
-        assert not Vendor.objects.filter(is_demo=False).exists()
-        assert not Aircraft.objects.filter(is_demo=False).exists()
+    def test_every_record_is_marked_as_generated(self) -> None:
+        assert not Client.objects.filter(is_generated=False).exists()
+        assert not Vendor.objects.filter(is_generated=False).exists()
+        assert not Aircraft.objects.filter(is_generated=False).exists()
 
     def test_origin_is_synthetic_not_live(self) -> None:
         """Данные генератора — `synthetic`, и ничем другим притворяться не должны."""
@@ -75,8 +82,14 @@ class TestGeneratedSet:
         entries = AuditEntry.objects.filter(source=AuditSource.SEED)
 
         assert entries.exists()
-        assert set(entries.values_list("actor_name", flat=True)) == {"System (демо-генератор)"}
-        assert not entries.filter(is_demo=False).exists()
+        assert set(entries.values_list("actor_name", flat=True)) == {"Система (генератор данных)"}
+        assert not entries.filter(is_generated=False).exists()
+
+    def test_users_live_in_the_generator_domain(self) -> None:
+        """По зоне адреса очистка находит пользователей генератора."""
+        users = User.objects.filter(email__endswith=f"@{GENERATED_EMAIL_DOMAIN}")
+        assert users.filter(username="karpov").exists()
+        assert not users.filter(username__contains=".").exists()
 
     def test_reference_data_is_not_invented(self) -> None:
         """Коды аэропортов и типов берутся из справочника, а не выдумываются."""
@@ -92,21 +105,30 @@ class TestGeneratedSet:
     def test_repeated_run_does_not_duplicate(self) -> None:
         before = Aircraft.objects.count()
 
-        call_command("seed_demo", seed=20260913)
+        call_command("seed_sample", seed=20260913)
 
         assert Aircraft.objects.count() == before
 
-    def test_purge_removes_demo_records(self) -> None:
-        call_command("seed_demo", purge=True)
+    def test_purge_removes_generated_records(self) -> None:
+        call_command("seed_sample", purge=True)
 
-        assert not Client.objects.filter(is_demo=True).exists()
-        assert not Aircraft.objects.filter(is_demo=True).exists()
+        assert not Client.objects.filter(is_generated=True).exists()
+        assert not Aircraft.objects.filter(is_generated=True).exists()
+        assert not User.objects.filter(email__endswith=f"@{GENERATED_EMAIL_DOMAIN}").exists()
+
+    def test_purge_keeps_people(self, make_user: Callable[..., User]) -> None:
+        """Пользователь, заведённый человеком, переживает очистку (ADR-016)."""
+        person = make_user(Role.DISPATCHER, suffix="person")
+
+        call_command("seed_sample", purge=True)
+
+        assert User.objects.filter(pk=person.pk).exists()
 
     def test_purge_keeps_the_audit_trail(self) -> None:
         """Журнал только пополняется — удалять из него нельзя и генератору."""
         before = AuditEntry.objects.count()
 
-        call_command("seed_demo", purge=True)
+        call_command("seed_sample", purge=True)
 
         assert AuditEntry.objects.count() >= before
 
@@ -114,13 +136,13 @@ class TestGeneratedSet:
 @pytest.mark.django_db
 def test_generator_is_deterministic(reference: None, settings: object) -> None:
     """Одно зерно — один набор: снимки экранов должны воспроизводиться."""
-    settings.DEMO_DATA = True  # type: ignore[attr-defined]
+    settings.SAMPLE_DATA = True  # type: ignore[attr-defined]
 
-    call_command("seed_demo", seed=777)
+    call_command("seed_sample", seed=777)
     first = sorted(Aircraft.objects.values_list("registration", flat=True))
 
-    call_command("seed_demo", purge=True)
-    call_command("seed_demo", seed=777)
+    call_command("seed_sample", purge=True)
+    call_command("seed_sample", seed=777)
     second = sorted(Aircraft.objects.values_list("registration", flat=True))
 
     assert first == second

@@ -67,7 +67,7 @@ def get_provider(code: str) -> Any:
 
 
 def record_exchange(
-    code: str, call: Callable[[], tuple[Any, Exchange]], *, is_demo: bool = False
+    code: str, call: Callable[[], tuple[Any, Exchange]], *, is_generated: bool = False
 ) -> Any:
     """Выполняет обмен и записывает его в журнал.
 
@@ -88,7 +88,7 @@ def record_exchange(
             status=ExchangeStatus.ERROR,
             duration_ms=int((time.perf_counter() - started) * 1000),
             error=f"{type(error).__name__}: {error}",
-            is_demo=is_demo,
+            is_generated=is_generated,
             data_source=DataSource.LIVE if mode == IntegrationMode.LIVE else DataSource.SYNTHETIC,
         )
         raise
@@ -106,7 +106,7 @@ def record_exchange(
         response_body=exchange.response_body[:20_000],
         related_entity_type=exchange.related[0] if exchange.related else "",
         related_entity_id=exchange.related[1] if exchange.related else "",
-        is_demo=is_demo,
+        is_generated=is_generated,
         data_source=DataSource.LIVE if mode == IntegrationMode.LIVE else DataSource.SYNTHETIC,
     )
     return result

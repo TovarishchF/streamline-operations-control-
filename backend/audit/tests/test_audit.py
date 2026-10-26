@@ -95,13 +95,13 @@ class TestRecord:
             entity_id="flt_1",
             action="created",
             source=AuditSource.SEED,
-            is_demo=True,
+            is_generated=True,
         )
 
         assert entry is not None
         assert entry.source == AuditSource.SEED
-        assert entry.actor_name == "System (демо-генератор)"
-        assert entry.is_demo is True
+        assert entry.actor_name == "Система (генератор данных)"
+        assert entry.is_generated is True
 
 
 @pytest.mark.django_db

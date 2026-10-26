@@ -182,21 +182,19 @@ def test_unsupported_format_is_refused(
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
-def test_demo_stand_marks_the_export(
+def test_export_carries_no_marking_in_sample_data_mode(
     invoice: Invoice, settings: Any
 ) -> None:
-    """`CLAUDE.md § 4`: выгрузка со стенда опознаётся как выгрузка со стенда."""
-    settings.DEMO_DATA = True
+    """Выгрузка одинакова в любом режиме: первая строка — заголовок документа."""
+    settings.SAMPLE_DATA = True
     context = export._context(invoice, kind="invoice")
-    assert context["is_demo"] is True
 
     from openpyxl import load_workbook
 
     workbook = load_workbook(BytesIO(export._render_xlsx(context)))
     sheet = workbook.active
     assert sheet is not None
-    first = sheet.cell(row=1, column=1).value
-    assert first is not None and "DEMO" in str(first)
+    assert sheet.cell(row=1, column=1).value == context["title"]
 
 
 def test_client_can_export_own_invoice_but_not_someone_elses(

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 NOISE_FIELDS = frozenset({"updated_at", "version"})
 
 SYSTEM_ACTOR_ID = "sys_system"
-SEED_ACTOR_NAME = "System (демо-генератор)"
+SEED_ACTOR_NAME = "Система (генератор данных)"
 
 
 def snapshot(instance: models.Model, fields: Iterable[str] | None = None) -> dict[str, Any]:
@@ -94,7 +94,7 @@ def record(
     after: dict[str, Any] | None = None,
     comment: str = "",
     source: AuditSource = AuditSource.USER,
-    is_demo: bool = False,
+    is_generated: bool = False,
 ) -> AuditEntry | None:
     """Добавляет запись в журнал. Возвращает `None`, если менять было нечего.
 
@@ -129,5 +129,5 @@ def record(
         before=before_changed,
         after=after_changed,
         comment=comment,
-        is_demo=is_demo,
+        is_generated=is_generated,
     )

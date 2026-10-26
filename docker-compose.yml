@@ -1,6 +1,6 @@
-# Один файл с профилями dev / demo / prod (INFRA.md § 1).
+# Один файл с профилями dev / sample / prod (INFRA.md § 1).
 # Разница между окружениями — переменные окружения и набор вспомогательных
-# сервисов, а не разные конфигурации. Отдельного «демо-кода» не существует.
+# сервисов, а не разные конфигурации.
 
 name: soc
 
@@ -23,7 +23,7 @@ services:
 
   db:
     image: postgres:16-alpine
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-soc}
       POSTGRES_USER: ${POSTGRES_USER:-soc}
@@ -42,7 +42,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     command: redis-server --appendonly yes
     volumes:
       - redis-data:/data
@@ -54,7 +54,7 @@ services:
 
   minio:
     image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${S3_ACCESS_KEY:-minioadmin}
@@ -70,7 +70,7 @@ services:
 
   api:
     <<: *backend-base
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py runserver 0.0.0.0:8000"
@@ -78,7 +78,7 @@ services:
 
   worker:
     <<: *backend-base
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     command: celery -A config worker -l info
     # Проверка из образа обращается к HTTP, которого у воркера нет.
     # Живость воркера — это ответ на ping через брокер.
@@ -91,7 +91,7 @@ services:
 
   beat:
     <<: *backend-base
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     # У планировщика нет ни HTTP, ни очереди, к которой можно обратиться:
     # состояние видно по журналу. Ложная проверка хуже отсутствующей.
@@ -104,7 +104,7 @@ services:
       context: .
       dockerfile: web/Dockerfile
       target: dev
-    profiles: [dev, demo, prod]
+    profiles: [dev, sample, prod]
     environment:
       VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
       VITE_API_PROXY_TARGET: http://api:8000
@@ -114,13 +114,13 @@ services:
       - ./shared:/app/shared:ro
       - /app/web/node_modules
 
-  # ─── Только dev и демонстрационный стенд ───
+  # ─── Только dev и установка для показа (sample) ───
 
   # Почта реально отправляется и видна в веб-интерфейсе, но наружу не уходит
   # (INTEGRATIONS § 3.1). Это честнее, чем «сообщение помечено отправленным».
   mailpit:
     image: axllent/mailpit:v1.21
-    profiles: [dev, demo]
+    profiles: [dev, sample]
     ports: ["127.0.0.1:1025:1025", "127.0.0.1:8025:8025"]
 
   # Тестовый каталог: механизм LDAP проверяется по-настоящему ещё до получения
@@ -128,11 +128,11 @@ services:
   #
   # bitnami/openldap снят с публикации в 2025 году, образы перенесены в архивный
   # реестр bitnamilegacy с тем же набором переменных. Каталог нужен только в dev
-  # и на стенде, в бою используется домен заказчика, поэтому замороженный образ
+  # и на установке для показа, в бою используется домен заказчика, поэтому замороженный образ
   # здесь допустим.
   openldap:
     image: bitnamilegacy/openldap:2.6.10
-    profiles: [dev, demo]
+    profiles: [dev, sample]
     environment:
       LDAP_ROOT: dc=soc,dc=local
       LDAP_ADMIN_USERNAME: admin
@@ -142,11 +142,11 @@ services:
       LDAP_GROUP: soc-dispatchers
     ports: ["127.0.0.1:1389:1389"]
 
-  # ─── Наблюдаемость: prod и стенд ───
+  # ─── Наблюдаемость: prod и установка для показа ───
 
   prometheus:
     image: prom/prometheus:v3.1.0
-    profiles: [demo, prod]
+    profiles: [sample, prod]
     volumes:
       - ./deploy/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
@@ -154,7 +154,7 @@ services:
 
   grafana:
     image: grafana/grafana:11.5.1
-    profiles: [demo, prod]
+    profiles: [sample, prod]
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
     volumes:

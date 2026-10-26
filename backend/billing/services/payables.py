@@ -86,7 +86,7 @@ def create_for_order(*, order: ServiceOrder, actor: User | None = None) -> Payab
         currency=order.purchase_currency or "RUB",
         due_date=completed + timedelta(days=defer_days_for(order)),
         status=PayableStatus.PENDING,
-        is_demo=order.is_demo,
+        is_generated=order.is_generated,
     )
     payable.service_orders.add(order)
 
@@ -97,7 +97,7 @@ def create_for_order(*, order: ServiceOrder, actor: User | None = None) -> Payab
         actor=actor,
         after=audit.snapshot(payable),
         comment=_("По выполненной заявке %(order)s") % {"order": order.pk},
-        is_demo=payable.is_demo,
+        is_generated=payable.is_generated,
     )
     return payable
 
@@ -129,7 +129,7 @@ def approve(*, payable: Payable, actor: User) -> Payable:
         actor=actor,
         before=before,
         after=audit.snapshot(payable),
-        is_demo=payable.is_demo,
+        is_generated=payable.is_generated,
     )
     return payable
 
@@ -153,6 +153,6 @@ def mark_disputed(*, payable: Payable, reason: str, actor: User | None = None) -
         before=before,
         after=audit.snapshot(payable),
         comment=reason,
-        is_demo=payable.is_demo,
+        is_generated=payable.is_generated,
     )
     return payable

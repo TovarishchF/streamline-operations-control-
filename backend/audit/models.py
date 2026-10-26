@@ -22,13 +22,13 @@ from core.models import make_id
 class AuditSource(models.TextChoices):
     """Происхождение записи.
 
-    `SEED` виден в интерфейсе отдельным тегом с автором «System (демо-генератор)»
-    и не выдаётся за действие человека (`CLAUDE.md § 4`).
+    `SEED` подписан автором «Система (генератор данных)» и не выдаётся
+    за действие человека (`CLAUDE.md § 4`).
     """
 
     USER = "user", _("Действие пользователя")
     SYSTEM = "system", _("Автоматический переход")
-    SEED = "seed", _("Демонстрационный генератор")
+    SEED = "seed", _("Генератор данных")
 
 
 class AuditEntityType(models.TextChoices):
@@ -81,7 +81,7 @@ class AuditEntry(models.Model):
     after = models.JSONField(null=True, blank=True)
     comment = models.TextField(blank=True)
 
-    is_demo = models.BooleanField(default=False, db_index=True)
+    is_generated = models.BooleanField(default=False, db_index=True)
 
     class Meta:
         verbose_name = _("Запись аудита")

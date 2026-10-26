@@ -131,3 +131,22 @@ class TestGenerate:
         assert flight.distance_nm > 0
         assert flight.sta_utc > flight.std_utc
         assert flight.template_id == template.pk
+
+
+@pytest.mark.django_db
+def test_series_of_a_generated_client_belongs_to_the_generated_set(
+    template: FlightTemplate, client_alpha: Client, dispatcher: User
+) -> None:
+    """ADR-016: рейс клиента из набора генератора — тоже запись набора.
+
+    Серию запускает человек, но клиент её рейсов — из набора генератора:
+    без признака рейс держал бы клиента связью PROTECT, и очистка набора
+    падала бы на первом же таком рейсе.
+    """
+    type(client_alpha).objects.filter(pk=client_alpha.pk).update(is_generated=True)
+    template.refresh_from_db()
+
+    created = generation.generate(template, date(2026, 3, 2), date(2026, 3, 3), actor=dispatcher)
+
+    assert created
+    assert all(flight.is_generated for flight in created)

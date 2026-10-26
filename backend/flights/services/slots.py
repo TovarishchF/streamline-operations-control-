@@ -211,7 +211,7 @@ def prepare_scr(*, slot: Slot, actor: User) -> tuple[Slot, str]:
             action="slot_message_prepared",
             actor=actor,
             after={"slotId": slot.pk, "messageRef": slot.message_number},
-            is_demo=slot.is_demo,
+            is_generated=slot.is_generated,
         )
     return slot, build_scr(slot)
 
@@ -308,7 +308,7 @@ def apply_answer(
         before=before,
         after=audit.snapshot(slot),
         comment=parsed.note,
-        is_demo=slot.is_demo,
+        is_generated=slot.is_generated,
     )
     return slot
 
@@ -344,7 +344,7 @@ def request_slot(
         type=slot_type,
         requested_utc=requested_utc,
         status=SlotStatus.REQUESTED,
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
     audit.record(
         entity_type=AuditEntityType.FLIGHT,
@@ -352,6 +352,6 @@ def request_slot(
         action="slot_requested",
         actor=actor,
         after=audit.snapshot(slot),
-        is_demo=slot.is_demo,
+        is_generated=slot.is_generated,
     )
     return slot

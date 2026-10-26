@@ -5,7 +5,7 @@
 
 * ULID-идентификатор с префиксом сущности (`DOMAIN.md § 1`);
 * метки создания и изменения в UTC;
-* `is_demo` и `data_source` (ADR-010) — техническая очистка и честность происхождения;
+* `is_generated` и `data_source` (ADR-010) — техническая очистка и честность происхождения;
 * `version` для оптимистичных блокировок.
 """
 
@@ -51,10 +51,10 @@ class BaseModel(models.Model):
     created_at = models.DateTimeField(editable=False, db_index=True)
     updated_at = models.DateTimeField(editable=False)
 
-    is_demo = models.BooleanField(
+    is_generated = models.BooleanField(
         default=False,
         db_index=True,
-        help_text=_("Демонстрационная запись, удаляется командой seed_demo --purge"),
+        help_text=_("Запись генератора данных, удаляется командой seed_sample --purge"),
     )
     data_source = models.CharField(
         max_length=16,
@@ -143,7 +143,7 @@ class Settings(SingletonModel):
     # Персональные данные (G-37): срок до получения ответа заказчика
     pd_retention_months = models.PositiveSmallIntegerField(default=60)
 
-    # Модельное время (ADR-014). Изменяется только при DEMO_DATA=true.
+    # Модельное время (ADR-014). Изменяется только при SAMPLE_DATA=true.
     clock_offset_seconds = models.IntegerField(default=0)
     clock_scale = models.PositiveSmallIntegerField(default=1)
 

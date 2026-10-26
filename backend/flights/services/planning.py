@@ -100,10 +100,13 @@ def create_flight(
     remarks: str = "",
     actor: User | None = None,
     template_id: str | None = None,
-    is_demo: bool = False,
+    is_generated: bool = False,
     source: AuditSource = AuditSource.USER,
 ) -> Flight:
     """Создаёт рейс с рассчитанным маршрутом и снимком курсов."""
+    # Рейс клиента из набора генератора — тоже запись набора (ADR-016):
+    # иначе он держал бы клиента связью PROTECT, и очистка набора падала.
+    is_generated = is_generated or client.is_generated
     route = compute_route(dep_icao, arr_icao, aircraft)
 
     flight = Flight.objects.create(
@@ -121,7 +124,7 @@ def create_flight(
         fx_snapshot=fx.snapshot(std_utc.date()),
         remarks=remarks,
         template_id=template_id,
-        is_demo=is_demo,
+        is_generated=is_generated,
         **route,
     )
 
@@ -134,7 +137,7 @@ def create_flight(
             flight, fields=["number", "client_id", "dep_icao", "arr_icao", "std_utc", "status"]
         ),
         source=source,
-        is_demo=is_demo,
+        is_generated=is_generated,
     )
     record_conflicts(flight, actor=actor, source=source)
     return flight
@@ -161,7 +164,7 @@ def record_conflicts(
         after={"conflicts": [{"kind": item.kind, "reason": item.message} for item in found]},
         comment="; ".join(item.message for item in found),
         source=source,
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
     return found
 
@@ -199,7 +202,7 @@ def update_route(flight: Flight, *, actor: User | None = None, **changes: Any) -
             flight,
             fields=["dep_icao", "arr_icao", "std_utc", "aircraft_id", "pax_count", "remarks"],
         ),
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
     record_conflicts(flight, actor=actor)
     return flight
@@ -226,7 +229,7 @@ def approve_request(request: FlightRequest, *, actor: User | None = None) -> Fli
         pax_count=request.pax_count,
         remarks=request.comment,
         actor=actor,
-        is_demo=request.is_demo,
+        is_generated=request.is_generated,
     )
 
     request.status = FlightRequestStatus.APPROVED
@@ -239,7 +242,7 @@ def approve_request(request: FlightRequest, *, actor: User | None = None) -> Fli
         action="request_approved",
         actor=actor,
         after={"requestId": request.pk, "number": flight.number},
-        is_demo=request.is_demo,
+        is_generated=request.is_generated,
     )
     return flight
 
@@ -329,6 +332,6 @@ def create_template(*, data: dict[str, Any], actor: User) -> FlightTemplate:
         action="template_created",
         actor=actor,
         after=audit.snapshot(template),
-        is_demo=template.is_demo,
+        is_generated=template.is_generated,
     )
     return template

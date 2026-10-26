@@ -380,18 +380,14 @@ def test_unknown_report_code_is_not_found(as_role: Callable[..., APIClient]) -> 
     assert response.json()["error"]["code"] == "NOT_FOUND"
 
 
-# ─────────────────────────── Разметка стенда ───────────────────────────
+# ─────────────────────────── Без пометок ───────────────────────────
 
 
-def test_report_from_the_stand_is_marked_as_such(
+def test_report_result_has_no_mode_flag(
     as_role: Callable[..., APIClient], settings: Any, query: dict[str, str]
 ) -> None:
-    """`CLAUDE.md § 4`: отчёт со стенда опознаётся как отчёт со стенда."""
-    settings.DEMO_DATA = True
+    """Результат отчёта одинаков в любом режиме: признака режима в нём нет."""
+    settings.SAMPLE_DATA = True
     api = as_role(Role.MANAGER)
-    assert api.get(f"{REPORTS_URL}/{definitions.FLIGHTS_PERIOD}", query).json()["isDemo"] is True
-
-    settings.DEMO_DATA = False
-    assert (
-        api.get(f"{REPORTS_URL}/{definitions.FLIGHTS_PERIOD}", query).json()["isDemo"] is False
-    )
+    body = api.get(f"{REPORTS_URL}/{definitions.FLIGHTS_PERIOD}", query).json()
+    assert set(body) == {"code", "generatedAt", "currency", "columns", "rows", "totals"}

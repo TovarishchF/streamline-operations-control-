@@ -170,7 +170,7 @@ def build_quote(
         currency=currency,
         fx_snapshot=snapshot,
         valid_until=valid_until,
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
 
     lines = [
@@ -186,7 +186,7 @@ def build_quote(
         for order in orders
     ]
     for line in lines:
-        DocumentLine.objects.create(quote=quote, **line)
+        DocumentLine.objects.create(quote=quote, is_generated=quote.is_generated, **line)
 
     _apply_totals(quote, lines)
     quote.save()
@@ -198,7 +198,7 @@ def build_quote(
         actor=actor,
         after=audit.snapshot(quote),
         comment=_("Строк: %(count)d") % {"count": len(lines)},
-        is_demo=quote.is_demo,
+        is_generated=quote.is_generated,
     )
     return quote
 
@@ -298,7 +298,7 @@ def build_invoice(*, flight: Flight, quote: Quote | None, actor: User) -> Invoic
         quote=quote,
         currency=currency,
         fx_snapshot=snapshot,
-        is_demo=flight.is_demo,
+        is_generated=flight.is_generated,
     )
 
     lines = [
@@ -314,7 +314,7 @@ def build_invoice(*, flight: Flight, quote: Quote | None, actor: User) -> Invoic
         for order in orders
     ]
     for line in lines:
-        DocumentLine.objects.create(invoice=invoice, **line)
+        DocumentLine.objects.create(invoice=invoice, is_generated=invoice.is_generated, **line)
 
     invoice.plan_fact_comparison = _plan_fact(quote, lines)
     _apply_totals(invoice, lines)
@@ -327,7 +327,7 @@ def build_invoice(*, flight: Flight, quote: Quote | None, actor: User) -> Invoic
         actor=actor,
         after=audit.snapshot(invoice),
         comment=_("Строк: %(count)d") % {"count": len(lines)},
-        is_demo=invoice.is_demo,
+        is_generated=invoice.is_generated,
     )
     return invoice
 
@@ -354,7 +354,7 @@ def issue_quote(*, quote: Quote, actor: User) -> Quote:
         actor=actor,
         before=before,
         after=audit.snapshot(quote),
-        is_demo=quote.is_demo,
+        is_generated=quote.is_generated,
     )
 
     # Выставленный документ уходит клиенту письмом `[ТЗ 3.5.2]`.
@@ -389,7 +389,7 @@ def issue_invoice(*, invoice: Invoice, actor: User) -> Invoice:
         actor=actor,
         before=before,
         after=audit.snapshot(invoice),
-        is_demo=invoice.is_demo,
+        is_generated=invoice.is_generated,
     )
 
     comms_events.document_issued(invoice, kind="invoice")
@@ -423,7 +423,7 @@ def void_invoice(*, invoice: Invoice, reason: str, actor: User) -> Invoice:
         before=before,
         after=audit.snapshot(invoice),
         comment=reason,
-        is_demo=invoice.is_demo,
+        is_generated=invoice.is_generated,
     )
     return invoice
 
@@ -449,7 +449,7 @@ def void_quote(*, quote: Quote, reason: str, actor: User) -> Quote:
         before=before,
         after=audit.snapshot(quote),
         comment=reason,
-        is_demo=quote.is_demo,
+        is_generated=quote.is_generated,
     )
     return quote
 
@@ -473,7 +473,7 @@ def respond_to_quote(*, quote: Quote, accepted: bool, actor: User) -> Quote:
         actor=actor,
         before=before,
         after=audit.snapshot(quote),
-        is_demo=quote.is_demo,
+        is_generated=quote.is_generated,
     )
 
     # Выставленный документ уходит клиенту письмом `[ТЗ 3.5.2]`.
