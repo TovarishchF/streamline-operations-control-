@@ -1,5 +1,5 @@
 import {
-  useMemo, useRef, useState, type HTMLAttributes, type JSX, type PointerEvent, type ReactNode,
+  useMemo, useState, type HTMLAttributes, type JSX, type PointerEvent, type ReactNode,
 } from 'react';
 import { Button, Input, Space, Table } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
@@ -21,6 +21,16 @@ import { useTranslation } from 'react-i18next';
  * Ширина меняется перетаскиванием края заголовка. Сторонняя библиотека для
  * этого не заводится (`CLAUDE.md § 5` — новая зависимость по согласованию):
  * хватает указателя и одного обработчика.
+ *
+ * Пока ширину не трогали, браузер раскладывает колонки сам: заданная ширина
+ * для него — подсказка, остаток места делится между колонками. Тянуть
+ * колонку в такой раскладке нельзя: край отстаёт от указателя, соседние
+ * колонки меняют ширину сами, а колонка правее «резиновой» растёт влево.
+ * Поэтому первое же перетаскивание замораживает **все** колонки на их
+ * фактической ширине, и дальше меняется только та, которую тянут: таблица
+ * становится шире и прокручивается, а свободное место справа занимает
+ * пустая колонка-заполнитель. Ширина считается от начала жеста, а не
+ * от прошлого шага: упёршись в предел, край не отстаёт от указателя.
  *
  * Ширина ограничена с обеих сторон: перетаскиванием колонку нельзя сжать
  * меньше `minWidth` (по умолчанию 80 px) и растянуть больше `maxWidth`
@@ -204,36 +214,46 @@ function TextFilter({
   );
 }
 
+/**
+ * Начало перетаскивания: получает ячейку заголовка, возвращает обработчик
+ * смещения указателя от точки, где жест начался.
+ */
+type ResizeStart = (cell: HTMLTableCellElement) => (offset: number) => void;
+
 /** Заголовок с ручкой изменения ширины. */
 function ResizableTitle(
   props: HTMLAttributes<HTMLTableCellElement> & {
-    onResize?: (delta: number) => void;
+    onResizeStart?: ResizeStart;
   },
 ): JSX.Element {
-  const { onResize, ...rest } = props;
-  const startX = useRef(0);
+  const { onResizeStart, ...rest } = props;
 
-  if (!onResize) return <th {...rest} />;
+  if (!onResizeStart) return <th {...rest} />;
 
   const handlePointerDown = (event: PointerEvent<HTMLSpanElement>): void => {
     event.preventDefault();
     event.stopPropagation();
-    startX.current = event.clientX;
 
     const handle = event.currentTarget;
+    const cell = handle.closest('th');
+    if (!cell) return;
+
+    const originX = event.clientX;
+    const resize = onResizeStart(cell);
     handle.setPointerCapture(event.pointerId);
 
     const move = (moveEvent: globalThis.PointerEvent): void => {
-      onResize(moveEvent.clientX - startX.current);
-      startX.current = moveEvent.clientX;
+      resize(moveEvent.clientX - originX);
     };
-    const up = (): void => {
+    const end = (): void => {
       handle.removeEventListener('pointermove', move);
-      handle.removeEventListener('pointerup', up);
+      handle.removeEventListener('pointerup', end);
+      handle.removeEventListener('pointercancel', end);
     };
 
     handle.addEventListener('pointermove', move);
-    handle.addEventListener('pointerup', up);
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
   };
 
   return (
@@ -255,11 +275,17 @@ function ResizableTitle(
 
 const TABLE_COMPONENTS = { header: { cell: ResizableTitle } };
 const EMPTY_ROWS: readonly unknown[] = [];
+/** Колонка-заполнитель: занимает место справа, когда колонки уже таблицы. */
+const FILLER_COLUMN: RawColumn = {
+  key: '__filler',
+  className: 'soc-table-filler',
+  render: () => null,
+};
 
 function prepareColumns(
   columns: RawColumn[],
   widths: Record<string, number>,
-  onResize: (key: string, base: number, delta: number, min: number, max: number) => void,
+  onResizeStart: (key: string, min: number, max: number) => ResizeStart,
   rows: readonly unknown[],
   serverPaged: boolean,
 ): RawColumn[] {
@@ -327,49 +353,93 @@ function prepareColumns(
       }
     }
 
-    if (width !== undefined) {
-      next['onHeaderCell'] = () => ({
-        onResize: (delta: number) => {
-          onResize(key, width, delta, min, max);
-        },
-      });
-    }
+    next['onHeaderCell'] = () => ({
+      'data-col-key': key,
+      onResizeStart: onResizeStart(key, min, max),
+    });
 
     return next;
   });
+}
+
+/**
+ * Колонка-заполнитель встаёт перед закреплёнными справа: закреплённые
+ * колонки обязаны быть крайними, иначе таблица не прижмёт их к краю.
+ */
+function withFiller(columns: RawColumn[]): RawColumn[] {
+  let at = columns.length;
+  while (at > 0 && columns[at - 1]?.['fixed'] === 'right') at -= 1;
+  return [...columns.slice(0, at), FILLER_COLUMN, ...columns.slice(at)];
 }
 
 export function DataTable<T extends object>({
   columns,
   ...rest
 }: Omit<TableProps<T>, 'columns' | 'components'> & { columns: DataColumns<T> }): JSX.Element {
-  // Ширина, изменённая пользователем: ключ колонки → пиксели
+  // Ширина колонок после первого перетаскивания: ключ колонки → пиксели.
+  // Пустой объект — раскладка ещё не заморожена.
   const [widths, setWidths] = useState<Record<string, number>>({});
+  const frozen = Object.keys(widths).length > 0;
 
   const rows = rest.dataSource ?? EMPTY_ROWS;
   // Серверная разбивка: таблица знает общее число строк, а видит одну страницу.
   const serverPaged = typeof rest.pagination === 'object' && rest.pagination.total !== undefined;
 
-  const prepared = useMemo(
-    () =>
-      prepareColumns(
-        columns as unknown as RawColumn[],
-        widths,
-        (key, base, delta, min, max) => {
+  const prepared = useMemo(() => {
+    const onResizeStart =
+      (key: string, min: number, max: number): ResizeStart =>
+      (cell) => {
+        // Замораживаются все колонки строки заголовка: иначе браузер
+        // перераспределит место между ними, пока тянут одну.
+        const measured: Record<string, number> = {};
+        cell.parentElement
+          ?.querySelectorAll<HTMLTableCellElement>('th[data-col-key]')
+          .forEach((th) => {
+            const thKey = th.dataset['colKey'];
+            if (thKey) measured[thKey] = Math.round(th.getBoundingClientRect().width);
+          });
+        setWidths(measured);
+
+        const start = measured[key] ?? Math.round(cell.getBoundingClientRect().width);
+        // Колонка, уже выходящая за пределы, не прыгает к ним с первым движением.
+        const lower = Math.min(min, start);
+        const upper = Math.max(max, start);
+        return (offset) => {
           setWidths((current) => ({
             ...current,
-            [key]: Math.min(max, Math.max(min, (current[key] ?? base) + delta)),
+            [key]: Math.min(upper, Math.max(lower, start + offset)),
           }));
-        },
-        rows,
-        serverPaged,
-      ),
-    [columns, widths, rows, serverPaged],
-  );
+        };
+      };
+
+    const columnsWithWidths = prepareColumns(
+      columns as unknown as RawColumn[],
+      widths,
+      onResizeStart,
+      rows,
+      serverPaged,
+    );
+    return frozen ? withFiller(columnsWithWidths) : columnsWithWidths;
+  }, [columns, widths, frozen, rows, serverPaged]);
+
+  // Замороженная раскладка — фиксированная: заданная ширина для браузера
+  // закон, а не подсказка. Ширина прокрутки — сумма колонок, иначе таблица
+  // не станет шире карточки.
+  const scroll = frozen
+    ? {
+        ...rest.scroll,
+        x: prepared.reduce(
+          (sum, column) => sum + (typeof column.width === 'number' ? column.width : 0),
+          0,
+        ),
+      }
+    : rest.scroll;
 
   return (
     <Table<T>
       {...rest}
+      {...(frozen ? { tableLayout: rest.tableLayout ?? 'fixed' } : {})}
+      {...(scroll ? { scroll } : {})}
       columns={prepared as unknown as TableProps<T>['columns']}
       components={TABLE_COMPONENTS}
     />
