@@ -32,6 +32,34 @@ class Provider:
 
     code = "SMTP"
 
+    def check(self) -> tuple[None, Exchange]:
+        """Проверка подключения: приветствие сервера и вход, без отправки письма."""
+        try:
+            with self._connect() as client:
+                code, reply = client.noop()
+        except (OSError, smtplib.SMTPException) as error:
+            raise ChannelError(f"{type(error).__name__}: {error}") from error
+        return None, Exchange(
+            operation="check",
+            endpoint=f"smtp://{settings.SMTP_HOST}:{settings.SMTP_PORT}",
+            response_body=f"{code} {reply.decode(errors='replace')}",
+            http_status=code,
+        )
+
+    def _connect(self) -> smtplib.SMTP:
+        client = smtplib.SMTP(
+            str(settings.SMTP_HOST), int(settings.SMTP_PORT), timeout=TIMEOUT_SECONDS
+        )
+        try:
+            if settings.SMTP_USE_TLS:
+                client.starttls()
+            if settings.SMTP_USER:
+                client.login(str(settings.SMTP_USER), str(settings.SMTP_PASSWORD))
+        except BaseException:
+            client.close()
+            raise
+        return client
+
     def send(self, message: Message) -> tuple[Delivery, Exchange]:
         from comms.services.eml import build_eml
 
@@ -43,13 +71,7 @@ class Provider:
         payload = build_eml(message, sender=sender)
 
         try:
-            with smtplib.SMTP(
-                str(settings.SMTP_HOST), int(settings.SMTP_PORT), timeout=TIMEOUT_SECONDS
-            ) as client:
-                if settings.SMTP_USE_TLS:
-                    client.starttls()
-                if settings.SMTP_USER:
-                    client.login(str(settings.SMTP_USER), str(settings.SMTP_PASSWORD))
+            with self._connect() as client:
                 client.sendmail(sender, addresses, payload)
         except (OSError, smtplib.SMTPException) as error:
             # Отказ канала — повод повторить, а не потерять сообщение.
