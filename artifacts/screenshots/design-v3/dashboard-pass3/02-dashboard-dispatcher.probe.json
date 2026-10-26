@@ -1,0 +1,230 @@
+[
+  {
+    "pair": "rail brand",
+    "key": "color",
+    "mockup": "rgb(255, 255, 255)",
+    "app": "rgb(0, 71, 152)"
+  },
+  {
+    "pair": "rail brand",
+    "key": "border",
+    "mockup": "0px rgb(255, 255, 255)",
+    "app": "0px rgb(0, 71, 152)"
+  },
+  {
+    "pair": "rail brand img",
+    "key": "color",
+    "mockup": "rgb(255, 255, 255)",
+    "app": "rgb(0, 71, 152)"
+  },
+  {
+    "pair": "rail brand img",
+    "key": "border",
+    "mockup": "0px rgb(255, 255, 255)",
+    "app": "0px rgb(0, 71, 152)"
+  },
+  {
+    "pair": "rail count",
+    "key": "x",
+    "mockup": 202,
+    "app": 198
+  },
+  {
+    "pair": "rail count",
+    "key": "w",
+    "mockup": 18,
+    "app": 22
+  },
+  {
+    "pair": "search",
+    "key": "x",
+    "mockup": 643,
+    "app": 754
+  },
+  {
+    "pair": "kbd",
+    "key": "x",
+    "mockup": 905,
+    "app": 1015
+  },
+  {
+    "pair": "demo badge",
+    "key": "x",
+    "mockup": 975,
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "y",
+    "mockup": 16,
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "w",
+    "mockup": 105,
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "h",
+    "mockup": 24,
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "pad",
+    "mockup": "0px 10px",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "radius",
+    "mockup": "999px",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "font",
+    "mockup": "700 11px/11px \"Golos Text\"",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "color",
+    "mockup": "rgb(106, 63, 176)",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "bg",
+    "mockup": "rgba(0, 0, 0, 0)",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "border",
+    "mockup": "0px rgb(106, 63, 176)",
+    "app": "∅"
+  },
+  {
+    "pair": "demo badge",
+    "key": "exists",
+    "mockup": true,
+    "app": false
+  },
+  {
+    "pair": "clock",
+    "key": "x",
+    "mockup": 1092,
+    "app": 1086
+  },
+  {
+    "pair": "bell",
+    "key": "x",
+    "mockup": 1255,
+    "app": 1249
+  },
+  {
+    "pair": "bell",
+    "key": "font",
+    "mockup": "400 13.3333px/normal Arial",
+    "app": "400 16px/normal Arial"
+  },
+  {
+    "pair": "avatar",
+    "key": "x",
+    "mockup": 1303,
+    "app": 1297
+  },
+  {
+    "pair": "user name",
+    "key": "x",
+    "mockup": 1341,
+    "app": 1335
+  },
+  {
+    "pair": "content",
+    "key": "h",
+    "mockup": 844,
+    "app": 1144
+  },
+  {
+    "pair": "page title",
+    "key": "w",
+    "mockup": 392,
+    "app": 309
+  },
+  {
+    "pair": "page meta",
+    "key": "w",
+    "mockup": 392,
+    "app": 309
+  },
+  {
+    "pair": "btn primary",
+    "key": "border",
+    "mockup": "1px rgb(0, 71, 152)",
+    "app": "1px rgba(0, 0, 0, 0)"
+  },
+  {
+    "pair": "kpi value",
+    "key": "w",
+    "mockup": 38,
+    "app": 18
+  },
+  {
+    "pair": "card",
+    "key": "h",
+    "mockup": 276,
+    "app": 474
+  },
+  {
+    "pair": "card head",
+    "key": "pad",
+    "mockup": "12px 16px",
+    "app": "0px 16px"
+  },
+  {
+    "pair": "card head",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "12px 12px 0px 0px"
+  },
+  {
+    "pair": "card head",
+    "key": "font",
+    "mockup": "400 13px/20px \"Golos Text\"",
+    "app": "600 16px/24.6154px \"Golos Text\""
+  },
+  {
+    "pair": "card title",
+    "key": "w",
+    "mockup": 158,
+    "app": 579
+  },
+  {
+    "pair": "card body",
+    "key": "h",
+    "mockup": 222,
+    "app": 420
+  },
+  {
+    "pair": "card body",
+    "key": "radius",
+    "mockup": "0px",
+    "app": "0px 0px 12px 12px"
+  },
+  {
+    "pair": "attention row",
+    "key": "h",
+    "mockup": 79,
+    "app": 80
+  },
+  {
+    "pair": "attention btn",
+    "key": "y",
+    "mockup": 372,
+    "app": 373
+  }
+]

@@ -1,0 +1,32 @@
+rail count       x       202                                          │ 198
+rail count       w       18                                           │ 22
+search           x       643                                          │ 754
+kbd              x       905                                          │ 1015
+demo badge       x       975                                          │ ∅
+demo badge       y       16                                           │ ∅
+demo badge       w       105                                          │ ∅
+demo badge       h       24                                           │ ∅
+demo badge       pad     0px 10px                                     │ ∅
+demo badge       radius  999px                                        │ ∅
+demo badge       font    700 11px/11px "Golos Text"                   │ ∅
+demo badge       color   rgb(106, 63, 176)                            │ ∅
+demo badge       bg      rgba(0, 0, 0, 0)                             │ ∅
+demo badge       border  0px rgb(106, 63, 176)                        │ ∅
+demo badge       exists  true                                         │ false
+clock            x       1092                                         │ 1086
+bell             x       1255                                         │ 1249
+bell             font    400 13.3333px/normal Arial                   │ 400 16px/normal Arial
+avatar           x       1303                                         │ 1297
+user name        x       1341                                         │ 1335
+content          h       844                                          │ 1138
+page title       w       392                                          │ 282
+page meta        w       392                                          │ 282
+btn primary      border  1px rgb(0, 71, 152)                          │ 1px rgba(0, 0, 0, 0)
+kpi value        w       38                                           │ 18
+card             h       276                                          │ 474
+card head        pad     12px 16px                                    │ 0px 16px
+card head        radius  0px                                          │ 12px 12px 0px 0px
+card head        font    400 13px/20px "Golos Text"                   │ 600 16px/24.6154px "Golos Text"
+card title       w       158                                          │ 579
+card body        h       222                                          │ 420
+card body        radius  0px                                          │ 0px 0px 12px 12px

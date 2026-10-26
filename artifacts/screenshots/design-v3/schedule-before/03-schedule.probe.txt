@@ -1,0 +1,322 @@
+content          h       853                                          │ 2785
+page title       x       264                                          │ ∅
+page title       y       76                                           │ ∅
+page title       w       442                                          │ ∅
+page title       h       28                                           │ ∅
+page title       pad     0px                                          │ ∅
+page title       radius  0px                                          │ ∅
+page title       font    600 22px/28px Geologica                      │ ∅
+page title       color   rgb(12, 21, 38)                              │ ∅
+page title       bg      rgba(0, 0, 0, 0)                             │ ∅
+page title       border  0px rgb(12, 21, 38)                          │ ∅
+page title       exists  true                                         │ false
+page meta        x       264                                          │ ∅
+page meta        y       108                                          │ ∅
+page meta        w       442                                          │ ∅
+page meta        h       18                                           │ ∅
+page meta        pad     0px                                          │ ∅
+page meta        radius  0px                                          │ ∅
+page meta        font    400 12px/16px "Golos Text"                   │ ∅
+page meta        color   rgb(74, 86, 108)                             │ ∅
+page meta        bg      rgba(0, 0, 0, 0)                             │ ∅
+page meta        border  0px rgb(74, 86, 108)                         │ ∅
+page meta        exists  true                                         │ false
+meta pill        x       494                                          │ ∅
+meta pill        y       108                                          │ ∅
+meta pill        w       92                                           │ ∅
+meta pill        h       18                                           │ ∅
+meta pill        pad     0px 7px 0px 6px                              │ ∅
+meta pill        radius  999px                                        │ ∅
+meta pill        font    600 11px/11px "Golos Text"                   │ ∅
+meta pill        color   rgb(176, 18, 28)                             │ ∅
+meta pill        bg      rgb(253, 234, 235)                           │ ∅
+meta pill        border  0px rgb(176, 18, 28)                         │ ∅
+meta pill        exists  true                                         │ false
+view seg         x       984                                          │ ∅
+view seg         y       94                                           │ ∅
+view seg         w       158                                          │ ∅
+view seg         h       32                                           │ ∅
+view seg         pad     2px                                          │ ∅
+view seg         radius  6px                                          │ ∅
+view seg         font    400 13px/20px "Golos Text"                   │ ∅
+view seg         color   rgb(12, 21, 38)                              │ ∅
+view seg         bg      rgb(247, 248, 251)                           │ ∅
+view seg         border  1px rgb(226, 231, 239)                       │ ∅
+view seg         exists  true                                         │ false
+view seg item    x       987                                          │ ∅
+view seg item    y       97                                           │ ∅
+view seg item    w       77                                           │ ∅
+view seg item    h       26                                           │ ∅
+view seg item    pad     0px 12px                                     │ ∅
+view seg item    radius  4px                                          │ ∅
+view seg item    font    600 12px/12px "Golos Text"                   │ ∅
+view seg item    color   rgb(12, 21, 38)                              │ ∅
+view seg item    bg      rgb(255, 255, 255)                           │ ∅
+view seg item    border  0px rgb(12, 21, 38)                          │ ∅
+view seg item    exists  true                                         │ false
+btn primary      x       1279                                         │ ∅
+btn primary      y       94                                           │ ∅
+btn primary      w       137                                          │ ∅
+btn primary      h       32                                           │ ∅
+btn primary      pad     0px 14px                                     │ ∅
+btn primary      radius  6px                                          │ ∅
+btn primary      font    600 13px/20px "Golos Text"                   │ ∅
+btn primary      color   rgb(255, 255, 255)                           │ ∅
+btn primary      bg      rgb(0, 71, 152)                              │ ∅
+btn primary      border  1px rgb(0, 71, 152)                          │ ∅
+btn primary      exists  true                                         │ false
+tabs             y       146                                          │ 76
+tab active       y       146                                          │ 76
+banner           x       264                                          │ ∅
+banner           y       207                                          │ ∅
+banner           w       1152                                         │ ∅
+banner           h       116                                          │ ∅
+banner           pad     12px 14px                                    │ ∅
+banner           radius  8px                                          │ ∅
+banner           font    400 13px/20px "Golos Text"                   │ ∅
+banner           color   rgb(176, 18, 28)                             │ ∅
+banner           bg      rgb(253, 234, 235)                           │ ∅
+banner           border  0px rgb(176, 18, 28)                         │ ∅
+banner           exists  true                                         │ false
+banner title     x       308                                          │ ∅
+banner title     y       219                                          │ ∅
+banner title     w       998                                          │ ∅
+banner title     h       20                                           │ ∅
+banner title     pad     0px                                          │ ∅
+banner title     radius  0px                                          │ ∅
+banner title     font    600 13px/20px "Golos Text"                   │ ∅
+banner title     color   rgb(176, 18, 28)                             │ ∅
+banner title     bg      rgba(0, 0, 0, 0)                             │ ∅
+banner title     border  0px rgb(176, 18, 28)                         │ ∅
+banner title     exists  true                                         │ false
+banner item      x       308                                          │ ∅
+banner item      y       245                                          │ ∅
+banner item      w       998                                          │ ∅
+banner item      h       20                                           │ ∅
+banner item      pad     0px                                          │ ∅
+banner item      radius  0px                                          │ ∅
+banner item      font    400 13px/20px "Golos Text"                   │ ∅
+banner item      color   rgb(12, 21, 38)                              │ ∅
+banner item      bg      rgba(0, 0, 0, 0)                             │ ∅
+banner item      border  0px rgb(12, 21, 38)                          │ ∅
+banner item      exists  true                                         │ false
+banner note      x       308                                          │ ∅
+banner note      y       295                                          │ ∅
+banner note      w       998                                          │ ∅
+banner note      h       16                                           │ ∅
+banner note      pad     0px                                          │ ∅
+banner note      radius  0px                                          │ ∅
+banner note      font    400 12px/16px "Golos Text"                   │ ∅
+banner note      color   rgb(74, 86, 108)                             │ ∅
+banner note      bg      rgba(0, 0, 0, 0)                             │ ∅
+banner note      border  0px rgb(74, 86, 108)                         │ ∅
+banner note      exists  true                                         │ false
+banner btn       x       1318                                         │ ∅
+banner btn       y       219                                          │ ∅
+banner btn       w       84                                           │ ∅
+banner btn       h       28                                           │ ∅
+banner btn       pad     0px 10px                                     │ ∅
+banner btn       radius  6px                                          │ ∅
+banner btn       font    600 12px/20px "Golos Text"                   │ ∅
+banner btn       color   rgb(12, 21, 38)                              │ ∅
+banner btn       bg      rgb(255, 255, 255)                           │ ∅
+banner btn       border  1px rgb(125, 139, 161)                       │ ∅
+banner btn       exists  true                                         │ false
+filters          x       264                                          │ ∅
+filters          y       343                                          │ ∅
+filters          w       1152                                         │ ∅
+filters          h       94                                           │ ∅
+filters          pad     12px                                         │ ∅
+filters          radius  12px                                         │ ∅
+filters          font    400 13px/20px "Golos Text"                   │ ∅
+filters          color   rgb(12, 21, 38)                              │ ∅
+filters          bg      rgb(255, 255, 255)                           │ ∅
+filters          border  1px rgb(226, 231, 239)                       │ ∅
+filters          exists  true                                         │ false
+filter search    x       277                                          │ ∅
+filter search    y       356                                          │ ∅
+filter search    w       280                                          │ ∅
+filter search    h       32                                           │ ∅
+filter search    pad     0px 10px                                     │ ∅
+filter search    radius  6px                                          │ ∅
+filter search    font    400 13px/20px "Golos Text"                   │ ∅
+filter search    color   rgb(12, 21, 38)                              │ ∅
+filter search    bg      rgb(255, 255, 255)                           │ ∅
+filter search    border  1px rgb(125, 139, 161)                       │ ∅
+filter search    exists  true                                         │ false
+filter select    x       565                                          │ ∅
+filter select    y       356                                          │ ∅
+filter select    w       160                                          │ ∅
+filter select    h       32                                           │ ∅
+filter select    pad     0px 10px                                     │ ∅
+filter select    radius  6px                                          │ ∅
+filter select    font    400 13px/20px "Golos Text"                   │ ∅
+filter select    color   rgb(12, 21, 38)                              │ ∅
+filter select    bg      rgb(255, 255, 255)                           │ ∅
+filter select    border  1px rgb(125, 139, 161)                       │ ∅
+filter select    exists  true                                         │ false
+filter chip      x       1079                                         │ ∅
+filter chip      y       358                                          │ ∅
+filter chip      w       213                                          │ ∅
+filter chip      h       28                                           │ ∅
+filter chip      pad     0px 10px                                     │ ∅
+filter chip      radius  6px                                          │ ∅
+filter chip      font    600 12px/20px "Golos Text"                   │ ∅
+filter chip      color   rgb(12, 21, 38)                              │ ∅
+filter chip      bg      rgb(255, 255, 255)                           │ ∅
+filter chip      border  1px rgb(125, 139, 161)                       │ ∅
+filter chip      exists  true                                         │ false
+legend           x       264                                          │ ∅
+legend           y       465                                          │ ∅
+legend           w       657                                          │ ∅
+legend           h       16                                           │ ∅
+legend           pad     0px                                          │ ∅
+legend           radius  0px                                          │ ∅
+legend           font    400 12px/16px "Golos Text"                   │ ∅
+legend           color   rgb(74, 86, 108)                             │ ∅
+legend           bg      rgba(0, 0, 0, 0)                             │ ∅
+legend           border  0px rgb(74, 86, 108)                         │ ∅
+legend           exists  true                                         │ false
+scale seg        x       1189                                         │ ∅
+scale seg        y       457                                          │ ∅
+scale seg        w       227                                          │ ∅
+scale seg        h       32                                           │ ∅
+scale seg        pad     2px                                          │ ∅
+scale seg        radius  6px                                          │ ∅
+scale seg        font    400 13px/20px "Golos Text"                   │ ∅
+scale seg        color   rgb(12, 21, 38)                              │ ∅
+scale seg        bg      rgb(247, 248, 251)                           │ ∅
+scale seg        border  1px rgb(226, 231, 239)                       │ ∅
+scale seg        exists  true                                         │ false
+gantt            x       264                                          │ ∅
+gantt            y       509                                          │ ∅
+gantt            w       1152                                         │ ∅
+gantt            h       368                                          │ ∅
+gantt            pad     0px                                          │ ∅
+gantt            radius  12px                                         │ ∅
+gantt            font    400 13px/20px "Golos Text"                   │ ∅
+gantt            color   rgb(12, 21, 38)                              │ ∅
+gantt            bg      rgb(255, 255, 255)                           │ ∅
+gantt            border  1px rgb(226, 231, 239)                       │ ∅
+gantt            exists  true                                         │ false
+gantt head       x       265                                          │ ∅
+gantt head       y       510                                          │ ∅
+gantt head       w       1150                                         │ ∅
+gantt head       h       36                                           │ ∅
+gantt head       pad     0px                                          │ ∅
+gantt head       radius  0px                                          │ ∅
+gantt head       font    400 13px/20px "Golos Text"                   │ ∅
+gantt head       color   rgb(12, 21, 38)                              │ ∅
+gantt head       bg      rgb(247, 248, 251)                           │ ∅
+gantt head       border  0px rgb(12, 21, 38)                          │ ∅
+gantt head       exists  true                                         │ false
+gantt head label x       265                                          │ ∅
+gantt head label y       510                                          │ ∅
+gantt head label w       184                                          │ ∅
+gantt head label h       35                                           │ ∅
+gantt head label pad     0px 12px                                     │ ∅
+gantt head label radius  0px                                          │ ∅
+gantt head label font    500 12px/12px "Golos Text"                   │ ∅
+gantt head label color   rgb(12, 21, 38)                              │ ∅
+gantt head label bg      rgba(0, 0, 0, 0)                             │ ∅
+gantt head label border  0px rgb(12, 21, 38)                          │ ∅
+gantt head label exists  true                                         │ false
+scale tick       x       449                                          │ ∅
+scale tick       y       510                                          │ ∅
+scale tick       w       27                                           │ ∅
+scale tick       h       36                                           │ ∅
+scale tick       pad     0px 0px 0px 6px                              │ ∅
+scale tick       radius  0px                                          │ ∅
+scale tick       font    500 11px/11px "JetBrains Mono"               │ ∅
+scale tick       color   rgb(99, 110, 134)                            │ ∅
+scale tick       bg      rgba(0, 0, 0, 0)                             │ ∅
+scale tick       border  0px rgb(99, 110, 134)                        │ ∅
+scale tick       exists  true                                         │ false
+group row        x       265                                          │ ∅
+group row        y       546                                          │ ∅
+group row        w       1150                                         │ ∅
+group row        h       30                                           │ ∅
+group row        pad     0px                                          │ ∅
+group row        radius  0px                                          │ ∅
+group row        font    400 13px/20px "Golos Text"                   │ ∅
+group row        color   rgb(12, 21, 38)                              │ ∅
+group row        bg      rgb(247, 248, 251)                           │ ∅
+group row        border  0px rgb(12, 21, 38)                          │ ∅
+group row        exists  true                                         │ false
+group label      x       265                                          │ ∅
+group label      y       546                                          │ ∅
+group label      w       184                                          │ ∅
+group label      h       29                                           │ ∅
+group label      pad     0px 12px                                     │ ∅
+group label      radius  0px                                          │ ∅
+group label      font    600 11px/16px "Golos Text"                   │ ∅
+group label      color   rgb(74, 86, 108)                             │ ∅
+group label      bg      rgba(0, 0, 0, 0)                             │ ∅
+group label      border  0px rgb(74, 86, 108)                         │ ∅
+group label      exists  true                                         │ false
+row              x       265                                          │ ∅
+row              y       576                                          │ ∅
+row              w       1150                                         │ ∅
+row              h       40                                           │ ∅
+row              pad     0px                                          │ ∅
+row              radius  0px                                          │ ∅
+row              font    400 13px/20px "Golos Text"                   │ ∅
+row              color   rgb(12, 21, 38)                              │ ∅
+row              bg      rgba(0, 0, 0, 0)                             │ ∅
+row              border  0px rgb(12, 21, 38)                          │ ∅
+row              exists  true                                         │ false
+row label        x       265                                          │ ∅
+row label        y       576                                          │ ∅
+row label        w       184                                          │ ∅
+row label        h       39                                           │ ∅
+row label        pad     0px 12px                                     │ ∅
+row label        radius  0px                                          │ ∅
+row label        font    500 12px/12px "JetBrains Mono"               │ ∅
+row label        color   rgb(12, 21, 38)                              │ ∅
+row label        bg      rgba(0, 0, 0, 0)                             │ ∅
+row label        border  0px rgb(12, 21, 38)                          │ ∅
+row label        exists  true                                         │ false
+bar              x       691                                          │ ∅
+bar              y       583                                          │ ∅
+bar              w       121                                          │ ∅
+bar              h       26                                           │ ∅
+bar              pad     0px 8px 0px 7px                              │ ∅
+bar              radius  4px                                          │ ∅
+bar              font    500 11px/11px "JetBrains Mono"               │ ∅
+bar              color   rgb(10, 102, 112)                            │ ∅
+bar              bg      rgb(224, 244, 245)                           │ ∅
+bar              border  0px rgb(10, 102, 112)                        │ ∅
+bar              exists  true                                         │ false
+bar number       x       698                                          │ ∅
+bar number       y       591                                          │ ∅
+bar number       w       53                                           │ ∅
+bar number       h       11                                           │ ∅
+bar number       pad     0px                                          │ ∅
+bar number       radius  0px                                          │ ∅
+bar number       font    600 11px/11px "JetBrains Mono"               │ ∅
+bar number       color   rgb(10, 102, 112)                            │ ∅
+bar number       bg      rgba(0, 0, 0, 0)                             │ ∅
+bar number       border  0px rgb(10, 102, 112)                        │ ∅
+bar number       exists  true                                         │ false
+now              x       619                                          │ ∅
+now              y       510                                          │ ∅
+now              w       2                                            │ ∅
+now              h       366                                          │ ∅
+now              pad     0px                                          │ ∅
+now              radius  0px                                          │ ∅
+now              font    400 13px/20px "Golos Text"                   │ ∅
+now              color   rgb(12, 21, 38)                              │ ∅
+now              bg      rgba(0, 0, 0, 0)                             │ ∅
+now              border  0px rgb(12, 21, 38)                          │ ∅
+now              exists  true                                         │ false
+now flag         x       597                                          │ ∅
+now flag         y       519                                          │ ∅
+now flag         w       46                                           │ ∅
+now flag         h       14                                           │ ∅
+now flag         pad     2px 5px                                      │ ∅
+now flag         radius  4px                                          │ ∅
+now flag         font    600 10px/10px "JetBrains Mono"               │ ∅
+now flag         color   rgb(255, 255, 255)                           │ ∅
+now flag         bg      rgb(191, 19, 27)                             │ ∅
+now flag         border  0px rgb(255, 255, 255)                       │ ∅
+now flag         exists  true                                         │ false

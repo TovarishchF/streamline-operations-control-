@@ -1,0 +1,30 @@
+brand            h       900                                          │ 698
+logo             w       658                                          │ 142
+arcs             h       900                                          │ 698
+claim            y       360                                          │ 259
+claim title      y       360                                          │ 259
+claim text       y       516                                          │ 415
+stamp            y       844                                          │ 642
+form wrap        h       900                                          │ 698
+form             y       214                                          │ 40
+form             h       472                                          │ 618
+form title       y       254                                          │ 40
+form sub         y       290                                          │ 76
+label            y       326                                          │ 113
+label            w       380                                          │ 50
+input            y       348                                          │ 135
+input            pad     0px 12px                                     │ 8px 12px
+input            radius  6px                                          │ 12px
+input            font    400 14px/20px "Golos Text"                   │ 400 14px/22px "Golos Text"
+password         y       426                                          │ 214
+password         pad     0px 12px                                     │ 8px 12px
+password         radius  6px                                          │ 12px
+password         font    400 14px/20px "Golos Text"                   │ 400 14px/22px "Golos Text"
+btn primary      y       518                                          │ 270
+btn primary      radius  6px                                          │ 12px
+btn primary      border  1px rgb(0, 71, 152)                          │ 1px rgba(0, 0, 0, 0)
+help             y       670                                          │ 334
+help link        y       670                                          │ 334
+help link        w       140                                          │ 122
+help link        h       15                                           │ 16
+help link        radius  0px                                          │ 6px

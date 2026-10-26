@@ -1,0 +1,20 @@
+logo             w       658                                          │ 142
+form             y       214                                          │ 142
+form             h       472                                          │ 616
+form title       y       254                                          │ 142
+form sub         y       290                                          │ 178
+label            y       326                                          │ 214
+label            w       380                                          │ 50
+input            y       348                                          │ 236
+input            pad     0px 12px                                     │ 8px 12px
+input            font    400 14px/20px "Golos Text"                   │ 400 14px/22px "Golos Text"
+password         y       426                                          │ 314
+password         pad     0px 12px                                     │ 8px 12px
+password         font    400 14px/20px "Golos Text"                   │ 400 14px/22px "Golos Text"
+btn primary      y       518                                          │ 370
+btn primary      border  1px rgb(0, 71, 152)                          │ 1px rgba(0, 0, 0, 0)
+help             y       670                                          │ 434
+help link        y       670                                          │ 434
+help link        w       140                                          │ 122
+help link        h       15                                           │ 16
+help link        radius  0px                                          │ 6px
