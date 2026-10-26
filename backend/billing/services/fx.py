@@ -1,8 +1,8 @@
 """Курсы валют: загрузка и выдача снимка `[ТЗ 3.4.1]`.
 
-Загрузка идёт через фабрику адаптера (`CLAUDE.md § 3` п. 4): доменный код
-не знает, отвечает ли ЦБ РФ или заглушка. Фактический режим виден
-в журнале обменов и на экране подключений.
+Загрузка идёт через фабрику адаптера (`CLAUDE.md § 3` п. 4). Заглушки нет
+(ADR-039): курсы приходят только от ЦБ РФ, и при выключенном подключении
+новых курсов просто нет — экран говорит об этом, а не подставляет выдуманные.
 """
 
 from __future__ import annotations
@@ -17,8 +17,7 @@ from django.db import transaction
 from billing.models import FxRate
 from core import clock
 from core.models import DataSource
-from integrations.base import Exchange, get_provider, mode_for, record_exchange
-from integrations.models import IntegrationMode
+from integrations.base import Exchange, get_provider, record_exchange
 
 # Сколько дней назад искать последний известный курс, если на нужную дату
 # его нет. Дольше двух недель курс неактуален, и молча подставлять его хуже,
@@ -43,15 +42,12 @@ def sync_rates(on_date: date | None = None) -> int:
 
     rate_set = record_exchange("FX", call)
 
-    live = mode_for("FX") == IntegrationMode.LIVE
-    source = DataSource.LIVE if live else DataSource.SYNTHETIC
-
     written = 0
     for currency, value in rate_set.rates.items():
         FxRate.objects.update_or_create(
             on_date=rate_set.on_date,
             currency=currency,
-            defaults={"rate": value, "data_source": source, "is_generated": not live},
+            defaults={"rate": value, "data_source": DataSource.LIVE, "is_generated": False},
         )
         written += 1
     return written

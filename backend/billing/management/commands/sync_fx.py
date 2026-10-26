@@ -14,7 +14,7 @@ from django.core.management.base import BaseCommand
 
 from billing.services import fx
 from core import clock
-from integrations.base import mode_for
+from integrations.base import is_enabled
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -29,7 +29,9 @@ class Command(BaseCommand):
     def handle(self, *args: Any, **options: Any) -> None:
         days = max(1, int(options["days"]))
         today = clock.now().date()
-        self.stdout.write(f"режим подключения FX: {mode_for('FX')}")
+        if not is_enabled("FX"):
+            self.stderr.write("подключение FX выключено: см. INTEGRATIONS_ENABLED")
+            return
 
         loaded = 0
         failed = 0

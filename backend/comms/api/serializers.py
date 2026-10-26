@@ -39,7 +39,6 @@ class AttachmentRefSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
 
 class OutboxMessageSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
-    channelMode = serializers.CharField(source="channel_mode")  # noqa: N815
     templateCode = serializers.CharField(source="template_code")  # noqa: N815
     lastError = serializers.SerializerMethodField()  # noqa: N815
     sentAt = serializers.DateTimeField(source="sent_at", allow_null=True)  # noqa: N815
@@ -52,7 +51,6 @@ class OutboxMessageSerializer(serializers.ModelSerializer):  # type: ignore[type
         fields = (
             "id",
             "channel",
-            "channelMode",
             "to",
             "templateCode",
             "subject",

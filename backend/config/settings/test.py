@@ -1,13 +1,14 @@
 """Настройки тестов.
 
-Внешние подключения всегда в stub: сеть в тестах не используется
-(`TESTING.md § 4`). Режим live проверяется против записанных ответов.
+Внешние подключения выключены: сеть в тестах не используется
+(`TESTING.md § 4`). Адаптеры проверяются против записанных ответов,
+а тест, которому нужен канал, подставляет его сам.
 """
 
 from __future__ import annotations
 
 from .base import *
-from .base import DATABASES, INTEGRATION_MODES, env
+from .base import DATABASES, env
 
 DEBUG = False
 SAMPLE_DATA = False
@@ -30,9 +31,7 @@ _test_database_url = env.str("TEST_DATABASE_URL", default="")
 if _test_database_url:
     DATABASES = {**DATABASES, "default": env.db_url_config(_test_database_url)}
 
-INTEGRATION_MODES = dict.fromkeys(INTEGRATION_MODES, "stub")
-INTEGRATION_STUB_LATENCY_MS = (0, 0)
-INTEGRATION_STUB_ERROR_RATE = 0.0
+INTEGRATIONS_ENABLED = []
 
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 
