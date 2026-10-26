@@ -9,7 +9,6 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
@@ -24,7 +23,7 @@ from core import clock
 from core.exceptions import ServiceCheckFailed
 from flights.models import ServiceLeg
 from orders.models import ServiceOrder, ServiceOrderStatus
-from orders.services import checks, transitions
+from orders.services import checks, sla, transitions
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -33,13 +32,6 @@ if TYPE_CHECKING:
     from catalog.models import Service, VendorPrice
     from counterparties.models import Vendor, VendorContract
     from flights.models import Flight
-
-# Срок на подтверждение заявки поставщиком (`DOMAIN.md § 7.6`). Справочник
-# правил SLA по категориям появится вместе с реестром правил; до него
-# действует общий срок, и он объявлен здесь одной величиной, а не рассыпан
-# по коду.
-DEFAULT_CONFIRM_SLA_HOURS = 4
-
 
 def airport_for_leg(flight: Flight, leg: str) -> str:
     return flight.dep_icao if leg == ServiceLeg.DEPARTURE else flight.arr_icao
@@ -179,14 +171,8 @@ def create_order(
     assert context.contract is not None
     _apply_price_snapshot(order, price=context.price, contract=context.contract)
 
-    now = clock.now()
-    order.ordered_at = now
-    order.sla_confirm_deadline = min(
-        now + timedelta(hours=DEFAULT_CONFIRM_SLA_HOURS),
-        # Дедлайн не может быть позже самого оказания: подтверждение,
-        # пришедшее после вылета, ничего не подтверждает.
-        moment,
-    )
+    order.ordered_at = clock.now()
+    sla.apply_deadlines(order, ordered_at=order.ordered_at, moment=moment)
     order.save()
     # Статус меняется переходом, а не присвоением (`CLAUDE.md § 3` п. 3).
     # Метод объявлен динамически из файла автомата, поэтому вызывается

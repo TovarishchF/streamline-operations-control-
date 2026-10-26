@@ -77,6 +77,7 @@ from integrations.api.views import (
     IntegrationListView,
     IntegrationLogListView,
 )
+from orders.api.sla import SlaRuleListView
 from orders.api.views import ServiceOrderViewSet
 from reports.api.views import (
     ReportBuildView,
@@ -186,6 +187,7 @@ api_v1: list[URLPattern | URLResolver] = [
         IntegrationCheckView.as_view(),
         name="integration-check",
     ),
+    path("sla-rules", SlaRuleListView.as_view(), name="sla-rules"),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
     path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),

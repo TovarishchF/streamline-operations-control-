@@ -18,7 +18,7 @@ from __future__ import annotations
 import json
 from functools import lru_cache
 from pathlib import Path
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
@@ -26,10 +26,15 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
 
-from catalog.models import Service, icao_validator
+from catalog.models import Service, ServiceCategory, icao_validator
 from core.models import BaseModel
 from counterparties.models import Vendor, VendorContract
 from flights.models import Flight, ServiceLeg
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+    from django.db.models import QuerySet
 
 MACHINE_PATH = Path(settings.SHARED_DIR) / "state-machines" / "service-order.json"
 
@@ -131,6 +136,15 @@ class ServiceOrder(BaseModel):
 
     sla_confirm_deadline = models.DateTimeField(null=True, blank=True, db_index=True)
     sla_breached = models.BooleanField(default=False, db_index=True)
+    # Срок исполнения (`DOMAIN.md § 7.6`): плановое время услуги плюс
+    # норматив правила. Фиксируется при заказе, как и срок подтверждения:
+    # правило могут поменять, а заявка принята на прежних условиях.
+    sla_completion_deadline = models.DateTimeField(null=True, blank=True)
+    # Нарушение срока исполнения отмечается при переходе в «Выполнена»
+    # по фактическому окончанию. Отдельно от `sla_breached`: опоздать
+    # с ответом и опоздать с работой — разные нарушения, и в рейтинге
+    # (`DOMAIN.md § 7.4`) они учитываются разными составляющими.
+    sla_completion_breached = models.BooleanField(default=False)
 
     rejection_reason = models.TextField(blank=True)
     # Заявка, взамен которой создана эта. Заполняется при переназначении
@@ -164,6 +178,102 @@ class ServiceOrder(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.flight.number}: {self.service.code} ({self.get_status_display()})"
+
+    def refresh_from_db(
+        self,
+        using: str | None = None,
+        fields: Iterable[str] | None = None,
+        from_queryset: QuerySet[Any, Any] | None = None,
+    ) -> None:
+        """Обновление объекта из базы.
+
+        Защищённое поле автомата запрещает присвоение, а `refresh_from_db`
+        именно присваивает — та же поправка, что у рейса. Снимаем
+        закэшированное значение, чтобы обновление прошло штатным путём.
+        """
+        self.__dict__.pop("status", None)
+        super().refresh_from_db(using=using, fields=fields, from_queryset=from_queryset)
+
+
+class SlaPenaltyKind(models.TextChoices):
+    """Штраф за нарушение (`DOMAIN.md § 7.6`). По умолчанию отключён (G-39)."""
+
+    NONE = "none", _("Без штрафа")
+    FIXED = "fixed", _("Фиксированная сумма")
+    PERCENT = "percent", _("Процент от стоимости услуги")
+
+
+class SlaRule(BaseModel):
+    """Правило SLA `[ТЗ 3.2.3]` (`DOMAIN.md § 7.6`, G-39).
+
+    Область действия — категория услуги, поставщик, оба сразу или ничего
+    (значение по умолчанию). Выбирается самое специфичное правило:
+    поставщик и категория → поставщик → категория → умолчание. Поставщик
+    специфичнее категории: его сроки записаны в договоре с ним, а сроки
+    категории — общая норма.
+
+    Правило не редактируется и не удаляется: новое правило на ту же
+    область вытесняет прежнее, а прежнее остаётся с отметкой
+    `superseded_at`. Сроки в уже оформленных заявках зафиксированы при
+    заказе и от правки справочника не меняются (`CLAUDE.md § 3` п. 5),
+    но историю справочника видно.
+    """
+
+    id_prefix: ClassVar[str] = "sla"
+
+    category = models.CharField(max_length=16, choices=ServiceCategory.choices, blank=True)
+    vendor = models.ForeignKey(
+        Vendor, on_delete=models.PROTECT, related_name="sla_rules", null=True, blank=True
+    )
+
+    confirm_minutes = models.PositiveIntegerField()
+    completion_minutes = models.PositiveIntegerField(null=True, blank=True)
+
+    penalty_kind = models.CharField(
+        max_length=8, choices=SlaPenaltyKind.choices, default=SlaPenaltyKind.NONE
+    )
+    # Фиксированный штраф — в валюте стоимости услуги, процент — от неё же:
+    # у штрафа по заявке нет собственной валюты, он считается к её сумме.
+    penalty_value = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+
+    superseded_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        verbose_name = _("Правило SLA")
+        verbose_name_plural = _("Правила SLA")
+        ordering = ("vendor", "category", "-created_at")
+        constraints = (
+            # На одну область — одно действующее правило. Пустой поставщик
+            # считается значением, а не «неизвестно»: иначе два правила
+            # по умолчанию на одну категорию база пропустила бы.
+            models.UniqueConstraint(
+                fields=("category", "vendor"),
+                condition=models.Q(superseded_at__isnull=True),
+                nulls_distinct=False,
+                name="sla_rule_one_active_per_scope",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(confirm_minutes__gt=0),
+                name="sla_rule_confirm_minutes_positive",
+                violation_error_message=_("Срок подтверждения должен быть больше нуля"),
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(penalty_kind="none", penalty_value__isnull=True)
+                    | (~models.Q(penalty_kind="none") & models.Q(penalty_value__gt=0))
+                ),
+                name="sla_rule_penalty_consistent",
+                violation_error_message=_("У штрафа обязан быть размер больше нуля"),
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"SLA {self.vendor_id or '*'} / {self.category or '*'}: {self.confirm_minutes} мин"
+
+    @property
+    def specificity(self) -> int:
+        """Чем уже область, тем выше: поставщик весит больше категории."""
+        return (2 if self.vendor_id else 0) + (1 if self.category else 0)
 
 
 def _attach_transitions() -> None:
