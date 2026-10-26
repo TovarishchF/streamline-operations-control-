@@ -316,13 +316,13 @@ paths:
   /auth/accounts:
     get:
       tags: [auth]
-      summary: Учётные записи стенда для экрана входа
+      summary: Учётные записи для экрана входа
       description: |
-        Экономит набор логина, когда стенд показывают нескольким людям подряд.
+        Экономит набор логина, когда систему показывают нескольким людям подряд.
         Отдаёт только имя, логин и роль: паролей в ответе нет и быть не может —
         вход остаётся настоящим, обход аутентификации запрещён (ADR-013).
 
-        Вне `DEMO_ACCOUNTS=true` список пуст: перечень действующих сотрудников
+        Вне `LOGIN_ACCOUNT_LIST=true` список пуст: перечень действующих сотрудников
         организации не является публичными данными.
       security: []
       responses:
@@ -1933,7 +1933,7 @@ paths:
       summary: Выгрузка счёта в PDF или XLSX `[ТЗ 3.4.1]`
       description: |
         Формируется на сервере. Сумма в выгрузке обязана совпадать с суммой в API
-        и на экране до копейки. При `DEMO_DATA=true` — водяной знак `DEMO` (ADR-008).
+        и на экране до копейки.
       x-idempotency: required
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody:
@@ -2190,6 +2190,26 @@ paths:
       responses:
         '204': { description: Отмечено }
 
+  /notifications/read-all:
+    post:
+      tags: [comms]
+      summary: Отметка всех уведомлений прочитанными `[ТЗ 3.5.1]`
+      description: |
+        Отмечает все непрочитанные уведомления текущего пользователя одним
+        запросом. Уже прочитанные не трогаются: их время прочтения не
+        переписывается, поэтому повторный вызов безопасен.
+      x-idempotency: optional
+      responses:
+        '200':
+          description: Сколько уведомлений отмечено
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [updated]
+                properties:
+                  updated: { type: integer, minimum: 0 }
+
   /outbox:
     get:
       tags: [comms]
@@ -2435,8 +2455,7 @@ paths:
       summary: Выгрузка отчёта `[ТЗ 3.6.3]`
       description: |
         Форматы PDF, XLSX, CSV, XML. XML валидируется против `soc-report-v1.xsd`
-        (ADR-032). Маркировка демонстрационного режима — по правилам `SPEC § 8.6`
-        с поправкой ADR-008.
+        (ADR-032).
       x-idempotency: required
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody:
@@ -2776,39 +2795,39 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/User' }
 
-  /demo/seed:
+  /sample-data/generate:
     post:
       tags: [admin]
-      summary: Генерация демонстрационного набора `[ТЗ этап 2]`
+      summary: Генерация набора данных `[ТЗ этап 2]`
       description: |
-        Доступна **только** при `DEMO_DATA=true` (ADR-008): в боевом режиме
-        придуманные контрагенты в базе недопустимы. Генератор детерминирован:
+        Доступна **только** при `SAMPLE_DATA=true` (ADR-008): в рабочей базе
+        придуманные контрагенты недопустимы. Генератор детерминирован:
         одно и то же зерно даёт один и тот же набор, чтобы снимки экранов
         и разговор с заказчиком воспроизводились.
 
         Набор дополняет существующий, а не заменяет его: для замены есть
-        `/demo/reset`.
+        `/sample-data/reset`.
       x-idempotency: required
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       requestBody:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/DemoSeedRequest' }
+            schema: { $ref: '#/components/schemas/SampleDataRequest' }
       responses:
         '200':
           description: Набор сгенерирован
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DemoResult' }
+              schema: { $ref: '#/components/schemas/SampleDataResult' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
-  /demo/reset:
+  /sample-data/reset:
     post:
       tags: [admin]
-      summary: Пересоздание демонстрационного набора
+      summary: Пересоздание набора данных
       description: |
-        Удаляет демонстрационные записи и генерирует набор заново. Записи
+        Удаляет записи генератора и генерирует набор заново. Записи
         журнала действий не удаляются: таблица аудита только пополняется
         (`BACKEND § 3.9`), а записи генератора отличимы по `source: seed`.
       x-idempotency: required
@@ -2817,31 +2836,31 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/DemoSeedRequest' }
+            schema: { $ref: '#/components/schemas/SampleDataRequest' }
       responses:
         '200':
           description: Набор пересоздан
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DemoResult' }
+              schema: { $ref: '#/components/schemas/SampleDataResult' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
-  /demo/purge:
+  /sample-data/purge:
     post:
       tags: [admin]
-      summary: Очистка демонстрационных данных
+      summary: Очистка данных генератора
       description: |
-        Удаляются **только** записи с `isDemo`. Это возможно потому, что
-        ссылки «настоящая запись → демонстрационная» запрещены на уровне базы
-        (ADR-016).
+        Удаляются **только** записи с `isGenerated` и пользователи генератора
+        (адрес в зоне `soc.local`). Это возможно потому, что ссылки
+        «введённая запись → запись генератора» запрещены на уровне базы (ADR-016).
       x-idempotency: required
       parameters: [{ $ref: '#/components/parameters/IdempotencyKey' }]
       responses:
         '200':
-          description: Демонстрационные записи удалены
+          description: Записи генератора удалены
           content:
             application/json:
-              schema: { $ref: '#/components/schemas/DemoResult' }
+              schema: { $ref: '#/components/schemas/SampleDataResult' }
         '403': { $ref: '#/components/responses/Forbidden' }
 
   /audit:
@@ -2850,8 +2869,8 @@ paths:
       summary: Журнал аудита `[ТЗ 4.3]`
       description: |
         Записи неизменяемы: приложение подключается к базе учётной записью без прав
-        `UPDATE` и `DELETE` на эту таблицу. Записи от демонстрационного генератора
-        помечены `source: seed` и автором `System (демо-генератор)`.
+        `UPDATE` и `DELETE` на эту таблицу. Записи генератора данных
+        помечены `source: seed` и автором `Система (генератор данных)`.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PerPage'
@@ -2898,7 +2917,7 @@ paths:
       tags: [admin]
       summary: Изменение настроек
       description: |
-        Изменение параметров модельного времени запрещено при `DEMO_DATA=false`
+        Изменение параметров модельного времени запрещено при `SAMPLE_DATA=false`
         (ADR-014) и возвращает 403.
       requestBody:
         required: true
@@ -3064,7 +3083,7 @@ paths:
       summary: Текущее время сервера
       description: |
         Единственный источник времени для клиентов (`CLAUDE.md § 3` п. 2).
-        При включённом модельном времени на демонстрационном стенде возвращает
+        При включённом модельном времени (режим генератора данных) возвращает
         смещённое значение и признак `shifted: true` (ADR-014).
       responses:
         '200':
@@ -3271,7 +3290,7 @@ components:
             page: { type: integer }
             perPage: { type: integer }
 
-    DemoSeedRequest:
+    SampleDataRequest:
       type: object
       properties:
         seed:
@@ -3280,13 +3299,13 @@ components:
             Зерно генератора. Одно и то же зерно даёт один и тот же набор.
           default: 20260913
 
-    DemoResult:
+    SampleDataResult:
       type: object
       required: [action, counts]
       properties:
         action:
           type: string
-          enum: [seed, reset, purge]
+          enum: [generate, reset, purge]
         counts:
           type: object
           description: Что создано либо удалено, по видам записей
@@ -3316,7 +3335,7 @@ components:
         - SLOT_ALREADY_ANSWERED
         - SCHEDULE_CONFLICT
         - INTEGRATION_UNAVAILABLE
-        - DEMO_ONLY_OPERATION
+        - SAMPLE_DATA_DISABLED
         - RATE_LIMITED
         - INTERNAL_ERROR
 
@@ -3463,9 +3482,9 @@ components:
           description: |
             Карта прав текущей роли — единый источник истины с клиентом.
             Скрытие элемента в интерфейсе не заменяет проверку на сервере.
-        demoMode:
+        sampleData:
           type: boolean
-          description: Признак демонстрационного стенда (ADR-008)
+          description: Включён генератор данных и управление модельным временем (ADR-008)
         twoFactorSetupRequired:
           type: boolean
           description: |
@@ -3814,7 +3833,7 @@ components:
             - type: 'null'
         isActive: { type: boolean }
         dataSource: { $ref: '#/components/schemas/DataSource' }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     ClientCreate:
       type: object
@@ -3883,7 +3902,7 @@ components:
             - type: 'null'
         isActive: { type: boolean }
         dataSource: { $ref: '#/components/schemas/DataSource' }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     VendorCreate:
       type: object
@@ -4190,7 +4209,7 @@ components:
         templateId: { type: [string, 'null'] }
         remarks: { type: [string, 'null'] }
         dataSource: { $ref: '#/components/schemas/DataSource' }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
 
@@ -4216,7 +4235,7 @@ components:
             - $ref: '#/components/schemas/DecimalString'
             - type: 'null'
         hasConflicts: { type: boolean }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     FlightCreate:
       type: object
@@ -4524,7 +4543,7 @@ components:
           type: array
           items: { $ref: '#/components/schemas/AttachmentRef' }
         dataSource: { $ref: '#/components/schemas/DataSource' }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     ServiceOrderCreate:
       type: object
@@ -4701,7 +4720,7 @@ components:
           items: { $ref: '#/components/schemas/DocumentFee' }
         totals: { $ref: '#/components/schemas/DocumentTotals' }
         voidedByDocId: { type: [string, 'null'] }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     InvoiceStatus:
       type: string
@@ -4749,7 +4768,7 @@ components:
               factValue: { $ref: '#/components/schemas/Money' }
               comment: { type: string }
         voidedByDocId: { type: [string, 'null'] }
-        isDemo: { type: boolean }
+        isGenerated: { type: boolean }
 
     PaymentCreate:
       type: object
@@ -5098,7 +5117,6 @@ components:
         code: { $ref: '#/components/schemas/ReportCode' }
         generatedAt: { type: string, format: date-time }
         currency: { $ref: '#/components/schemas/CurrencyCode' }
-        isDemo: { type: boolean }
         columns:
           type: array
           items:
@@ -5263,9 +5281,8 @@ components:
       type: object
       required: [id, ts, actorId, actorName, actorRole, source, entityType, entityId, action]
       description: |
-        Записи неизменяемы. `source: seed` означает демонстрационный генератор —
-        такие записи визуально отличаются и не выдаются за действия людей
-        (`CLAUDE.md § 4`).
+        Записи неизменяемы. `source: seed` означает генератор данных — такие
+        записи подписаны системой и не выдаются за действия людей (`CLAUDE.md § 4`).
       properties:
         id: { type: string }
         ts: { type: string, format: date-time }
@@ -5326,12 +5343,12 @@ components:
         clockOffsetSeconds:
           type: integer
           description: |
-            Смещение модельного времени. Изменение запрещено при `DEMO_DATA=false`
+            Смещение модельного времени. Изменение запрещено при `SAMPLE_DATA=false`
             (ADR-014).
         clockScale:
           type: integer
           enum: [1, 60, 600]
-        demoMode:
+        sampleData:
           type: boolean
           readOnly: true
           description: Управляется переменной окружения, из интерфейса не изменяется
@@ -5456,5 +5473,5 @@ components:
         nowUtc: { type: string, format: date-time }
         shifted:
           type: boolean
-          description: Включено модельное время демонстрационного стенда (ADR-014)
+          description: Включено модельное время (ADR-014)
         scale: { type: integer }
