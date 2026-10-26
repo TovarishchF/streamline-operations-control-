@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Select, Space, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Row, Select, Space, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,7 @@ import { useClock } from '@/shared/clock/useClock';
 import { DateText, EmptyState, MoneyText, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 import { DocumentFormModal } from './DocumentFormModal';
 
 const QUOTE_TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
@@ -75,7 +76,7 @@ export function QuotesPage(): JSX.Element {
 
   const columns: DataColumns<QuoteRow> = [
     {
-      title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      title: t('finance.number'), dataIndex: 'number', filterable: 'text', width: 170, fixed: 'left',
       render: (value: string | null, row) => (
         <Link to={`/billing/quotes/${row.id}`}>
           <Mono>{value ?? t('finance.draft')}</Mono>
@@ -220,7 +221,7 @@ export function InvoicesPage(): JSX.Element {
 
   const columns: DataColumns<InvoiceRow> = [
     {
-      title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      title: t('finance.number'), dataIndex: 'number', filterable: 'text', width: 170, fixed: 'left',
       render: (value: string | null, row) => (
         <Link to={`/billing/invoices/${row.id}`}>
           <Mono>{value ?? t('finance.draft')}</Mono>
@@ -314,7 +315,8 @@ export function InvoicesPage(): JSX.Element {
       </Row>
 
       {overdue.length > 0 ? (
-        <Alert
+        <Notice
+          id={`finance.overdue:${String(overdue.length)}`}
           type="error"
           showIcon
           message={t('finance.overdueNotice', { count: overdue.length })}

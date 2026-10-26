@@ -227,8 +227,6 @@ export function MessageTemplatesPage(): JSX.Element {
                 </Typography.Text>
               </Space>
 
-              <Alert type="info" showIcon message={t('comms.localeHint')} />
-
               <Space>
                 <Button
                   type="primary"

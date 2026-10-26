@@ -9,6 +9,7 @@ import type { VendorCandidate } from '@/api/types';
 import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 type Preset = 'price' | 'rating' | 'proximity' | 'balanced';
 
@@ -224,7 +225,8 @@ export function VendorSuggestModal({
           />
         )}
 
-        <Alert
+        <Notice
+          id="vendor.snapshot"
           type="info"
           showIcon
           message={t('vendor.snapshotNotice')}

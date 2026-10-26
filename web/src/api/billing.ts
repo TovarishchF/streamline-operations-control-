@@ -61,7 +61,7 @@ export const payableSchema = z.object({
   dueDate: z.string(),
   status: payableStatusSchema,
   // Просрочку считает сервер: иначе она зависела бы от часов рабочего
-  // места, а на стенде ещё и от модельного времени (ADR-014).
+  // места, а в режиме генератора — ещё и от модельного времени (ADR-014).
   isOverdue: z.boolean(),
   vendorInvoiceId: z.string().nullable(),
 });

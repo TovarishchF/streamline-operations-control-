@@ -199,12 +199,6 @@ export function ReconciliationPage(): JSX.Element {
             </Descriptions>
           </Card>
 
-          <Alert
-            type="info"
-            showIcon
-            message={t('reconciliation.toleranceNotice')}
-          />
-
           {(invoice.unmappedCodes?.length ?? 0) > 0 ? (
             <Alert
               type="warning"
@@ -344,7 +338,6 @@ function ResolveModal({
           }}
         />
 
-        <Alert type="info" showIcon message={t('reconciliation.goesToAudit')} />
       </Space>
     </Modal>
   );

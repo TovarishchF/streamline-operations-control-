@@ -1,6 +1,5 @@
-import { useState, type JSX } from 'react';
+import { useState, type JSX, type ReactElement } from 'react';
 import { Button, Popover, Radio, Space, Typography } from 'antd';
-import { ClockCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
 import { useClockStore } from '@/shared/clock/useClock';
@@ -13,10 +12,12 @@ import { useClockStore } from '@/shared/clock/useClock';
  * по серверным часам, поэтому клиентская перемотка ничего бы не показала.
  *
  * На макетах панель меняет только клиентский стор — на M11 она начнёт
- * вызывать `PATCH /settings`. При `DEMO_DATA=false` панель не выводится
+ * вызывать `PATCH /settings`. При `SAMPLE_DATA=false` панель не выводится
  * и изменение запрещено на уровне сервиса.
+ *
+ * Открывается нажатием на часы в шапке: отдельной кнопки у панели нет.
  */
-export function DemoClockPanel(): JSX.Element {
+export function ModelClockPanel({ children }: { children: ReactElement }): JSX.Element {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const scale = useClockStore((s) => s.scale);
@@ -30,7 +31,7 @@ export function DemoClockPanel(): JSX.Element {
   const content = (
     <Space direction="vertical" size={10} style={{ width: 240 }}>
       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-        {t('clock.demoPanelHint')}
+        {t('clock.modelPanelHint')}
       </Typography.Text>
 
       <Space direction="vertical" size={4}>
@@ -73,12 +74,12 @@ export function DemoClockPanel(): JSX.Element {
   return (
     <Popover
       content={content}
-      title={t('clock.demoPanel')}
+      title={t('clock.modelPanel')}
       trigger="click"
       open={open}
       onOpenChange={setOpen}
     >
-      <Button size="small" icon={<ClockCircleOutlined />} aria-label={t('clock.demoPanel')} />
+      {children}
     </Popover>
   );
 }

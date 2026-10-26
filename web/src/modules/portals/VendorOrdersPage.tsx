@@ -24,6 +24,7 @@ import {
 } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 interface FinishValues {
   actualStart: Dayjs;
@@ -252,7 +253,8 @@ export function VendorOrdersPage(): JSX.Element {
       </Typography.Title>
 
       {needsResponse > 0 ? (
-        <Alert
+        <Notice
+          id={`portal.vendor.needsResponse:${String(needsResponse)}`}
           type="warning"
           showIcon
           message={t('portal.vendor.needsResponse', { count: needsResponse })}

@@ -135,7 +135,7 @@ export const QUOTES: Quote[] = QUOTE_FLIGHTS.map((flight, index) => {
     fees: [{ code: 'handling_fee', description: 'Сбор за организацию', kind: 'percent', value: '2.0000', amount: doc.totals.feesTotal }],
     totals: doc.totals,
     voidedByDocId: null,
-    isDemo: true,
+    isGenerated: true,
   };
 });
 
@@ -192,7 +192,7 @@ export const INVOICES: Invoice[] = INVOICE_FLIGHTS.map((flight, index) => {
     paidAmount: money(paid, doc.currency),
     planFactComparison: comparison,
     voidedByDocId: null,
-    isDemo: true,
+    isGenerated: true,
   };
 });
 

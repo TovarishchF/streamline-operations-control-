@@ -9,11 +9,10 @@
  * готовые значения; маржа, цены и рейтинги приходят с сервера.
  */
 import type { CSSProperties, ReactNode } from 'react';
-import { Alert, Empty, Skeleton, Space, Tag, Tooltip, Typography } from 'antd';
+import { Alert, Empty, Skeleton, Space, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import type { Money } from '@/api/types';
-import { useDemoMode } from '@/shared/auth/session';
 import {
   FLIGHT_STATUS_TOKENS,
   SERVICE_ORDER_STATUS_TOKENS,
@@ -170,54 +169,33 @@ export function DateText({ value }: { value: string | null | undefined }) {
 // ─────────────────────────────── Статусы ───────────────────────────────
 
 /**
- * Статус — пара «тег и точка» («Основа 2.0»).
+ * Пилюля статуса — единственный способ показать доменный статус
+ * (карточка StatusPill дизайн-системы).
  *
- * Точка несёт тот же цвет, что и текст: тон заливки от этого спокойнее,
- * а отличие статуса читается с двух метров — диспетчер смотрит на план
- * не только в упор. Форма — пилюля; цвет берётся только из токена,
- * объявлять свой цвет статуса компонент не вправе (`CLAUDE.md § 10`).
+ * Точка, слово и четыре цвета смысла. Слово обязательно: цвет в одиночку
+ * статус не несёт. `sm` — для таблиц и плотных списков.
  */
-function TokenTag({ token, label }: { token: StatusToken; label: string }) {
-  const style = STATUS_TOKENS[token];
-  return (
-    <Tag
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        // Высота 22 px: пилюля помещается в строку таблицы 30 px,
-        // не растягивая её.
-        height: 22,
-        lineHeight: '20px',
-        color: style.color,
-        background: style.background,
-        borderColor: style.border,
-        borderRadius: 999,
-        margin: 0,
-        fontWeight: 500,
-      }}
-    >
-      <span
-        aria-hidden="true"
-        style={{
-          width: 6,
-          height: 6,
-          borderRadius: 999,
-          background: style.color,
-          flexShrink: 0,
-        }}
-      />
-      {label}
-    </Tag>
-  );
+export function StatusPill({
+  token,
+  label,
+  size = 'md',
+}: {
+  token: StatusToken;
+  label: string;
+  size?: 'md' | 'sm';
+}) {
+  const classes = ['soc-pill', `soc-pill--${token}`];
+  if (size === 'sm') classes.push('soc-pill--sm');
+  return <span className={classes.join(' ')}>{label}</span>;
 }
 
-export function FlightStatusTag({ status }: { status: string }) {
+export function FlightStatusTag({ status, size }: { status: string; size?: 'md' | 'sm' }) {
   const { t } = useTranslation();
   return (
-    <TokenTag
+    <StatusPill
       token={FLIGHT_STATUS_TOKENS[status] ?? 'neutral'}
       label={t(`flightStatus.${status}`, status)}
+      size={size}
     />
   );
 }
@@ -225,7 +203,7 @@ export function FlightStatusTag({ status }: { status: string }) {
 export function ServiceStatusTag({ status }: { status: string }) {
   const { t } = useTranslation();
   return (
-    <TokenTag
+    <StatusPill
       token={SERVICE_ORDER_STATUS_TOKENS[status] ?? 'neutral'}
       label={t(`serviceStatus.${status}`, status)}
     />
@@ -234,7 +212,7 @@ export function ServiceStatusTag({ status }: { status: string }) {
 
 /** Статус произвольной сущности: документ, контракт, заявка на оплату. */
 export function GenericStatusTag({ token, label }: { token: StatusToken; label: string }) {
-  return <TokenTag token={token} label={label} />;
+  return <StatusPill token={token} label={label} />;
 }
 
 export { statusToken, STATUS_TOKENS };
@@ -281,25 +259,6 @@ export function ErrorState({ code, onRetry }: { code?: string; onRetry?: () => v
 }
 
 // ─────────────────────────── Прочее ───────────────────────────
-
-/**
- * Подпись «источник данных» — честность происхождения (`CLAUDE.md § 4`).
- *
- * Выводится только на демонстрационном стенде: в боевом режиме помечать
- * нечего, все записи настоящие.
- */
-export function DataSourceTag({ source }: { source: string | undefined }) {
-  const { t } = useTranslation();
-  const demoMode = useDemoMode();
-  if (!demoMode || source !== 'synthetic') return null;
-  return (
-    <Tooltip title={t('demo.syntheticHint')}>
-      <Tag color="purple" style={{ margin: 0 }}>
-        {t('demo.synthetic')}
-      </Tag>
-    </Tooltip>
-  );
-}
 
 /** Пара «подпись — значение» для карточек и сводок. */
 export function Field({ label, children }: { label: string; children: ReactNode }) {

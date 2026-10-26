@@ -1,13 +1,13 @@
 import type { JSX } from 'react';
 import {
-  Button, ConfigProvider, Dropdown, Layout, Menu, Tag, Tooltip, Typography, Select,
+  Button, ConfigProvider, Dropdown, Layout, Menu, Typography, Select,
 } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { portalTheme, SOC_COLORS } from '@/app/theme';
-import { useCurrentUser, useDemoMode, useSession } from '@/shared/auth/session';
+import { useCurrentUser, useSession } from '@/shared/auth/session';
 import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
 
@@ -25,7 +25,6 @@ export function PortalLayout(): JSX.Element {
   const navigate = useNavigate();
   const location = useLocation();
   const { nowUtc } = useClock();
-  const demoMode = useDemoMode();
   useClockTicker();
 
   const items =
@@ -66,7 +65,7 @@ export function PortalLayout(): JSX.Element {
           gap: 14,
           height: 64,
           lineHeight: '64px',
-          background: SOC_COLORS.brandInk,
+          background: SOC_COLORS.chrome,
           paddingInline: 24,
         }}
       >
@@ -78,26 +77,18 @@ export function PortalLayout(): JSX.Element {
 
         <span
           aria-hidden="true"
-          style={{ width: 1, height: 24, background: SOC_COLORS.brandInkLine }}
+          style={{ width: 1, height: 24, background: SOC_COLORS.chromeLine }}
         />
 
-        <Typography.Text style={{ color: SOC_COLORS.onBrandInk, fontSize: 14, fontWeight: 500 }}>
+        <Typography.Text style={{ color: SOC_COLORS.onChrome, fontSize: 14, fontWeight: 500 }}>
           {user?.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
         </Typography.Text>
-
-        {demoMode && (
-          <Tooltip title={t('app.demoTooltip')}>
-            <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
-              {t('app.demoBadge')}
-            </Tag>
-          </Tooltip>
-        )}
 
         <div style={{ flex: 1 }} />
 
         <Typography.Text
           className="soc-hide-sm"
-          style={{ fontFamily: "'JetBrains Mono', monospace", color: SOC_COLORS.onBrandInkMuted }}
+          style={{ fontFamily: "'JetBrains Mono', monospace", color: SOC_COLORS.onChromeMuted }}
         >
           {formatUtc(nowUtc)}
         </Typography.Text>
@@ -126,7 +117,7 @@ export function PortalLayout(): JSX.Element {
       <nav
         style={{
           background: SOC_COLORS.surface,
-          borderBottom: `1px solid ${SOC_COLORS.border}`,
+          borderBottom: `1px solid ${SOC_COLORS.line}`,
           paddingInline: 24,
         }}
       >

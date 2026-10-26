@@ -1,57 +1,73 @@
-import { useState, type JSX } from 'react';
-import {
-  Badge, Button, Drawer, Dropdown, Layout, Select, Space, Tag, Tooltip, Typography,
-} from 'antd';
-import { BellOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useCallback, useEffect, useState, type JSX } from 'react';
+import { Button, Drawer, Dropdown, Layout, Tooltip } from 'antd';
+import { BellOutlined, MenuOutlined, SearchOutlined } from '@ant-design/icons';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { SUPPORTED_LOCALES, type Locale } from '@/shared/i18n';
+import { SUPPORTED_LOCALES } from '@/shared/i18n';
 import { useClock, useClockTicker, formatUtc } from '@/shared/clock/useClock';
-import { useCurrentUser, useDemoMode, useSession } from '@/shared/auth/session';
-import { SOC_COLORS, SOC_DENSITY } from '@/app/theme';
+import { formatLocalTime, zoneAbbreviation } from '@/shared/format/timezone';
+import { useCurrentUser, useSampleDataMode, useSession } from '@/shared/auth/session';
+import { SOC_DENSITY } from '@/app/theme';
 import { useNotifications } from '@/api/comms';
-import { NavRail } from './NavRail';
-import { SectionTabs } from './SectionTabs';
+import { useHealth } from '@/api/system';
+import { NavRail, breadcrumb } from './NavRail';
 import { NotificationCentre } from './NotificationCentre';
-import { DemoClockPanel } from './DemoClockPanel';
+import { ModelClockPanel } from './ModelClockPanel';
+import { CommandPalette } from './CommandPalette';
 
-function LocaleSwitch(): JSX.Element {
-  const { t, i18n } = useTranslation();
-  return (
-    <Select<Locale>
-      size="small"
-      value={i18n.language.startsWith('en') ? 'en' : 'ru'}
-      onChange={(value) => {
-        void i18n.changeLanguage(value);
-      }}
-      options={SUPPORTED_LOCALES.map((code) => ({ value: code, label: code.toUpperCase() }))}
-      style={{ width: 68 }}
-      aria-label={t('common.language')}
-    />
-  );
+/** Инициалы для аватара: первая буква первого и последнего слова имени. */
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/);
+  const first = words[0]?.[0] ?? '';
+  const last = words.length > 1 ? (words[words.length - 1]?.[0] ?? '') : '';
+  return `${first}${last}`.toLocaleUpperCase('ru');
+}
+
+/** Имя в шапке: имя и фамилия, без отчества — полное имя в подсказке. */
+function shortName(name: string): string {
+  const words = name.trim().split(/\s+/);
+  return words.length > 2 ? `${words[0] ?? ''} ${words[words.length - 1] ?? ''}` : name;
 }
 
 /**
- * Переключатель роли.
+ * Пользователь: аватар, имя и роль; в меню — язык, версия, смена
+ * сотрудника и выход.
  *
- * Профиль и выход. Переключателя ролей нет: обход аутентификации запрещён
- * (ADR-013). Чтобы посмотреть систему глазами другой роли, нужно войти
- * под другим пользователем.
+ * Переключателя ролей нет: обход аутентификации запрещён (ADR-013).
+ * Чтобы посмотреть систему глазами другой роли, нужно войти под другим
+ * пользователем.
  */
 function UserMenu(): JSX.Element | null {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = useCurrentUser();
   const signOut = useSession((s) => s.signOut);
   const navigate = useNavigate();
+  // Версия берётся с сервера, а не пишется в разметке: подпись, которую
+  // забыли обновить, хуже отсутствующей.
+  const health = useHealth();
 
   if (!user) return null;
 
-  // «Сменить сотрудника» — это выход и новый вход, а не подмена роли:
-  // обход аутентификации запрещён (ADR-013). От обычного выхода отличается
-  // тем, куда приводит: на вход со списком учётных записей, а не на пустую
-  // форму.
+  const language = i18n.language.startsWith('en') ? 'en' : 'ru';
+
+  // «Сменить сотрудника» — это выход и новый вход, а не подмена роли.
+  // От обычного выхода отличается тем, куда приводит: на вход со списком
+  // учётных записей, а не на пустую форму.
   const items = [
+    {
+      key: 'language',
+      label: t('common.language'),
+      children: SUPPORTED_LOCALES.map((code) => ({
+        key: `lang:${code}`,
+        label: code.toUpperCase(),
+        disabled: code === language,
+        onClick: () => {
+          void i18n.changeLanguage(code);
+        },
+      })),
+    },
+    { type: 'divider' as const },
     {
       key: 'switchUser',
       label: t('auth.switchUser'),
@@ -61,7 +77,6 @@ function UserMenu(): JSX.Element | null {
         });
       },
     },
-    { type: 'divider' as const },
     {
       key: 'signOut',
       label: t('auth.signOut'),
@@ -71,157 +86,182 @@ function UserMenu(): JSX.Element | null {
         });
       },
     },
+    ...(health.data
+      ? [
+          { type: 'divider' as const },
+          { key: 'version', label: `SOC ${health.data.version}`, disabled: true },
+        ]
+      : []),
   ];
 
   return (
-    <Dropdown menu={{ items }} trigger={['click']}>
-      {/* Ширина по содержимому: имя с отчеством и должность читаются
-          целиком. Урезание включается только тогда, когда кнопка начинает
-          выдавливать часы и уведомления. */}
-      <Button size="small" icon={<UserOutlined />} className="soc-user-button">
-        <Space size={4}>
-          <span className="soc-user-name">{user.name}</span>
-          <Typography.Text type="secondary" className="soc-hide-sm">
-            {t(`roles.${user.role}`)}
-          </Typography.Text>
-        </Space>
-      </Button>
+    <Dropdown menu={{ items }} trigger={['click']} placement="bottomRight">
+      <button type="button" className="soc-user" title={user.name}>
+        <span className="soc-avatar" aria-hidden="true">{initials(user.name)}</span>
+        <span className="soc-user__text soc-hide-sm">
+          <span className="soc-user__name">{shortName(user.name)}</span>
+          <span className="soc-user__role">{t(`roles.${user.role}`)}</span>
+        </span>
+      </button>
     </Dropdown>
   );
 }
 
-export function AppLayout(): JSX.Element {
+/**
+ * Часы: UTC, затем местное время пользователя с подписью зоны.
+ * Голое `12:40` — дефект: время в шапке всегда с зоной.
+ */
+function DualClock(): JSX.Element {
   const { t } = useTranslation();
   const { nowUtc, shifted } = useClock();
+  const user = useCurrentUser();
+  const timeZone = user?.timezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  return (
+    <Tooltip title={shifted ? t('clock.shiftedHint') : t('clock.utcHint')}>
+      <div className={shifted ? 'soc-clock is-shifted' : 'soc-clock'}>
+        <span>{formatUtc(nowUtc)}</span>
+        <span className="soc-clock__sep" aria-hidden="true" />
+        <span className="soc-clock__lt">
+          {formatLocalTime(timeZone, nowUtc)} {zoneAbbreviation(timeZone, nowUtc)}
+        </span>
+      </div>
+    </Tooltip>
+  );
+}
+
+/** Состояние свёрнутого рельса — своё у каждого пользователя на этом устройстве. */
+function useRailCollapsed(userId: string | undefined): [boolean, () => void] {
+  const key = `soc.rail.collapsed.${userId ?? 'anonymous'}`;
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return window.localStorage.getItem(key) === '1';
+    } catch {
+      return false;
+    }
+  });
+
+  const toggle = useCallback(() => {
+    setCollapsed((value) => {
+      try {
+        window.localStorage.setItem(key, value ? '0' : '1');
+      } catch {
+        // Хранилище недоступно (приватный режим) — рельс просто не запомнит выбор.
+      }
+      return !value;
+    });
+  }, [key]);
+
+  return [collapsed, toggle];
+}
+
+/**
+ * Обвязка внутренних экранов (карточки AppShell, NavRail, TopBar).
+ *
+ * Слева тёмный рельс, справа шапка на `surface` и область содержимого
+ * на `canvas`. Ниже 1024 px рельс уходит в выдвижную панель.
+ */
+export function AppLayout(): JSX.Element {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const user = useCurrentUser();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  const [collapsed, toggleCollapsed] = useRailCollapsed(user?.id);
   useClockTicker();
 
   // Непрочитанные считает сервер своей выборкой: колокольчик показывает
   // ровно то, что лежит в центре уведомлений.
   const unread = useNotifications(true).data?.meta.total ?? 0;
-  const demoMode = useDemoMode();
+  const sampleData = useSampleDataMode();
+  const crumbs = breadcrumb(location.pathname);
+
+  useEffect(() => {
+    const onKey = (event: globalThis.KeyboardEvent): void => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        setPaletteOpen(true);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  const clock = <DualClock />;
 
   return (
-    <Layout className="soc" style={{ minHeight: '100vh' }}>
-      {/* Обвязка несёт знак заказчика и потому тёмная. Полоса 52 px:
-          выше она отнимала бы строки у суточного плана, ради которых
-          вся плотность и выбиралась. */}
-      <Layout.Header
-        className="soc-chrome"
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          height: SOC_DENSITY.chromeHeight,
-          lineHeight: `${String(SOC_DENSITY.chromeHeight)}px`,
-          background: SOC_COLORS.brandInk,
-          paddingInline: 16,
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-        }}
+    <Layout className="soc soc-shell" hasSider>
+      <Layout.Sider
+        width={SOC_DENSITY.railWidth}
+        collapsedWidth={SOC_DENSITY.railWidthCollapsed}
+        collapsed={collapsed}
+        trigger={null}
+        className={collapsed ? 'soc-rail is-collapsed' : 'soc-rail'}
       >
-        {/* Кнопка меню появляется на узких экранах (адаптив от 360 px) */}
-        <Button
-          className="soc-burger"
-          icon={<MenuOutlined />}
-          size="small"
-          onClick={() => {
-            setDrawerOpen(true);
-          }}
-          aria-label={t('nav.menu')}
-        />
+        <NavRail collapsed={collapsed} onToggleCollapsed={toggleCollapsed} />
+      </Layout.Sider>
 
-        {/* Белая версия знака — на brand-ink, цветная остаётся для белого
-            фона и бланка документа. Красный из знака в интерфейсе не
-            используется: там он означает критический статус. */}
-        <Link to="/" style={{ display: 'flex', alignItems: 'center' }}>
-          <img
-            src="/brand/streamline-fs-white.png"
-            alt={t('app.fullName')}
-            style={{ height: 26, width: 'auto', display: 'block' }}
-          />
-        </Link>
-
-        <span
-          aria-hidden="true"
-          style={{ width: 1, height: 22, background: SOC_COLORS.brandInkLine }}
-          className="soc-hide-sm"
-        />
-
-        <Typography.Text
-          className="soc-hide-sm"
-          style={{ color: SOC_COLORS.onBrandInk, fontSize: 13, fontWeight: 500 }}
-        >
-          {t('app.chromeTitle')}
-        </Typography.Text>
-
-        {demoMode && (
-          <Tooltip title={t('app.demoTooltip')}>
-            <Tag color="orange" style={{ margin: 0 }} className="soc-hide-sm">
-              {t('app.demoBadge')}
-            </Tag>
-          </Tooltip>
-        )}
-
-        <div style={{ flex: 1 }} />
-
-        {demoMode && (
-          <span className="soc-hide-sm">
-            <DemoClockPanel />
-          </span>
-        )}
-
-        <Tooltip title={t('clock.utcHint')}>
-          <Space size={4} className="soc-hide-sm">
-            <Typography.Text
-              style={{ fontFamily: "'JetBrains Mono', monospace", color: SOC_COLORS.onBrandInk }}
-            >
-              {formatUtc(nowUtc)}
-            </Typography.Text>
-            {shifted && (
-              <Tag color="purple" style={{ margin: 0 }}>
-                {t('clock.shifted')}
-              </Tag>
-            )}
-          </Space>
-        </Tooltip>
-
-        <Badge count={unread} size="small">
+      <Layout className="soc-main">
+        <Layout.Header className="soc-topbar">
           <Button
-            icon={<BellOutlined />}
-            size="small"
+            className="soc-burger"
+            type="text"
+            icon={<MenuOutlined />}
+            onClick={() => {
+              setDrawerOpen(true);
+            }}
+            aria-label={t('nav.menu')}
+          />
+
+          <div className="soc-crumbs">
+            {crumbs ? (
+              <>
+                <span className="soc-crumbs__section">{t(crumbs.sectionKey)}</span>
+                <span className="soc-crumbs__sep" aria-hidden="true">/</span>
+                <span className="soc-crumbs__page">{t(crumbs.pageKey)}</span>
+              </>
+            ) : (
+              <span className="soc-crumbs__page">{t('app.fullName')}</span>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="soc-search soc-hide-sm"
+            onClick={() => {
+              setPaletteOpen(true);
+            }}
+            aria-label={t('nav.search')}
+          >
+            <SearchOutlined />
+            <span className="soc-search__text">{t('nav.searchPlaceholder')}</span>
+            <span className="soc-kbd">Ctrl K</span>
+          </button>
+
+          {/* В режиме генератора часы открывают управление модельным временем. */}
+          <span className="soc-hide-sm">
+            {sampleData ? <ModelClockPanel>{clock}</ModelClockPanel> : clock}
+          </span>
+
+          <button
+            type="button"
+            className="soc-iconbtn"
             onClick={() => {
               setNotificationsOpen(true);
             }}
-            aria-label={t('nav.notifications')}
-          />
-        </Badge>
+            aria-label={`${t('nav.notifications')}: ${String(unread)}`}
+          >
+            <BellOutlined />
+            {unread > 0 ? <span className="soc-count">{unread}</span> : null}
+          </button>
 
-        <span className="soc-hide-sm">
-          <LocaleSwitch />
-        </span>
-        <UserMenu />
-      </Layout.Header>
+          <UserMenu />
+        </Layout.Header>
 
-      <Layout>
-        {/* Навигация переехала на светлый рельс: контраст отдан данным,
-            а не обвязке. */}
-        <Layout.Sider
-          width={SOC_DENSITY.railWidth}
-          theme="light"
-          className="soc-sider"
-          style={{
-            background: SOC_COLORS.surface,
-            borderInlineEnd: `1px solid ${SOC_COLORS.border}`,
-          }}
-        >
-          <NavRail />
-        </Layout.Sider>
-
-        <Layout.Content style={{ padding: SOC_DENSITY.contentPadding, minWidth: 0 }}>
-          <SectionTabs />
+        <Layout.Content className="soc-content">
           <Outlet />
         </Layout.Content>
       </Layout>
@@ -232,9 +272,9 @@ export function AppLayout(): JSX.Element {
         onClose={() => {
           setDrawerOpen(false);
         }}
-        width={260}
-        styles={{ body: { padding: 0 } }}
-        title={t('app.name')}
+        width={SOC_DENSITY.railWidth}
+        closable={false}
+        rootClassName="soc-rail-drawer"
       >
         <NavRail
           onNavigate={() => {
@@ -247,6 +287,13 @@ export function AppLayout(): JSX.Element {
         open={notificationsOpen}
         onClose={() => {
           setNotificationsOpen(false);
+        }}
+      />
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => {
+          setPaletteOpen(false);
         }}
       />
     </Layout>

@@ -1,5 +1,5 @@
 import type { JSX } from 'react';
-import { Alert, Card, Space, Tag, Typography } from 'antd';
+import { Card, Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
@@ -104,13 +104,6 @@ export function PerformancePage(): JSX.Element {
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.performance')}</Typography.Title>
 
-      <Alert
-        type="info"
-        showIcon
-        message={t('performance.methodNotice')}
-        description={t('performance.methodHint')}
-      />
-
       <Card size="small">
         <Space size={16} wrap>
           <Typography.Text type="secondary">{t('performance.period')}:</Typography.Text>
@@ -131,7 +124,6 @@ export function PerformancePage(): JSX.Element {
         />
       </Card>
 
-      <Alert type="warning" showIcon message={t('performance.loadTestNotice')} />
     </Space>
   );
 }

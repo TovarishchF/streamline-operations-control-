@@ -17,6 +17,7 @@ import {
 } from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
 import { EmptyState, Mono } from '@/shared/ui/primitives';
+import { Notice } from '@/shared/ui/Notice';
 
 import { TemplateFormModal } from './TemplateFormModal';
 
@@ -75,7 +76,7 @@ export function FlightTemplatesPage(): JSX.Element {
   };
 
   const columns: DataColumns<FlightTemplateRow> = [
-    { title: t('template.name'), dataIndex: 'name', width: 260, fixed: 'left' },
+    { title: t('template.name'), dataIndex: 'name', filterable: 'text', width: 260, fixed: 'left' },
     {
       title: t('flight.client'), dataIndex: 'clientId', width: 200,
       render: (value: string) => clients.get(value) ?? value,
@@ -185,8 +186,12 @@ export function FlightTemplatesPage(): JSX.Element {
             </Form.Item>
           </Form>
 
-          <Alert type="info" showIcon message={t('template.dstNotice')} />
-          <Alert type="warning" showIcon message={t('template.editDoesNotAffectExisting')} />
+          <Notice
+            id="template.editDoesNotAffectExisting"
+            type="warning"
+            showIcon
+            message={t('template.editDoesNotAffectExisting')}
+          />
         </Space>
       </Modal>
     </Space>

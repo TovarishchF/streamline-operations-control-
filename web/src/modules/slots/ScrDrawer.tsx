@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { SOC_COLORS } from '@/app/theme';
 import { useBuildScr, type SlotRow } from '@/api/slots';
 import { Mono } from '@/shared/ui/primitives';
+import { Notice } from '@/shared/ui/Notice';
 
 /**
  * Черновик сообщения SCR `[ТЗ 4.2]` (ADR-026).
@@ -68,7 +69,7 @@ export function ScrDrawer({
       }
     >
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Alert type="info" showIcon message={t('slots.scrNotice')} />
+        <Notice id="slots.scr" type="info" showIcon message={t('slots.scrNotice')} />
 
         {buildScr.isError ? (
           <Alert type="error" showIcon message={t('slots.scrFailed')} />
@@ -116,7 +117,7 @@ function Input({
         lineHeight: 1.5,
         padding: 12,
         borderRadius: 6,
-        border: `1px solid ${SOC_COLORS.border}`,
+        border: `1px solid ${SOC_COLORS.line}`,
         resize: 'vertical',
       }}
     />

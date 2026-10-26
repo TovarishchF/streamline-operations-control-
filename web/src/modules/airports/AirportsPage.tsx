@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Input, Row, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Input, Row, Space, Tag, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
@@ -124,8 +124,6 @@ export function AirportsPage(): JSX.Element {
           </Can>
         </Col>
       </Row>
-
-      <Alert type="info" showIcon message={t('airport.realDataNotice')} />
 
       <Card size="small" styles={{ body: { padding: 10 } }}>
         <Input.Search

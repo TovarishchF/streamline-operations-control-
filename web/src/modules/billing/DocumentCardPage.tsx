@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Card, Col, Descriptions, Input, Row, Skeleton,
+  App, Button, Card, Col, Descriptions, Input, Row, Skeleton,
   Space, Table, Tag, Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
@@ -20,9 +20,9 @@ import {
 } from '@/api/documents';
 import { useFlight } from '@/api/flights';
 import { Can } from '@/shared/auth/Can';
-import { useDemoMode } from '@/shared/auth/session';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
+import { Notice } from '@/shared/ui/Notice';
 
 /**
  * Котировка и счёт `[ТЗ 3.4.1]`.
@@ -36,7 +36,6 @@ import { NotFoundPage } from '@/modules/misc/NotFoundPage';
  */
 export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.Element {
   const { t } = useTranslation();
-  const demoMode = useDemoMode();
   const { message, modal } = App.useApp();
   const { id } = useParams<{ id: string }>();
   // Причина аннулирования живёт снаружи диалога: содержимое диалога
@@ -183,7 +182,6 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
                     ? t(`quoteStatus.${document.status}`)
                     : t(`invoiceStatus.${document.status}`)}
                 </Tag>
-                {demoMode && document.isDemo ? <Tag color="orange">DEMO</Tag> : null}
               </Space>
               <Space size={10} wrap>
                 <Typography.Text type="secondary">{client?.name}</Typography.Text>
@@ -231,11 +229,7 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
       </Card>
 
       {issued ? (
-        <Alert type="info" showIcon message={t('finance.immutableNotice')} />
-      ) : null}
-
-      {demoMode && document.isDemo ? (
-        <Alert type="warning" showIcon message={t('finance.demoWatermarkNotice')} />
+        <Notice id="finance.immutable" type="info" showIcon message={t('finance.immutableNotice')} />
       ) : null}
 
       <Row gutter={[12, 12]}>

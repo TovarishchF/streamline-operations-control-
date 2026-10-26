@@ -1,10 +1,12 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Card, Col, Input, Radio, Row, Segmented, Select, Space, Tag, Tooltip,
-  Typography,
+  App, Button, Card, Input, Segmented, Select, Space, Tag, Tooltip, Typography,
 } from 'antd';
+import dayjs from 'dayjs';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
-import { ExportOutlined, PlusOutlined, WarningOutlined } from '@ant-design/icons';
+import {
+  CalendarOutlined, ExportOutlined, PlusOutlined, SearchOutlined, WarningOutlined,
+} from '@ant-design/icons';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
@@ -20,13 +22,15 @@ import type { FlightStatus } from '@/api/types';
 import { useClients } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
 import { QueryState } from '@/shared/ui/QueryState';
-import { useClock } from '@/shared/clock/useClock';
+import { useClock, formatUtc } from '@/shared/clock/useClock';
+import { DateOnlyPicker } from '@/shared/ui/DateTimePicker';
+import { PageHeader } from '@/shared/ui/PageHeader';
 import {
-  EmptyState, FlightStatusTag, Mono, PercentText, UtcTime,
+  EmptyState, FlightStatusTag, Mono, PercentText, StatusPill, UtcTime,
 } from '@/shared/ui/primitives';
-import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { STATUS_TOKENS, type StatusToken } from '@/shared/ui/status-tokens';
 import { BulkActionsModal } from './BulkActionsModal';
-import { GanttBoard, type ScaleKey } from './GanttBoard';
+import { GanttBoard, SCALE_HOURS, type ScaleKey } from './GanttBoard';
 
 const STATUSES: FlightStatus[] = [
   'planned', 'in_work', 'ready_for_departure', 'in_flight', 'arrived', 'completed', 'cancelled', 'aog',
@@ -46,6 +50,21 @@ const EMPTY_FILTERS: Filters = {
   unconfirmedOnly: false, lowMarginOnly: false,
 };
 
+/** Легенда планшета: цвет полосы — семантика статуса (макет, карточка GanttBoard). */
+const LEGEND: Array<{ token: StatusToken; status: FlightStatus }> = [
+  { token: 'neutral', status: 'planned' },
+  { token: 'progress', status: 'in_work' },
+  { token: 'ready', status: 'ready_for_departure' },
+  { token: 'active', status: 'in_flight' },
+  { token: 'done', status: 'completed' },
+];
+
+/**
+ * Рейс, вылетевший до начала окна, ещё может быть в воздухе: выборка
+ * берёт сутки до окна, иначе его полоса пропала бы с планшета.
+ */
+const LOOKBACK_MS = 24 * 3_600_000;
+
 /**
  * Суточный план полётов `[ТЗ 3.1.1]`.
  *
@@ -58,38 +77,60 @@ const EMPTY_FILTERS: Filters = {
  * посчитан в строке, и лишний запрос ради него не нужен.
  */
 export function SchedulePage(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { nowUtc } = useClock();
 
   const [view, setView] = useState<'gantt' | 'table'>('gantt');
   const [scale, setScale] = useState<ScaleKey>('day');
+  // Дата плана в UTC (`YYYY-MM-DD`); `null` — окно от текущего момента.
+  const [planDate, setPlanDate] = useState<string | null>(null);
   const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkMode, setBulkMode] = useState<'status' | 'vendor' | null>(null);
 
   const { message } = App.useApp();
   const exportSchedule = useExportSchedule();
+  const todayUtc = nowUtc.toISOString().slice(0, 10);
+  // Значение календаря пересоздаётся только при смене даты: часы
+  // перерисовывают экран каждую секунду, и новый объект на каждом тике
+  // возвращал открытую панель к выбранному месяцу.
+  const pickerValue = useMemo(() => dayjs(planDate ?? todayUtc), [planDate, todayUtc]);
 
+  const origin = useMemo(() => {
+    if (planDate !== null) return new Date(`${planDate}T00:00:00Z`);
+    const base = new Date(nowUtc);
+    base.setUTCHours(base.getUTCHours() - (scale === 'day' ? 4 : scale === 'threeDays' ? 12 : 24), 0, 0, 0);
+    return base;
+  }, [nowUtc, planDate, scale]);
+  const originIso = origin.toISOString();
+  const windowEndIso = new Date(origin.getTime() + SCALE_HOURS[scale] * 3_600_000).toISOString();
+
+  // Планшет берёт рейсы своего окна; таблица — весь список, как раньше.
   const query = useFlights({
     search: filters.search.trim(),
     status: filters.statuses.join(','),
     ...(filters.clientId ? { clientId: filters.clientId } : {}),
     ...(filters.airport ? { airport: filters.airport } : {}),
+    ...(view === 'gantt'
+      ? { from: new Date(origin.getTime() - LOOKBACK_MS).toISOString(), to: windowEndIso }
+      : {}),
     perPage: 200,
   });
   // Конфликты приходят по всему горизонту планирования, а не по странице:
   // предупреждение о пересечении не должно зависеть от того, на какой
   // странице списка сейчас диспетчер.
   const conflicts = useScheduleConflicts().data?.data ?? [];
+  const conflictToken: StatusToken = conflicts.some((c) => c.severity === 'critical')
+    ? 'critical'
+    : 'warning';
   const airportsQuery = useAirports({ perPage: 200 });
   const clients = useClients().data?.data ?? [];
 
-  const origin = useMemo(() => {
-    const base = new Date(nowUtc);
-    base.setUTCHours(base.getUTCHours() - (scale === 'day' ? 4 : scale === 'threeDays' ? 12 : 24), 0, 0, 0);
-    return base;
-  }, [nowUtc, scale]);
+  const locale = i18n.language.startsWith('en') ? 'en-GB' : 'ru-RU';
+  const planDay = new Intl.DateTimeFormat(locale, {
+    timeZone: 'UTC', weekday: 'long', day: 'numeric', month: 'long',
+  }).format(new Date(originIso));
 
   const runExport = async (): Promise<void> => {
     try {
@@ -196,15 +237,26 @@ export function SchedulePage(): JSX.Element {
   ];
 
   return (
-    <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Row align="middle" gutter={[8, 8]} wrap>
-        <Col flex="auto">
-          <Typography.Title level={4} style={{ margin: 0 }}>
-            {t('nav.schedule')}
-          </Typography.Title>
-        </Col>
-        <Col>
-          <Space size={8} wrap>
+    <>
+      <PageHeader
+        title={t('nav.schedule')}
+        meta={
+          <>
+            <span>
+              {planDay.charAt(0).toLocaleUpperCase(locale) + planDay.slice(1)} ·{' '}
+              {t(`schedule.window.${scale}`, { time: formatUtc(new Date(originIso)) })}
+            </span>
+            {conflicts.length > 0 ? (
+              <StatusPill
+                token={conflictToken}
+                label={t('schedule.conflictCount', { count: conflicts.length })}
+                size="sm"
+              />
+            ) : null}
+          </>
+        }
+        actions={
+          <>
             <Segmented
               value={view}
               onChange={(value) => {
@@ -214,6 +266,19 @@ export function SchedulePage(): JSX.Element {
                 { label: t('schedule.gantt'), value: 'gantt' },
                 { label: t('schedule.table'), value: 'table' },
               ]}
+            />
+            {/* Выбор сегодняшней даты возвращает окно к текущему моменту. */}
+            <DateOnlyPicker
+              className="soc-plan-date"
+              aria-label={t('schedule.planDate')}
+              value={pickerValue}
+              allowClear={false}
+              prefix={<CalendarOutlined />}
+              suffixIcon={null}
+              onChange={(value) => {
+                const day = value.format('YYYY-MM-DD');
+                setPlanDate(day === todayUtc ? null : day);
+              }}
             />
             <Can permission="flight.create">
               <Button
@@ -226,120 +291,126 @@ export function SchedulePage(): JSX.Element {
                 {t('schedule.newFlight')}
               </Button>
             </Can>
-          </Space>
-        </Col>
-      </Row>
+          </>
+        }
+      />
 
+      {/* Карточка Banner: до четырёх конфликтов, примечание и одно действие. */}
       {conflicts.length > 0 ? (
-        <Alert
-          type="warning"
-          showIcon
-          message={t('schedule.conflictsFound', { count: conflicts.length })}
-          description={
-            <Space direction="vertical" size={2}>
-              {conflicts.map((conflict, index) => (
-                <Space key={`${conflict.flightId}:${String(index)}`} size={6}>
-                  <Tag
-                    style={{
-                      margin: 0,
-                      color: conflict.severity === 'critical' ? STATUS_TOKENS.critical.color : STATUS_TOKENS.warning.color,
-                      borderColor: conflict.severity === 'critical' ? STATUS_TOKENS.critical.border : STATUS_TOKENS.warning.border,
-                      background: 'transparent',
-                    }}
-                  >
-                    {t(`conflictKind.${conflict.kind}`)}
-                  </Tag>
+        <div className={`soc-banner soc-banner--${conflictToken}`}>
+          <WarningOutlined className="soc-banner__icon" />
+          <div className="soc-banner__body">
+            <div className="soc-banner__title">
+              {t('schedule.conflictsFound', { count: conflicts.length })}
+            </div>
+            <ul className="soc-banner__list">
+              {conflicts.slice(0, 4).map((conflict, index) => (
+                <li key={`${conflict.flightId}:${String(index)}`}>
+                  <StatusPill
+                    token={conflict.severity === 'critical' ? 'critical' : 'warning'}
+                    label={t(`conflictKind.${conflict.kind}`)}
+                    size="sm"
+                  />
                   <Link to={`/flights/${conflict.flightId}`}>{conflict.message}</Link>
-                </Space>
+                </li>
               ))}
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {t('schedule.conflictHint')}
-              </Typography.Text>
-            </Space>
-          }
-        />
+            </ul>
+            <div className="soc-banner__note">{t('schedule.conflictHint')}</div>
+          </div>
+          <Button
+            size="small"
+            onClick={() => {
+              navigate(`/flights/${conflicts[0]?.flightId ?? ''}`);
+            }}
+          >
+            {t('dashboard.resolve')}
+          </Button>
+        </div>
       ) : null}
 
-      <Card size="small" styles={{ body: { padding: 10 } }}>
-        <Row gutter={[8, 8]} align="middle" wrap>
-          <Col xs={24} md={6}>
-            <Input.Search
-              allowClear
-              placeholder={t('schedule.searchPlaceholder')}
-              value={filters.search}
-              onChange={(e) => {
-                setFilters((f) => ({ ...f, search: e.target.value }));
-              }}
-            />
-          </Col>
-          <Col xs={12} md={5}>
-            <Select
-              mode="multiple" allowClear maxTagCount="responsive" style={{ width: '100%' }}
-              placeholder={t('flight.status')}
-              value={filters.statuses}
-              onChange={(value: FlightStatus[]) => {
-                setFilters((f) => ({ ...f, statuses: value }));
-              }}
-              options={STATUSES.map((status) => ({ value: status, label: t(`flightStatus.${status}`) }))}
-            />
-          </Col>
-          <Col xs={12} md={5}>
-            <Select
-              allowClear showSearch optionFilterProp="label" style={{ width: '100%' }}
-              placeholder={t('flight.client')}
-              value={filters.clientId}
-              onChange={(value: string | undefined) => {
-                setFilters((f) => ({ ...f, clientId: value }));
-              }}
-              options={clients.map((client) => ({ value: client.id, label: client.name }))}
-            />
-          </Col>
-          <Col xs={12} md={4}>
-            <Select
-              allowClear showSearch optionFilterProp="label" style={{ width: '100%' }}
-              placeholder={t('flight.airport')}
-              value={filters.airport}
-              onChange={(value: string | undefined) => {
-                setFilters((f) => ({ ...f, airport: value }));
-              }}
-              options={(airportsQuery.data?.data ?? []).map((airport) => ({
-                value: airport.icao,
-                label: `${airport.icao} — ${airport.city}`,
-              }))}
-            />
-          </Col>
-          <Col xs={24} md={4}>
-            <Space size={4} wrap>
-              <Tag.CheckableTag
-                checked={filters.unconfirmedOnly}
-                onChange={(checked) => {
-                  setFilters((f) => ({ ...f, unconfirmedOnly: checked }));
-                }}
-              >
-                {t('schedule.filterUnconfirmed')}
-              </Tag.CheckableTag>
-              <Tag.CheckableTag
-                checked={filters.lowMarginOnly}
-                onChange={(checked) => {
-                  setFilters((f) => ({ ...f, lowMarginOnly: checked }));
-                }}
-              >
-                {t('schedule.filterLowMargin')}
-              </Tag.CheckableTag>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
+      <div className="soc-filters">
+        <Input
+          allowClear
+          prefix={<SearchOutlined />}
+          style={{ width: 280 }}
+          placeholder={t('schedule.searchPlaceholder')}
+          value={filters.search}
+          onChange={(e) => {
+            setFilters((f) => ({ ...f, search: e.target.value }));
+          }}
+        />
+        <Select
+          mode="multiple" allowClear maxTagCount="responsive" style={{ width: 160 }}
+          placeholder={t('flight.status')}
+          value={filters.statuses}
+          onChange={(value: FlightStatus[]) => {
+            setFilters((f) => ({ ...f, statuses: value }));
+          }}
+          options={STATUSES.map((status) => ({ value: status, label: t(`flightStatus.${status}`) }))}
+        />
+        <Select
+          allowClear showSearch optionFilterProp="label" style={{ width: 180 }}
+          placeholder={t('flight.client')}
+          value={filters.clientId}
+          onChange={(value: string | undefined) => {
+            setFilters((f) => ({ ...f, clientId: value }));
+          }}
+          options={clients.map((client) => ({ value: client.id, label: client.name }))}
+        />
+        <Select
+          allowClear showSearch optionFilterProp="label" style={{ width: 150 }}
+          placeholder={t('flight.airport')}
+          value={filters.airport}
+          onChange={(value: string | undefined) => {
+            setFilters((f) => ({ ...f, airport: value }));
+          }}
+          options={(airportsQuery.data?.data ?? []).map((airport) => ({
+            value: airport.icao,
+            label: `${airport.icao} — ${airport.city}`,
+          }))}
+        />
+        <Button
+          size="small"
+          className={filters.unconfirmedOnly ? 'soc-toggle is-on' : 'soc-toggle'}
+          aria-pressed={filters.unconfirmedOnly}
+          onClick={() => {
+            setFilters((f) => ({ ...f, unconfirmedOnly: !f.unconfirmedOnly }));
+          }}
+        >
+          {t('schedule.filterUnconfirmed')}
+        </Button>
+        <Button
+          size="small"
+          className={filters.lowMarginOnly ? 'soc-toggle is-on' : 'soc-toggle'}
+          aria-pressed={filters.lowMarginOnly}
+          onClick={() => {
+            setFilters((f) => ({ ...f, lowMarginOnly: !f.lowMarginOnly }));
+          }}
+        >
+          {t('schedule.filterLowMargin')}
+        </Button>
+      </div>
 
       <QueryState query={query}>
       {() => view === 'gantt' ? (
-        <Space direction="vertical" size={8} style={{ width: '100%' }}>
-          <Space size={8} wrap>
-            <Radio.Group
-              size="small" optionType="button"
+        <>
+          <div className="soc-gantt-toolbar">
+            <div className="soc-legend">
+              {LEGEND.map(({ token, status }) => (
+                <span key={token}>
+                  <i style={{ background: STATUS_TOKENS[token].dot }} />
+                  {t(`flightStatus.${status}`)}
+                </span>
+              ))}
+              <span>
+                <i style={{ background: STATUS_TOKENS.critical.dot }} />
+                {t('schedule.legendConflict')}
+              </span>
+            </div>
+            <Segmented
               value={scale}
-              onChange={(e) => {
-                setScale(e.target.value as ScaleKey);
+              onChange={(value) => {
+                setScale(value as ScaleKey);
               }}
               options={[
                 { label: t('schedule.scaleDay'), value: 'day' },
@@ -347,16 +418,13 @@ export function SchedulePage(): JSX.Element {
                 { label: t('schedule.scaleWeek'), value: 'week' },
               ]}
             />
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {t('schedule.ganttHint')}
-            </Typography.Text>
-          </Space>
+          </div>
           {filtered.length === 0 ? (
             <Card><EmptyState description={t('schedule.emptyFiltered')} /></Card>
           ) : (
             <GanttBoard flights={filtered} scale={scale} originUtc={origin} />
           )}
-        </Space>
+        </>
       ) : (
         <Card size="small" styles={{ body: { padding: 0 } }}>
           <DataTable<FlightRow>
@@ -422,6 +490,6 @@ export function SchedulePage(): JSX.Element {
           setSelected([]);
         }}
       />
-    </Space>
+    </>
   );
 }

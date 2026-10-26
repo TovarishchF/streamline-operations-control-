@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Space, Tag, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Row, Space, Tag, Tooltip, Typography } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +12,7 @@ import { AircraftFormModal } from './AircraftFormModal';
 import { EmptyState, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   serviceable: 'done', maintenance: 'warning', aog: 'critical',
@@ -40,7 +41,7 @@ export function FleetPage(): JSX.Element {
 
   const columns: DataColumns<Aircraft> = [
     {
-      title: t('fleet.registration'), dataIndex: 'registration', width: 130, fixed: 'left',
+      title: t('fleet.registration'), dataIndex: 'registration', filterable: 'text', width: 130, fixed: 'left',
       render: (value: string) => <Mono>{value}</Mono>,
     },
     {
@@ -144,7 +145,8 @@ export function FleetPage(): JSX.Element {
       </Row>
 
       {unserviceable.length > 0 ? (
-        <Alert
+        <Notice
+          id={`fleet.unserviceable:${unserviceable.map((a) => a.id).join(',')}`}
           type="warning"
           showIcon
           message={t('fleet.unserviceableNotice', { count: unserviceable.length })}

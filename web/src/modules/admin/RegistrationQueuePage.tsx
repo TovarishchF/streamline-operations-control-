@@ -179,7 +179,7 @@ export function RegistrationQueuePage(): JSX.Element {
         }}
       >
         <Space direction="vertical" size={10} style={{ width: '100%' }}>
-          <Typography.Text style={{ color: SOC_COLORS.inkSecondary }}>
+          <Typography.Text style={{ color: SOC_COLORS.ink2 }}>
             {t('register.rejectHint', { company: rejecting?.companyName ?? '' })}
           </Typography.Text>
           <Input.TextArea

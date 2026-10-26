@@ -205,7 +205,7 @@ export const useSocStore = create<StoreState>()(
           remarks: input.remarks ?? null,
           // Запись введена пользователем, а не сгенерирована (CLAUDE.md § 4)
           dataSource: 'user',
-          isDemo: false,
+          isGenerated: false,
           createdAt: nowIso,
           updatedAt: nowIso,
           ...derived,
@@ -367,7 +367,7 @@ export const useSocStore = create<StoreState>()(
           replacedOrderId: null,
           documents: [],
           dataSource: 'user',
-          isDemo: false,
+          isGenerated: false,
         };
 
         set((state) => ({ orders: [...state.orders, order] }));
@@ -442,7 +442,7 @@ export const useSocStore = create<StoreState>()(
           orderedAt: new Date().toISOString(),
           confirmedAt: null,
           dataSource: 'user',
-          isDemo: false,
+          isGenerated: false,
         };
 
         set((state) => ({ orders: [...state.orders, replacement] }));
@@ -556,7 +556,7 @@ export function useFlightList(): FlightListItem[] {
           ).length,
           marginPercent: margin?.marginPercent ?? null,
           hasConflicts: flight.id === 'flt_025' || flight.id === 'flt_026',
-          isDemo: flight.isDemo ?? false,
+          isGenerated: flight.isGenerated ?? false,
         };
       }),
     [flights, orders],

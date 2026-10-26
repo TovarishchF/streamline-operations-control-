@@ -59,7 +59,7 @@ describe('локализация', () => {
       'CURRENCY_MISMATCH',
       'DOCUMENT_IMMUTABLE',
       'INTEGRATION_UNAVAILABLE',
-      'DEMO_ONLY_OPERATION',
+      'SAMPLE_DATA_DISABLED',
       'INTERNAL_ERROR',
     ];
     for (const code of userFacingCodes) {

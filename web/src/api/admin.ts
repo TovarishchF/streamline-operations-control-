@@ -107,30 +107,30 @@ export function useCreateUser() {
   });
 }
 
-// ─────────────────────── Демонстрационные данные ───────────────────────
+// ─────────────────────── Генератор данных ───────────────────────
 
-const demoResultSchema = z.object({
-  action: z.enum(['seed', 'reset', 'purge']),
+const sampleDataResultSchema = z.object({
+  action: z.enum(['generate', 'reset', 'purge']),
   counts: z.record(z.number().int()),
   // Поле обязательное: сервер возвращает его всегда, в том числе пустым.
   message: z.string(),
 });
 
-export type DemoResult = z.infer<typeof demoResultSchema>;
+export type SampleDataResult = z.infer<typeof sampleDataResultSchema>;
 
 /**
- * Управление демонстрационным набором `[ТЗ этап 2]` (ADR-008, ADR-016).
+ * Управление набором генератора `[ТЗ этап 2]` (ADR-008, ADR-016).
  *
- * Действие выполняет сервер той же командой, что и `make seed-demo`:
+ * Действие выполняет сервер той же командой, что и `make seed-sample`:
  * набор, собранный кнопкой, обязан совпадать с набором, собранным командой.
- * В боевом режиме сервер отказывает — это не проверка на клиенте.
+ * При выключенном генераторе сервер отказывает — это не проверка на клиенте.
  */
-export function useDemoAction(action: 'seed' | 'reset' | 'purge') {
+export function useSampleDataAction(action: 'generate' | 'reset' | 'purge') {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (seed?: number) =>
-      request(`/demo/${action}`, demoResultSchema, {
+      request(`/sample-data/${action}`, sampleDataResultSchema, {
         method: 'POST',
         body: action === 'purge' ? {} : { seed },
         idempotencyKey: newIdempotencyKey(),

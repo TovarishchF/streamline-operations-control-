@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Col, Row, Segmented, Space, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Row, Segmented, Space, Tooltip, Typography } from 'antd';
 import { PaperClipOutlined, PlusOutlined } from '@ant-design/icons';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { useContracts, useVendors, type VendorContractRow } from '@/api/counterp
 import { Can } from '@/shared/auth/Can';
 import { useClock } from '@/shared/clock/useClock';
 import { DateText, EmptyState, Mono, GenericStatusTag } from '@/shared/ui/primitives';
+import { Notice } from '@/shared/ui/Notice';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { ContractFormModal } from './ContractFormModal';
@@ -62,7 +63,7 @@ export function ContractsPage(): JSX.Element {
 
   const columns: DataColumns<VendorContractRow> = [
     {
-      title: t('contract.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      title: t('contract.number'), dataIndex: 'number', filterable: 'text', width: 170, fixed: 'left',
       render: (value: string, row) => (
         <Space size={6}>
           <Mono>{value}</Mono>
@@ -170,7 +171,8 @@ export function ContractsPage(): JSX.Element {
       </Row>
 
       {expired > 0 || expiring > 0 ? (
-        <Alert
+        <Notice
+          id={`contract.attention:${String(expired)}:${String(expiring)}`}
           type={expired > 0 ? 'error' : 'warning'}
           showIcon
           message={t('contract.attentionNotice', { expiring, expired })}

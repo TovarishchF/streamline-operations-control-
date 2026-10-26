@@ -42,7 +42,7 @@ export const clientSchema = z.object({
   creditLimit: moneySchema.nullable(),
   isActive: z.boolean(),
   dataSource: z.string(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type ClientRow = z.infer<typeof clientSchema>;
@@ -71,7 +71,7 @@ export const vendorSchema = z.object({
   manualQualityScore: z.number().int(),
   isActive: z.boolean(),
   dataSource: z.string(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type VendorRow = z.infer<typeof vendorSchema>;

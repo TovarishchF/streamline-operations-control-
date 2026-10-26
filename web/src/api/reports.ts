@@ -78,7 +78,6 @@ export const reportResultSchema = z.object({
   code: z.string(),
   generatedAt: z.string(),
   currency: z.string(),
-  isDemo: z.boolean(),
   columns: z.array(reportColumnSchema).default([]),
   rows: z.array(z.record(z.unknown())).default([]),
   totals: z.record(z.unknown()).default({}),

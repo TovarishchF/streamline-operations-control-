@@ -1,13 +1,14 @@
 import { useState, type JSX } from 'react';
-import { Alert, Button, Card, Form, Input, Layout, Space, Tag, Typography } from 'antd';
+import { Alert, Button, Form, Input, Space, Tag, Typography } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useDemoAccounts, type DemoAccount } from '@/api/auth';
+import { useLoginAccounts, type LoginAccount } from '@/api/auth';
 import { RegistrationModal } from './RegistrationModal';
 import { ApiError } from '@/api/client';
 import { SOC_COLORS, SOC_RADIUS } from '@/app/theme';
 import { useSession } from '@/shared/auth/session';
+import { formatUtc, useClock, useClockTicker } from '@/shared/clock/useClock';
 
 /**
  * Вход `[ТЗ 4.3]`.
@@ -16,21 +17,28 @@ import { useSession } from '@/shared/auth/session';
  * после пяти неудачных попыток учётная запись блокируется на пятнадцать минут,
  * второй фактор запрашивается, если приложение-аутентификатор привязано.
  * Переключателя «войти как» не существует ни в какой сборке: обход
- * аутентификации запрещён. Список учётных записей на стенде — не обход:
+ * аутентификации запрещён. Список учётных записей на экране входа — не обход:
  * он подставляет **логин**, пароль по-прежнему набирается, и вход идёт
  * обычным путём через сервер.
  *
  * Сообщение об ошибке приходит с сервера и не уточняет, что именно не подошло:
  * иначе форма входа превращается в справочник логинов.
+ *
+ * Компоновка — макет `docs/design/mockups/screens/01-login.html`: слева
+ * панель знака на `chrome`, справа форма на `canvas`.
  */
 export function LoginPage(): JSX.Element {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const signIn = useSession((s) => s.signIn);
   const submitTwoFactor = useSession((s) => s.submitTwoFactor);
+  // Сервер отдаёт время только вошедшим: до входа часы идут от браузера
+  // (`useClock`, synced: false) — это всё равно UTC с подписью зоны.
+  useClockTicker();
+  const { nowUtc } = useClock();
 
   const [form] = Form.useForm<{ username: string; password: string }>();
-  const accounts = useDemoAccounts().data ?? [];
+  const accounts = useLoginAccounts().data ?? [];
   // Пришли по «Сменить сотрудника» — список сотрудников стоит над формой:
   // выбирают из него, а не набирают логин заново.
   const switching = useSearchParams()[0].get('switch') === '1';
@@ -60,22 +68,37 @@ export function LoginPage(): JSX.Element {
   };
 
   return (
-    <Layout
-      className="soc"
-      style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', padding: 16 }}
-    >
-      <Card style={{ width: '100%', maxWidth: 420 }}>
-        <Space direction="vertical" size={16} style={{ width: '100%' }}>
-          {/* Цветная версия знака — на белом; в тёмной обвязке стоит
-              белая. Входящий видит, чья это система, до ввода логина. */}
-          <Space direction="vertical" size={10}>
-            <img
-              src="/brand/streamline-fs.png"
-              alt={t('app.fullName')}
-              style={{ height: 36, width: 'auto', display: 'block' }}
-            />
-            <Typography.Text type="secondary">{t('app.fullName')}</Typography.Text>
-          </Space>
+    <div className="soc soc-login">
+      {/* Белый знак — на `chrome`, как в рельсе. Входящий видит, чья это
+          система, до ввода логина. */}
+      <section className="soc-login__brand">
+        <svg
+          className="soc-login__arcs"
+          viewBox="0 0 700 720"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
+        >
+          <path d="M-40 640 Q330 120 760 260" />
+          <path d="M-40 700 Q360 200 760 340" />
+          <path d="M-40 580 Q300 40 760 180" />
+          <path className="is-hot" d="M60 560 Q360 150 640 250" />
+          <circle cx="60" cy="560" r="4" />
+          <circle cx="640" cy="250" r="4" />
+        </svg>
+        <img src="/brand/streamline-fs-white.png" alt={t('app.fullName')} />
+        <div className="soc-login__claim">
+          <h1>{t('auth.claimTitle')}</h1>
+          <p>{t('auth.claimText')}</p>
+        </div>
+        <div className="soc-login__stamp">
+          <span>{formatUtc(nowUtc)}</span>
+        </div>
+      </section>
+
+      <section className="soc-login__form-wrap">
+        <div className="soc-login__form">
+          <h2>{t('auth.title')}</h2>
+          <p className="soc-login__sub">{t('auth.subtitle')}</p>
 
           {error ? (
             <Alert type={locked ? 'warning' : 'error'} showIcon message={error} />
@@ -106,6 +129,7 @@ export function LoginPage(): JSX.Element {
               form={form}
               name="login"
               layout="vertical"
+              requiredMark={false}
               onFinish={(values: { username: string; password: string }) => {
                 void handle(async () => {
                   const result = await signIn(values.username, values.password);
@@ -122,7 +146,7 @@ export function LoginPage(): JSX.Element {
                 name="username"
                 rules={[{ required: true, message: t('auth.usernameRequired') }]}
               >
-                <Input autoComplete="username" size="large" />
+                <Input autoComplete="username" size="large" autoFocus />
               </Form.Item>
               <Form.Item
                 label={t('auth.password')}
@@ -135,22 +159,19 @@ export function LoginPage(): JSX.Element {
                 {t('auth.signIn')}
               </Button>
 
-              <Space size={6} style={{ marginTop: 12 }}>
-                <Typography.Text type="secondary" style={{ fontSize: 13 }}>
-                  {t('register.haveNoAccount')}
-                </Typography.Text>
+              <p className="soc-login__help">
+                {t('register.haveNoAccount')}{' '}
                 {/* Настоящая кнопка, а не `<a>` без адреса: ссылка без
                     `href` не получает фокус, и клавиатура её пропускает. */}
                 <Button
                   type="link"
-                  style={{ padding: 0, height: 'auto' }}
                   onClick={() => {
                     setRegistering(true);
                   }}
                 >
                   {t('register.openForm')}
                 </Button>
-              </Space>
+              </p>
 
               {accounts.length > 0 && !switching ? (
                 <Space direction="vertical" size={6} style={{ width: '100%', marginTop: 16 }}>
@@ -212,8 +233,8 @@ export function LoginPage(): JSX.Element {
               </Space>
             </Form>
           )}
-        </Space>
-      </Card>
+        </div>
+      </section>
 
       <RegistrationModal
         open={registering}
@@ -221,12 +242,12 @@ export function LoginPage(): JSX.Element {
           setRegistering(false);
         }}
       />
-    </Layout>
+    </div>
   );
 }
 
 /**
- * Учётная запись стенда одним нажатием.
+ * Учётная запись одним нажатием.
  *
  * Подставляет **логин** и переводит фокус на пароль: набор сокращается
  * на одну строку, вход остаётся настоящим (ADR-013).
@@ -235,7 +256,7 @@ function AccountChip({
   account,
   onPick,
 }: {
-  account: DemoAccount;
+  account: LoginAccount;
   onPick: () => void;
 }): JSX.Element {
   const { t } = useTranslation();
@@ -250,9 +271,9 @@ function AccountChip({
         height: 28,
         paddingInline: 10,
         borderRadius: SOC_RADIUS.pill,
-        border: `1px solid ${SOC_COLORS.border}`,
+        border: `1px solid ${SOC_COLORS.line}`,
         background: SOC_COLORS.surface,
-        color: SOC_COLORS.inkSecondary,
+        color: SOC_COLORS.ink2,
         font: 'inherit',
         cursor: 'pointer',
       }}
@@ -263,13 +284,13 @@ function AccountChip({
           margin: 0,
           borderRadius: SOC_RADIUS.pill,
           background: SOC_COLORS.surfaceSunken,
-          borderColor: SOC_COLORS.border,
-          color: SOC_COLORS.inkTertiary,
+          borderColor: SOC_COLORS.line,
+          color: SOC_COLORS.ink3,
           fontSize: 11,
           lineHeight: '16px',
         }}
       >
-        {t(`role.${account.role}`, account.role)}
+        {t(`roles.${account.role}`, account.role)}
       </Tag>
     </button>
   );

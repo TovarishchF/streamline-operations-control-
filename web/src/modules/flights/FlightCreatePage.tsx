@@ -1,6 +1,6 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Card, Col, Descriptions, Form, Input, InputNumber, Row, Select, Space,
+  App, Button, Card, Col, Descriptions, Form, Input, InputNumber, Row, Select, Space,
   Typography,
 } from 'antd';
 import type { Dayjs } from 'dayjs';
@@ -283,8 +283,6 @@ export function FlightCreatePage(): JSX.Element {
                 {t('flight.estimateHint')}
               </Typography.Text>
             </Card>
-
-            <Alert type="info" showIcon message={t('flight.conflictCheckNotice')} />
 
             <Card size="small" styles={{ body: { padding: 10 } }}>
               <Typography.Text type="secondary" style={{ fontSize: 12 }}>

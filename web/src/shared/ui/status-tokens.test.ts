@@ -16,6 +16,7 @@ import {
   STATUS_TOKENS,
   statusToken,
 } from './status-tokens';
+import { SOC_COLORS } from '@/app/theme';
 
 describe('статусные токены', () => {
   it('каждое состояние рейса имеет цвет', () => {
@@ -78,6 +79,14 @@ describe('контраст статусной пары', () => {
   it('подпись читается на своей заливке не хуже 4.5:1', () => {
     for (const [name, token] of Object.entries(STATUS_TOKENS)) {
       expect(contrast(token.color, token.background), `токен ${name}`).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  // Подпись статуса встречается и без пилюли: значение KPI, срок SLA
+  // в таблице, заголовок плашки. Там под ней белая поверхность.
+  it('подпись читается на поверхности не хуже 4.5:1', () => {
+    for (const [name, token] of Object.entries(STATUS_TOKENS)) {
+      expect(contrast(token.color, SOC_COLORS.surface), `токен ${name}`).toBeGreaterThanOrEqual(4.5);
     }
   });
 

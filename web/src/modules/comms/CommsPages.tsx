@@ -16,6 +16,7 @@ import {
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { EmptyState, Mono, UtcTime, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 import { ApplyInboxModal } from './ApplyInboxModal';
 
@@ -63,7 +64,7 @@ export function OutboxPage(): JSX.Element {
       title: t('comms.to'), key: 'to', width: 220, ellipsis: true,
       render: (_, row) => row.to.map((x) => x.name || x.address).join(', '),
     },
-    { title: t('comms.subject'), dataIndex: 'subject', ellipsis: true },
+    { title: t('comms.subject'), dataIndex: 'subject', filterable: 'text', ellipsis: true },
     {
       title: t('comms.status'), dataIndex: 'status', width: 140,
       render: (value: string, row) => {
@@ -121,9 +122,6 @@ export function OutboxPage(): JSX.Element {
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.outbox')}</Typography.Title>
 
-      {messages.some((item) => item.channelMode === 'stub') ? (
-        <Alert type="info" showIcon message={t('comms.stubNotice')} />
-      ) : null}
 
       {outbox.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
 
@@ -219,7 +217,7 @@ export function InboxPage(): JSX.Element {
     },
     { title: t('comms.from'), dataIndex: 'from', width: 240, ellipsis: true,
       render: (value: string) => <Mono>{value}</Mono> },
-    { title: t('comms.subject'), dataIndex: 'subject', ellipsis: true },
+    { title: t('comms.subject'), dataIndex: 'subject', filterable: 'text', ellipsis: true },
     {
       title: t('comms.recognized'), dataIndex: 'recognized', width: 190,
       render: (value: boolean, row) =>
@@ -265,7 +263,8 @@ export function InboxPage(): JSX.Element {
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.inbox')}</Typography.Title>
 
       {unrecognized > 0 ? (
-        <Alert
+        <Notice
+          id={`comms.unrecognized:${String(unrecognized)}`}
           type="info" showIcon
           message={t('comms.unrecognizedCount', { count: unrecognized })}
           description={t('comms.unrecognizedHint')}

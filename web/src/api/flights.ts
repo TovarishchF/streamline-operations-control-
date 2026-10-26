@@ -59,7 +59,7 @@ export const flightRowSchema = z.object({
   unconfirmedServicesCount: z.number().int(),
   marginPercent: z.string().nullable(),
   hasConflicts: z.boolean(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
 });
 
 export type FlightRow = z.infer<typeof flightRowSchema>;
@@ -105,7 +105,7 @@ export const flightSchema = z.object({
   billingCurrency: z.string(),
   templateId: z.string().nullable(),
   remarks: z.string(),
-  isDemo: z.boolean(),
+  isGenerated: z.boolean(),
   dataSource: z.string(),
   createdAt: z.string(),
   updatedAt: z.string(),

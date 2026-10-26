@@ -1,6 +1,6 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Card, Col, Popconfirm, Row, Select, Space, Tag, Typography,
+  App, Button, Card, Col, Popconfirm, Row, Select, Space, Tag, Typography,
 } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { useVendors } from '@/api/counterparties';
 import { Can } from '@/shared/auth/Can';
 import { DateText, EmptyState, MoneyText, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { Notice } from '@/shared/ui/Notice';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   pending: 'neutral', approved: 'progress', scheduled: 'ready',
@@ -58,11 +59,11 @@ export function PayablesPage(): JSX.Element {
 
   const columns: DataColumns<PayableRow> = [
     {
-      title: t('finance.number'), dataIndex: 'number', width: 170, fixed: 'left',
+      title: t('finance.number'), dataIndex: 'number', filterable: 'text', width: 170, fixed: 'left',
       render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
     },
     {
-      title: t('service.vendor'), dataIndex: 'vendorName', ellipsis: true,
+      title: t('service.vendor'), dataIndex: 'vendorName', filterable: 'text', ellipsis: true,
       render: (value: string, row) => <Link to={`/vendors/${row.vendorId}`}>{value}</Link>,
     },
     {
@@ -126,7 +127,12 @@ export function PayablesPage(): JSX.Element {
       <Typography.Title level={4} style={{ margin: 0 }}>{t('nav.payables')}</Typography.Title>
 
       {overdueCount > 0 ? (
-        <Alert type="warning" showIcon message={t('finance.payablesOverdue', { count: overdueCount })} />
+        <Notice
+          id={`finance.payablesOverdue:${String(overdueCount)}`}
+          type="warning"
+          showIcon
+          message={t('finance.payablesOverdue', { count: overdueCount })}
+        />
       ) : null}
 
       <Card size="small" styles={{ body: { padding: 10 } }}>
