@@ -10,7 +10,7 @@ import { z } from 'zod';
 import { userSchema } from './auth';
 import { pagedSchema, type Paged } from './catalog';
 import { newIdempotencyKey, request } from './client';
-import type { AuditEntry, User } from './types';
+import type { AuditEntry, IntegrationLogEntry, IntegrationStatus, User } from './types';
 
 export const auditEntrySchema = z.object({
   id: z.string(),
@@ -139,6 +139,87 @@ export function useSampleDataAction(action: 'generate' | 'reset' | 'purge') {
       // Набор изменился целиком: держать список того, что могло поменяться,
       // значит забыть в нём очередной экран.
       void queryClient.invalidateQueries();
+    },
+  });
+}
+
+// ─────────────────────── Внешние подключения (ADR-039) ───────────────────────
+
+const integrationCodeSchema = z.enum([
+  'FX', 'WX', 'TRACK', 'APT', 'SMTP', 'MSGR', 'MAILBOT', 'LDAP', 'ONEC', 'EDO', 'BI',
+  'SLOT', 'VENDOR_API', 'IATA',
+]);
+
+export const integrationStatusSchema = z.object({
+  code: integrationCodeSchema,
+  name: z.object({ ru: z.string(), en: z.string() }),
+  // `null` — обменов ещё не было: состояние неизвестно, а не «исправно».
+  healthy: z.boolean().nullable(),
+  lastCheckAt: z.string().nullable(),
+  lastSuccessAt: z.string().nullable(),
+}) satisfies z.ZodType<IntegrationStatus>;
+
+export type IntegrationStatusRow = z.infer<typeof integrationStatusSchema>;
+
+export const integrationLogEntrySchema = z.object({
+  id: z.string(),
+  code: integrationCodeSchema,
+  direction: z.enum(['outbound', 'inbound']),
+  operation: z.string(),
+  endpoint: z.string(),
+  ts: z.string(),
+  durationMs: z.number().int(),
+  success: z.boolean(),
+  httpStatus: z.number().int().nullable(),
+  error: z.string().nullable(),
+  responseSizeBytes: z.number().int(),
+  relatedEntityType: z.string().nullable(),
+  relatedEntityId: z.string().nullable(),
+}) satisfies z.ZodType<IntegrationLogEntry>;
+
+export type IntegrationLogRow = z.infer<typeof integrationLogEntrySchema>;
+
+const integrationCheckSchema = z.object({
+  code: integrationCodeSchema,
+  success: z.boolean(),
+  durationMs: z.number().int(),
+  message: z.string(),
+});
+
+/**
+ * Работающие подключения `[ТЗ 4.2]`. Выключенных сервер не отдаёт:
+ * система их не вызывает, и показывать их как подключения незачем.
+ */
+export function useIntegrations(): UseQueryResult<{ data: IntegrationStatusRow[] }> {
+  return useQuery({
+    queryKey: ['integrations'],
+    queryFn: ({ signal }) =>
+      request('/integrations', z.object({ data: z.array(integrationStatusSchema) }), { signal }),
+  });
+}
+
+export function useIntegrationLogs(page: number): UseQueryResult<Paged<IntegrationLogRow>> {
+  return useQuery({
+    queryKey: ['integrations', 'logs', page],
+    queryFn: ({ signal }) =>
+      request(
+        `/integrations/logs?page=${String(page)}&perPage=20`,
+        pagedSchema(integrationLogEntrySchema),
+        { signal },
+      ),
+    placeholderData: (previous) => previous,
+  });
+}
+
+/** Настоящее обращение к внешней системе; результат попадает в журнал. */
+export function useCheckIntegration() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (code: string) =>
+      request(`/integrations/${code}/test`, integrationCheckSchema, { method: 'POST' }),
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['integrations'] });
     },
   });
 }

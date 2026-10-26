@@ -28,8 +28,8 @@ const OUTBOX_TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
  * Исходящие `[ТЗ 3.5.2]`.
  *
  * Сообщение хранится целиком: канал, получатели, тема, отрендеренное тело,
- * вложения, статус и число попыток. Бейдж канала показывает **фактический
- * режим** и не выдаёт заглушку за отправку (`CLAUDE.md § 4`).
+ * вложения, статус и число попыток. Сообщение в неподключённый канал сразу
+ * получает ошибку, а не статус «отправлено» (ADR-039).
  */
 export function OutboxPage(): JSX.Element {
   const { t } = useTranslation();
@@ -53,12 +53,7 @@ export function OutboxPage(): JSX.Element {
   const columns: DataColumns<OutboxMessageRow> = [
     {
       title: t('comms.channel'), dataIndex: 'channel', width: 150,
-      render: (value: string, row) => (
-        <Space size={4}>
-          <Tag style={{ margin: 0 }}>{t(`channel.${value}`)}</Tag>
-          <Tag color="purple" style={{ margin: 0 }}>{row.channelMode || 'stub'}</Tag>
-        </Space>
-      ),
+      render: (value: string) => <Tag style={{ margin: 0 }}>{t(`channel.${value}`)}</Tag>,
     },
     {
       title: t('comms.to'), key: 'to', width: 220, ellipsis: true,
@@ -153,7 +148,6 @@ export function OutboxPage(): JSX.Element {
           <Space direction="vertical" size={12} style={{ width: '100%' }}>
             <Space size={6} wrap>
               <Tag>{t(`channel.${preview.channel}`)}</Tag>
-              <Tag color="purple">{preview.channelMode || 'stub'}</Tag>
               <Tag>{t(`outboxStatus.${preview.status}`)}</Tag>
             </Space>
             <Typography.Text strong>{preview.subject}</Typography.Text>

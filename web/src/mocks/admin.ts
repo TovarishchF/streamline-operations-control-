@@ -1,15 +1,12 @@
 /**
- * Аудит, интеграции, SLA, производительность, отчёты.
+ * Аудит, SLA, производительность, отчёты.
  *
- * `CLAUDE.md § 4`:
- * — записи аудита от генератора помечены `source: 'seed'` и автором
- *   «Система (генератор данных)» и не выдаются за действия людей;
- * — `/admin/integrations` показывает **фактический** режим подключения.
+ * `CLAUDE.md § 4`: записи аудита от генератора помечены `source: 'seed'`
+ * и автором «Система (генератор данных)» и не выдаются за действия людей.
+ * Подключения показываются с сервера (ADR-039) и в наборе не нужны.
  */
 import type {
   AuditEntry,
-  IntegrationLogEntry,
-  IntegrationStatus,
   PerformanceReport,
   ReportDefinition,
   SlaRule,
@@ -76,46 +73,6 @@ export const AUDIT: AuditEntry[] = AUDIT_SEEDS.map((seed, index) => ({
   comment: seed.comment ?? null,
   clockShifted: false,
 }));
-
-// ─────────────────────────── Интеграции ───────────────────────────
-// Фактический режим, а не желаемый. Колонка «что нужно для live» — из
-// INTEGRATIONS § 6 и письма заказчику.
-
-export const INTEGRATIONS: IntegrationStatus[] = [
-  { code: 'FX', name: { ru: 'Курсы валют, ЦБ РФ', en: 'FX rates, CBR' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-0.2), lastSuccessAt: hoursFromNow(-0.2), errorRate24h: '0.0100', requiredForLive: 'Решение об официальном источнике курсов. Источник открыт, ключ не нужен.' },
-  { code: 'WX', name: { ru: 'Погода METAR/TAF', en: 'Weather METAR/TAF' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-0.3), lastSuccessAt: hoursFromNow(-0.3), errorRate24h: '0.0200', requiredForLive: 'Ничего: источник NOAA открыт.' },
-  { code: 'APT', name: { ru: 'Справочник аэропортов', en: 'Airport directory' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-6), lastSuccessAt: hoursFromNow(-6), errorRate24h: '0.0000', requiredForLive: 'Ничего: открытый набор данных OurAirports.' },
-  { code: 'TRACK', name: { ru: 'Данные о движении ВС', en: 'Aircraft tracking' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-0.1), lastSuccessAt: hoursFromNow(-0.1), errorRate24h: '0.0500', requiredForLive: 'Решение по бюджету. OpenSky не покрывает всю бизнес-авиацию.' },
-  { code: 'SMTP', name: { ru: 'Исходящая почта', en: 'Outgoing mail' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-0.1), lastSuccessAt: hoursFromNow(-0.1), errorRate24h: '0.0000', requiredForLive: 'Сервер, порт, учётные данные, адрес отправителя, настройка SPF/DKIM/DMARC.' },
-  { code: 'MAILBOT', name: { ru: 'Разбор входящей почты', en: 'Inbound mail parsing' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-0.4), lastSuccessAt: hoursFromNow(-0.4), errorRate24h: '0.0200', requiredForLive: 'Выделенный ящик, доступ по IMAP, согласие на автоматическую обработку.' },
-  { code: 'MSGR', name: { ru: 'Мессенджер MAX', en: 'MAX messenger' }, mode: 'stub', healthy: false, lastCheckAt: hoursFromNow(-0.1), lastSuccessAt: null, errorRate24h: '1.0000', requiredForLive: 'Наличие Bot API не подтверждено. Нужна документация, токен, идентификаторы чатов либо решение об альтернативе.' },
-  { code: 'LDAP', name: { ru: 'Active Directory', en: 'Active Directory' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-1), lastSuccessAt: hoursFromNow(-1), errorRate24h: '0.0000', requiredForLive: 'Адрес контроллера домена, base DN, сервисная учётная запись, карта групп.' },
-  { code: 'ONEC', name: { ru: '1С:Бухгалтерия', en: '1C Accounting' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-2), lastSuccessAt: hoursFromNow(-2), errorRate24h: '0.0300', requiredForLive: 'Версия и конфигурация, адрес публикации OData, учётная запись, перечень сопоставляемых реквизитов.' },
-  { code: 'EDO', name: { ru: 'Электронный документооборот', en: 'E-document exchange' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-3), lastSuccessAt: hoursFromNow(-3), errorRate24h: '0.0000', requiredForLive: 'Договор с оператором, сертификат электронной подписи, доступ к API.' },
-  { code: 'BI', name: { ru: 'Power BI / Tableau', en: 'Power BI / Tableau' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-4), lastSuccessAt: hoursFromNow(-4), errorRate24h: '0.0000', requiredForLive: 'Реплика только для чтения, перечень требуемых показателей, список подключающихся.' },
-  { code: 'SLOT', name: { ru: 'Слот-координация', en: 'Slot coordination' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-5), lastSuccessAt: hoursFromNow(-5), errorRate24h: '0.0000', requiredForLive: 'Публичного подключения не существует. Реестр ведётся вручную, сообщения SSIM/SCR формируются системой.' },
-  { code: 'VENDOR_API', name: { ru: 'Системы поставщиков', en: 'Vendor systems' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-5), lastSuccessAt: hoursFromNow(-5), errorRate24h: '0.0000', requiredForLive: 'Отраслевого стандарта не существует. Основные каналы — портал поставщика и почтовый робот.' },
-  { code: 'IATA', name: { ru: 'IATA SIS / IS-XML', en: 'IATA SIS / IS-XML' }, mode: 'stub', healthy: true, lastCheckAt: hoursFromNow(-6), lastSuccessAt: hoursFromNow(-6), errorRate24h: '0.0000', requiredForLive: 'Уточнение по «BDG», решение о членстве и сертификации. Реализуется выгрузка IS-XML.' },
-];
-
-export const INTEGRATION_LOG: IntegrationLogEntry[] = Array.from({ length: 24 }, (_, i) => {
-  const codes: IntegrationStatus['code'][] = ['FX', 'WX', 'TRACK', 'SMTP', 'MAILBOT', 'ONEC'];
-  const code = codes[i % codes.length] ?? 'FX';
-  const failed = i % 11 === 3;
-  return {
-    id: `ilog_${String(i + 1).padStart(3, '0')}`,
-    code,
-    mode: 'stub',
-    direction: code === 'MAILBOT' ? 'inbound' : 'outbound',
-    endpoint: code === 'FX' ? '/scripts/XML_daily.asp' : code === 'WX' ? '/api/data/metar' : '/odata/standard.odata',
-    ts: hoursFromNow(-i * 0.7),
-    durationMs: failed ? 5000 : 80 + ((i * 37) % 320),
-    status: failed ? 503 : 200,
-    responseSizeBytes: failed ? 0 : 1200 + i * 80,
-    relatedEntityType: i % 4 === 0 ? 'flight' : null,
-    relatedEntityId: i % 4 === 0 ? 'flt_002' : null,
-  };
-});
 
 // ─────────────────────────── Правила SLA ───────────────────────────
 // G-39: значения по умолчанию заданы нами, реальные сроки — от заказчика.

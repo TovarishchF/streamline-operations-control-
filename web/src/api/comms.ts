@@ -38,7 +38,6 @@ const attachmentRefSchema = z.object({
 export const outboxMessageSchema = z.object({
   id: z.string(),
   channel: messageChannelSchema,
-  channelMode: z.string().default(''),
   to: z.array(recipientSchema).default([]),
   templateCode: z.string().default(''),
   subject: z.string(),
