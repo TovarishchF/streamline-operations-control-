@@ -223,6 +223,11 @@ export function ReconciliationPage(): JSX.Element {
   );
 }
 
+/** Файл, который сервер умеет читать (`billing.services.invoice_file`). */
+function isInvoiceFile(name: string): boolean {
+  return /\.(xlsx|csv)$/i.test(name);
+}
+
 /** Нерешённых расхождений в сверке. */
 function unresolved(invoice: VendorInvoiceRow): number {
   return invoice.reconciliation.discrepancies.filter((item) => !item.resolution).length;
@@ -443,14 +448,31 @@ function ImportModal({
   const [vendorId, setVendorId] = useState<string | undefined>();
   const [file, setFile] = useState<File | null>(null);
   const [failure, setFailure] = useState<{ message: string; rows: string[] } | null>(null);
+  // Подсказки «чего не хватает» — после первой попытки, а не сразу при открытии.
+  const [attempted, setAttempted] = useState(false);
+  const [wrongFormat, setWrongFormat] = useState<string | null>(null);
 
   const reset = (): void => {
     setVendorId(undefined);
     setFile(null);
     setFailure(null);
+    setAttempted(false);
+    setWrongFormat(null);
   };
 
+  const pick = (picked: File): void => {
+    if (!isInvoiceFile(picked.name)) {
+      setWrongFormat(picked.name);
+      return;
+    }
+    setFile(picked);
+    setWrongFormat(null);
+    setFailure(null);
+  };
+
+  // Кнопка не выключается: выключенная кнопка не говорит, чего ей не хватает.
   const submit = async (): Promise<void> => {
+    setAttempted(true);
     if (!vendorId || !file) return;
     setFailure(null);
     try {
@@ -473,7 +495,7 @@ function ImportModal({
       title={t('reconciliation.import')}
       okText={t('reconciliation.startImport')}
       cancelText={t('common.cancel')}
-      okButtonProps={{ disabled: !vendorId || !file, loading: importInvoice.isPending }}
+      okButtonProps={{ loading: importInvoice.isPending }}
       onCancel={() => {
         reset();
         onClose();
@@ -483,25 +505,32 @@ function ImportModal({
       }}
     >
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Select
-          showSearch
-          optionFilterProp="label"
-          style={{ width: '100%' }}
-          placeholder={t('reconciliation.vendorRequired')}
-          value={vendorId}
-          onChange={setVendorId}
-          options={vendors.map((vendor) => ({ value: vendor.id, label: vendor.name }))}
-        />
+        <div>
+          <Select
+            showSearch
+            optionFilterProp="label"
+            style={{ width: '100%' }}
+            placeholder={t('reconciliation.vendorRequired')}
+            status={attempted && !vendorId ? 'error' : ''}
+            value={vendorId}
+            onChange={setVendorId}
+            options={vendors.map((vendor) => ({ value: vendor.id, label: vendor.name }))}
+          />
+          {attempted && !vendorId ? (
+            <Typography.Text type="danger">{t('reconciliation.vendorRequired')}</Typography.Text>
+          ) : null}
+        </div>
         <Upload.Dragger
-          accept=".xlsx,.csv"
           maxCount={1}
           fileList={
             file ? [{ uid: 'invoice', name: file.name, status: 'done' as const }] : []
           }
           // Файл не уходит сам: его отправляет кнопка вместе с поставщиком.
+          // Формат проверяется здесь, а не фильтром `accept`: фильтр молча
+          // отбрасывает перетащенный файл не того формата, и кажется, что
+          // окно сломано.
           beforeUpload={(picked) => {
-            setFile(picked);
-            setFailure(null);
+            pick(picked);
             return false;
           }}
           onRemove={() => {
@@ -515,6 +544,13 @@ function ImportModal({
           <p className="ant-upload-text">{t('reconciliation.dropFile')}</p>
           <p className="ant-upload-hint">{t('reconciliation.dropFileHint')}</p>
         </Upload.Dragger>
+        {wrongFormat ? (
+          <Typography.Text type="danger">
+            {t('reconciliation.wrongFormat', { name: wrongFormat })}
+          </Typography.Text>
+        ) : attempted && !file ? (
+          <Typography.Text type="danger">{t('reconciliation.fileRequired')}</Typography.Text>
+        ) : null}
         <Space size={8} wrap>
           <Typography.Text type="secondary">{t('reconciliation.noTemplate')}</Typography.Text>
           <Typography.Link

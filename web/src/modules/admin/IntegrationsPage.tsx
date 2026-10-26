@@ -1,99 +1,85 @@
 import { useState, type JSX } from 'react';
-import { Button, Card, Space, Tabs, Tag, Tooltip, Typography } from 'antd';
-import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
+import { App, Button, Card, Space, Tabs, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import type { IntegrationLogEntry, IntegrationStatus } from '@/api/types';
-import { INTEGRATIONS, INTEGRATION_LOG } from '@/mocks/admin';
+import {
+  useCheckIntegration,
+  useIntegrationLogs,
+  useIntegrations,
+  type IntegrationLogRow,
+  type IntegrationStatusRow,
+} from '@/api/admin';
+import { ApiError } from '@/api/client';
+import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
+import { Notice } from '@/shared/ui/Notice';
+import { QueryState } from '@/shared/ui/QueryState';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
-import { Notice } from '@/shared/ui/Notice';
 
 /**
- * Состояние внешних подключений `[ТЗ 4.2]`.
+ * Внешние подключения `[ТЗ 4.2]` (ADR-039).
  *
- * **Показывает фактический режим каждого подключения** (`CLAUDE.md § 4`):
- * заглушка не изображает живое подключение. Колонка «что нужно для live» —
- * из `INTEGRATIONS.md § 6` и письма заказчику: администратор должен видеть,
- * чего именно не хватает, а не просто «не настроено».
+ * Только работающие подключения: заглушек нет, а выключенное подключение
+ * система не вызывает — показывать его здесь незачем. Как подключить
+ * остальные — `docs/CONNECTING.md`.
  *
- * ADR-008: режим подключения на маркировку документов не влияет.
+ * Состояние — по последнему настоящему обмену из журнала, а не по настройке:
+ * включённое, но недоступное подключение должно выглядеть недоступным.
  */
 export function IntegrationsPage(): JSX.Element {
-  const { t } = useTranslation();
-  const [testing, setTesting] = useState<string | null>(null);
+  const { t, i18n } = useTranslation();
+  const { message } = App.useApp();
+  const query = useIntegrations();
+  const check = useCheckIntegration();
+  const [logPage, setLogPage] = useState(1);
+  const logs = useIntegrationLogs(logPage);
+  const language = i18n.language.startsWith('en') ? 'en' : 'ru';
 
-  const stubCount = INTEGRATIONS.filter((i) => i.mode === 'stub').length;
-  const unhealthy = INTEGRATIONS.filter((i) => !i.healthy);
+  const runCheck = async (code: string): Promise<void> => {
+    try {
+      const result = await check.mutateAsync(code);
+      if (result.success) {
+        void message.success(t('integrations.checkOk', { code }));
+      } else {
+        void message.error(t('integrations.checkFailed', { code, message: result.message }));
+      }
+    } catch (error) {
+      void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+    }
+  };
 
-  const columns: DataColumns<IntegrationStatus> = [
+  const unhealthy = (query.data?.data ?? []).filter((item) => item.healthy === false);
+
+  const columns: DataColumns<IntegrationStatusRow> = [
     {
-      title: t('integrations.code'), dataIndex: 'code', width: 120, fixed: 'left',
+      title: t('integrations.code'), dataIndex: 'code', width: 120,
       render: (value: string) => <Mono>{value}</Mono>,
     },
     {
-      title: t('integrations.purpose'), key: 'name', width: 230,
-      render: (_, row) => row.name?.ru ?? row.code,
+      title: t('integrations.purpose'), key: 'name',
+      sortBy: (row) => row.name[language],
+      render: (_, row) => row.name[language],
     },
     {
-      title: t('integrations.mode'), dataIndex: 'mode', width: 110,
-      render: (value: string) => (
-        <Tooltip title={value === 'stub' ? t('integrations.stubHint') : t('integrations.liveHint')}>
-          <Tag color={value === 'live' ? 'green' : 'purple'} style={{ margin: 0 }}>
-            {value}
-          </Tag>
-        </Tooltip>
-      ),
+      title: t('integrations.health'), dataIndex: 'healthy', width: 160, filterable: false,
+      render: (value: boolean | null) => <HealthTag healthy={value} />,
     },
     {
-      title: t('integrations.health'), dataIndex: 'healthy', width: 120,
-      render: (value: boolean) => (
-        <Tag
-          style={{
-            margin: 0,
-            color: value ? STATUS_TOKENS.done.color : STATUS_TOKENS.critical.color,
-            background: value ? STATUS_TOKENS.done.background : STATUS_TOKENS.critical.background,
-            borderColor: value ? STATUS_TOKENS.done.border : STATUS_TOKENS.critical.border,
-          }}
-        >
-          {value ? t('integrations.healthy') : t('integrations.unhealthy')}
-        </Tag>
-      ),
+      title: t('integrations.lastCheck'), dataIndex: 'lastCheckAt', width: 150,
+      render: (value: string | null) => <UtcTime value={value} withDate />,
     },
     {
-      title: t('integrations.lastCheck'), dataIndex: 'lastCheckAt', width: 110,
-      render: (value: string | null) => <UtcTime value={value} />,
+      title: t('integrations.lastSuccess'), dataIndex: 'lastSuccessAt', width: 170,
+      render: (value: string | null) => <UtcTime value={value} withDate />,
     },
     {
-      title: t('integrations.errorRate'), dataIndex: 'errorRate24h', width: 110, align: 'right',
-      render: (value: string) => {
-        const percent = Number.parseFloat(value) * 100;
-        return (
-          <Mono>
-            <span style={{ color: percent > 5 ? STATUS_TOKENS.critical.color : undefined }}>
-              {percent.toFixed(1)} %
-            </span>
-          </Mono>
-        );
-      },
-    },
-    {
-      title: t('integrations.requiredForLive'), dataIndex: 'requiredForLive', ellipsis: false,
-      render: (value: string) => (
-        <Typography.Text style={{ fontSize: 12 }}>{value}</Typography.Text>
-      ),
-    },
-    {
-      title: t('common.actions'), key: 'actions', sortable: false, width: 130, fixed: 'right',
+      title: t('common.actions'), key: 'actions', sortable: false, width: 130,
       render: (_, row) => (
         <Button
           size="small"
-          loading={testing === row.code}
+          loading={check.isPending && check.variables === row.code}
           onClick={() => {
-            setTesting(row.code);
-            window.setTimeout(() => {
-              setTesting(null);
-            }, 800);
+            void runCheck(row.code);
           }}
         >
           {t('integrations.test')}
@@ -102,48 +88,47 @@ export function IntegrationsPage(): JSX.Element {
     },
   ];
 
-  const logColumns: DataColumns<IntegrationLogEntry> = [
-    { title: t('integrations.ts'), dataIndex: 'ts', width: 110,
+  const logColumns: DataColumns<IntegrationLogRow> = [
+    { title: t('integrations.ts'), dataIndex: 'ts', width: 130,
       render: (value: string) => <UtcTime value={value} withDate /> },
     { title: t('integrations.code'), dataIndex: 'code', width: 100,
       render: (value: string) => <Mono>{value}</Mono> },
-    { title: t('integrations.mode'), dataIndex: 'mode', width: 90,
-      render: (value: string) => <Tag color="purple" style={{ margin: 0 }}>{value}</Tag> },
-    { title: t('integrations.direction'), dataIndex: 'direction', width: 110,
+    { title: t('integrations.direction'), dataIndex: 'direction', width: 120,
       render: (value: string) => t(`integrations.${value}`) },
+    { title: t('integrations.operation'), dataIndex: 'operation', width: 140,
+      render: (value: string) => <Mono>{value}</Mono> },
     { title: t('integrations.endpoint'), dataIndex: 'endpoint', ellipsis: true,
       render: (value: string) => <Mono>{value}</Mono> },
-    { title: t('integrations.duration'), dataIndex: 'durationMs', width: 100, align: 'right',
+    { title: t('integrations.duration'), dataIndex: 'durationMs', width: 110, align: 'right',
       render: (value: number) => <Mono>{value} ms</Mono> },
-    { title: t('integrations.httpStatus'), dataIndex: 'status', width: 90, align: 'right',
-      render: (value: number) => (
-        <Mono>
-          <span style={{ color: value >= 400 ? STATUS_TOKENS.critical.color : undefined }}>{value}</span>
-        </Mono>
-      ) },
+    { title: t('integrations.result'), key: 'result', width: 220, ellipsis: true,
+      sortBy: (row) => row.success,
+      render: (_, row) =>
+        row.success ? (
+          <Mono>{row.httpStatus ?? 'OK'}</Mono>
+        ) : (
+          <Typography.Text style={{ color: STATUS_TOKENS.critical.color }}>
+            {row.error ?? t('integrations.unhealthy')}
+          </Typography.Text>
+        ) },
   ];
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>
-        {t('nav.integrations')}
-      </Typography.Title>
-
-      <Notice
-        id={`integrations.stub:${String(stubCount)}`}
-        type="info"
-        showIcon
-        message={t('integrations.honestyNotice', { count: stubCount, total: INTEGRATIONS.length })}
-        description={t('integrations.honestyHint')}
-      />
+      <div>
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          {t('nav.integrations')}
+        </Typography.Title>
+        <Typography.Text type="secondary">{t('integrations.subtitle')}</Typography.Text>
+      </div>
 
       {unhealthy.length > 0 ? (
         <Notice
-          id={`integrations.unhealthy:${String(unhealthy.length)}`}
+          id={`integrations.unhealthy:${unhealthy.map((item) => item.code).join(',')}`}
           type="warning"
           showIcon
           message={t('integrations.unhealthyCount', { count: unhealthy.length })}
-          description={unhealthy.map((i) => `${i.code}: ${i.requiredForLive ?? ''}`).join(' · ')}
+          description={unhealthy.map((item) => item.name[language]).join(' · ')}
         />
       ) : null}
 
@@ -154,14 +139,19 @@ export function IntegrationsPage(): JSX.Element {
             label: t('integrations.tabStatus'),
             children: (
               <Card size="small" styles={{ body: { padding: 0 } }}>
-                <DataTable<IntegrationStatus>
-                  size="small"
-                  rowKey="code"
-                  columns={columns}
-                  dataSource={INTEGRATIONS}
-                  pagination={false}
-                  scroll={{ x: 1250 }}
-                />
+                <QueryState query={query}>
+                  {(page) => (
+                    <DataTable<IntegrationStatusRow>
+                      size="small"
+                      rowKey="code"
+                      columns={columns}
+                      dataSource={page.data}
+                      pagination={false}
+                      scroll={{ x: 900 }}
+                      locale={{ emptyText: <EmptyState description={t('integrations.empty')} /> }}
+                    />
+                  )}
+                </QueryState>
               </Card>
             ),
           },
@@ -174,15 +164,25 @@ export function IntegrationsPage(): JSX.Element {
                   {t('integrations.logHint')}
                 </Typography.Text>
                 <Card size="small" styles={{ body: { padding: 0 } }}>
-                  <DataTable<IntegrationLogEntry>
-                    size="small"
-                    rowKey="id"
-                    columns={logColumns}
-                    dataSource={INTEGRATION_LOG}
-                    pagination={{ pageSize: 15, size: 'small' }}
-                    scroll={{ x: 900 }}
-                    locale={{ emptyText: <EmptyState /> }}
-                  />
+                  <QueryState query={logs}>
+                    {(page) => (
+                      <DataTable<IntegrationLogRow>
+                        size="small"
+                        rowKey="id"
+                        columns={logColumns}
+                        dataSource={page.data}
+                        pagination={{
+                          current: logPage,
+                          pageSize: page.meta.perPage,
+                          total: page.meta.total,
+                          size: 'small',
+                          onChange: setLogPage,
+                        }}
+                        scroll={{ x: 1000 }}
+                        locale={{ emptyText: <EmptyState /> }}
+                      />
+                    )}
+                  </QueryState>
                 </Card>
               </Space>
             ),
@@ -190,5 +190,25 @@ export function IntegrationsPage(): JSX.Element {
         ]}
       />
     </Space>
+  );
+}
+
+function HealthTag({ healthy }: { healthy: boolean | null }): JSX.Element {
+  const { t } = useTranslation();
+  if (healthy === null) {
+    return <Tag style={{ margin: 0 }}>{t('integrations.unknown')}</Tag>;
+  }
+  const token = healthy ? STATUS_TOKENS.done : STATUS_TOKENS.critical;
+  return (
+    <Tag
+      style={{
+        margin: 0,
+        color: token.color,
+        background: token.background,
+        borderColor: token.border,
+      }}
+    >
+      {healthy ? t('integrations.healthy') : t('integrations.unhealthy')}
+    </Tag>
   );
 }

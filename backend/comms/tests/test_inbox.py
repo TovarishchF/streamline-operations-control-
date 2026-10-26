@@ -105,33 +105,20 @@ def test_same_letter_is_not_ingested_twice(order: ServiceOrder) -> None:
     assert InboxMessage.objects.count() == 1
 
 
-def test_stub_source_is_marked_synthetic(order: ServiceOrder) -> None:
-    """`CLAUDE.md § 4`: письмо от генератора не выдаётся за настоящее."""
+def test_letter_from_the_mailbox_is_marked_live(order: ServiceOrder) -> None:
+    """Письмо пришло из ящика — это данные внешней системы (ADR-010)."""
     message = inbox.ingest(mail(f"Заявка {order.pk}", "Подтверждаем."))
-    assert message.data_source == "synthetic"
+    assert message.data_source == "live"
 
 
-# ─────────────────────────── Генератор ───────────────────────────
+# ─────────────────────────── Выборка ───────────────────────────
 
 
-def test_generator_builds_letters_from_real_pending_orders(order: ServiceOrder) -> None:
-    created = inbox.poll(10)
-
-    assert created >= 0
-    for message in InboxMessage.objects.all():
-        # Письмо либо про настоящую заявку, либо честно нераспознанное
-        assert message.service_order_id in (order.pk, None)
-
-
-def test_generator_is_deterministic(order: ServiceOrder) -> None:
-    """Стенд, показывающий разные ответы при каждом обновлении, разбирать нельзя."""
-    from integrations.mailbot.stub import Provider
-
-    first, _ = Provider().fetch(10)
-    InboxMessage.objects.all().delete()
-    second, _ = Provider().fetch(10)
-
-    assert [item.subject for item in first] == [item.subject for item in second]
+def test_poll_does_nothing_while_the_mailbox_is_not_connected(order: ServiceOrder) -> None:
+    """ADR-039: заглушки, выдумывающей ответы поставщиков, нет. Пока ящик
+    не подключён, задача по расписанию ничего не заводит и не падает."""
+    assert inbox.poll(10) == 0
+    assert not InboxMessage.objects.exists()
 
 
 # ─────────────────────────── Применение ───────────────────────────

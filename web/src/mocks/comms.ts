@@ -2,9 +2,7 @@
  * Уведомления, исходящие, входящие, шаблоны сообщений.
  *
  * `SPEC.md § 8.2`: сообщение хранится целиком — канал, получатели, тема,
- * отрендеренное тело, вложения, статус и число попыток. В режиме `stub`
- * внешний вызов не выполняется, и это видно: бейдж канала показывает режим,
- * а не притворяется отправкой (`CLAUDE.md § 4`).
+ * отрендеренное тело, вложения, статус и число попыток.
  */
 import type {
   InboxMessage,
@@ -64,7 +62,6 @@ export const OUTBOX: OutboxMessage[] = FLIGHTS.slice(0, 26).map((flight, index) 
   return {
     id: `out_${String(index + 1).padStart(3, '0')}`,
     channel: index % 7 === 3 ? 'messenger' : 'email',
-    channelMode: 'stub',
     to: isVendorLetter
       ? [{ name: vendor?.name ?? '', address: vendor?.contacts?.[0]?.email ?? '', locale: 'ru' }]
       : [{ name: client?.contacts?.[0]?.name ?? '', address: client?.contacts?.[0]?.email ?? '', locale: client?.defaultLocale ?? 'ru' }],

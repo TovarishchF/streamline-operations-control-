@@ -13,7 +13,7 @@ INSTALLED_APPS = [*INSTALLED_APPS, "django_extensions"] if env.bool(
 ) else INSTALLED_APPS
 
 # Почта в dev перехватывается Mailpit: письма реально уходят, но наружу не выходят
-# (INTEGRATIONS § 3.1). Наружу — только при INTEGRATION_SMTP_MODE=live.
+# (INTEGRATIONS § 3.1). Наружу — только если SMTP_HOST указывает на настоящий сервер.
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = env("SMTP_HOST", default="localhost")
 EMAIL_PORT = env.int("SMTP_PORT", default=1025)

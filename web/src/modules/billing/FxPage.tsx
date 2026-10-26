@@ -487,7 +487,7 @@ export function FxPage(): JSX.Element {
               {/* Дата — того курса, что показан: в выходные это пятничный. */}
               {snapshot.source === 'live'
                 ? t('fx.sourceLive', { date: fullDate(snapshot.staleSince ?? snapshot.date, locale) })
-                : t('fx.sourceStub', { date: fullDate(snapshot.staleSince ?? snapshot.date, locale) })}
+                : t('fx.sourceOff', { date: fullDate(snapshot.staleSince ?? snapshot.date, locale) })}
             </span>
           ) : null
         }

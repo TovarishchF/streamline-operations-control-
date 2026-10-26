@@ -92,10 +92,6 @@ def ingest(mail: IncomingMail, *, channel: str = MessageChannel.EMAIL) -> InboxM
     action = suggest_action(text) if order is not None else ""
 
     from core.models import DataSource
-    from integrations.base import mode_for
-    from integrations.models import IntegrationMode
-
-    live = mode_for("MAILBOT") == IntegrationMode.LIVE
 
     return InboxMessage.objects.create(
         channel=channel,
@@ -110,7 +106,7 @@ def ingest(mail: IncomingMail, *, channel: str = MessageChannel.EMAIL) -> InboxM
         service_order=order,
         suggested_action=action,
         external_id=mail.external_id,
-        data_source=DataSource.LIVE if live else DataSource.SYNTHETIC,
+        data_source=DataSource.LIVE,
         # Запись, сделанная в режиме генератора, помечается: иначе её
         # не убрать чисткой `seed_sample --purge` (`CLAUDE.md § 4`).
         is_generated=sample_data.enabled(),
@@ -175,9 +171,15 @@ def apply(
 
 
 def poll(limit: int = 50) -> int:
-    """Забирает письма у источника и разбирает. Возвращает число новых."""
-    from integrations.base import get_provider, record_exchange
+    """Забирает письма у источника и разбирает. Возвращает число новых.
 
+    Пока почтовый ящик не подключён (ADR-039), забирать неоткуда:
+    задача по расписанию ничего не делает, а не сыплет ошибками.
+    """
+    from integrations.base import get_provider, is_enabled, record_exchange
+
+    if not is_enabled("MAILBOT"):
+        return 0
     provider = get_provider("MAILBOT")
     mails = record_exchange("MAILBOT", lambda: provider.fetch(limit))
 

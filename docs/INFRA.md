@@ -27,12 +27,13 @@
 
 | Окружение | Назначение | Данные | Интеграции |
 |---|---|---|---|
-| `dev` | разработка | `seed_sample` | все `stub`, почта в Mailpit |
-| `sample` | показ заказчику | `seed_sample` | все `stub` |
-| `stage` | приёмочные испытания | обезличенная копия рабочих | частично `live` |
-| `prod` | эксплуатация | рабочие | `live` |
+| `dev` | разработка | `seed_sample` | FX, почта в Mailpit |
+| `sample` | показ заказчику | `seed_sample` | FX, почта заказчика либо Mailpit |
+| `stage` | приёмочные испытания | обезличенная копия рабочих | подключённые к этому моменту |
+| `prod` | эксплуатация | рабочие | подключённые к этому моменту |
 
-Установка для показа (`sample`) — это `prod`-сборка с `SAMPLE_DATA=true` и заглушками.
+Заглушек нет ни в одном окружении (ADR-039): подключение работает по-настоящему либо
+выключено. Установка для показа (`sample`) — это `prod`-сборка с `SAMPLE_DATA=true`.
 Отдельного кода для неё не существует; ветвление только по конфигурации.
 
 ---
@@ -53,18 +54,10 @@ S3_ENDPOINT= S3_BUCKET= S3_ACCESS_KEY= S3_SECRET_KEY=
 SAMPLE_DATA=false               # генератор данных и модельное время
 LOGIN_ACCOUNT_LIST=false        # список учётных записей на экране входа
 
-# Интеграции — по умолчанию stub (см. INTEGRATIONS.md)
-INTEGRATION_FX_MODE=stub
-INTEGRATION_WX_MODE=stub
-INTEGRATION_TRACK_MODE=stub
-INTEGRATION_SMTP_MODE=stub
-INTEGRATION_MSGR_MODE=stub
-INTEGRATION_MAILBOT_MODE=stub
-INTEGRATION_LDAP_MODE=stub
-INTEGRATION_ONEC_MODE=stub
-INTEGRATION_EDO_MODE=stub
+# Интеграции: работают перечисленные, для которых есть адаптер (CONNECTING.md)
+INTEGRATIONS_ENABLED=FX,SMTP
 
-# Учётные данные подключений — заполняются при переводе в live
+# Учётные данные подключений — заполняются при подключении
 ONEC_ODATA_URL= ONEC_USER= ONEC_PASSWORD=
 LDAP_SERVER_URI= LDAP_BIND_DN= LDAP_BIND_PASSWORD= LDAP_BASE_DN=
 SMTP_HOST= SMTP_PORT= SMTP_USER= SMTP_PASSWORD= SMTP_FROM=

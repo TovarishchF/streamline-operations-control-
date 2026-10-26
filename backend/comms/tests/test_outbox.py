@@ -6,7 +6,11 @@
 * попытки кончаются, и тогда сообщение ждёт человека, а не исчезает;
 * повтор отправленного запрещён — второй экземпляр письма поставщику
   читается как второй заказ;
-* заглушка не выдаёт себя за отправку наружу (`CLAUDE.md § 4`).
+* неподключённый канал сразу даёт ошибку, а не делает вид, что отправил
+  (ADR-039: заглушек нет).
+
+Сеть в тестах не используется: канал, который принимает сообщение,
+подставляется приспособлением `working_channel`.
 """
 
 from __future__ import annotations
@@ -20,7 +24,8 @@ from accounts.models import Role
 from comms.models import MessageChannel, OutboxMessage, OutboxStatus
 from comms.services import outbox
 from core.services import storage
-from integrations.channels import MAX_ATTEMPTS, ChannelError, Message, Recipient
+from integrations.base import Exchange
+from integrations.channels import MAX_ATTEMPTS, ChannelError, Delivery, Message, Recipient
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -54,19 +59,25 @@ def storage_stub(monkeypatch: pytest.MonkeyPatch) -> dict[str, Any]:
     return stored
 
 
+@pytest.fixture
+def working_channel(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Почтовый сервер, который принимает письмо."""
+    monkeypatch.setattr(outbox, "get_provider", lambda code: _WorkingProvider())
+
+
 # ─────────────────────────── Постановка в очередь ───────────────────────────
 
 
-def test_enqueued_message_records_the_actual_channel_mode(db: None) -> None:
-    """`CLAUDE.md § 4`: режим записывается, а не вычисляется при показе."""
+def test_enqueued_message_waits_in_the_queue(db: None) -> None:
+    """Наружу сообщение уходит после фиксации транзакции, а не при постановке."""
     message = outbox.enqueue(
         channel=MessageChannel.EMAIL,
         to=[{"name": "Поставщик", "address": "ops@vendor.test"}],
         subject="Заявка",
         body="Текст",
     )
-    assert message.channel_mode == "stub"
     assert message.status == OutboxStatus.QUEUED
+    assert message.attempts == 0
 
 
 def test_sample_data_mode_marks_the_record_not_the_subject(db: None, settings: Any) -> None:
@@ -127,10 +138,10 @@ def test_english_recipient_gets_the_english_text(
 # ─────────────────────────── Отправка ───────────────────────────
 
 
-def test_stub_marks_the_message_sent_but_not_delivered(
-    queued_message: OutboxMessage,
+def test_accepted_letter_is_sent_but_not_delivered(
+    queued_message: OutboxMessage, working_channel: None
 ) -> None:
-    """Заглушка не подтверждает доставку, которую подтвердить не может."""
+    """Сервер исходящей почты подтверждает приём, а не доставку адресату."""
     sent = outbox.send(queued_message)
 
     assert sent.status == OutboxStatus.SENT
@@ -140,7 +151,7 @@ def test_stub_marks_the_message_sent_but_not_delivered(
 
 
 def test_sent_email_keeps_a_copy_of_the_letter(
-    queued_message: OutboxMessage, storage_stub: dict[str, Any]
+    queued_message: OutboxMessage, storage_stub: dict[str, Any], working_channel: None
 ) -> None:
     """Файл письма — то же самое, что ушло бы наружу."""
     sent = outbox.send(queued_message)
@@ -149,6 +160,20 @@ def test_sent_email_keeps_a_copy_of_the_letter(
     assert storage_stub["key"] == sent.eml_key
     assert b"Subject:" in storage_stub["data"]
     assert outbox.eml_url(sent) == f"http://storage.test/{sent.eml_key}"
+
+
+def test_disconnected_channel_fails_at_once(queued_message: OutboxMessage) -> None:
+    """Канал не подключён — повторы через минуту ничего не изменят.
+
+    Сообщение не делает вид, что ушло, и не висит в очереди полдня:
+    оно сразу ждёт человека с понятной причиной.
+    """
+    failed = outbox.send(queued_message)
+
+    assert failed.status == OutboxStatus.FAILED
+    assert failed.attempts == 1
+    assert failed.next_attempt_at is None
+    assert "не включено" in failed.last_error
 
 
 def test_channel_failure_postpones_instead_of_losing(
@@ -213,9 +238,7 @@ def test_retry_endpoint_sends_a_failed_message(
     # Канал отказывает, пока не сказано иначе. Флагом, а не `monkeypatch.undo()`:
     # тот снял бы и подмену хранилища, поставленную приспособлением.
     broken = {"value": True}
-    from integrations.base import get_provider
-
-    working = get_provider("SMTP")
+    working = _WorkingProvider()
     monkeypatch.setattr(
         outbox,
         "get_provider",
@@ -239,7 +262,7 @@ def test_retry_endpoint_sends_a_failed_message(
 
 
 def test_sent_message_cannot_be_retried(
-    as_role: Callable[..., APIClient], queued_message: OutboxMessage
+    as_role: Callable[..., APIClient], queued_message: OutboxMessage, working_channel: None
 ) -> None:
     """Второй экземпляр письма поставщику читается как второй заказ."""
     outbox.send(queued_message)
@@ -265,8 +288,8 @@ def test_retry_requires_idempotency_key(
 # ─────────────────────────── Список ───────────────────────────
 
 
-def test_list_shows_channel_mode_and_eml_link(
-    as_role: Callable[..., APIClient], queued_message: OutboxMessage
+def test_list_shows_the_eml_link(
+    as_role: Callable[..., APIClient], queued_message: OutboxMessage, working_channel: None
 ) -> None:
     outbox.send(queued_message)
 
@@ -275,7 +298,7 @@ def test_list_shows_channel_mode_and_eml_link(
 
     assert response.status_code == status.HTTP_200_OK
     row = response.json()["data"][0]
-    assert row["channelMode"] == "stub"
+    assert "channelMode" not in row
     assert row["emlUrl"].startswith("http://storage.test/messages/")
     assert row["lastError"] is None
 
@@ -304,3 +327,16 @@ class _FailingProvider:
     def send(self, message: Message) -> tuple[object, object]:
         assert isinstance(message.to[0], Recipient)
         raise ChannelError("сервер исходящей почты недоступен")
+
+
+class _WorkingProvider:
+    """Канал, который принимает сообщение, — как боевой SMTP."""
+
+    code = "SMTP"
+
+    def send(self, message: Message) -> tuple[Delivery, Exchange]:
+        assert isinstance(message.to[0], Recipient)
+        return (
+            Delivery(delivered=False, detail="Принято сервером исходящей почты"),
+            Exchange(operation="send", endpoint="smtp://mail.test:25", http_status=250),
+        )

@@ -51,6 +51,24 @@ test.describe('Сверка счетов', () => {
     expect(Buffer.concat(chunks).toString('utf-8').replace(/^﻿/, '').trim()).toBe(HEADER);
   });
 
+  test('кнопка импорта говорит, чего не хватает', async ({ page }) => {
+    // Раньше кнопка была выключена без объяснений, и казалось, что она не работает
+    await page.getByRole('button', { name: 'Импортировать счёт' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: 'Импортировать' }).click();
+
+    await expect(dialog.locator('.ant-typography-danger')).toHaveText([
+      'Выберите поставщика',
+      'Выберите файл счёта',
+    ]);
+
+    // Файл не того формата не отбрасывается молча
+    await dialog
+      .locator('input[type=file]')
+      .setInputFiles({ name: 'счёт.xls', mimeType: 'application/vnd.ms-excel', buffer: Buffer.from('x') });
+    await expect(dialog).toContainText('«счёт.xls» — не XLSX и не CSV');
+  });
+
   test('ошибки файла показываются по строкам, счёт не создаётся', async ({ page }) => {
     await openImport(page);
     await attach(page, 'bad.csv', `${HEADER}\nE2E-BAD-${RUN};20.10.2026;RUB;UUW;вчера;GPU;1;1;1\n`);

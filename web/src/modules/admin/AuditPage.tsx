@@ -4,16 +4,11 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { ExportOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import { useAuditEntries, type AuditEntryRow } from '@/api/admin';
+import { AUDIT_ENTITY_TYPES, useAuditEntries, type AuditEntryRow } from '@/api/admin';
 import { AuditActor, AuditDiff } from '@/modules/flights/FlightHistoryTab';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 
-const ENTITY_TYPES = [
-  'flight', 'service_order', 'vendor', 'client', 'contract', 'tariff', 'quote',
-  'invoice', 'payable', 'payment', 'reconciliation', 'user', 'settings', 'crew',
-  'aircraft', 'service', 'airport',
-] as const;
 
 /**
  * Журнал аудита `[ТЗ 4.3]`.
@@ -92,7 +87,7 @@ export function AuditPage(): JSX.Element {
                 setEntityType(value);
                 setPage(1);
               }}
-              options={ENTITY_TYPES.map((code) => ({ value: code, label: t(`auditEntity.${code}`) }))}
+              options={AUDIT_ENTITY_TYPES.map((code) => ({ value: code, label: t(`auditEntity.${code}`) }))}
             />
           </Col>
           <Col xs={12} md={6}>

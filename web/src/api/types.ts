@@ -114,7 +114,6 @@ export type AuditEntityType = S['AuditEntityType'];
 export type Settings = S['Settings'];
 export type SlaRule = S['SlaRule'];
 export type IntegrationCode = S['IntegrationCode'];
-export type IntegrationMode = S['IntegrationMode'];
 export type IntegrationStatus = S['IntegrationStatus'];
 export type IntegrationLogEntry = S['IntegrationLogEntry'];
 export type PerformanceReport = S['PerformanceReport'];

@@ -72,6 +72,11 @@ from flights.api.views import (
     ScheduleExportView,
     SlotViewSet,
 )
+from integrations.api.views import (
+    IntegrationCheckView,
+    IntegrationListView,
+    IntegrationLogListView,
+)
 from orders.api.views import ServiceOrderViewSet
 from reports.api.views import (
     ReportBuildView,
@@ -174,6 +179,13 @@ api_v1: list[URLPattern | URLResolver] = [
     path("sample-data/generate", SampleDataGenerateView.as_view(), name="sample-data-generate"),
     path("sample-data/reset", SampleDataResetView.as_view(), name="sample-data-reset"),
     path("sample-data/purge", SampleDataPurgeView.as_view(), name="sample-data-purge"),
+    path("integrations", IntegrationListView.as_view(), name="integration-list"),
+    path("integrations/logs", IntegrationLogListView.as_view(), name="integration-logs"),
+    path(
+        "integrations/<str:code>/test",
+        IntegrationCheckView.as_view(),
+        name="integration-check",
+    ),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
     path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),

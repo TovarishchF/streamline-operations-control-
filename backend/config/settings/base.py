@@ -276,23 +276,18 @@ LOGIN_LOCKOUT_MINUTES = 15
 TWO_FACTOR_REQUIRED_ROLES = env.list("TWO_FACTOR_REQUIRED_ROLES", default=["admin", "finance"])
 
 # ─────────────────────────── Внешние подключения ───────────────────────────
-# INTEGRATIONS.md § 1: режим на каждое подключение, по умолчанию stub.
-# Доменный код режима не видит — только фабрику адаптера.
+# Заглушек нет (ADR-039): подключение либо включено и работает с настоящей
+# системой, либо выключено, и система его не вызывает. Работает подключение,
+# которое перечислено здесь и для которого написан адаптер. Как подключать —
+# docs/CONNECTING.md. Доменный код обращается только к фабрике адаптера.
 
-INTEGRATION_MODES: dict[str, str] = {
-    code: env(f"INTEGRATION_{code}_MODE", default="stub")
-    for code in [
-        "FX", "WX", "TRACK", "APT", "SMTP", "MSGR",
-        "MAILBOT", "LDAP", "ONEC", "EDO", "BI", "SLOT", "VENDOR_API", "IATA",
-    ]
-}
+INTEGRATIONS_ENABLED: list[str] = [
+    code.strip().upper() for code in env.list("INTEGRATIONS_ENABLED", default=["FX", "SMTP"])
+]
 
-INTEGRATION_STUB_LATENCY_MS = (80, 400)
-INTEGRATION_STUB_ERROR_RATE = 0.02  # INTEGRATIONS § 1 п. 3
 INTEGRATION_LOG_BODY_RETENTION_DAYS = 30
 
-# Каналы сообщений (INTEGRATIONS.md § 3). Значения нужны только режиму
-# `live`: заглушка наружу не ходит и учётных данных не спрашивает.
+# Каналы сообщений (INTEGRATIONS.md § 3).
 SMTP_HOST = env("SMTP_HOST", default="mailpit")
 SMTP_PORT = env.int("SMTP_PORT", default=1025)
 SMTP_USER = env("SMTP_USER", default="")

@@ -23,7 +23,7 @@ from comms.services import templates as template_service
 from core import clock, sample_data
 from core.exceptions import DomainError
 from core.services import storage
-from integrations.base import get_provider, mode_for, record_exchange
+from integrations.base import IntegrationNotConfigured, get_provider, record_exchange
 from integrations.channels import (
     MAX_ATTEMPTS,
     RETRY_DELAYS_SECONDS,
@@ -67,7 +67,6 @@ def enqueue(
 
     message = OutboxMessage.objects.create(
         channel=channel,
-        channel_mode=mode_for(CHANNEL_CODES[channel]) if channel in CHANNEL_CODES else "",
         to=to,
         template_code=template_code,
         subject=subject[:255],
@@ -214,7 +213,6 @@ def send(message: OutboxMessage) -> OutboxMessage:
         return message
 
     code = CHANNEL_CODES[message.channel]
-    message.channel_mode = mode_for(code)
 
     try:
         provider = get_provider(code)
@@ -240,7 +238,9 @@ def send(message: OutboxMessage) -> OutboxMessage:
 def _fail(message: OutboxMessage, error: Exception) -> OutboxMessage:
     message.last_error = f"{type(error).__name__}: {error}"[:2000]
 
-    if message.attempts >= MAX_ATTEMPTS:
+    # Канал не подключён: повтор через минуту ничего не изменит, а очередь
+    # полдня делала бы вид, что сообщение вот-вот уйдёт (ADR-039).
+    if message.attempts >= MAX_ATTEMPTS or isinstance(error, IntegrationNotConfigured):
         # Попытки исчерпаны — сообщение ждёт человека, а не исчезает.
         message.status = OutboxStatus.FAILED
         message.next_attempt_at = None

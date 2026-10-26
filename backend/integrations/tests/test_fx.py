@@ -11,6 +11,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pytest
 from django.test import override_settings
@@ -18,15 +19,26 @@ from django.test import override_settings
 from billing.models import FxRate
 from billing.services import fx
 from core.models import DataSource
+from integrations.base import IntegrationNotConfigured
 from integrations.fx.live import Provider as LiveProvider
-from integrations.fx.stub import Provider as StubProvider
 from integrations.models import ExchangeStatus, IntegrationLog
 
 RECORDED = Path(__file__).parent / "fixtures" / "cbr-2026-09-11.xml"
 
 
+# Дата публикации в записанном ответе ЦБ.
+PUBLISHED = date(2026, 9, 11)
+
+
 def _recorded_payload() -> str:
     return RECORDED.read_bytes().decode("windows-1251")
+
+
+@pytest.fixture
+def cbr(settings: Any, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Подключение FX включено, а ЦБ отвечает записанным ответом."""
+    settings.INTEGRATIONS_ENABLED = ["FX"]
+    monkeypatch.setattr(LiveProvider, "_fetch", lambda self, url: _recorded_payload())
 
 
 class TestLiveParser:
@@ -68,92 +80,74 @@ class TestLiveParser:
         assert LiveProvider()._parse(empty) == {}
 
 
-class TestStub:
-    def test_same_day_gives_the_same_rate(self) -> None:
-        """Стенд не должен дрожать между обновлениями страницы."""
-        first, _ = StubProvider().rates_on_date(date(2026, 3, 10))
-        second, _ = StubProvider().rates_on_date(date(2026, 3, 10))
-
-        assert first.rates == second.rates
-
-    def test_neighbouring_days_differ(self) -> None:
-        monday, _ = StubProvider().rates_on_date(date(2026, 3, 9))
-        tuesday, _ = StubProvider().rates_on_date(date(2026, 3, 10))
-
-        assert monday.rates["USD"] != tuesday.rates["USD"]
-
-    def test_weekend_repeats_friday(self) -> None:
-        """Так же ведёт себя и настоящий источник."""
-        friday, _ = StubProvider().rates_on_date(date(2026, 3, 13))
-        sunday, _ = StubProvider().rates_on_date(date(2026, 3, 15))
-
-        assert sunday.on_date == friday.on_date
-        assert sunday.rates == friday.rates
-
-    def test_rates_stay_plausible(self) -> None:
-        rate_set, _ = StubProvider().rates_on_date(date(2026, 3, 10))
-
-        assert Decimal(60) < rate_set.rates["USD"] < Decimal(140)
-        assert rate_set.rates["RUB"] == Decimal(1)
-
-
 @pytest.mark.django_db
+@pytest.mark.usefixtures("cbr")
 class TestSync:
-    def test_stub_data_is_not_passed_off_as_live(self) -> None:
-        """`CLAUDE.md § 4`: заглушка не изображает живое подключение."""
-        fx.sync_rates(date(2026, 3, 10))
+    def test_rates_are_stored_as_live_data(self) -> None:
+        fx.sync_rates(PUBLISHED)
 
-        assert set(FxRate.objects.values_list("data_source", flat=True)) == {
-            DataSource.SYNTHETIC
-        }
+        assert set(FxRate.objects.values_list("data_source", flat=True)) == {DataSource.LIVE}
+        assert FxRate.objects.get(currency="USD", on_date=PUBLISHED).rate > Decimal(50)
 
-    def test_every_call_is_logged_with_the_actual_mode(self) -> None:
-        fx.sync_rates(date(2026, 3, 10))
+    def test_every_call_is_logged(self) -> None:
+        fx.sync_rates(PUBLISHED)
 
         entry = IntegrationLog.objects.get(code="FX")
-        assert entry.mode == "stub"
+        assert entry.mode == "live"
         assert entry.status == ExchangeStatus.OK
         assert entry.operation == "rates_on_date"
 
     def test_repeated_sync_does_not_duplicate(self) -> None:
         """Задача по расписанию может сработать дважды (`BACKEND.md § 5`)."""
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
         before = FxRate.objects.count()
 
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
 
         assert FxRate.objects.count() == before
 
 
 @pytest.mark.django_db
+def test_disabled_connection_gives_no_rates_at_all(settings: Any) -> None:
+    """ADR-039: выключенное подключение не подменяется выдуманными курсами."""
+    settings.INTEGRATIONS_ENABLED = []
+
+    with pytest.raises(IntegrationNotConfigured):
+        fx.sync_rates(PUBLISHED)
+
+    assert not FxRate.objects.exists()
+
+
+@pytest.mark.django_db
+@pytest.mark.usefixtures("cbr")
 class TestSnapshot:
     def test_reports_that_the_rate_is_stale(self) -> None:
         """Расчёт по устаревшему курсу допустим, молчание о нём — нет."""
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
 
-        snapshot = fx.snapshot(date(2026, 3, 12))
+        snapshot = fx.snapshot(PUBLISHED + timedelta(days=2))
 
-        assert snapshot["staleSince"] == "2026-03-10"
+        assert snapshot["staleSince"] == PUBLISHED.isoformat()
         assert snapshot["rates"]["USD"]
 
     def test_exact_date_is_not_marked_stale(self) -> None:
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
 
-        assert fx.snapshot(date(2026, 3, 10))["staleSince"] is None
+        assert fx.snapshot(PUBLISHED)["staleSince"] is None
 
     def test_rates_are_decimal_strings(self) -> None:
         """Число с плавающей точкой в JSON запрещено (`CLAUDE.md § 3` п. 1)."""
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
 
-        rates = fx.snapshot(date(2026, 3, 10))["rates"]
+        rates = fx.snapshot(PUBLISHED)["rates"]
 
         assert all(isinstance(value, str) for value in rates.values())
         assert rates["RUB"] == "1.0000"
 
     def test_too_old_rate_is_not_substituted_silently(self) -> None:
-        fx.sync_rates(date(2026, 3, 10))
+        fx.sync_rates(PUBLISHED)
 
-        snapshot = fx.snapshot(date(2026, 3, 10) + timedelta(days=fx.MAX_STALE_DAYS + 1))
+        snapshot = fx.snapshot(PUBLISHED + timedelta(days=fx.MAX_STALE_DAYS + 1))
 
         assert snapshot["rates"] == {"RUB": "1.0000"}
 

@@ -2251,8 +2251,8 @@ paths:
       summary: Очередь исходящих сообщений `[ТЗ 3.5.2]`
       description: |
         Сообщение хранится целиком: канал, получатели, тема, отрендеренное тело,
-        вложения, статус и число попыток. В режиме `stub` внешний вызов не выполняется,
-        сообщение доступно для выгрузки в `.eml`.
+        вложения, статус и число попыток. Письмо доступно для выгрузки в `.eml` —
+        тем же файлом, что ушёл адресату.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PerPage'
@@ -3007,8 +3007,9 @@ paths:
       tags: [admin]
       summary: Состояние внешних подключений `[ТЗ 4.2]`
       description: |
-        Показывает **фактический** режим каждого подключения. Заглушка не изображает
-        живое подключение (`CLAUDE.md § 4`, `INTEGRATIONS § 7`).
+        Только **работающие** подключения: включённые настройкой `INTEGRATIONS_ENABLED`
+        и имеющие адаптер. Заглушек нет (ADR-039): выключенное подключение система
+        не вызывает, и в списке его нет. Как подключить остальные — `docs/CONNECTING.md`.
       responses:
         '200':
           description: Подключения
@@ -3030,6 +3031,9 @@ paths:
     post:
       tags: [admin]
       summary: Проверка подключения
+      description: |
+        Настоящее обращение к внешней системе без побочных действий: курсы
+        на сегодня, приветствие почтового сервера. Записывается в журнал обменов.
       x-idempotency: optional
       responses:
         '200':
@@ -3037,6 +3041,11 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/IntegrationCheckResult' }
+        '404':
+          description: Подключение не включено или для него нет адаптера
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
 
   /integrations/logs:
     get:
@@ -3044,17 +3053,13 @@ paths:
       summary: Журнал обменов с внешними системами `[INTEGRATIONS § 7]`
       description: |
         Доказательная база при разборе спорных ситуаций и главный инструмент отладки
-        при переходе `stub → live`. Реквизиты доступа и персональные данные в журнал
-        не попадают.
+        подключения. Реквизиты доступа и персональные данные в журнал не попадают.
       parameters:
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PerPage'
         - name: code
           in: query
           schema: { $ref: '#/components/schemas/IntegrationCode' }
-        - name: mode
-          in: query
-          schema: { $ref: '#/components/schemas/IntegrationMode' }
       responses:
         '200':
           description: Страница записей журнала
@@ -3307,8 +3312,8 @@ components:
       type: string
       enum: [synthetic, user, imported, live]
       description: |
-        Происхождение записи (ADR-010). Данные, полученные адаптером в режиме `stub`,
-        получают `synthetic`, а не `live`.
+        Происхождение записи (ADR-010). `synthetic` — генератор данных, `live` — данные
+        внешней системы, полученные через её адаптер.
 
     PagedResponse:
       type: object
@@ -5052,8 +5057,6 @@ components:
       properties:
         id: { type: string }
         channel: { $ref: '#/components/schemas/MessageChannel' }
-        channelMode:
-          $ref: '#/components/schemas/IntegrationMode'
         to:
           type: array
           items:
@@ -5079,7 +5082,7 @@ components:
         sentAt: { type: [string, 'null'], format: date-time }
         emlUrl:
           type: [string, 'null']
-          description: Выгрузка сообщения в `.eml` (доступна в режиме `stub`)
+          description: Выгрузка письма в `.eml` — того же файла, что ушёл адресату
 
     InboxMessage:
       type: object
@@ -5292,6 +5295,8 @@ components:
         Типы сущностей, действия над которыми попадают в журнал.
         Справочники (`aircraft`, `service`, `airport`) добавлены на M3:
         изменение справочника меняет расчёты, и его автор должен быть виден.
+        Подписки на отчёты, цены поставщиков, сообщения и шаблоны сообщений
+        сервер записывает с M7–M9; перечень совпадает с `audit.models.AuditEntityType`.
       type: string
       enum:
         - flight
@@ -5311,6 +5316,11 @@ components:
         - aircraft
         - service
         - airport
+        - report_subscription
+        - vendor_price
+        - outbox_message
+        - inbox_message
+        - message_template
 
     AuditEntry:
       type: object
@@ -5416,52 +5426,46 @@ components:
       type: string
       enum: [FX, WX, TRACK, APT, SMTP, MSGR, MAILBOT, LDAP, ONEC, EDO, BI, SLOT, VENDOR_API, IATA]
 
-    IntegrationMode:
-      type: string
-      enum: [live, stub]
-
     IntegrationStatus:
       type: object
-      required: [code, mode, healthy]
+      required: [code, name, healthy]
       description: |
-        Показывает **фактический** режим. Заглушка не изображает живое подключение
-        (`CLAUDE.md § 4`).
+        Работающее подключение (ADR-039). Состояние — по последнему обмену
+        из журнала, а не по настройке.
       properties:
         code: { $ref: '#/components/schemas/IntegrationCode' }
         name: { $ref: '#/components/schemas/LocalizedName' }
-        mode: { $ref: '#/components/schemas/IntegrationMode' }
-        healthy: { type: boolean }
+        healthy:
+          type: [boolean, 'null']
+          description: Последний обмен успешен. `null` — обменов ещё не было.
         lastCheckAt: { type: [string, 'null'], format: date-time }
         lastSuccessAt: { type: [string, 'null'], format: date-time }
-        errorRate24h: { $ref: '#/components/schemas/DecimalString' }
-        requiredForLive:
-          type: string
-          description: |
-            Что нужно получить от заказчика для перевода в боевой режим
-            (`INTEGRATIONS § 6`).
 
     IntegrationCheckResult:
       type: object
-      required: [code, mode, success, durationMs]
+      required: [code, success, durationMs]
       properties:
         code: { $ref: '#/components/schemas/IntegrationCode' }
-        mode: { $ref: '#/components/schemas/IntegrationMode' }
         success: { type: boolean }
         durationMs: { type: integer }
         message: { type: string }
 
     IntegrationLogEntry:
       type: object
-      required: [id, code, mode, direction, ts, durationMs, status]
+      required: [id, code, direction, operation, ts, durationMs, success]
       properties:
         id: { type: string }
         code: { $ref: '#/components/schemas/IntegrationCode' }
-        mode: { $ref: '#/components/schemas/IntegrationMode' }
         direction: { type: string, enum: [outbound, inbound] }
+        operation: { type: string, examples: ['rates_on_date', 'send', 'check'] }
         endpoint: { type: string }
         ts: { type: string, format: date-time }
         durationMs: { type: integer }
-        status: { type: integer }
+        success: { type: boolean }
+        httpStatus:
+          type: [integer, 'null']
+          description: Код ответа внешней системы; у отказа соединения его нет.
+        error: { type: [string, 'null'] }
         responseSizeBytes: { type: integer }
         relatedEntityType: { type: [string, 'null'] }
         relatedEntityId: { type: [string, 'null'] }

@@ -10,8 +10,8 @@ import { signInAs } from './helpers/session';
  * на настоящий файл письма, «Применить» двигает заявку, а «Обработать
  * вручную» открывает разбор письма, которое система не опознала.
  *
- * Отдельно проверяется, что бейдж канала показывает фактический режим:
- * заглушка не должна выглядеть как отправка наружу (`CLAUDE.md § 4`).
+ * Отдельно проверяется, что режима заглушки на экране нет: заглушек
+ * больше нет вовсе (ADR-039).
  */
 
 function dialog(page: Page): Locator {
@@ -41,17 +41,17 @@ test.describe('Коммуникации', () => {
     await signInAs(page, 'usr_disp1');
   });
 
-  test('исходящие показывают фактический режим канала', async ({ page }) => {
+  test('исходящие не показывают режима заглушки', async ({ page }) => {
     const listed = page.waitForResponse(
       (response) => response.url().includes('/api/v1/outbox?') && response.status() === 200,
     );
     await page.goto('/communications/outbox', { waitUntil: 'networkidle' });
-    const body = (await (await listed).json()) as { data: { channelMode: string }[] };
+    const body = (await (await listed).json()) as { data: Record<string, unknown>[] };
 
     expect(body.data.length, 'на стенде нет исходящих сообщений').toBeGreaterThan(0);
-    // Подключение в режиме заглушки — так и написано в таблице
-    expect(body.data.every((item) => item.channelMode === 'stub')).toBe(true);
-    await expect(page.getByRole('cell', { name: 'stub' }).first()).toBeVisible();
+    expect(body.data.every((item) => !('channelMode' in item))).toBe(true);
+    await expect(page.locator('.ant-table-row').first()).toBeVisible();
+    await expect(page.getByText('stub', { exact: true })).toHaveCount(0);
   });
 
   test('кнопка «Повторить» отправляет сообщение с ошибкой', async ({ page }) => {

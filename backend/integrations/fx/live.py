@@ -17,6 +17,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 import urllib.request
 from datetime import date, timedelta
 from decimal import Decimal
@@ -24,6 +25,7 @@ from xml.etree import ElementTree
 
 from django.conf import settings
 
+from core import clock
 from integrations.base import Exchange
 from integrations.fx.base import RateSet
 
@@ -39,6 +41,11 @@ class Provider:
     """Боевой адаптер курсов ЦБ РФ."""
 
     code = "FX"
+
+    def check(self) -> tuple[None, Exchange]:
+        """Проверка подключения: курсы на сегодня, без записи в базу."""
+        _, exchange = self.rates_on_date(clock.now().date())
+        return None, dataclasses.replace(exchange, operation="check")
 
     def rates_on_date(self, on_date: date) -> tuple[RateSet, Exchange]:
         for offset in range(MAX_LOOKBACK_DAYS):
