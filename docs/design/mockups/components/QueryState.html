@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>QueryState · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.wrap{padding:16px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px} .sk{padding:16px;display:grid;gap:14px}</style>
+<div class="wrap">
+  <div class="ct-card"><div class="ct-card__head"><h3 class="ct-card__title">Счета клиентам</h3></div>
+    <div class="sk"><span class="ct-skel" style="width:70%"></span><span class="ct-skel"></span><span class="ct-skel" style="width:85%"></span><span class="ct-skel" style="width:55%"></span><span class="ct-skel" style="width:78%"></span></div></div>
+  <div class="ct-card"><div class="ct-card__head"><h3 class="ct-card__title">Заявки клиентов</h3></div>
+    <div class="ct-state"><svg class="ct-state__art" viewBox="0 0 120 56"><path d="M6 50 Q60 -10 114 50"/><path d="M6 50 H114" stroke-dasharray="3 5"/></svg>
+      <p class="ct-state__title">Новых заявок нет</p><p class="ct-state__text">Заявки из кабинета заказчика появятся здесь сразу после отправки.</p></div></div>
+  <div class="ct-card"><div class="ct-card__head"><h3 class="ct-card__title">Курсы валют</h3></div>
+    <div class="ct-state"><p class="ct-state__title">Курс ЦБ не получен</p><p class="ct-state__text">Сервер ЦБ не ответил за 10 секунд. Последний курс от 22.10 продолжает действовать.</p><button class="ct-btn ct-btn--sm"><span data-icon="Reload" data-size="14"></span>Повторить</button><span class="ct-state__code">FX_PROVIDER_TIMEOUT · 08:12Z</span></div></div>
+</div>
+<script>window.Contrail && Contrail.mountIcons();</script>
+</body></html>

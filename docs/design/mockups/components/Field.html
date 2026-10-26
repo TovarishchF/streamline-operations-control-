@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>Field · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.wrap { padding: 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 14px; } .full { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }</style>
+<div class="wrap">
+  <label class="ct-field"><span class="ct-label">Борт<b>*</b></span><span class="ct-select"><span class="ct-code">RA-67231 · CL60</span><span data-icon="Down" data-size="12" class="ct-quiet"></span></span><span class="ct-help">Только исправные борта</span></label>
+  <label class="ct-field"><span class="ct-label">Вылет, UTC<b>*</b></span><span class="ct-input is-focus"><span class="ct-code">24.10.2026 12:40Z</span></span><span class="ct-help">15:40 LT в Москве</span></label>
+  <label class="ct-field"><span class="ct-label">Аэропорт назначения<b>*</b></span><span class="ct-input is-error"><span class="ct-code">UNN</span></span><span class="ct-error">Код ИКАО из 4 латинских букв</span></label>
+  <div class="full">
+    <span class="ct-label">Вид</span>
+    <div class="ct-seg" role="tablist"><button class="is-active">Сутки</button><button>Трое суток</button><button>Неделя</button></div>
+    <span class="ct-label" style="margin-left:12px">Плотность</span>
+    <div class="ct-seg"><button>Обычная</button><button class="is-active">Компактная</button></div>
+  </div>
+</div>
+<script>window.Contrail && Contrail.mountIcons();</script>
+</body></html>

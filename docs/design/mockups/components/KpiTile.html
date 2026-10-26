@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>KpiTile · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.wrap{padding:16px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}</style>
+<div class="wrap">
+  <div class="ct-kpi"><div class="ct-kpi__label">Рейсов в работе</div>
+    <div class="ct-kpi__row"><div class="ct-kpi__value">18</div>
+      <svg class="ct-spark" viewBox="0 0 96 32" preserveAspectRatio="none"><path class="area" d="M0 24 L12 22 L24 25 L36 18 L48 20 L60 14 L72 15 L84 9 L96 7 L96 32 L0 32Z"/><path class="line" d="M0 24 L12 22 L24 25 L36 18 L48 20 L60 14 L72 15 L84 9 L96 7"/><circle class="end" cx="94" cy="7" r="3"/></svg></div>
+    <div class="ct-kpi__foot"><span class="ct-delta is-up">▲ 3</span>к прошлой пятнице</div></div>
+  <div class="ct-kpi"><div class="ct-kpi__label">Выручка за октябрь</div>
+    <div class="ct-kpi__row"><div class="ct-kpi__value">48,2<small>млн ₽</small></div></div>
+    <div class="ct-kpi__foot"><span class="ct-delta is-up">▲ 12 %</span>маржа 21,4 %</div></div>
+  <div class="ct-kpi"><div class="ct-kpi__label">Неподтверждённых заявок <span class="ct-pill ct-pill--sm ct-pill--warning">SLA &lt; 2 ч</span></div>
+    <div class="ct-kpi__row"><div class="ct-kpi__value is-warning">6</div></div>
+    <div class="ct-kpi__foot">из 41 на сегодня</div></div>
+  <div class="ct-kpi"><div class="ct-kpi__label">Борта не в строю</div>
+    <div class="ct-kpi__row"><div class="ct-kpi__value is-critical">1</div></div>
+    <div class="ct-kpi__foot"><span class="ct-code">RA-10211</span>· AOG с 06:40Z</div></div>
+</div>
+</body></html>

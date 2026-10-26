@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>GanttBoard · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.wrap{padding:16px;display:grid;gap:10px} .nowbox{position:absolute;top:0;bottom:0;left:calc(var(--lab) + (100% - var(--lab)) * 0.176);}</style>
+<div class="wrap">
+<div class="ct-gantt"><div class="ct-gantt__scroll"><div class="ct-gantt__grid">
+  <div class="ct-gantt__head"><div class="ct-gantt__label ct-muted" style="font-family:var(--font-sans)">Борт</div>
+    <div class="ct-gantt__scale"><span style="left:0">04Z</span><span style="left:8.33%">06Z</span><span style="left:16.66%">08Z</span><span style="left:25%">10Z</span><span style="left:33.33%">12Z</span><span style="left:41.66%">14Z</span><span style="left:50%">16Z</span><span style="left:58.33%">18Z</span><span style="left:66.66%">20Z</span><span style="left:75%">22Z</span><span style="left:83.33%">00Z</span><span style="left:91.66%">02Z</span></div></div>
+  <div class="ct-gantt__row ct-gantt__row--group"><div class="ct-gantt__label">CHALLENGER 605</div><div class="ct-gantt__lane"></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-67231</div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--ready" style="left:25%;width:12.5%"><b>SLG-1126</b> UUDD→UNNT</div></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-67244 <span class="flag flag--warn" title="Допуск истекает"></span></div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--progress" style="left:58.3%;width:14.6%"><b>SLG-1140</b> UUEE→UACC</div></div></div>
+  <div class="ct-gantt__row ct-gantt__row--group"><div class="ct-gantt__label">GULFSTREAM G550</div><div class="ct-gantt__lane"></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-10203</div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--active" style="left:10.4%;width:16.7%"><b>SLG-1147</b> UUWW→UUOB</div><div class="ct-bar" style="left:62.5%;width:10.4%"><b>SLG-1172</b> UUOB→UUWW</div></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-10211 <span class="flag" title="AOG"></span></div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--critical is-conflict" style="left:12.5%;width:12.5%"><b>SLG-1119</b> UUEE→LSGG</div></div></div>
+  <div class="ct-gantt__row ct-gantt__row--group"><div class="ct-gantt__label">GLOBAL 7500</div><div class="ct-gantt__lane"></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-11500</div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--done" style="left:2%;width:12.5%"><b>SLG-1101</b> ULLI→UUDD</div><div class="ct-bar ct-bar--progress is-selected" style="left:41.7%;width:25%"><b>SLG-1154</b> ULLI→UUEE · 6 услуг</div></div></div>
+  <div class="ct-gantt__row"><div class="ct-gantt__label">RA-11502</div><div class="ct-gantt__lane"><div class="ct-bar ct-bar--cancelled" style="left:29%;width:10.4%"><b>SLG-1161</b> UUDD→ZBAA</div></div></div>
+</div><div class="nowbox"><div class="ct-now"><span>08:13Z</span></div></div></div></div>
+<div class="ct-legend"><span><i style="background:var(--status-neutral-dot)"></i>Запланирован</span><span><i style="background:var(--status-progress-dot)"></i>В работе</span><span><i style="background:var(--status-ready-dot)"></i>Готов</span><span><i style="background:var(--status-active-dot)"></i>В полёте</span><span><i style="background:var(--status-done-dot)"></i>Завершён</span><span><i style="background:var(--status-critical-dot)"></i>AOG / конфликт — красная обводка</span></div>
+</div>
+</body></html>

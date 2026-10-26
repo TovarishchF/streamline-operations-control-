@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>CommandPalette · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.scrim{padding:32px 24px;min-height:500px;background:var(--canvas);display:flex;justify-content:center;align-items:flex-start}</style>
+<div class="scrim"><div class="ct-palette" role="dialog" aria-label="Поиск и команды">
+  <div class="ct-palette__input"><span data-icon="Search" data-size="18" class="ct-quiet"></span><span>RA-102</span><span class="caret"></span><span class="ct-kbd" style="margin-left:auto">Esc</span></div>
+  <div class="ct-palette__list">
+    <div class="ct-palette__group">Борта</div>
+    <div class="ct-palette__item is-active"><span class="ico"><span data-icon="Send" data-size="14"></span></span><span class="main"><span class="ct-code">RA-10203</span><span class="ct-muted">Gulfstream G550</span><span class="ct-pill ct-pill--sm ct-pill--active">В полёте</span></span><span class="hint">Открыть ↵</span></div>
+    <div class="ct-palette__item"><span class="ico"><span data-icon="Send" data-size="14"></span></span><span class="main"><span class="ct-code">RA-10211</span><span class="ct-muted">Gulfstream G550</span><span class="ct-pill ct-pill--sm ct-pill--critical">AOG</span></span></div>
+    <div class="ct-palette__group">Рейсы</div>
+    <div class="ct-palette__item"><span class="ico"><span data-icon="Schedule" data-size="14"></span></span><span class="main"><span class="ct-code">SLG-1147</span><span class="ct-route">UUWW → UUOB</span><span class="ct-quiet">сегодня 06:30Z</span></span></div>
+    <div class="ct-palette__item"><span class="ico"><span data-icon="Schedule" data-size="14"></span></span><span class="main"><span class="ct-code">SLG-1172</span><span class="ct-route">UUOB → UUWW</span><span class="ct-quiet">сегодня 19:00Z</span></span></div>
+    <div class="ct-palette__group">Действия</div>
+    <div class="ct-palette__item"><span class="ico"><span data-icon="Plus" data-size="14"></span></span><span class="main">Создать рейс на RA-10203</span><span class="hint"><span class="ct-kbd">N</span></span></div>
+  </div>
+  <div class="ct-palette__foot"><span><span class="ct-kbd">↑</span><span class="ct-kbd">↓</span>выбор</span><span><span class="ct-kbd">↵</span>открыть</span><span><span class="ct-kbd">Tab</span>следующая группа</span></div>
+</div></div>
+<script>window.Contrail && Contrail.mountIcons();</script>
+</body></html>

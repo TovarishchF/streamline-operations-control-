@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head><meta charset="utf-8"><title>Button · Contrail mockup</title>
+<link rel="stylesheet" href="../frame.css"><link rel="stylesheet" href="../../components/bundle.css">
+<script src="../contrail.js"></script></head>
+<body style="width:960px">
+<style>.wrap { padding: 20px; display: grid; gap: 14px; } .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }</style>
+<div class="wrap">
+  <div class="row">
+    <button class="ct-btn ct-btn--primary"><span data-icon="Plus" data-size="14"></span>Создать рейс</button>
+    <button class="ct-btn">Сохранить черновик</button>
+    <button class="ct-btn ct-btn--ghost">Отмена</button>
+    <button class="ct-btn ct-btn--danger">Отменить рейс</button>
+    <button class="ct-btn" disabled>Выставить счёт</button>
+  </div>
+  <div class="row">
+    <button class="ct-btn ct-btn--primary ct-btn--lg">Войти</button>
+    <button class="ct-btn ct-btn--sm"><span data-icon="Filter" data-size="14"></span>Фильтры</button>
+    <button class="ct-btn ct-btn--sm"><span data-icon="Export" data-size="14"></span>Экспорт</button>
+    <button class="ct-btn ct-btn--icon" aria-label="Обновить"><span data-icon="Reload"></span></button>
+  </div>
+</div>
+<script>window.Contrail && Contrail.mountIcons();</script>
+</body></html>
