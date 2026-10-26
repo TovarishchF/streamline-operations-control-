@@ -3986,11 +3986,27 @@ components:
         orderCount: { type: integer }
         components:
           type: object
+          description: |
+            Составляющая без данных (ни одной выполненной заявки со сроком исполнения,
+            ни одной сверки) — `null`, а не ноль и не единица; её вес делится между
+            остальными (`GAPS.md` G-55).
           properties:
-            onTimeConfirmRate: { $ref: '#/components/schemas/DecimalString' }
-            slaComplianceRate: { $ref: '#/components/schemas/DecimalString' }
-            billingAccuracy: { $ref: '#/components/schemas/DecimalString' }
-            qualityScore: { $ref: '#/components/schemas/DecimalString' }
+            onTimeConfirmRate:
+              oneOf:
+                - $ref: '#/components/schemas/DecimalString'
+                - type: 'null'
+            slaComplianceRate:
+              oneOf:
+                - $ref: '#/components/schemas/DecimalString'
+                - type: 'null'
+            billingAccuracy:
+              oneOf:
+                - $ref: '#/components/schemas/DecimalString'
+                - type: 'null'
+            qualityScore:
+              oneOf:
+                - $ref: '#/components/schemas/DecimalString'
+                - type: 'null'
         weights:
           type: object
           additionalProperties: { $ref: '#/components/schemas/DecimalString' }
