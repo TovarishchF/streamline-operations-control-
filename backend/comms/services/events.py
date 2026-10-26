@@ -23,7 +23,7 @@ from comms.services.templates import TemplateNotFound
 if TYPE_CHECKING:
     from accounts.models import User
     from billing.models import Invoice, Quote
-    from counterparties.models import Client, Vendor
+    from counterparties.models import Client, Vendor, VendorContract
     from orders.models import ServiceOrder
 
 logger = logging.getLogger(__name__)
@@ -110,6 +110,33 @@ def order_sla_breached(order: ServiceOrder) -> None:
         kind="sla_breach",
         title=f"Просрочено подтверждение: {order.service.name_ru}, рейс {order.flight.number}",
         link=f"/flights/{order.flight_id}/services",
+    )
+
+
+# ─────────────────────────── Договоры ───────────────────────────
+
+
+def contract_expiring(contract: VendorContract, *, dedupe_key: str) -> None:
+    """Письмо поставщику об истечении договора `[ТЗ 3.3.3]`.
+
+    Ключ идемпотентности тот же, что у внутреннего уведомления: одно
+    напоминание по одному порогу — одно письмо.
+    """
+    to = _recipients(contract.vendor)
+    if not to:
+        logger.info("у поставщика договора %s нет контактов для переписки", contract.pk)
+        return
+
+    _enqueue(
+        "contract_expiring",
+        to=to,
+        data={
+            "contract": context.contract_data(contract),
+            "vendor": {"name": contract.vendor.name},
+            "operator": context.operator_data(),
+        },
+        related=("contract", contract.pk),
+        dedupe_key=dedupe_key,
     )
 
 

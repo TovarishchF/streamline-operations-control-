@@ -13,6 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.db import IntegrityError, transaction
 from django.db.models import F
 
 from comms.models import Notification, NotificationSeverity
@@ -45,17 +46,34 @@ def notify(
     title: str,
     body: str = "",
     link: str = "",
+    dedupe_key: str = "",
 ) -> Notification:
-    """Заводит уведомление одному пользователю."""
-    return Notification.objects.create(
-        user=user,
-        kind=kind,
-        severity=SEVERITY_BY_KIND.get(kind, NotificationSeverity.INFO),
-        title=title[:255],
-        body=body,
-        link=link[:255],
-        is_generated=sample_data.enabled(),
-    )
+    """Заводит уведомление одному пользователю.
+
+    С ключом идемпотентности (`DOMAIN.md § 9`) повторный вызов возвращает
+    уже заведённое уведомление. Гонку двух одновременных вызовов закрывает
+    ограничение уникальности в базе, а не проверка перед вставкой.
+    """
+    if dedupe_key:
+        existing = Notification.objects.filter(user=user, dedupe_key=dedupe_key).first()
+        if existing is not None:
+            return existing
+    try:
+        with transaction.atomic():
+            return Notification.objects.create(
+                user=user,
+                kind=kind,
+                severity=SEVERITY_BY_KIND.get(kind, NotificationSeverity.INFO),
+                title=title[:255],
+                body=body,
+                link=link[:255],
+                dedupe_key=dedupe_key,
+                is_generated=sample_data.enabled(),
+            )
+    except IntegrityError:
+        if not dedupe_key:
+            raise
+        return Notification.objects.get(user=user, dedupe_key=dedupe_key)
 
 
 def notify_many(
@@ -65,9 +83,13 @@ def notify_many(
     title: str,
     body: str = "",
     link: str = "",
+    dedupe_key: str = "",
 ) -> list[Notification]:
     """Одно событие — запись каждому адресату."""
-    return [notify(user=user, kind=kind, title=title, body=body, link=link) for user in users]
+    return [
+        notify(user=user, kind=kind, title=title, body=body, link=link, dedupe_key=dedupe_key)
+        for user in users
+    ]
 
 
 def mark_read(*, notification: Notification) -> Notification:

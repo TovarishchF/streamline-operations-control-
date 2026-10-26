@@ -103,6 +103,21 @@ class SingletonModel(models.Model):
         return obj
 
 
+def default_contract_expiry_reminders() -> list[int]:
+    """Пороги напоминаний об истечении договора, дни (`SPEC.md § 6.3`)."""
+    return [30, 15, 7]
+
+
+def default_sla_weights() -> dict[str, str]:
+    """Веса составляющих рейтинга поставщика (`DOMAIN.md § 7.4`)."""
+    return {"onTimeConfirm": "0.30", "slaCompliance": "0.30", "billing": "0.20", "quality": "0.20"}
+
+
+def default_vendor_suggest_weights() -> dict[str, str]:
+    """Веса подбора поставщика по умолчанию — пресет «сбалансированный» (`DOMAIN.md § 7.5`)."""
+    return {"price": "0.50", "rating": "0.30", "proximity": "0.20"}
+
+
 class Settings(SingletonModel):
     """Настройки системы, влияющие на расчёты (`DOMAIN.md § 11`).
 
@@ -134,7 +149,13 @@ class Settings(SingletonModel):
     slot_message_mask = models.CharField(max_length=64, default="SCR-{YYYY}-{NNNN}")
 
     # Контракты
-    contract_expiry_reminders = models.JSONField(default=list)
+    contract_expiry_reminders = models.JSONField(default=default_contract_expiry_reminders)
+
+    # Веса хранятся десятичными строками, а не числами: в JSON число
+    # с плавающей точкой, а веса умножаются на доли в `Decimal`
+    # (`CLAUDE.md § 3` п. 1).
+    sla_weights = models.JSONField(default=default_sla_weights)
+    vendor_suggest_weights = models.JSONField(default=default_vendor_suggest_weights)
 
     # Противообледенительная обработка (ADR-029). Подсказка диспетчеру,
     # окончательное решение принимает командир воздушного судна.
