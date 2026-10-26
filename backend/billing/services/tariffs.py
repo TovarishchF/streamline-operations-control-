@@ -17,17 +17,22 @@
 Валюта: `cost` может быть в валюте поставщика, `sale` — всегда в валюте
 рейса. Конвертация по снимку курса документа, а не по сегодняшнему:
 пересчёт выставленного документа по новому курсу менял бы его сумму.
+
+Одна функция считает цену для документа, для маржи, для подбора
+поставщика и для песочницы тарифа: песочница, считающая не так, как счёт,
+объясняла бы не ту цифру, которую увидит клиент.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from billing.models import TariffMode, TariffRule
+from billing.services import fx
 from core.models import Settings
-from core.money import Money, convert
+from core.money import Money
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -48,6 +53,9 @@ class SalePrice:
     amount: Money
     rule: TariffRule | None
     explanation: str
+    # Шаги расчёта и рассмотренные правила — форма `TariffSimulateResult`.
+    steps: list[dict[str, Any]] = field(default_factory=list)
+    candidates: list[dict[str, Any]] = field(default_factory=list)
 
 
 def applicable_rules(
@@ -82,56 +90,109 @@ def pick_rule(rules: list[TariffRule]) -> TariffRule | None:
     return max(rules, key=lambda rule: (rule.priority, rule.valid_from))
 
 
-def sale_price(
+def _scope_text(rule: TariffRule) -> str:
+    if rule.service_id:
+        scope = f"услуга {rule.service.code}" if rule.service else "услуга"
+    elif rule.category:
+        scope = f"категория {rule.category}"
+    else:
+        scope = "все услуги"
+    if rule.airport_icao:
+        scope += f", аэропорт {rule.airport_icao}"
+    return scope
+
+
+def price_for(
     *,
-    order: ServiceOrder,
+    cost: Money,
+    quantity: Decimal,
     client_id: str,
+    service_id: str,
+    category: str,
+    airport_icao: str,
     target_currency: str,
     rates: Mapping[str, Decimal | str],
     moment: datetime,
 ) -> SalePrice:
-    """Цена продажи заявки по формуле `DOMAIN.md § 7.2`."""
-    cost = Money.of(
-        order.purchase_cost_amount or Decimal(0),
-        order.purchase_currency or target_currency,
+    """Цена продажи по закупочной стоимости и тарифам клиента (`DOMAIN.md § 7.2`)."""
+    rules = applicable_rules(
+        client_id=client_id,
+        service_id=service_id,
+        category=category,
+        airport_icao=airport_icao,
+        moment=moment,
     )
-    quantity = order.actual_quantity if order.actual_quantity is not None else order.quantity
+    rule = pick_rule(rules)
+    candidates = [
+        {
+            "ruleId": item.pk,
+            "priority": item.priority,
+            "selected": rule is not None and item.pk == rule.pk,
+            "reason": (
+                f"{_scope_text(item)}: приоритет {item.priority}, действует с "
+                f"{item.valid_from:%d.%m.%Y}"
+            ),
+        }
+        for item in sorted(rules, key=lambda item: (-item.priority, -item.valid_from.timestamp()))
+    ]
 
-    rule = pick_rule(
-        applicable_rules(
-            client_id=client_id,
-            service_id=order.service_id,
-            category=order.service.category,
-            airport_icao=order.airport_icao,
-            moment=moment,
-        )
-    )
+    base = fx.convert(cost, target_currency, rates)
+    steps: list[dict[str, Any]] = [
+        {
+            "step": "cost",
+            "detail": (
+                f"Закупочная стоимость {cost}"
+                + (f", в валюте расчётов {base}" if cost.currency != target_currency else "")
+            ),
+            "value": str(base.amount),
+        }
+    ]
 
     if rule is None:
-        # Правил нет — наценка по умолчанию из настроек системы.
         markup = Settings.get_solo().default_markup_percent
-        base = _in_currency(cost, target_currency, rates)
         sale = base + base.percent(markup)
-        return SalePrice(
-            amount=sale.rounded(),
-            rule=None,
-            explanation=(
-                f"Тарифного правила нет, применена наценка по умолчанию {markup} %"
-            ),
+        explanation = f"Тарифного правила нет, применена наценка по умолчанию {markup} %"
+        steps.append({"step": "rule", "detail": explanation, "value": str(markup)})
+        steps.append(
+            {"step": "sale", "detail": "Цена продажи", "value": str(sale.rounded().amount)}
         )
+        return SalePrice(
+            amount=sale.rounded(), rule=None, explanation=explanation, steps=steps,
+            candidates=candidates,
+        )
+
+    steps.append(
+        {
+            "step": "rule",
+            "detail": (
+                f"Выбрано правило «{rule.get_mode_display()}» ({_scope_text(rule)}): "
+                f"самый высокий приоритет {rule.priority}"
+                + (", при равенстве — самое позднее" if len(rules) > 1 else "")
+            ),
+            "value": str(rule.priority),
+        }
+    )
 
     if rule.mode == TariffMode.COST_PLUS:
         markup = rule.markup_percent or Decimal(0)
-        base = _in_currency(cost, target_currency, rates)
         sale = base + base.percent(markup)
         explanation = f"Правило «закупка плюс наценка» {markup} %"
+        steps.append({"step": "markup", "detail": f"Наценка {markup} %", "value": str(sale.amount)})
     elif rule.mode == TariffMode.FIXED:
         unit = Money.of(rule.fixed_amount or Decimal(0), rule.fixed_currency or target_currency)
-        sale = _in_currency(unit.multiply(quantity), target_currency, rates)
+        sale = fx.convert(unit.multiply(quantity), target_currency, rates)
         explanation = f"Правило «фиксированная цена» {unit}"
+        steps.append(
+            {
+                "step": "fixed",
+                "detail": f"Фиксированная цена {unit} × {quantity}",
+                "value": str(sale.amount),
+            }
+        )
     else:
-        sale = _in_currency(cost, target_currency, rates)
+        sale = base
         explanation = "Правило «по себестоимости»: наценка не применяется"
+        steps.append({"step": "pass_through", "detail": explanation, "value": str(sale.amount)})
 
     if rule.discount_kind and rule.discount_value:
         discount = (
@@ -140,16 +201,52 @@ def sale_price(
             else Money.of(rule.discount_value, target_currency)
         )
         sale = sale - discount
-        explanation += f", скидка {rule.discount_value}"
-        explanation += " %" if rule.discount_kind == "percent" else f" {target_currency}"
+        suffix = " %" if rule.discount_kind == "percent" else f" {target_currency}"
+        explanation += f", скидка {rule.discount_value}{suffix}"
+        steps.append(
+            {
+                "step": "discount",
+                "detail": f"Скидка {rule.discount_value}{suffix}",
+                "value": str(discount.amount),
+            }
+        )
 
-    return SalePrice(amount=sale.rounded(), rule=rule, explanation=explanation)
+    steps.append({"step": "sale", "detail": "Цена продажи", "value": str(sale.rounded().amount)})
+    return SalePrice(
+        amount=sale.rounded(), rule=rule, explanation=explanation, steps=steps,
+        candidates=candidates,
+    )
 
 
-def _in_currency(
-    value: Money, target_currency: str, rates: Mapping[str, Decimal | str]
-) -> Money:
-    """Конвертация по снимку курса документа (`CLAUDE.md § 3` п. 5)."""
-    if value.currency == target_currency:
-        return value
-    return convert(value, target_currency, rates)
+def sale_price(
+    *,
+    order: ServiceOrder,
+    client_id: str,
+    target_currency: str,
+    rates: Mapping[str, Decimal | str],
+    moment: datetime,
+    use_actual: bool,
+) -> SalePrice:
+    """Цена продажи заявки (`DOMAIN.md § 7.2`).
+
+    `use_actual` различает план и факт: котировка и плановая маржа
+    считаются по плановому количеству, счёт и фактическая маржа —
+    по фактическому (ADR-020). Закупочная стоимость при этом берётся
+    из снимка цены, пересчитанного на то же количество, — иначе наценка
+    по факту считалась бы от плановой закупки.
+    """
+    from orders.services import costs
+
+    quantity = costs.actual_quantity(order) if use_actual else Decimal(order.quantity)
+    cost = costs.cost_for(order, quantity) or Money.zero(target_currency)
+    return price_for(
+        cost=cost,
+        quantity=quantity,
+        client_id=client_id,
+        service_id=order.service_id,
+        category=order.service.category,
+        airport_icao=order.airport_icao,
+        target_currency=target_currency,
+        rates=rates,
+        moment=moment,
+    )

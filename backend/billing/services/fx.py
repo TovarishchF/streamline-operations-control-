@@ -9,15 +9,32 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from django.conf import settings
 from django.db import transaction
 
 from billing.models import FxRate
 from core import clock
+from core.exceptions import IntegrationUnavailable
 from core.models import DataSource
+from core.money import Money
+from core.money import convert as money_convert
 from integrations.base import Exchange, get_provider, record_exchange
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+class RateMissing(IntegrationUnavailable):
+    """Нужного курса нет в снимке.
+
+    Курсы приходят только от подключения `FX` (ADR-039): если оно
+    выключено или ещё ни разу не отработало, пересчитать сумму не во что.
+    Подставлять курс «на глаз» нельзя — это была бы выдуманная сумма.
+    """
+
+    http_status: ClassVar[int] = 503
+
 
 # Сколько дней назад искать последний известный курс, если на нужную дату
 # его нет. Дольше двух недель курс неактуален, и молча подставлять его хуже,
@@ -131,3 +148,17 @@ def _settings() -> Any:
     from core.models import Settings
 
     return Settings.get_solo()
+
+
+def convert(value: Money, to_currency: str, rates: Mapping[str, Decimal | str]) -> Money:
+    """Пересчёт по снимку курсов с понятной ошибкой при пропуске курса."""
+    if value.currency == to_currency:
+        return value
+    missing = sorted({code for code in (value.currency, to_currency) if code not in rates})
+    if missing:
+        raise RateMissing(
+            f"Нет курса {', '.join(missing)} на дату расчёта: курсы загружает подключение FX. "
+            f"Проверьте его на экране подключений.",
+            {"currencies": missing},
+        )
+    return money_convert(value, to_currency, rates)

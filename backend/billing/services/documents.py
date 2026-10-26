@@ -107,6 +107,7 @@ def _line_for(
         target_currency=currency,
         rates=rates,
         moment=moment,
+        use_actual=use_actual,
     )
 
     amount = price.amount.rounded()

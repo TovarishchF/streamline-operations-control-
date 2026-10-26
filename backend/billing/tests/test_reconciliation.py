@@ -166,6 +166,37 @@ def test_exact_match_gives_no_discrepancy(
     assert result["delta"]["amount"] == "0.00"
 
 
+def test_invoice_for_the_actual_quantity_matches(
+    as_role: Callable[..., APIClient],
+    completed_order: ServiceOrder,
+    vendor_alpha: Vendor,
+    dispatcher: User,
+) -> None:
+    """ADR-020: поставщик выставил за фактические 1200 л по цене договора.
+
+    Наша сумма считается по фактическому количеству — расхождения нет.
+    70 × 1200 = 84 000, ночная надбавка 10 % — 92 400.
+    """
+    from orders.models import ServiceOrder as Order
+
+    Order.objects.filter(pk=completed_order.pk).update(actual_quantity=Decimal("1200.0000"))
+    response = as_role(Role.FINANCE).post(
+        IMPORT_URL,
+        invoice_payload(
+            [line(completed_order, amount="92400.00", quantity="1200.0000")],
+            vendor=vendor_alpha,
+            number="V-ACTUAL",
+        ),
+        format="json",
+        headers=idempotent("rec-actual-01"),
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+    result = response.json()["reconciliation"]
+    assert result["discrepancies"] == []
+    assert result["matched"] == [{"lineIndex": 1, "serviceOrderId": completed_order.pk}]
+
+
 def test_rounding_difference_is_not_a_discrepancy(
     as_role: Callable[..., APIClient], completed_order: ServiceOrder, vendor_alpha: Vendor
 ) -> None:
