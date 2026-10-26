@@ -5295,6 +5295,8 @@ components:
         Типы сущностей, действия над которыми попадают в журнал.
         Справочники (`aircraft`, `service`, `airport`) добавлены на M3:
         изменение справочника меняет расчёты, и его автор должен быть виден.
+        Подписки на отчёты, цены поставщиков, сообщения и шаблоны сообщений
+        сервер записывает с M7–M9; перечень совпадает с `audit.models.AuditEntityType`.
       type: string
       enum:
         - flight
@@ -5314,6 +5316,11 @@ components:
         - aircraft
         - service
         - airport
+        - report_subscription
+        - vendor_price
+        - outbox_message
+        - inbox_message
+        - message_template
 
     AuditEntry:
       type: object

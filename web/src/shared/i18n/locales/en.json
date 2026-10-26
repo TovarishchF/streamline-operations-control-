@@ -100,17 +100,22 @@
     "contract": "Contract",
     "crew": "Crew",
     "flight": "Flight",
+    "inbox_message": "Incoming message",
     "invoice": "Invoice",
+    "message_template": "Message template",
+    "outbox_message": "Outgoing message",
     "payable": "Payable",
     "payment": "Payment",
     "quote": "Quote",
     "reconciliation": "Reconciliation",
+    "report_subscription": "Report subscription",
     "service": "Catalogue service",
     "service_order": "Service order",
     "settings": "Settings",
     "tariff": "Tariff",
     "user": "User",
-    "vendor": "Vendor"
+    "vendor": "Vendor",
+    "vendor_price": "Vendor price"
   },
   "auditSource": {
     "seed": "Data generator",
