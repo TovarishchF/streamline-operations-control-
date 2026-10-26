@@ -179,8 +179,11 @@ def test_financial_margin_is_revenue_minus_cost(
 
     revenue = Decimal(row["revenue"])
     cost = Decimal(row["cost"])
-    assert revenue == issued_invoice.total_amount.quantize(Decimal("0.01"))
-    assert cost == completed_order.purchase_cost_amount
+    # Выручка — без НДС: налог не доход (`DOMAIN.md § 7.3`). Закупка —
+    # по фактическому количеству (ADR-020).
+    assert revenue == issued_invoice.subtotal_amount.quantize(Decimal("0.01"))
+    assert completed_order.actual_cost_amount is not None
+    assert cost == completed_order.actual_cost_amount.quantize(Decimal("0.01"))
     assert Decimal(row["margin"]) == revenue - cost
     assert Decimal(row["marginPercent"]) == (
         (revenue - cost) / revenue * 100
@@ -211,7 +214,8 @@ def test_draft_invoice_is_not_revenue(
     make_user: Callable[..., Any],
     query: dict[str, str],
 ) -> None:
-    """Выручка — то, что выставлено клиенту, а не то, что подготовлено."""
+    """Черновик счёта в выручку не идёт; до выставления выручка — продажа,
+    зафиксированная при выполнении, как в карточке рейса по факту."""
     from billing.services import documents
 
     documents.build_invoice(
@@ -222,11 +226,39 @@ def test_draft_invoice_is_not_revenue(
     rows = api.get(f"{REPORTS_URL}/{definitions.FINANCIAL}", query).json()["rows"]
     row = next(item for item in rows if item["flight"] == flight.number)
 
-    assert Decimal(row["revenue"]) == Decimal(0)
-    # Расход есть, выручки нет — маржа отрицательная и не обнуляется
-    assert Decimal(row["margin"]) < 0
-    # Процент от нулевой выручки не считается вовсе
-    assert row["marginPercent"] is None
+    assert completed_order.actual_sale_amount is not None
+    assert Decimal(row["revenue"]) == completed_order.actual_sale_amount.quantize(Decimal("0.01"))
+
+
+def test_financial_report_matches_the_flight_card(
+    as_role: Callable[..., APIClient],
+    flight: Flight,
+    completed_order: ServiceOrder,
+    issued_invoice: Invoice,
+    query: dict[str, str],
+) -> None:
+    """Приёмка M9: отчёт сходится с карточкой рейса — расчёт один."""
+    api = as_role(Role.FINANCE)
+    row = next(
+        item
+        for item in api.get(f"{REPORTS_URL}/{definitions.FINANCIAL}", query).json()["rows"]
+        if item["flight"] == flight.number
+    )
+    card = api.get(f"/api/v1/flights/{flight.pk}/margin?mode=fact").json()
+
+    assert Decimal(row["revenue"]) == Decimal(card["revenue"]["amount"])
+    assert Decimal(row["cost"]) == Decimal(card["cost"]["amount"])
+    assert Decimal(row["margin"]) == Decimal(card["margin"]["amount"])
+    assert row["marginPercent"] == card["marginPercent"]
+
+
+def test_unknown_presentation_currency_is_refused(
+    as_role: Callable[..., APIClient], query: dict[str, str]
+) -> None:
+    response = as_role(Role.FINANCE).get(
+        f"{REPORTS_URL}/{definitions.FINANCIAL}", {**query, "currency": "XYZ"}
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_percent_of_nothing_is_not_zero() -> None:

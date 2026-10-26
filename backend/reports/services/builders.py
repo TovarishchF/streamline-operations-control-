@@ -24,7 +24,8 @@ from django.db.models import Count, Q
 from audit.models import AuditEntityType, AuditEntry
 from billing.models import Invoice, InvoiceStatus
 from core import clock
-from core.money import DISPLAY_QUANT, Money
+from core.exceptions import DomainError
+from core.money import BASE_CURRENCY, DISPLAY_QUANT, SUPPORTED_CURRENCIES, Money
 from flights.models import Flight
 from orders.models import ServiceOrder, ServiceOrderStatus
 from reports import definitions
@@ -32,6 +33,12 @@ from reports import definitions
 if TYPE_CHECKING:
     from collections.abc import Callable
     from datetime import date, datetime
+
+class ReportParameterInvalid(DomainError):
+    """Параметр отчёта вне допустимых значений."""
+
+    code = "VALIDATION_ERROR"
+
 
 # Корзины дебиторки по срокам (`SPEC.md § 9.1` п. 5).
 BUCKETS = ((0, 30, "0–30"), (31, 60, "31–60"), (61, None, "60+"))
@@ -158,49 +165,54 @@ def services_rendered(params: dict[str, Any]) -> list[dict[str, Any]]:
 def financial(params: dict[str, Any]) -> list[dict[str, Any]]:
     """Доходы, расходы и маржа по рейсам (`DOMAIN.md § 7.3`).
 
-    Выручка берётся из выставленных счетов, а не из плановых цен продажи:
-    отчёт о доходах обязан опираться на то, что выставлено клиенту.
-    Расход — из снимков закупочной цены в выполненных заявках.
+    Те же цифры, что в карточке рейса в режиме «факт»: расчёт один
+    (`billing.services.margin`), иначе отчёт и карточка расходились бы,
+    и было бы непонятно, какой цифре верить. Выручка — по ценам клиента
+    без НДС: налог не доход. Источник — строки выставленного счёта, а до
+    его выставления — продажа, зафиксированная при выполнении услуги;
+    черновик счёта в расчёт не идёт. Расход — закупка по фактическому
+    количеству (ADR-020).
 
-    Аннулированные счета не учитываются: они выведены из обращения.
+    Суммы приводятся к валюте представления (параметр `currency`, по
+    умолчанию рубль) по снимку курсов каждого рейса: складывать доллары
+    одного рейса с рублями другого в итоге нельзя.
     """
+    from billing.services import fx
+    from billing.services import margin as margin_service
+
+    presentation = str(params.get("currency") or BASE_CURRENCY).upper()
+    if presentation not in SUPPORTED_CURRENCIES:
+        raise ReportParameterInvalid(
+            f"Валюта представления {presentation} не поддерживается",
+            {"currency": sorted(SUPPORTED_CURRENCIES)},
+        )
+
     start, end = _window(params)
     queryset = Flight.objects.filter(std_utc__range=(start, end)).select_related("client")
     if params.get("clientId"):
         queryset = queryset.filter(client_id=params["clientId"])
 
-    flights = list(queryset.order_by("std_utc"))
-    flight_ids = [flight.pk for flight in flights]
-
-    revenue_by_flight: dict[str, Decimal] = defaultdict(Decimal)
-    for invoice in Invoice.objects.filter(flight_id__in=flight_ids).exclude(
-        status__in=[InvoiceStatus.DRAFT, InvoiceStatus.VOIDED]
-    ):
-        revenue_by_flight[invoice.flight_id] += invoice.total_amount
-
-    cost_by_flight: dict[str, Decimal] = defaultdict(Decimal)
-    for order in ServiceOrder.objects.filter(
-        flight_id__in=flight_ids, status=ServiceOrderStatus.COMPLETED
-    ):
-        cost_by_flight[order.flight_id] += order.purchase_cost_amount or Decimal(0)
-
     rows = []
-    for flight in flights:
-        revenue = revenue_by_flight.get(flight.pk, Decimal(0))
-        cost = cost_by_flight.get(flight.pk, Decimal(0))
+    for flight in queryset.order_by("std_utc"):
+        result = margin_service.margin_for(flight, "fact")
+        rates = fx.rates_for(flight)
+        revenue = fx.convert(result.revenue, presentation, rates).rounded()
+        cost = fx.convert(result.cost, presentation, rates).rounded()
         margin = revenue - cost
         rows.append(
             {
                 "flight": flight.number,
                 "client": flight.client.name,
-                "currency": flight.billing_currency,
-                "revenue": _money(revenue, flight.billing_currency),
-                "cost": _money(cost, flight.billing_currency),
-                "margin": _money(margin, flight.billing_currency),
+                "currency": presentation,
+                "revenue": _money(revenue.amount, presentation),
+                "cost": _money(cost.amount, presentation),
+                "margin": _money(margin.amount, presentation),
                 # Отрицательная маржа не ошибка и не обнуляется
                 # (`DOMAIN.md § 7.3`), а нулевая выручка даёт `None`,
                 # а не ноль процентов.
-                "marginPercent": _percent(margin, revenue) if revenue else None,
+                "marginPercent": _percent(margin.amount, revenue.amount)
+                if not revenue.is_zero
+                else None,
             }
         )
     return rows
@@ -283,8 +295,15 @@ def receivables_payables(params: dict[str, Any]) -> list[dict[str, Any]]:
         .select_related("client")
         .order_by("due_date")
     )
+    from billing.services import payments
+
     for invoice in invoices:
         assert invoice.due_date is not None
+        # Долг — неоплаченный остаток, а не итог счёта (ADR-019): частично
+        # оплаченный счёт должен клиенту только разницу.
+        outstanding = invoice.total_amount - payments.paid_amount(invoice)
+        if outstanding <= payments.TOLERANCE:
+            continue
         overdue_days = max(0, (as_of - invoice.due_date).days)
         rows.append(
             {
@@ -294,7 +313,7 @@ def receivables_payables(params: dict[str, Any]) -> list[dict[str, Any]]:
                 "dueDate": invoice.due_date.isoformat(),
                 "bucket": _bucket_for(overdue_days),
                 "currency": invoice.currency,
-                "amount": _money(invoice.total_amount, invoice.currency),
+                "amount": _money(outstanding, invoice.currency),
             }
         )
     return rows
