@@ -17,6 +17,8 @@ from django.utils.translation import gettext as _
 
 from audit import services as audit
 from audit.models import AuditEntityType
+from billing.services import margin as margin_service
+from billing.services import tariffs as tariff_service
 from catalog import services as catalog_services
 from comms.services import events as comms_events
 from core import clock
@@ -66,6 +68,7 @@ def _apply_price_snapshot(
         "mode": contract.payment_mode,
         "deferDays": contract.payment_defer_days,
     }
+    tariff_service.snapshot_sale(order)
 
 
 def _check_failure(context: checks.OrderContext) -> ServiceCheckFailed:
@@ -136,6 +139,7 @@ def create_order(
             comment=_("Черновик без поставщика"),
             is_generated=order.is_generated,
         )
+        margin_service.flight_changed(order.flight_id)
         return order
 
     context = checks.run(
@@ -197,6 +201,7 @@ def create_order(
     # Заявка ушла поставщику — письмо ставится в очередь. Отправка уходит
     # наружу только после фиксации транзакции (`CLAUDE.md § 3` п. 13).
     comms_events.order_placed(order)
+    margin_service.flight_changed(order.flight_id)
     return order
 
 
@@ -236,6 +241,7 @@ def assign_vendor(*, order: ServiceOrder, vendor: Vendor, actor: User) -> Servic
         after=audit.snapshot(order),
         is_generated=order.is_generated,
     )
+    margin_service.flight_changed(order.flight_id)
     return order
 
 
@@ -290,7 +296,8 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
         setattr(order, field, value)
 
     # Количество изменилось — закупочная стоимость пересчитывается
-    # по тому же снимку цены, а не по текущему прайсу.
+    # по тому же снимку цены, а не по текущему прайсу; цена продажи —
+    # по тарифу на новое количество.
     if "quantity" in changes and order.purchase_unit_amount is not None:
         order.purchase_cost_amount = catalog_services.purchase_cost(
             unit_amount=order.purchase_unit_amount,
@@ -299,6 +306,7 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
             surcharges=order.purchase_surcharges,
             min_charge_amount=order.purchase_min_charge_amount,
         ).amount
+        tariff_service.snapshot_sale(order)
 
     order.save()
 
@@ -311,4 +319,5 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
         after=audit.snapshot(order),
         is_generated=order.is_generated,
     )
+    margin_service.flight_changed(order.flight_id)
     return order

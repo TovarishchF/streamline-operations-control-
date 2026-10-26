@@ -121,6 +121,30 @@ class ServiceOrder(BaseModel):
     # Снимок условий расчётов договора (ADR-025): валюта, способ, отсрочка.
     contract_terms_snapshot = models.JSONField(default=dict, blank=True)
 
+    # Цена продажи и правило тарифа — снимок на момент назначения поставщика
+    # (ADR-022), в валюте рейса. Изменение тарифа после назначения его
+    # молча не пересчитывает: расхождение видно в сопоставлении «план ↔ факт».
+    sale_amount = models.DecimalField(max_digits=18, decimal_places=4, null=True, blank=True)
+    sale_currency = models.CharField(max_length=3, blank=True)
+    tariff_rule = models.ForeignKey(
+        "billing.TariffRule",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
+    )
+
+    # Фактические суммы фиксируются при переходе «Выполнена» (ADR-020):
+    # закупка по фактическому количеству — в валюте поставщика, продажа
+    # по тарифу на фактическое количество — в валюте рейса. На них
+    # опираются маржа по факту и агрегаты дашбордов (ADR-012).
+    actual_cost_amount = models.DecimalField(
+        max_digits=18, decimal_places=4, null=True, blank=True
+    )
+    actual_sale_amount = models.DecimalField(
+        max_digits=18, decimal_places=4, null=True, blank=True
+    )
+
     # ─────────────────────────── Время ───────────────────────────
 
     ordered_at = models.DateTimeField(null=True, blank=True)

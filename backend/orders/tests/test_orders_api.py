@@ -85,9 +85,10 @@ def test_order_is_created_with_price_snapshot(
     assert body["purchaseCost"] == {"amount": "77000.0000", "currency": "RUB"}
     assert body["contractTermsSnapshot"]["deferDays"] == 14
     assert body["slaConfirmDeadline"] is not None
-    # Цена продажи считается по тарифам клиента — их пока нет, и выдавать
-    # закупку за продажу нельзя (`CLAUDE.md § 4`)
-    assert body["salePrice"] is None
+    # Цена продажи — снимок при назначении (ADR-022). Тарифных правил
+    # у клиента нет — наценка по умолчанию 15 %: 77 000 × 1,15 = 88 550.
+    assert body["salePrice"] == {"amount": "88550.0000", "currency": "RUB"}
+    assert body["tariffRuleId"] is None
 
 
 def test_price_change_does_not_rewrite_placed_order(

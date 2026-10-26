@@ -162,3 +162,16 @@ def convert(value: Money, to_currency: str, rates: Mapping[str, Decimal | str]) 
             {"currencies": missing},
         )
     return money_convert(value, to_currency, rates)
+
+
+def rates_for(flight: Any) -> dict[str, Any]:
+    """Курсы рейса: снимок на дату рейса, зафиксированный при его создании.
+
+    Суммы рейса приводятся к его валюте по этому снимку (`SPEC.md § 7.4`),
+    а не по сегодняшнему курсу. Рейс, созданный, когда курсов ещё не было,
+    получает снимок на дату рейса сейчас.
+    """
+    rates = (flight.fx_snapshot or {}).get("rates")
+    if rates:
+        return dict(rates)
+    return dict(snapshot(flight.std_utc.date())["rates"])

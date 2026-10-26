@@ -37,7 +37,7 @@ from accounts import services as accounts
 from accounts.models import Organization, Role, TimezoneMode, User
 from audit import services as audit
 from audit.models import AuditEntityType, AuditEntry, AuditSource
-from billing.models import DocumentLine, Invoice, Payable, Quote, VendorInvoice
+from billing.models import DocumentLine, Invoice, Payable, Payment, Quote, VendorInvoice
 from catalog.models import AircraftType, Airport, Service, ServiceCategory
 from comms.models import InboxMessage, Notification, OutboxMessage
 from core import clock, sample_data
@@ -245,6 +245,8 @@ class Command(BaseCommand):
             # Документы по рейсам генератора — тоже записи генератора
             # (признак наследуется от рейса). Строка держит заявку на услугу
             # связью PROTECT, поэтому документы уходят раньше заявок.
+            # Платёж держит счёт связью PROTECT через распределение.
+            "платежи": Payment.objects.filter(is_generated=True).delete()[0],
             "строки документов": DocumentLine.objects.filter(is_generated=True).delete()[0],
             "счета клиентам": Invoice.objects.filter(is_generated=True).delete()[0],
             "котировки": Quote.objects.filter(is_generated=True).delete()[0],

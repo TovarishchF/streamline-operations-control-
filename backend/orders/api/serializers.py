@@ -86,6 +86,20 @@ class ServiceOrderSerializer(serializers.ModelSerializer):  # type: ignore[type-
     def get_availableTransitions(self, obj: ServiceOrder) -> list[str]:  # noqa: N802
         return transitions.available_transitions(obj)
 
+    def _sees_sale(self) -> bool:
+        """Цену продажи видит тот, кому положена маржа.
+
+        Поставщик получает свои заявки через тот же эндпоинт, а цена,
+        по которой мы перепродаём его услугу клиенту, — не его дело
+        (`openapi.yaml` VendorPortalOrder). Без запроса в контексте поле
+        скрыто: забытый контекст не должен открывать цену.
+        """
+        from accounts.permissions import Permission, has_permission
+
+        request = self.context.get("request")
+        role = str(getattr(getattr(request, "user", None), "role", ""))
+        return has_permission(role, Permission.BILLING_MARGIN_VIEW)
+
     def _money(self, amount: Decimal | None, currency: str) -> dict[str, str] | None:
         if amount is None or not currency:
             return None
@@ -101,16 +115,17 @@ class ServiceOrderSerializer(serializers.ModelSerializer):  # type: ignore[type-
         return self._money(obj.purchase_cost_amount, obj.purchase_currency)
 
     def get_salePrice(self, obj: ServiceOrder) -> dict[str, str] | None:  # noqa: N802
-        """Цена продажи считается по тарифам клиента (`DOMAIN.md § 7.2`).
+        """Цена продажи по тарифу клиента — снимок на момент назначения (ADR-022).
 
-        Тарифные правила — задача вехи M7. До неё поле пусто, а не равно
-        закупочной цене: выдать закупку за продажу значило бы показать
-        нулевую маржу как настоящую (`CLAUDE.md § 4`).
+        Пусто, пока поставщик не назначен, или если курса для пересчёта
+        нет: закупку за продажу не выдаём (`CLAUDE.md § 4`).
         """
-        return None
+        if not self._sees_sale():
+            return None
+        return self._money(obj.sale_amount, obj.sale_currency)
 
     def get_tariffRuleId(self, obj: ServiceOrder) -> str | None:  # noqa: N802
-        return None
+        return obj.tariff_rule_id if self._sees_sale() else None
 
     def get_documents(self, obj: ServiceOrder) -> list[dict[str, Any]]:
         """Только завершённые загрузки: ссылка в никуда в карточке не нужна."""

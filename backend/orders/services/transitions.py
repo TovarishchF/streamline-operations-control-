@@ -245,10 +245,12 @@ def apply_transition(
         changed.extend(["sla_confirm_deadline", "sla_completion_deadline"])
 
     if name == "finish":
+        from billing.services import tariffs
         from orders.services import sla
 
         order.sla_completion_breached = sla.completion_breached(order)
-        changed.append("sla_completion_breached")
+        tariffs.snapshot_actuals(order)
+        changed.extend(["sla_completion_breached", "actual_cost_amount", "actual_sale_amount"])
 
     if name == "confirm" and order.sla_confirm_deadline is not None:
         # Нарушение SLA фиксируется в момент подтверждения, а не вычисляется
@@ -286,6 +288,11 @@ def apply_transition(
             previous_status=previous_status,
             comment=comment,
         )
+
+    # Состав заявок в расчёте маржи зависит от статуса (`DOMAIN.md § 7.3`).
+    from billing.services import margin as margin_service
+
+    margin_service.flight_changed(order.flight_id)
     return order
 
 

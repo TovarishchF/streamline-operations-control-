@@ -41,7 +41,8 @@ from billing.api.payables import (
     ReconciliationResolveView,
     ReconciliationTemplateView,
 )
-from billing.api.views import FxRatesView
+from billing.api.payments import PaymentViewSet
+from billing.api.views import FlightMarginView, FxRatesView
 from catalog.api.views import (
     AircraftTypeViewSet,
     AirportViewSet,
@@ -107,6 +108,7 @@ router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("quotes", QuoteViewSet, basename="quote")
 router.register("invoices", InvoiceViewSet, basename="invoice")
 router.register("payables", PayableViewSet, basename="payable")
+router.register("payments", PaymentViewSet, basename="payment")
 router.register(
     "vendor-service-mappings",
     VendorServiceMappingViewSet,
@@ -177,6 +179,7 @@ api_v1: list[URLPattern | URLResolver] = [
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
     path("flights/export", ScheduleExportView.as_view(), name="flight-export"),
+    path("flights/<str:pk>/margin", FlightMarginView.as_view(), name="flight-margin"),
     path("sample-data/generate", SampleDataGenerateView.as_view(), name="sample-data-generate"),
     path("sample-data/reset", SampleDataResetView.as_view(), name="sample-data-reset"),
     path("sample-data/purge", SampleDataPurgeView.as_view(), name="sample-data-purge"),

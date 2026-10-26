@@ -158,12 +158,14 @@ class FlightListSerializer(serializers.ModelSerializer):  # type: ignore[type-ar
         return obj.service_orders.filter(status__in=UNSETTLED_ORDER_STATUSES).count()
 
     def get_marginPercent(self, obj: Flight) -> str | None:  # noqa: N802
-        """Маржа появится вместе с биллингом (M7).
+        """Маржа рейса в режиме `mixed` (`DOMAIN.md § 7.3`).
 
-        Поле отдаётся пустым, а не выдуманным: подставить сюда число
-        значило бы показать диспетчеру расчёт, которого не было.
+        Считается списком на страницу заранее и приходит в контексте.
+        Пусто — у роли нет права на маржу или её не посчитать (нет курса):
+        подставить ноль значило бы показать расчёт, которого не было.
         """
-        return None
+        margins: dict[str, str | None] = self.context.get("margins", {})
+        return margins.get(obj.pk)
 
     def get_hasConflicts(self, obj: Flight) -> bool:  # noqa: N802
         return bool(conflict_detector.detect(obj))

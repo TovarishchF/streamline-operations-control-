@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import Any, ClassVar, cast
 
-from django.db.models import QuerySet
+from django.db.models import Prefetch, QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -18,9 +18,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User
-from accounts.permissions import Permission
+from accounts.permissions import Permission, has_permission
 from audit.api.views import AuditEntrySerializer
 from audit.models import AuditEntityType, AuditEntry
+from billing.services import margin as margin_service
 from catalog.models import Service
 from core.api.idempotency import IdempotencyMixin, IdempotentCreateMixin
 from core.api.permissions import HasRolePermission
@@ -106,7 +107,12 @@ class FlightViewSet(
 
     queryset = Flight.objects.select_related(
         "client", "aircraft", "aircraft__type"
-    ).prefetch_related("service_orders", "aircraft__approvals")
+    ).prefetch_related(
+        # Услуга нужна марже: цена продажи заявки без снимка считается
+        # по тарифу категории услуги.
+        Prefetch("service_orders", queryset=ServiceOrder.objects.select_related("service")),
+        "aircraft__approvals",
+    )
     serializer_class = FlightSerializer
     idempotency = "required"
     tenant_client_field = "client_id"
@@ -156,6 +162,24 @@ class FlightViewSet(
 
     def get_serializer_class(self) -> type[Any]:
         return FlightListSerializer if self.action == "list" else FlightSerializer
+
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Суточный план с маржой по странице `[ТЗ 3.4.3]` (`SPEC.md § 7.4`).
+
+        Маржа считается пачкой на страницу, а не отдельным расчётом на строку.
+        Роль без права на маржу её не получает: клиент видит свои рейсы,
+        но не нашу маржу на них.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        flights = list(page) if page is not None else list(queryset)
+
+        context = self.get_serializer_context()
+        role = str(getattr(request.user, "role", ""))
+        if has_permission(role, Permission.BILLING_MARGIN_VIEW):
+            context["margins"] = margin_service.percents_for(flights)
+        data = FlightListSerializer(flights, many=True, context=context).data
+        return self.get_paginated_response(data) if page is not None else Response(data)
 
     def get_queryset(self) -> QuerySet[Flight]:
         queryset = super().get_queryset()
@@ -262,7 +286,13 @@ class FlightViewSet(
                 .select_related("service", "vendor", "contract", "flight")
                 .prefetch_related("documents")
             )
-            return Response({"data": ServiceOrderSerializer(queryset, many=True).data})
+            return Response(
+                {
+                    "data": ServiceOrderSerializer(
+                        queryset, many=True, context={"request": request}
+                    ).data
+                }
+            )
 
         return self.idempotent(request, lambda: self._create_service_order(request, flight))
 
@@ -282,7 +312,10 @@ class FlightViewSet(
             override_reason=data["overrideReason"],
             actor=cast(User, request.user),
         )
-        return Response(ServiceOrderSerializer(order).data, status=status.HTTP_201_CREATED)
+        return Response(
+            ServiceOrderSerializer(order, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @extend_schema(
         summary="История изменений рейса",

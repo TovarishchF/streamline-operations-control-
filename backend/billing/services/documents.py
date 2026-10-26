@@ -32,6 +32,7 @@ from billing.models import (
     QuoteStatus,
 )
 from billing.services import fx, numbering
+from billing.services import margin as margin_service
 from billing.services import tariffs as tariff_service
 from catalog.models import VatApplicability, VatRate
 from comms.services import events as comms_events
@@ -394,6 +395,7 @@ def issue_invoice(*, invoice: Invoice, actor: User) -> Invoice:
     )
 
     comms_events.document_issued(invoice, kind="invoice")
+    margin_service.flight_changed(invoice.flight_id)
     return invoice
 
 
@@ -426,6 +428,7 @@ def void_invoice(*, invoice: Invoice, reason: str, actor: User) -> Invoice:
         comment=reason,
         is_generated=invoice.is_generated,
     )
+    margin_service.flight_changed(invoice.flight_id)
     return invoice
 
 
