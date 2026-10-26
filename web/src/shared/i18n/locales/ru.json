@@ -100,17 +100,22 @@
     "contract": "Договор",
     "crew": "Экипаж",
     "flight": "Рейс",
+    "inbox_message": "Входящее сообщение",
     "invoice": "Счёт",
+    "message_template": "Шаблон сообщения",
+    "outbox_message": "Исходящее сообщение",
     "payable": "Заявка на оплату",
     "payment": "Платёж",
     "quote": "Котировка",
     "reconciliation": "Сверка",
+    "report_subscription": "Подписка на отчёт",
     "service": "Услуга каталога",
     "service_order": "Заявка на услугу",
     "settings": "Настройки",
     "tariff": "Тариф",
     "user": "Пользователь",
-    "vendor": "Поставщик"
+    "vendor": "Поставщик",
+    "vendor_price": "Цена поставщика"
   },
   "auditSource": {
     "seed": "Генератор данных",

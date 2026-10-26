@@ -12,6 +12,18 @@ import { pagedSchema, type Paged } from './catalog';
 import { newIdempotencyKey, request } from './client';
 import type { AuditEntry, User } from './types';
 
+/**
+ * Типы сущностей журнала — по `AuditEntityType` контракта. Один перечень
+ * на проверку ответа и фильтр экрана: неизвестный тип в ответе роняет
+ * весь журнал, и второй список, отставший от первого, это гарантирует.
+ */
+export const AUDIT_ENTITY_TYPES = [
+  'flight', 'service_order', 'vendor', 'client', 'contract', 'tariff', 'quote',
+  'invoice', 'payable', 'payment', 'reconciliation', 'user', 'settings', 'crew',
+  'aircraft', 'service', 'airport', 'report_subscription', 'vendor_price',
+  'outbox_message', 'inbox_message', 'message_template',
+] as const;
+
 export const auditEntrySchema = z.object({
   id: z.string(),
   ts: z.string(),
@@ -19,11 +31,7 @@ export const auditEntrySchema = z.object({
   actorName: z.string(),
   actorRole: z.enum(['admin', 'dispatcher', 'sales', 'finance', 'manager', 'client', 'vendor']),
   source: z.enum(['user', 'seed', 'system']),
-  entityType: z.enum([
-    'flight', 'service_order', 'vendor', 'client', 'contract', 'tariff', 'quote',
-    'invoice', 'payable', 'payment', 'reconciliation', 'user', 'settings', 'crew',
-    'aircraft', 'service', 'airport',
-  ]),
+  entityType: z.enum(AUDIT_ENTITY_TYPES),
   entityId: z.string(),
   action: z.string(),
   before: z.record(z.unknown()).nullable(),
