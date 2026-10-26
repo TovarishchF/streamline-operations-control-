@@ -947,7 +947,8 @@
     "unmappedTitle": "Unmapped vendor codes: {{count}}",
     "unresolved": "Unresolved",
     "vendor": "Vendor",
-    "vendorRequired": "Select a vendor"
+    "vendorRequired": "Select a vendor",
+    "wrongFormat": "\"{{name}}\" is neither XLSX nor CSV. Save an .xls file as .xlsx in Excel"
   },
   "register": {
     "approve": "Approve",

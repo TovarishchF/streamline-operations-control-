@@ -947,7 +947,8 @@
     "unmappedTitle": "Неопознанных кодов поставщика: {{count}}",
     "unresolved": "Не разобрано",
     "vendor": "Поставщик",
-    "vendorRequired": "Выберите поставщика"
+    "vendorRequired": "Выберите поставщика",
+    "wrongFormat": "«{{name}}» — не XLSX и не CSV. Файл .xls сохраните в Excel как .xlsx"
   },
   "register": {
     "approve": "Одобрить",
