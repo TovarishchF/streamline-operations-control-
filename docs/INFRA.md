@@ -14,11 +14,11 @@
 | `beat` | собственный | Celery beat |
 | `web` | nginx | статика веб-клиента и прокси на `api` |
 | `minio` | minio | файловое хранилище (только on-premise) |
-| `mailpit` | mailpit | перехват почты (только dev и стенд) |
-| `openldap` | osixia/openldap | тестовый каталог (только dev и стенд) |
+| `mailpit` | mailpit | перехват почты (только dev и `sample`) |
+| `openldap` | osixia/openldap | тестовый каталог (только dev и `sample`) |
 | `prometheus`, `grafana`, `loki` | — | метрики и логи |
 
-Один `docker-compose.yml` с профилями: `dev`, `demo`, `prod`. Разница — переменные
+Один `docker-compose.yml` с профилями: `dev`, `sample`, `prod`. Разница — переменные
 окружения и набор вспомогательных сервисов, а не разные файлы конфигурации.
 
 ---
@@ -27,13 +27,13 @@
 
 | Окружение | Назначение | Данные | Интеграции |
 |---|---|---|---|
-| `dev` | разработка | `seed_demo` | все `stub`, почта в Mailpit |
-| `demo` | показ заказчику | `seed_demo` | все `stub`, маркировка `ДЕМО-СТЕНД` |
+| `dev` | разработка | `seed_sample` | все `stub`, почта в Mailpit |
+| `sample` | показ заказчику | `seed_sample` | все `stub` |
 | `stage` | приёмочные испытания | обезличенная копия рабочих | частично `live` |
 | `prod` | эксплуатация | рабочие | `live` |
 
-Демонстрационный стенд — это `prod`-сборка с `DEMO_DATA=true` и заглушками.
-Отдельного «демо-кода» не существует; ветвление только по конфигурации.
+Установка для показа (`sample`) — это `prod`-сборка с `SAMPLE_DATA=true` и заглушками.
+Отдельного кода для неё не существует; ветвление только по конфигурации.
 
 ---
 
@@ -49,8 +49,9 @@ REPLICA_DATABASE_URL=postgres://...
 REDIS_URL=redis://...
 S3_ENDPOINT= S3_BUCKET= S3_ACCESS_KEY= S3_SECRET_KEY=
 
-# Режим демонстрации
-DEMO_DATA=false                 # включает маркировку и доступность seed_demo
+# Генератор данных
+SAMPLE_DATA=false               # генератор данных и модельное время
+LOGIN_ACCOUNT_LIST=false        # список учётных записей на экране входа
 
 # Интеграции — по умолчанию stub (см. INTEGRATIONS.md)
 INTEGRATION_FX_MODE=stub
@@ -147,8 +148,8 @@ docker compose run --rm api python manage.py migrate
 docker compose run --rm api python manage.py loaddata airports    # справочник аэропортов
 docker compose run --rm api python manage.py createsuperuser
 docker compose --profile prod up -d
-# для демонстрационного стенда:
-docker compose run --rm api python manage.py seed_demo --seed 20260912
+# для установки с данными генератора (SAMPLE_DATA=true):
+docker compose run --rm api python manage.py seed_sample --seed 20260912
 ```
 
 Процедура целиком переносится в руководство администратора и проверяется на чистой

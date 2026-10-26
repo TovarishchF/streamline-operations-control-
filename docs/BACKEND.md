@@ -45,7 +45,7 @@ backend/
 ├── reports/             # отчёты, дашборды, экспорт
 ├── integrations/        # адаптеры внешних систем (см. INTEGRATIONS.md)
 ├── audit/               # журнал аудита
-└── demo/                # генератор демонстрационных данных
+└── sampledata/          # генератор данных
 ```
 
 Правило зависимостей: `flights` может импортировать `catalog` и `counterparties`,
@@ -157,8 +157,8 @@ Guard-функции из `DOMAIN.md § 5` реализуются как отд�
 `service_orders(vendor_id, status)`, `service_orders(sla_confirm_deadline)`
 частичный по неподтверждённым, `audit_entry(entity_type, entity_id, ts)`.
 
-Все таблицы имеют `is_demo BOOLEAN NOT NULL DEFAULT FALSE` — это делает возможной
-очистку демонстрационных записей без затрагивания рабочих.
+Все таблицы имеют `is_generated BOOLEAN NOT NULL DEFAULT FALSE` — это делает возможной
+очистку записей генератора без затрагивания введённых людьми.
 
 ---
 
@@ -220,7 +220,6 @@ Guard-функции из `DOMAIN.md § 5` реализуются как отд�
 | XML | `lxml`, схема в `DECISIONS.md`, для IATA — профиль IS-XML |
 
 Шаблоны печатных форм — Django-шаблоны, редактируются без пересборки.
-Водяной знак и строка DEMO подставляются по правилам `SPEC.md § 8.6`.
 
 ---
 
