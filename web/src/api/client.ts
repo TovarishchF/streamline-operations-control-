@@ -104,29 +104,7 @@ export async function request<T>(
   schema: z.ZodType<T, z.ZodTypeDef, unknown>,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = 'GET', body, idempotencyKey, signal, skipRefresh = false } = options;
-
-  const send = async (): Promise<Response> => {
-    const headers: Record<string, string> = { Accept: 'application/json' };
-    if (body !== undefined) headers['Content-Type'] = 'application/json';
-    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
-    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
-
-    return fetch(`${BASE_URL}${path}`, {
-      method,
-      headers,
-      ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-      ...(signal ? { signal } : {}),
-    });
-  };
-
-  let response = await send();
-
-  // Токен доступа живёт 15 минут. Истёк — обновляем и повторяем запрос
-  // ровно один раз: второй отказ означает, что сессия кончилась.
-  if (response.status === 401 && !skipRefresh && (await refreshOnce())) {
-    response = await send();
-  }
+  const response = await send(path, options);
 
   if (response.status === 204) {
     return schema.parse(undefined);
@@ -135,19 +113,77 @@ export async function request<T>(
   const payload: unknown = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const parsed = errorResponseSchema.safeParse(payload);
-    if (parsed.success) {
-      throw new ApiError(
-        response.status,
-        parsed.data.error.code,
-        parsed.data.error.message,
-        parsed.data.error.details ?? {},
-      );
-    }
-    throw new ApiError(response.status, 'INTERNAL_ERROR', `HTTP ${String(response.status)}`, {});
+    throw toApiError(response.status, payload);
   }
 
   return schema.parse(payload);
+}
+
+/**
+ * Файл с сервера: шаблон, выгрузка.
+ *
+ * Обычная ссылка `<a href>` здесь не годится: токен доступа живёт только
+ * в памяти вкладки (ADR-034), и браузер не приложил бы его к запросу.
+ */
+export async function download(
+  path: string,
+): Promise<{ blob: Blob; filename: string | null }> {
+  const response = await send(path, { method: 'GET' });
+
+  if (!response.ok) {
+    throw toApiError(response.status, await response.json().catch(() => null));
+  }
+
+  const disposition = response.headers.get('Content-Disposition') ?? '';
+  const filename = /filename="([^"]+)"/.exec(disposition)?.[1] ?? null;
+  return { blob: await response.blob(), filename };
+}
+
+/**
+ * Отправка запроса с токеном и повтором после обновления сессии.
+ *
+ * Тело `FormData` уходит как есть: заголовок `Content-Type` с границей
+ * частей проставляет браузер, и заданный руками сломал бы разбор файла.
+ */
+async function send(path: string, options: RequestOptions): Promise<Response> {
+  const { method = 'GET', body, idempotencyKey, signal, skipRefresh = false } = options;
+  const isForm = body instanceof FormData;
+
+  const attempt = async (): Promise<Response> => {
+    const headers: Record<string, string> = { Accept: 'application/json' };
+    if (body !== undefined && !isForm) headers['Content-Type'] = 'application/json';
+    if (accessToken) headers['Authorization'] = `Bearer ${accessToken}`;
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey;
+
+    return fetch(`${BASE_URL}${path}`, {
+      method,
+      headers,
+      ...(body !== undefined ? { body: isForm ? body : JSON.stringify(body) } : {}),
+      ...(signal ? { signal } : {}),
+    });
+  };
+
+  const response = await attempt();
+
+  // Токен доступа живёт 15 минут. Истёк — обновляем и повторяем запрос
+  // ровно один раз: второй отказ означает, что сессия кончилась.
+  if (response.status === 401 && !skipRefresh && (await refreshOnce())) {
+    return attempt();
+  }
+  return response;
+}
+
+function toApiError(status: number, payload: unknown): ApiError {
+  const parsed = errorResponseSchema.safeParse(payload);
+  if (parsed.success) {
+    return new ApiError(
+      status,
+      parsed.data.error.code,
+      parsed.data.error.message,
+      parsed.data.error.details ?? {},
+    );
+  }
+  return new ApiError(status, 'INTERNAL_ERROR', `HTTP ${String(status)}`, {});
 }
 
 /**
