@@ -2065,12 +2065,47 @@ paths:
                         type: array
                         items: { $ref: '#/components/schemas/VendorInvoice' }
 
+  /reconciliation/template:
+    get:
+      tags: [billing]
+      summary: Шаблон счёта поставщика для импорта `[ТЗ 3.4.2]`
+      description: |
+        Файл, который принимает `/reconciliation/import`. Колонки шаблона и разбор
+        файла при импорте описаны на сервере в одном месте: шаблон не расходится
+        с тем, что система умеет читать. В XLSX второй лист — инструкция
+        с примером заполнения; читается только первый лист.
+      parameters:
+        # Не `format`: этим именем DRF выбирает рендерер ответа
+        # и на `?format=csv` ответил бы 404.
+        - name: fileFormat
+          in: query
+          schema: { type: string, enum: [xlsx, csv], default: xlsx }
+      responses:
+        '200':
+          description: Файл шаблона
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema: { type: string, format: binary }
+            text/csv:
+              schema: { type: string, format: binary }
+
   /reconciliation/import:
     post:
       tags: [billing]
       summary: Импорт счёта поставщика для сверки `[ТЗ 3.4.2]`
       description: |
-        Принимает CSV или XLSX по шаблону системы либо строки в теле запроса.
+        Принимает CSV или XLSX по шаблону системы (`/reconciliation/template`)
+        либо строки в теле запроса.
+
+        Файл — одна таблица, строка на позицию счёта. Колонки: «Номер счёта»,
+        «Дата счёта», «Валюта» (заполняются в первой строке, в остальных можно
+        оставить пустыми), «Аэропорт ИКАО», «Дата услуги», «Код услуги»,
+        «Количество», «Цена за единицу», «Сумма». Даты — `ДД.ММ.ГГГГ` или
+        `ГГГГ-ММ-ДД`, время необязательно и читается как UTC. Дробная часть —
+        через запятую или точку. CSV — в UTF-8 или Windows-1251, разделитель
+        `;` или `,`. Ошибки разбора возвращаются `VALIDATION_ERROR` с номерами
+        строк в `details.rows`.
+
         Сопоставление по ключу `поставщик + аэропорт + дата (±1 день) + код услуги`
         с допуском 0.01 на округление (`DOMAIN § 7.7`). Неопознанные коды поставщика
         попадают в очередь сопоставления (ADR-024).

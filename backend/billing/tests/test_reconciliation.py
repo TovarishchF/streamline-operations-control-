@@ -15,10 +15,12 @@ from decimal import Decimal
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework import status
 
 from accounts.models import Role
 from billing.models import Payable, PayableStatus, VendorInvoice
+from billing.services import invoice_file
 from core.clock import now
 from counterparties.models import VendorServiceMapping
 from orders.services import orders as order_services
@@ -727,3 +729,102 @@ def test_result_is_a_snapshot_not_a_recomputation(
 
     body = api.get(f"/api/v1/reconciliation/{invoice_id}").json()
     assert Decimal(body["reconciliation"]["totalOurs"]["amount"]) == before
+
+
+# ─────────────────────────── Файл по шаблону ───────────────────────────
+
+TEMPLATE_URL = "/api/v1/reconciliation/template"
+
+
+def _invoice_xlsx(order: ServiceOrder, *, number: str) -> bytes:
+    """Шаблон системы, заполненный одной позицией по заявке."""
+    import io
+
+    from openpyxl import load_workbook
+
+    content, _, _ = invoice_file.template("xlsx")
+    workbook = load_workbook(io.BytesIO(content))
+    workbook.worksheets[0].append(
+        [
+            number,
+            now().strftime("%d.%m.%Y"),
+            "RUB",
+            "UUWW",
+            _completed(order).strftime("%d.%m.%Y %H:%M"),
+            order.service.code,
+            "1000",
+            "70,00",
+            str(_cost(order).quantize(Decimal("0.01"))).replace(".", ","),
+        ]
+    )
+    buffer = io.BytesIO()
+    workbook.save(buffer)
+    return buffer.getvalue()
+
+
+def test_template_is_downloaded_in_both_formats(as_role: Callable[..., APIClient]) -> None:
+    api = as_role(Role.FINANCE)
+
+    xlsx = api.get(TEMPLATE_URL)
+    csv = api.get(f"{TEMPLATE_URL}?fileFormat=csv")
+
+    assert xlsx.status_code == status.HTTP_200_OK
+    assert xlsx["Content-Type"] == invoice_file.XLSX_CONTENT_TYPE
+    assert 'filename="soc-vendor-invoice-template.xlsx"' in xlsx["Content-Disposition"]
+    assert csv.status_code == status.HTTP_200_OK
+    assert csv["Content-Type"].startswith("text/csv")
+
+
+def test_dispatcher_cannot_download_the_template(as_role: Callable[..., APIClient]) -> None:
+    assert as_role(Role.DISPATCHER).get(TEMPLATE_URL).status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_filled_template_is_imported_and_reconciled(
+    as_role: Callable[..., APIClient], completed_order: ServiceOrder, vendor_alpha: Vendor
+) -> None:
+    """Шаблон, скачанный из системы и заполненный, импортируется как есть."""
+    api = as_role(Role.FINANCE)
+    upload = SimpleUploadedFile(
+        "счёт.xlsx",
+        _invoice_xlsx(completed_order, number="F-1"),
+        content_type=invoice_file.XLSX_CONTENT_TYPE,
+    )
+
+    response = api.post(
+        IMPORT_URL,
+        {"vendorId": vendor_alpha.pk, "file": upload},
+        format="multipart",
+        headers=idempotent("rec-file-0001"),
+    )
+
+    assert response.status_code == status.HTTP_201_CREATED, response.json()
+    body = response.json()
+    assert body["number"] == "F-1"
+    assert body["reconciliation"]["discrepancies"] == []
+    assert body["reconciliation"]["matched"][0]["serviceOrderId"] == completed_order.pk
+
+
+def test_file_errors_come_back_with_row_numbers(
+    as_role: Callable[..., APIClient], vendor_alpha: Vendor
+) -> None:
+    api = as_role(Role.FINANCE)
+    upload = SimpleUploadedFile(
+        "счёт.csv",
+        "Номер счёта;Дата счёта;Валюта;Аэропорт ИКАО;Дата услуги;Код услуги;"
+        "Количество;Цена за единицу;Сумма\n"
+        "F-2;20.10.2026;RUB;UUWW;вчера;FUEL;1;1;1\n".encode(),
+        content_type="text/csv",
+    )
+
+    response = api.post(
+        IMPORT_URL,
+        {"vendorId": vendor_alpha.pk, "file": upload},
+        format="multipart",
+        headers=idempotent("rec-file-0002"),
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    error = response.json()["error"]
+    assert error["code"] == "VALIDATION_ERROR"
+    assert error["details"]["rows"][0].startswith("Строка 2: Дата услуги")
+    assert not VendorInvoice.objects.exists()

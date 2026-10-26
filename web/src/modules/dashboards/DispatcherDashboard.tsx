@@ -38,7 +38,7 @@ interface AttentionItem {
  * лидтаймом, нарушения SLA за сутки, борта в AOG, конфликты расписания.
  *
  * Компоновка — макет `docs/design/mockups/screens/02-dashboard-dispatcher.html`
- * без приветствия: дата и действия, четыре плитки, ближайшие вылеты
+ * без приветствия: заголовок, дата и действия, четыре плитки, ближайшие вылеты
  * полосами и список «Требует внимания», где у каждой строки одно действие.
  */
 export function DispatcherDashboard(): JSX.Element {
@@ -126,7 +126,6 @@ export function DispatcherDashboard(): JSX.Element {
   return (
     <>
       <PageHeader
-        titleHidden
         title={t('nav.dashboardDispatcher')}
         meta={<span>{date.charAt(0).toLocaleUpperCase(locale) + date.slice(1)}</span>}
         actions={

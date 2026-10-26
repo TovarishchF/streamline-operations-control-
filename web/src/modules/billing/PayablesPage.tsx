@@ -92,7 +92,7 @@ export function PayablesPage(): JSX.Element {
       title: t('reconciliation.title'), dataIndex: 'vendorInvoiceId', width: 130,
       render: (value: string | null) =>
         value ? (
-          <Link to="/billing/reconciliation">{t('reconciliation.linked')}</Link>
+          <Link to={`/billing/reconciliation/${value}`}>{t('reconciliation.linked')}</Link>
         ) : (
           <Typography.Text type="secondary">—</Typography.Text>
         ),

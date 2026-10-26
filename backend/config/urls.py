@@ -39,6 +39,7 @@ from billing.api.payables import (
     ReconciliationImportView,
     ReconciliationListView,
     ReconciliationResolveView,
+    ReconciliationTemplateView,
 )
 from billing.api.views import FxRatesView
 from catalog.api.views import (
@@ -145,6 +146,12 @@ api_v1: list[URLPattern | URLResolver] = [
         "reconciliation/import",
         ReconciliationImportView.as_view(),
         name="reconciliation-import",
+    ),
+    # До `reconciliation/<pk>`: иначе «template» разберётся как идентификатор.
+    path(
+        "reconciliation/template",
+        ReconciliationTemplateView.as_view(),
+        name="reconciliation-template",
     ),
     path(
         "reconciliation/<str:pk>",

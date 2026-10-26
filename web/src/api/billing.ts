@@ -8,7 +8,7 @@ import {
 import { z } from 'zod';
 
 import { currencyCodeSchema, moneySchema, pagedSchema, type Paged } from './catalog';
-import { newIdempotencyKey, request } from './client';
+import { download, newIdempotencyKey, request } from './client';
 
 export const fxSnapshotSchema = z.object({
   date: z.string(),
@@ -168,43 +168,47 @@ export function useVendorInvoices(
   });
 }
 
-export interface ImportInvoiceInput {
-  vendorId: string;
-  number: string;
-  issuedAt: string;
-  currency: 'RUB' | 'USD' | 'EUR';
-  lines: {
-    airportIcao: string;
-    serviceDate: string;
-    serviceCode: string;
-    quantity: string;
-    unitPrice: { amount: string; currency: string };
-    amount: { amount: string; currency: string };
-  }[];
-}
-
 /**
- * Импорт счёта поставщика для сверки `[ТЗ 3.4.2]`.
+ * Импорт счёта поставщика для сверки `[ТЗ 3.4.2]`: файл CSV или XLSX
+ * по шаблону системы.
  *
- * Сопоставление делает сервер по `DOMAIN § 7.7`: ключ, порядок разбора
- * и допуск на округление — часть предметной области, а не оформления
- * экрана.
+ * Файл разбирает сервер, и сопоставление делает он же по `DOMAIN § 7.7`:
+ * ключ, порядок разбора и допуск на округление — часть предметной области,
+ * а не оформления экрана.
  */
 export function useImportVendorInvoice() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: ImportInvoiceInput) =>
-      request('/reconciliation/import', vendorInvoiceSchema, {
+    mutationFn: (input: { vendorId: string; file: File }) => {
+      const form = new FormData();
+      form.append('vendorId', input.vendorId);
+      form.append('file', input.file);
+      return request('/reconciliation/import', vendorInvoiceSchema, {
         method: 'POST',
-        body: input,
+        body: form,
         idempotencyKey: newIdempotencyKey(),
-      }),
+      });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['payables'] });
       void queryClient.invalidateQueries({ queryKey: ['reconciliation'] });
     },
   });
+}
+
+/**
+ * Шаблон счёта поставщика `[ТЗ 3.4.2]`. Колонки задаёт сервер — те же,
+ * что он читает при импорте.
+ */
+export async function downloadInvoiceTemplate(fileFormat: 'xlsx' | 'csv'): Promise<void> {
+  const { blob, filename } = await download(`/reconciliation/template?fileFormat=${fileFormat}`);
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename ?? `invoice-template.${fileFormat}`;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export function useVendorInvoice(id: string | undefined): UseQueryResult<VendorInvoiceRow> {

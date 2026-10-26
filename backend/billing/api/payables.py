@@ -1,8 +1,8 @@
 """Расчёты с поставщиками `[ТЗ 3.4.2]`.
 
-`/payables`, `/payables/{id}/approve`, `/reconciliation/import`,
-`/reconciliation/{id}`, `/reconciliation/{id}/resolve` — пути и формы
-по `openapi.yaml`.
+`/payables`, `/payables/{id}/approve`, `/reconciliation/template`,
+`/reconciliation/import`, `/reconciliation/{id}`, `/reconciliation/{id}/resolve` —
+пути и формы по `openapi.yaml`.
 
 Поставщик видит свои заявки на оплату и только их: фильтр стоит
 в `get_queryset()` (`BACKEND.md § 3.7`), поэтому чужая заявка даёт 404,
@@ -15,7 +15,9 @@ from __future__ import annotations
 from typing import Any, ClassVar, cast
 
 from django.db.models import QuerySet
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from django.http import HttpResponse
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, mixins, serializers, status
 from rest_framework.decorators import action
 from rest_framework.request import Request
@@ -25,6 +27,7 @@ from rest_framework.views import APIView
 from accounts.models import User
 from accounts.permissions import Permission
 from billing.models import Payable, VendorInvoice
+from billing.services import invoice_file
 from billing.services import payables as payable_services
 from billing.services import reconciliation as reconciliation_services
 from core.api.idempotency import IdempotencyMixin
@@ -226,8 +229,46 @@ class ReconciliationListView(generics.ListAPIView):  # type: ignore[type-arg]
         return queryset
 
 
+class ReconciliationTemplateView(APIView):
+    """`GET /api/v1/reconciliation/template` `[ТЗ 3.4.2]`.
+
+    Колонки шаблона и разбор файла описаны в `billing.services.invoice_file`
+    одним перечнем: шаблон не расходится с тем, что импорт умеет читать.
+    """
+
+    permission_classes: Any = (HasRolePermission,)
+    required_permissions: ClassVar[dict[str, Any]] = {
+        "GET": Permission.BILLING_RECONCILIATION
+    }
+
+    @extend_schema(
+        summary="Шаблон счёта поставщика для импорта",
+        parameters=[
+            OpenApiParameter(
+                "fileFormat", str, enum=["xlsx", "csv"], default="xlsx", required=False
+            )
+        ],
+        responses={
+            (200, invoice_file.XLSX_CONTENT_TYPE): OpenApiTypes.BINARY,
+            (200, "text/csv"): OpenApiTypes.BINARY,
+        },
+        tags=["billing"],
+    )
+    def get(self, request: Request) -> HttpResponse:
+        file_format = "csv" if request.query_params.get("fileFormat") == "csv" else "xlsx"
+        content, content_type, filename = invoice_file.template(file_format)
+        response = HttpResponse(content, content_type=content_type)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+
 class ReconciliationImportView(IdempotencyMixin, APIView):
-    """`POST /api/v1/reconciliation/import` `[ТЗ 3.4.2]`."""
+    """`POST /api/v1/reconciliation/import` `[ТЗ 3.4.2]`.
+
+    Счёт приходит строками в JSON либо файлом CSV/XLSX по шаблону.
+    Файл приводится к той же форме, что JSON, и дальше импорт идёт
+    одним путём: проверки и сверка не зависят от того, как счёт прислали.
+    """
 
     idempotency: ClassVar[str] = "required"
     permission_classes: Any = (HasRolePermission,)
@@ -247,7 +288,14 @@ class ReconciliationImportView(IdempotencyMixin, APIView):
     )
     def post(self, request: Request) -> Response:
         def produce() -> Response:
-            payload = VendorInvoiceImportSerializer(data=request.data)
+            source: Any = request.data
+            upload = request.FILES.get("file")
+            if upload is not None:
+                source = {
+                    **invoice_file.parse(upload.name or "", upload.read()),
+                    "vendorId": request.data.get("vendorId", ""),
+                }
+            payload = VendorInvoiceImportSerializer(data=source)
             payload.is_valid(raise_exception=True)
             data = payload.validated_data
 

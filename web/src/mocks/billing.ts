@@ -1,8 +1,8 @@
 /**
- * Котировки, счета, платежи, заявки на оплату, сверка, курсы.
+ * Котировки, счета, платежи, заявки на оплату, курсы.
  *
- * Обязательный случай `SPEC.md § 11`: счёт поставщика с тремя типами
- * расхождений. Без него экран сверки нечего показывать.
+ * Сверка счетов поставщиков работает на сервере и в наборе для макетов
+ * не нужна.
  */
 import type {
   DocumentLine,
@@ -12,7 +12,6 @@ import type {
   PayableItem,
   Payment,
   Quote,
-  VendorInvoice,
 } from '@/api/types';
 
 import { CLIENTS, VENDOR_BY_ID } from './counterparties';
@@ -247,88 +246,6 @@ export const PAYABLES: PayableItem[] = FLIGHTS.filter((f) => f.status === 'compl
       vendorInvoiceId: index < 5 ? 'vinv_001' : null,
     };
   });
-
-// ─────────────────────────── Сверка ───────────────────────────
-// Обязательный случай: счёт с тремя типами расхождений (SPEC § 11).
-
-const reconciledPayables = PAYABLES.slice(0, 6);
-
-export const VENDOR_INVOICES: VendorInvoice[] = [
-  {
-    id: 'vinv_001',
-    vendorId: 'ven_003',
-    number: 'ХП-2026/4471',
-    issuedAt: daysFromNow(-6),
-    currency: 'RUB',
-    lines: [
-      // 1. Совпадает полностью
-      { airportIcao: 'UUEE', serviceDate: daysFromNow(-9), serviceCode: 'GH-BASE', quantity: '1', unitPrice: money(48000, 'RUB'), amount: money(48000, 'RUB') },
-      // 2. Расхождение цены
-      { airportIcao: 'UUDD', serviceDate: daysFromNow(-8), serviceCode: 'GH-BASE', quantity: '1', unitPrice: money(49900, 'RUB'), amount: money(49900, 'RUB') },
-      // 3. Расхождение количества
-      { airportIcao: 'UUEE', serviceDate: daysFromNow(-7), serviceCode: 'GH-TOW', quantity: '3', unitPrice: money(18000, 'RUB'), amount: money(54000, 'RUB') },
-      // 4. Есть у поставщика, нет у нас
-      { airportIcao: 'UUWW', serviceDate: daysFromNow(-7), serviceCode: 'GH-CLEAN-XL', quantity: '1', unitPrice: money(21000, 'RUB'), amount: money(21000, 'RUB') },
-      // 5. В пределах допуска на округление — расхождением не считается
-      { airportIcao: 'UUEE', serviceDate: daysFromNow(-6), serviceCode: 'GH-BASE', quantity: '1', unitPrice: money(48000.01, 'RUB'), amount: money(48000.01, 'RUB') },
-    ],
-    unmappedCodes: ['GH-CLEAN-XL'],
-    reconciliation: {
-      matched: [
-        { lineIndex: 0, serviceOrderId: reconciledPayables[0]?.serviceOrderIds?.[0] ?? 'so_001_01' },
-        { lineIndex: 4, serviceOrderId: reconciledPayables[4]?.serviceOrderIds?.[0] ?? 'so_005_01' },
-      ],
-      discrepancies: [
-        {
-          kind: 'price_mismatch', lineIndex: 1,
-          serviceOrderId: reconciledPayables[1]?.serviceOrderIds?.[0] ?? 'so_002_01',
-          ours: money(44500, 'RUB'), theirs: money(49900, 'RUB'),
-          resolution: null, comment: null,
-        },
-        {
-          kind: 'quantity_mismatch', lineIndex: 2,
-          serviceOrderId: reconciledPayables[2]?.serviceOrderIds?.[0] ?? 'so_003_01',
-          ours: money(18000, 'RUB'), theirs: money(54000, 'RUB'),
-          resolution: null, comment: null,
-        },
-        {
-          kind: 'missing_on_our_side', lineIndex: 3, serviceOrderId: null,
-          ours: null, theirs: money(21000, 'RUB'),
-          resolution: null, comment: null,
-        },
-        {
-          kind: 'missing_on_their_side', lineIndex: null,
-          serviceOrderId: reconciledPayables[5]?.serviceOrderIds?.[0] ?? 'so_006_01',
-          ours: money(12500, 'RUB'), theirs: null,
-          resolution: null, comment: null,
-        },
-      ],
-      totalOurs: money(171000, 'RUB'),
-      totalTheirs: money(220900.01, 'RUB'),
-      delta: money(-49900.01, 'RUB'),
-      resolvedAt: null,
-    },
-  },
-  {
-    id: 'vinv_002',
-    vendorId: 'ven_001',
-    number: 'АТЦ-2026-882',
-    issuedAt: daysFromNow(-12),
-    currency: 'RUB',
-    lines: [
-      { airportIcao: 'UUEE', serviceDate: daysFromNow(-15), serviceCode: 'JETA1', quantity: '4820', unitPrice: money(72.4, 'RUB'), amount: money(348968, 'RUB') },
-    ],
-    unmappedCodes: [],
-    reconciliation: {
-      matched: [{ lineIndex: 0, serviceOrderId: 'so_001_02' }],
-      discrepancies: [],
-      totalOurs: money(348968, 'RUB'),
-      totalTheirs: money(348968, 'RUB'),
-      delta: money(0, 'RUB'),
-      resolvedAt: daysFromNow(-10),
-    },
-  },
-];
 
 // ─────────────────────────── Сводки для дашбордов ───────────────────────────
 

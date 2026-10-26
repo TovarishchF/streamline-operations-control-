@@ -2,7 +2,7 @@
 # Цели, работающие без Docker, вызывают локальное окружение backend/.venv.
 
 .DEFAULT_GOAL := help
-.PHONY: help up down logs migrate makemigrations shell superuser \
+.PHONY: help up down restart logs migrate makemigrations shell superuser \
         seed-reference seed-sample sample-reset setup-beat \
         api-schema api-types lint types test test-e2e test-load test-restore check \
         venv install format
@@ -36,6 +36,12 @@ up:  ## Поднять окружение (PROFILE=dev|sample|prod)
 
 down:  ## Остановить окружение
 	$(COMPOSE) --profile $(PROFILE) down
+
+# Сервер разработки перезагружается сам, но при смене ветки файлы меняются
+# быстрее, чем он успевает: процесс поднимается на смеси старых и новых
+# модулей, и каждый запрос отвечает 500. Celery не перезагружается вовсе.
+restart:  ## Перезапустить API и Celery — после смены ветки
+	$(COMPOSE) restart api worker beat
 
 logs:  ## Журналы сервисов
 	$(COMPOSE) --profile $(PROFILE) logs -f --tail=100

@@ -188,4 +188,42 @@ test.describe('Операции', () => {
     // Ручка изменения ширины присутствует в заголовках
     expect(await page.locator('.soc-resize-handle').count()).toBeGreaterThan(0);
   });
+
+  test('край колонки идёт за указателем, соседние колонки не меняются', async ({ page }) => {
+    // В реестре поставщиков колонки вместе уже таблицы: браузер раздаёт
+    // остаток места всем колонкам, и именно здесь край отставал от указателя.
+    await asDispatcher(page);
+    await page.goto('/vendors');
+    await expect(page.locator('tbody tr.ant-table-row').first()).toBeVisible();
+
+    const headerWidths = async (): Promise<number[]> =>
+      page
+        .locator('.ant-table-thead > tr > th:not(.soc-table-filler)')
+        .evaluateAll((cells) => cells.map((cell) => Math.round(cell.getBoundingClientRect().width)));
+
+    // Тянется вторая колонка: левее неё — колонка, которая не должна сдвинуться
+    const handle = page.locator('.ant-table-thead .soc-resize-handle').nth(1);
+    const box = await handle.boundingBox();
+    if (!box) throw new Error('нет ручки изменения ширины');
+    const before = await headerWidths();
+
+    const y = box.y + box.height / 2;
+    for (const offset of [100, -60]) {
+      const start = (await handle.boundingBox())?.x ?? 0;
+      await page.mouse.move(start + box.width / 2, y);
+      await page.mouse.down();
+      for (let step = 1; step <= 10; step += 1) {
+        await page.mouse.move(start + box.width / 2 + (offset * step) / 10, y);
+      }
+      await page.mouse.up();
+      // Край колонки сдвинулся ровно на столько, на сколько указатель
+      expect(Math.round(((await handle.boundingBox())?.x ?? 0) - start)).toBe(offset);
+    }
+
+    const after = await headerWidths();
+    expect(after[1]).toBe((before[1] ?? 0) + 40);
+    expect(after.filter((_, index) => index !== 1)).toEqual(
+      before.filter((_, index) => index !== 1),
+    );
+  });
 });
