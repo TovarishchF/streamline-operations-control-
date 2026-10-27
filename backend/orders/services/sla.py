@@ -192,3 +192,21 @@ def create_rule(
         comment=f"Вытесняет {current.pk}" if current is not None else "",
     )
     return rule
+
+
+def follow_flight(order: ServiceOrder, *, previous_moment: datetime, moment: datetime) -> bool:
+    """Сдвигает сроки заявки вслед за переносом рейса. Возвращает, изменились ли они.
+
+    Срок исполнения отсчитывается от планового времени услуги: рейс
+    перенесли — сдвигается и он, на ту же величину норматива. Срок
+    подтверждения не позже самого оказания: при переносе на раньше
+    он ужимается до нового времени.
+    """
+    changed = False
+    if order.sla_completion_deadline is not None and previous_moment != moment:
+        order.sla_completion_deadline = moment + (order.sla_completion_deadline - previous_moment)
+        changed = True
+    if order.sla_confirm_deadline is not None and order.sla_confirm_deadline > moment:
+        order.sla_confirm_deadline = moment
+        changed = True
+    return changed

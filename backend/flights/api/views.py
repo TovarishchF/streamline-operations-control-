@@ -225,6 +225,7 @@ class FlightViewSet(
             "depIcao": "dep_icao",
             "arrIcao": "arr_icao",
             "stdUtc": "std_utc",
+            "staUtc": "sta_utc",
             "paxCount": "pax_count",
             "remarks": "remarks",
         }
@@ -233,7 +234,12 @@ class FlightViewSet(
             for key, value in payload.validated_data.items()
             if key in mapping
         }
-        planning.update_route(flight, actor=cast(User, request.user), **changes)
+        planning.update_route(
+            flight,
+            actor=cast(User, request.user),
+            override_reason=payload.validated_data.get("conflictOverrideReason", ""),
+            **changes,
+        )
         return Response(FlightSerializer(flight).data)
 
     @extend_schema(

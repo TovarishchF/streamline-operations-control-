@@ -21,9 +21,12 @@ from comms.services import context, notifications, outbox
 from comms.services.templates import TemplateNotFound
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from accounts.models import User
     from billing.models import Invoice, Quote
     from counterparties.models import Client, Vendor, VendorContract
+    from flights.models import Flight
     from orders.models import ServiceOrder
 
 logger = logging.getLogger(__name__)
@@ -78,6 +81,19 @@ def order_placed(order: ServiceOrder) -> None:
         data=_order_data(order),
         related=("service_order", order.pk),
     )
+
+
+def order_changed(order: ServiceOrder, *, previous_moment: datetime, moment: datetime) -> None:
+    """Время оказания изменилось вслед за рейсом `[ТЗ 3.1.3]`."""
+    to = _recipients(order.vendor)
+    if not to:
+        return
+    data = _order_data(order)
+    data["change"] = {
+        "before": f"{context.utc(previous_moment)} UTC",
+        "after": f"{context.utc(moment)} UTC",
+    }
+    _enqueue("order_changed", to=to, data=data, related=("service_order", order.pk))
 
 
 def order_cancelled(order: ServiceOrder, *, reason: str) -> None:
@@ -164,6 +180,25 @@ def document_issued(document: Quote | Invoice, *, kind: str) -> None:
 
 
 # ─────────────────────────── Рейсы ───────────────────────────
+
+
+def flight_rescheduled(flight: Flight, *, previous_std: datetime, reason: str) -> None:
+    """Изменение времени вылета — письмо клиенту `[ТЗ 3.1.3]`."""
+    to = _recipients(flight.client)
+    if not to:
+        logger.info("у клиента рейса %s нет контактов для переписки", flight.pk)
+        return
+    _enqueue(
+        "flight_rescheduled",
+        to=to,
+        data={
+            "flight": context.flight_data(flight),
+            "client": {"name": flight.client.name},
+            "change": {"before": context.utc(previous_std), "reason": reason or "—"},
+            "operator": context.operator_data(),
+        },
+        related=("flight", flight.pk),
+    )
 
 
 def flight_status_changed(flight: Any, *, previous: str, actor: User | None) -> None:

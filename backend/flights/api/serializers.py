@@ -190,12 +190,30 @@ class FlightCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
 
 class FlightUpdateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`FlightUpdate` из контракта.
+
+    `staUtc` задаёт длительность — растягивание полосы на планшете;
+    `conflictOverrideReason` — причина, с которой подтверждён конфликт,
+    появившийся от этой правки (`SPEC.md § 4.1`).
+    """
+
     aircraftId = serializers.CharField(required=False, allow_null=True)  # noqa: N815
     depIcao = serializers.CharField(required=False, min_length=4, max_length=4)  # noqa: N815
     arrIcao = serializers.CharField(required=False, min_length=4, max_length=4)  # noqa: N815
     stdUtc = serializers.DateTimeField(required=False)  # noqa: N815
+    staUtc = serializers.DateTimeField(required=False)  # noqa: N815
     paxCount = serializers.IntegerField(required=False)  # noqa: N815
     remarks = serializers.CharField(required=False, allow_blank=True)
+    conflictOverrideReason = serializers.CharField(  # noqa: N815
+        required=False, allow_blank=True, default=""
+    )
+
+    def validate_aircraftId(self, value: str | None) -> str | None:  # noqa: N802
+        from fleet.models import Aircraft
+
+        if value and not Aircraft.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("Борт не найден")
+        return value or None
 
 
 class FlightTransitionSerializer(serializers.Serializer):  # type: ignore[type-arg]
