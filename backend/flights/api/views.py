@@ -6,13 +6,14 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, ClassVar, cast
 
 from django.db.models import Prefetch, QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -49,7 +50,7 @@ from flights.api.serializers import (
 )
 from flights.models import Flight, FlightRequest, FlightTemplate, Slot
 from flights.services import conflicts as conflict_detector
-from flights.services import generation, planning, transitions
+from flights.services import generation, planning, selection, transitions
 from flights.services import slots as slot_services
 from orders.api.serializers import ServiceOrderCreateSerializer, ServiceOrderSerializer
 from orders.models import ServiceOrder
@@ -171,49 +172,27 @@ class FlightViewSet(
         но не нашу маржу на них.
         """
         queryset = self.filter_queryset(self.get_queryset())
+        role = str(getattr(request.user, "role", ""))
+        sees_margin = has_permission(role, Permission.BILLING_MARGIN_VIEW)
+
+        threshold = selection.margin_threshold(request.query_params)
+        if threshold is not None:
+            # Отбор по марже раскрывал бы маржу тому, кому её не видно.
+            if not sees_margin:
+                raise PermissionDenied
+            queryset = selection.below_margin(queryset, threshold)
+
         page = self.paginate_queryset(queryset)
         flights = list(page) if page is not None else list(queryset)
 
         context = self.get_serializer_context()
-        role = str(getattr(request.user, "role", ""))
-        if has_permission(role, Permission.BILLING_MARGIN_VIEW):
+        if sees_margin:
             context["margins"] = margin_service.percents_for(flights)
         data = FlightListSerializer(flights, many=True, context=context).data
         return self.get_paginated_response(data) if page is not None else Response(data)
 
     def get_queryset(self) -> QuerySet[Flight]:
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        if params.get("status"):
-            queryset = queryset.filter(status__in=params["status"].split(","))
-        if params.get("clientId"):
-            queryset = queryset.filter(client_id=params["clientId"])
-        if params.get("aircraftId"):
-            queryset = queryset.filter(aircraft_id=params["aircraftId"])
-        if params.get("from"):
-            queryset = queryset.filter(std_utc__gte=params["from"])
-        if params.get("to"):
-            queryset = queryset.filter(std_utc__lte=params["to"])
-        if params.get("airport"):
-            from django.db.models import Q
-
-            icao = params["airport"].upper()
-            queryset = queryset.filter(Q(dep_icao=icao) | Q(arr_icao=icao))
-        if params.get("type"):
-            queryset = queryset.filter(type=params["type"])
-        if params.get("search"):
-            from django.db.models import Q
-
-            needle = params["search"].strip()
-            queryset = queryset.filter(
-                Q(number__icontains=needle)
-                | Q(dep_icao__istartswith=needle)
-                | Q(arr_icao__istartswith=needle)
-                | Q(client__name__icontains=needle)
-                | Q(aircraft__registration__icontains=needle)
-            )
-        return queryset
+        return selection.apply(super().get_queryset(), self.request.query_params)
 
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         flight = self.get_object()
@@ -364,8 +343,6 @@ class ScheduleExportView(IdempotencyMixin, APIView):
         from accounts.permissions import TENANT_SCOPED_ROLES
 
         if str(getattr(request.user, "role", "")) in TENANT_SCOPED_ROLES:
-            from rest_framework.exceptions import PermissionDenied
-
             raise PermissionDenied
 
         def produce() -> Response:
@@ -388,37 +365,36 @@ class ScheduleExportView(IdempotencyMixin, APIView):
         return self.idempotent(request, produce)
 
     def _selection(self, request: Request) -> QuerySet[Flight]:
-        """Выборка по тем же параметрам, что и `GET /flights`."""
-        from django.db.models import Q
-
-        params = request.query_params
-        queryset = Flight.objects.all()
-
-        if params.get("status"):
-            queryset = queryset.filter(status__in=params["status"].split(","))
-        if params.get("clientId"):
-            queryset = queryset.filter(client_id=params["clientId"])
-        if params.get("aircraftId"):
-            queryset = queryset.filter(aircraft_id=params["aircraftId"])
-        if params.get("from"):
-            queryset = queryset.filter(std_utc__gte=params["from"])
-        if params.get("to"):
-            queryset = queryset.filter(std_utc__lte=params["to"])
-        if params.get("airport"):
-            icao = params["airport"].upper()
-            queryset = queryset.filter(Q(dep_icao=icao) | Q(arr_icao=icao))
-        if params.get("type"):
-            queryset = queryset.filter(type=params["type"])
-        if params.get("search"):
-            needle = params["search"].strip()
-            queryset = queryset.filter(
-                Q(number__icontains=needle)
-                | Q(dep_icao__istartswith=needle)
-                | Q(arr_icao__istartswith=needle)
-                | Q(client__name__icontains=needle)
-                | Q(aircraft__registration__icontains=needle)
+        """Выборка по тем же параметрам и тем же правилам, что и `GET /flights`."""
+        queryset = selection.apply(
+            Flight.objects.select_related("client", "aircraft"), request.query_params
+        )
+        threshold = selection.margin_threshold(request.query_params)
+        if threshold is not None:
+            role = str(getattr(request.user, "role", ""))
+            if not has_permission(role, Permission.BILLING_MARGIN_VIEW):
+                raise PermissionDenied
+            queryset = selection.below_margin(
+                queryset.prefetch_related(
+                    Prefetch(
+                        "service_orders", queryset=ServiceOrder.objects.select_related("service")
+                    )
+                ),
+                threshold,
             )
-        return queryset.order_by("std_utc")
+        return queryset
+
+
+def _moment(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        from rest_framework.exceptions import ValidationError
+
+        raise ValidationError({"period": "Ожидается дата и время ISO 8601"}) from None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 class ScheduleConflictsView(APIView):
@@ -440,8 +416,13 @@ class ScheduleConflictsView(APIView):
     def get(self, request: Request) -> Response:
         from core import clock
 
-        since = clock.now()
-        until = since + timedelta(days=CONFLICT_HORIZON_DAYS)
+        # Период — по контракту; без него — горизонт планирования от сейчас.
+        # Карточка рейса спрашивает конфликты только своего рейса: считать
+        # их по всему месяцу ради одной строки незачем.
+        since = _moment(request.query_params.get("from")) or clock.now()
+        until = _moment(request.query_params.get("to")) or since + timedelta(
+            days=CONFLICT_HORIZON_DAYS
+        )
 
         flights = (
             Flight.objects.filter(std_utc__gte=since, std_utc__lte=until)
