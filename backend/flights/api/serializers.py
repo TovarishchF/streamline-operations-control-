@@ -96,7 +96,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         return [
             name
             for name in transitions.available_transitions(obj)
-            if not transitions.check_guards(obj, name)
+            if not transitions.unmet_conditions(obj, name)
         ]
 
     def get_blockedTransitions(self, obj: Flight) -> list[dict[str, Any]]:  # noqa: N802
@@ -107,7 +107,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         """
         blocked = []
         for name in transitions.available_transitions(obj):
-            problems = transitions.check_guards(obj, name)
+            problems = transitions.unmet_conditions(obj, name)
             if problems:
                 blocked.append({"transition": name, "unmetConditions": problems})
         return blocked
@@ -220,14 +220,16 @@ class FlightTransitionSerializer(serializers.Serializer):  # type: ignore[type-a
     transition = serializers.CharField()
     reasonCode = serializers.CharField(required=False, allow_blank=True, default="")  # noqa: N815
     comment = serializers.CharField(required=False, allow_blank=True, default="")
+    completeWithoutInvoice = serializers.BooleanField(required=False, default=False)  # noqa: N815
 
 
 class ConflictSerializer(serializers.Serializer):  # type: ignore[type-arg]
     kind = serializers.CharField()
     flightId = serializers.CharField()  # noqa: N815
     relatedFlightId = serializers.CharField(allow_null=True)  # noqa: N815
+    aircraftId = serializers.CharField(allow_null=True)  # noqa: N815
     message = serializers.CharField()
-    severity = serializers.CharField()
+    severity = serializers.ChoiceField(choices=["warning", "blocking"])
 
 
 class TemplateServiceSerializer(serializers.Serializer):  # type: ignore[type-arg]
@@ -361,14 +363,15 @@ class SlotAnswerSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
 
 def conflict_payload(flight: Flight, item: conflict_detector.Conflict) -> dict[str, Any]:
-    """Конфликт в форме контракта."""
-    # Неисправный борт и пересечение рейсов — разного веса: первое срывает
-    # рейс, второе чаще всего улаживается сдвигом расписания.
-    critical = item.kind in ("aircraft_aog", "overlap")
+    """Конфликт в форме контракта (`ScheduleConflict`)."""
+    # Неисправный борт и пересечение рейсов срывают рейс; разворот короче
+    # нормы и истекающий допуск чаще улаживаются без отмены.
+    blocking = item.kind in ("aircraft_unserviceable", "overlap")
     return {
         "kind": item.kind,
         "flightId": flight.pk,
         "relatedFlightId": item.related_flight_id,
+        "aircraftId": flight.aircraft_id,
         "message": item.message,
-        "severity": "critical" if critical else "warning",
+        "severity": "blocking" if blocking else "warning",
     }

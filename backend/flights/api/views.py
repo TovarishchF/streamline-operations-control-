@@ -239,6 +239,7 @@ class FlightViewSet(
             actor=cast(User, request.user),
             reason_code=payload.validated_data["reasonCode"],
             comment=payload.validated_data["comment"],
+            complete_without_invoice=payload.validated_data["completeWithoutInvoice"],
         )
         return Response(FlightSerializer(flight).data)
 

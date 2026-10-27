@@ -118,12 +118,22 @@ def all_orders_completed_or_cancelled(flight: Flight) -> str | None:
 
 
 def invoice_issued_or_explicitly_waived(flight: Flight) -> str | None:
-    """Счета появятся на M7.
+    """Счёт клиенту выставлен либо явно выбрано «завершить без счёта».
 
-    До тех пор условие не проверяется, и это записано здесь, а не забыто:
-    молчаливо пропускающий guard отличается от нереализованного только тем,
-    что про него помнят.
+    `DOMAIN.md § 5.1`. Отказ от счёта — признак запроса перехода, а не
+    состояние рейса: его ставит `apply_transition` вместе с причиной,
+    и в базе он остаётся записью аудита.
     """
+    if flight.invoice_waived:
+        return None
+
+    from billing.models import InvoiceStatus
+
+    issued = flight.invoices.exclude(
+        status__in=[InvoiceStatus.DRAFT, InvoiceStatus.VOIDED]
+    ).exists()
+    if not issued:
+        return _("Клиенту не выставлен счёт")
     return None
 
 

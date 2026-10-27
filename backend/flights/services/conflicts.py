@@ -54,13 +54,13 @@ def _aircraft_state(flight: Flight) -> Iterable[Conflict]:
         return
     if aircraft.status == AircraftStatus.AOG:
         yield Conflict(
-            kind="aircraft_aog",
+            kind="aircraft_unserviceable",
             message=_("Борт %(registration)s в состоянии AOG")
             % {"registration": aircraft.registration},
         )
     elif aircraft.status == AircraftStatus.MAINTENANCE:
         yield Conflict(
-            kind="aircraft_maintenance",
+            kind="aircraft_unserviceable",
             message=_("Борт %(registration)s на техобслуживании")
             % {"registration": aircraft.registration},
         )
@@ -126,7 +126,7 @@ def _expired_approvals(flight: Flight) -> Iterable[Conflict]:
     for approval in aircraft.approvals.all():
         if approval.valid_to < flight.std_utc:
             yield Conflict(
-                kind="approval_expired",
+                kind="expired_approval",
                 message=_("Допуск %(kind)s борта %(registration)s истекает %(date)s")
                 % {
                     "kind": approval.kind,

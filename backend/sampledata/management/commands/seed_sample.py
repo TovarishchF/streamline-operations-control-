@@ -802,7 +802,9 @@ class Command(BaseCommand):
                 },
             )
 
-        def move(name: str, reason_code: str = "", comment: str = "") -> bool:
+        def move(
+            name: str, reason_code: str = "", comment: str = "", *, without_invoice: bool = False
+        ) -> bool:
             try:
                 transitions.apply_transition(
                     flight,
@@ -810,6 +812,7 @@ class Command(BaseCommand):
                     source=AuditSource.SEED,
                     reason_code=reason_code,
                     comment=comment,
+                    complete_without_invoice=without_invoice,
                 )
             except DomainError:
                 return False
@@ -832,7 +835,9 @@ class Command(BaseCommand):
             return
         move("arrive")
         flight.service_orders.update(status=ServiceOrderStatus.COMPLETED)
-        move("complete")
+        # Счетов генератор пока не выставляет (`SPEC.md § 11`, M11), и рейс
+        # завершается явным отказом от счёта — тем же путём, что у диспетчера.
+        move("complete", comment="Счёт по рейсу не выставлялся", without_invoice=True)
 
     def _flight_requests(
         self, organization: Organization, clients: list[Client], seed: int

@@ -209,7 +209,7 @@ class TestConflictsEndpoint:
         kinds = {item["kind"] for item in response.data["data"]}
         assert "overlap" in kinds
         overlap = next(item for item in response.data["data"] if item["kind"] == "overlap")
-        assert overlap["severity"] == "critical"
+        assert overlap["severity"] == "blocking"
         assert overlap["message"]
 
 

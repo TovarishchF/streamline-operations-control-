@@ -259,7 +259,7 @@ def test_dispatcher_dashboard_shows_the_current_situation(
     assert data["sla_breaches"]["count"] == 1
     assert data["aircraft_out_of_service"]["items"][0]["registration"] == aircraft.registration
     # Рейс на неисправном борту — конфликт расписания.
-    assert any(item["kind"] == "aircraft_aog" for item in data["conflicts"]["items"])
+    assert any(item["kind"] == "aircraft_unserviceable" for item in data["conflicts"]["items"])
     # До вылета меньше лидтайма топлива (4 ч), а поставщик не подтвердил.
     assert data["lead_time_overdue"]["count"] == 1
     assert body["layout"] == {"widgets": dashboards.default_layout("dispatcher")}

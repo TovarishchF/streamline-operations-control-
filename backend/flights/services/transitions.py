@@ -46,11 +46,19 @@ def available_transitions(flight: Flight) -> list[str]:
     return [item["name"] for item in machine.transitions() if flight.status in item["from"]]
 
 
-def check_guards(flight: Flight, name: str) -> list[str]:
+# Условия, которые выполняет сам запрос перехода, а не состояние рейса:
+# причину вводят в диалоге перехода. Карточка не показывает их
+# невыполненными — иначе отмена была бы заблокирована всегда.
+REQUEST_GUARDS = frozenset({"reason_provided"})
+
+
+def check_guards(flight: Flight, name: str, *, skip: frozenset[str] = frozenset()) -> list[str]:
     """Невыполненные условия перехода. Пустой список — переход разрешён."""
     definition = transition_by_name(name)
     problems: list[str] = []
     for guard_name in definition.get("guards", []):
+        if guard_name in skip:
+            continue
         guard = GUARDS.get(guard_name)
         if guard is None:
             # Условие объявлено в автомате, но не реализовано: пропускать
@@ -63,6 +71,11 @@ def check_guards(flight: Flight, name: str) -> list[str]:
     return problems
 
 
+def unmet_conditions(flight: Flight, name: str) -> list[str]:
+    """Что мешает переходу из состояния рейса — для панели статуса."""
+    return check_guards(flight, name, skip=REQUEST_GUARDS)
+
+
 @transaction.atomic
 def apply_transition(
     flight: Flight,
@@ -72,9 +85,24 @@ def apply_transition(
     reason_code: str = "",
     comment: str = "",
     source: AuditSource | None = None,
+    complete_without_invoice: bool = False,
 ) -> Flight:
     """Выполняет переход. Возбуждает исключение, если он невозможен."""
     definition = transition_by_name(name)
+
+    if complete_without_invoice:
+        if name != "complete":
+            raise GuardNotSatisfied(
+                "Отказ от счёта возможен только при завершении рейса",
+                {"unsatisfied": ["Отказ от счёта относится к переходу «complete»"]},
+            )
+        # «Завершить без счёта» выбирается явно и с причиной (`DOMAIN.md § 5.1`).
+        if not comment.strip():
+            raise GuardNotSatisfied(
+                "Завершение без счёта требует причины",
+                {"unsatisfied": ["Не указана причина завершения без счёта"]},
+            )
+        flight.invoice_waived = True
 
     if flight.status not in definition["from"]:
         raise TransitionNotAllowed(
@@ -126,7 +154,11 @@ def apply_transition(
         actor=actor,
         before=before,
         after=audit.snapshot(flight, fields=["status", "atd_utc", "ata_utc"]),
-        comment=comment or f"{previous_status} → {definition['to']}",
+        comment=(
+            f"Без счёта: {comment}"
+            if complete_without_invoice
+            else comment or f"{previous_status} → {definition['to']}"
+        ),
         source=source or (AuditSource.USER if actor else AuditSource.SYSTEM),
         is_generated=flight.is_generated,
     )

@@ -230,3 +230,92 @@ class TestDeparture:
         transitions.apply_transition(flight_ready, "depart", actor=dispatcher)
 
         assert flight_ready.status == FlightStatus.IN_FLIGHT
+
+
+@pytest.fixture
+def flight_arrived(flight_ready: Flight, dispatcher: User) -> Flight:
+    transitions.apply_transition(flight_ready, "depart", actor=dispatcher)
+    transitions.apply_transition(flight_ready, "arrive", actor=dispatcher)
+    flight_ready.service_orders.update(status=ServiceOrderStatus.COMPLETED)
+    return flight_ready
+
+
+@pytest.mark.django_db
+class TestComplete:
+    """Завершение: счёт выставлен или явно выбрано «без счёта» (`DOMAIN.md § 5.1`)."""
+
+    def test_refused_without_an_invoice(self, flight_arrived: Flight, dispatcher: User) -> None:
+        with pytest.raises(GuardNotSatisfied) as error:
+            transitions.apply_transition(flight_arrived, "complete", actor=dispatcher)
+
+        assert error.value.details["unsatisfied"] == ["Клиенту не выставлен счёт"]
+
+    def test_draft_invoice_is_not_enough(self, flight_arrived: Flight, dispatcher: User) -> None:
+        from billing.models import Invoice
+
+        Invoice.objects.create(
+            flight=flight_arrived, client=flight_arrived.client, currency="RUB"
+        )
+
+        assert transitions.unmet_conditions(flight_arrived, "complete") == [
+            "Клиенту не выставлен счёт"
+        ]
+
+    def test_passes_with_an_issued_invoice(
+        self, flight_arrived: Flight, dispatcher: User
+    ) -> None:
+        from billing.models import Invoice, InvoiceStatus
+
+        Invoice.objects.create(
+            flight=flight_arrived,
+            client=flight_arrived.client,
+            currency="RUB",
+            number="SOC-I-2026-0001",
+            issued_at=clock.now(),
+            status=InvoiceStatus.ISSUED,
+        )
+
+        transitions.apply_transition(flight_arrived, "complete", actor=dispatcher)
+
+        assert flight_arrived.status == FlightStatus.COMPLETED
+
+    def test_waiver_needs_a_reason(self, flight_arrived: Flight, dispatcher: User) -> None:
+        with pytest.raises(GuardNotSatisfied):
+            transitions.apply_transition(
+                flight_arrived, "complete", actor=dispatcher, complete_without_invoice=True
+            )
+
+    def test_waiver_with_a_reason_is_audited(
+        self, flight_arrived: Flight, dispatcher: User
+    ) -> None:
+        transitions.apply_transition(
+            flight_arrived,
+            "complete",
+            actor=dispatcher,
+            comment="Рейс выполнен по гарантийному обязательству",
+            complete_without_invoice=True,
+        )
+
+        assert flight_arrived.status == FlightStatus.COMPLETED
+        entry = AuditEntry.objects.get(
+            entity_id=flight_arrived.pk, action="status_changed", after__status="completed"
+        )
+        assert entry.comment == "Без счёта: Рейс выполнен по гарантийному обязательству"
+
+    def test_waiver_belongs_to_completion_only(self, flight: Flight, dispatcher: User) -> None:
+        with pytest.raises(GuardNotSatisfied):
+            transitions.apply_transition(
+                flight,
+                "cancel",
+                actor=dispatcher,
+                reason_code="client_request",
+                comment="x",
+                complete_without_invoice=True,
+            )
+
+
+@pytest.mark.django_db
+def test_reason_is_not_an_unmet_condition_of_the_card(flight: Flight) -> None:
+    """Причину вводят в диалоге перехода: отмена не показывается заблокированной."""
+    assert transitions.unmet_conditions(flight, "cancel") == []
+    assert transitions.check_guards(flight, "cancel") == ["Не указана причина"]

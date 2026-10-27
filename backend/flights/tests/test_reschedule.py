@@ -96,7 +96,7 @@ def test_new_conflict_needs_a_reason(
     assert refused.status_code == status.HTTP_409_CONFLICT
     error = refused.json()["error"]
     assert error["code"] == "SCHEDULE_CONFLICT"
-    assert error["details"]["conflicts"][0]["kind"] == "aircraft_aog"
+    assert error["details"]["conflicts"][0]["kind"] == "aircraft_unserviceable"
     # Отказ ничего не сохранил.
     assert Flight.objects.get(pk=flight_with_aircraft.pk).aircraft_id != broken_aircraft.pk
 
