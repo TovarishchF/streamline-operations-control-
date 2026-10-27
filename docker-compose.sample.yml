@@ -84,6 +84,9 @@ services:
     volumes:
       - ./shared:/shared:ro
       - ./deploy/sample:/deploy:ro
+    # Проверка образа обращается к HTTP, которого у разовой службы нет.
+    healthcheck:
+      disable: true
     restart: "no"
 
   api:

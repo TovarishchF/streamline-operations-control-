@@ -18,8 +18,12 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
 
 FROM deps AS build
 COPY shared /app/shared
+COPY openapi.yaml /app/openapi.yaml
 COPY web /app/web
-RUN npm run build
+# Типы клиента генерируются из контракта и в репозитории не хранятся
+# (CLAUDE.md § 3 п. 6): сборка из чистого архива поставки их не найдёт.
+# Генератор — закреплённая версия из devDependencies, сеть не нужна.
+RUN npx openapi-typescript /app/openapi.yaml -o /app/shared/api-types.ts && npm run build
 
 
 FROM nginx:alpine AS prod
