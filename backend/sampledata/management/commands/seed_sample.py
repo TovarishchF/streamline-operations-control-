@@ -90,6 +90,7 @@ from orders.models import ServiceOrder, ServiceOrderStatus, SlaPenaltyKind, SlaR
 from orders.services import orders as order_services
 from orders.services import sla as sla_services
 from orders.services import transitions as order_transitions
+from reports.services import dashboards
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -206,7 +207,7 @@ CARGO_EVERY = 6
 # «историей за год»: система должна выглядеть работающей сегодня.
 FLIGHTS_BACK_DAYS = 30
 FLIGHTS_FORWARD_DAYS = 14
-FLIGHTS_PER_DAY = 4
+FLIGHTS_PER_DAY = 6
 CANCELLED_SHARE = 0.08
 
 # Дальние рейсы частью ещё только запланированы: заявок по ним нет.
@@ -220,6 +221,8 @@ SLA_LATE_SHARE = 0.03
 # С какого дня вперёд часть заявок ещё ждёт ответа поставщика.
 PENDING_ANSWERS_FROM_DAY = 2
 PENDING_ANSWER_SHARE = 0.25
+# Доля молчащих поставщиков среди тех, чей срок ответа уже вышел.
+OVERDUE_ANSWER_SHARE = 0.1
 
 REJECTION_REASONS = (
     "Нет свободного топливозаправщика на это время",
@@ -329,6 +332,9 @@ PAID_SHARE = 0.62
 PARTIAL_SHARE = 0.12
 # Доля заявок на оплату, которые финансист не успел согласовать к сроку.
 OVERDUE_PAYABLE_SHARE = 0.2
+# Поставщик с короткой отсрочкой: по его заявкам на оплату есть просрочка.
+SHORT_TERMS_VENDOR = "Гурмэ Флай"
+SHORT_TERMS_DAYS = 14
 
 # Счета поставщиков: всего и сколько из них с расхождениями (`SPEC.md § 11`).
 VENDOR_INVOICES = 12
@@ -418,6 +424,11 @@ class Command(BaseCommand):
         counts = (
             self.purge() if options["purge"] else self.generate(int(options["seed"]))
         )
+        # Дашборд руководителя читает агрегаты маржи, которые фоновая задача
+        # обновляет раз в пять минут. Без обновления здесь сразу после
+        # генерации там были бы нули. Вне транзакции генерации: обновление
+        # должно видеть её результат.
+        dashboards.refresh_views()
         for name, count in counts.items():
             self.stdout.write(f"{name}: {count}")
         if options["purge"]:
@@ -836,7 +847,13 @@ class Command(BaseCommand):
                         currency="RUB",
                         specializations=specializations,
                         airports=sorted(coverage.get(name, set())),
-                        defer_days=rnd.choice([15, 30, 30, 45]),
+                        # Оплата поставщику уходит из 1С, а не из системы:
+                        # без подключения заявка на оплату не становится
+                        # «оплаченной», и короткая отсрочка превратила бы
+                        # весь месяц истории в просрочку.
+                        defer_days=SHORT_TERMS_DAYS
+                        if name == SHORT_TERMS_VENDOR
+                        else rnd.choice([30, 30, 45, 60]),
                     )
                 )
 
@@ -853,7 +870,7 @@ class Command(BaseCommand):
                     currency=currency,
                     specializations=list(FOREIGN_SPECIALIZATIONS),
                     airports=stations,
-                    defer_days=14,
+                    defer_days=30,
                 )
             )
         return vendors
@@ -1029,7 +1046,7 @@ class Command(BaseCommand):
                     client,
                     category=category,
                     mode=TariffMode.COST_PLUS,
-                    markup=Decimal(rnd.randint(8, 22)),
+                    markup=Decimal(rnd.randint(12, 25)),
                     discount_kind="percent" if discount else "",
                     discount_value=Decimal(5) if discount else None,
                 )
@@ -1184,7 +1201,7 @@ class Command(BaseCommand):
                 rnd = self._rnd(seed, f"flight:{offset}:{index}")
                 departure, arrival = rnd.sample(airports, 2)
                 std = today + timedelta(
-                    days=offset, hours=6 + index * 4, minutes=rnd.choice([0, 10, 25, 40])
+                    days=offset, hours=5 + index * 3, minutes=rnd.choice([0, 10, 25, 40])
                 )
                 # Повторный запуск не плодит рейсов: тот же слот уже занят.
                 if Flight.objects.filter(
@@ -1379,7 +1396,12 @@ class Command(BaseCommand):
             # Подтверждение после срока: система фиксирует нарушение SLA.
             answered_at = deadline + timedelta(minutes=rnd.randint(20, 180))
         elif offset >= PENDING_ANSWERS_FROM_DAY and rnd.random() < PENDING_ANSWER_SHARE:
-            return
+            # Ответа ещё нет: обычно — потому что срок не вышел, изредка —
+            # поставщик молчит дольше срока, и это нарушение SLA отметит
+            # фоновая проверка.
+            if deadline is None or deadline > now or rnd.random() < OVERDUE_ANSWER_SHARE:
+                return
+            answered_at = ordered_at + timedelta(minutes=rnd.randint(4, 25))
         else:
             answered_at = ordered_at + timedelta(minutes=rnd.randint(4, 25))
         if answered_at > now:

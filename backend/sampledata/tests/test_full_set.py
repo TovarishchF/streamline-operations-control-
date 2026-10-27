@@ -127,7 +127,7 @@ def _assert_interesting_cases() -> None:
         for flight in Flight.objects.filter(
             client__name=NEGATIVE_MARGIN_CLIENT, status=FlightStatus.COMPLETED
         )
-        if margin_service.margin_for(flight, "actual").margin.amount < 0
+        if margin_service.margin_for(flight, "fact").margin.amount < 0
     ]
     assert negative, "нет рейса с отрицательной маржой"
 
@@ -193,7 +193,8 @@ def _assert_history_is_made_by_the_system(stored: dict[str, bytes]) -> None:
 
     payables = Payable.objects.filter(is_generated=True)
     assert payables.filter(status=PayableStatus.APPROVED).exists()
-    assert payables.filter(status=PayableStatus.PENDING, due_date__lt=clock.now()).exists()
+    assert payables.filter(status=PayableStatus.PENDING).exists()
+    assert any(payable.is_overdue() for payable in payables.filter(due_date__lt=clock.now()))
     assert not payables.filter(status=PayableStatus.PAID).exists()
 
 
