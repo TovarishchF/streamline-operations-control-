@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any, ClassVar, cast
 
-from django.db.models import Prefetch, QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
@@ -309,10 +309,25 @@ class FlightViewSet(
     )
     @action(detail=True, methods=["get"])
     def history(self, request: Request, pk: str | None = None) -> Response:
+        """Журнал по рейсу `[ТЗ 3.1.3]`: сам рейс, его заявки и документы.
+
+        История рейса без его заявок не отвечает на вопрос «что происходило
+        с рейсом»: подтверждение поставщика, отказ и переназначение —
+        это события рейса, записанные на заявку.
+        """
+        from billing.models import Invoice, Quote
+
         flight = self.get_object()
-        entries = AuditEntry.objects.filter(
-            entity_type=AuditEntityType.FLIGHT, entity_id=flight.pk
+        orders = flight.service_orders.values("pk")
+        quotes = Quote.objects.filter(flight=flight).values("pk")
+        invoices = Invoice.objects.filter(flight=flight).values("pk")
+        related = (
+            Q(entity_type=AuditEntityType.FLIGHT, entity_id=flight.pk)
+            | Q(entity_type=AuditEntityType.SERVICE_ORDER, entity_id__in=orders)
+            | Q(entity_type=AuditEntityType.QUOTE, entity_id__in=quotes)
+            | Q(entity_type=AuditEntityType.INVOICE, entity_id__in=invoices)
         )
+        entries = AuditEntry.objects.filter(related).order_by("ts", "id")
         return Response({"data": AuditEntrySerializer(entries, many=True).data})
 
 
