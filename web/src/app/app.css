@@ -887,9 +887,35 @@ a.soc-rail-flyout__item.is-active {
   }
 }
 
+/* Порталы: поля шапки, меню и содержимого сужаются на телефоне. */
+.soc-portal-header.ant-layout-header {
+  padding-inline: 24px;
+}
+
+.soc-portal-nav {
+  padding-inline: 24px;
+}
+
+.soc-portal-content.ant-layout-content {
+  padding: 24px;
+}
+
 /* На узком экране в шапке остаются кнопка меню, название экрана,
    колокольчик и аватар: иначе она не помещается в 360 px. */
 @media (max-width: 699px) {
+  .soc-portal-header.ant-layout-header {
+    gap: 8px !important;
+    padding-inline: 12px;
+  }
+
+  .soc-portal-nav {
+    padding-inline: 4px;
+  }
+
+  .soc-portal-content.ant-layout-content {
+    padding: 16px;
+  }
+
   .soc-hide-sm {
     display: none !important;
   }

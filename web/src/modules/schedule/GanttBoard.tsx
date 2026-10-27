@@ -28,6 +28,13 @@ export type ScaleKey = 'day' | 'threeDays' | 'week';
 
 export const SCALE_HOURS: Record<ScaleKey, number> = { day: 24, threeDays: 72, week: 168 };
 
+/**
+ * Строка планшета. `nestedInGroup` и `treeLevel` в объявлениях типов
+ * библиотеки нет, но без уровня она рисует вложенной строке отладочную
+ * красную рамку («level-unknown»).
+ */
+type PlanGroup = TimelineGroup & { nestedInGroup?: string; treeLevel?: number };
+
 /** Строка «Без борта» (`SPEC.md § 4.1`). */
 const NO_AIRCRAFT = 'none';
 
@@ -137,14 +144,14 @@ export function GanttBoard({
   const endMs = originMs + SCALE_HOURS[scale] * 3_600_000;
 
   /** Строки: борта по типу ВС — вложенными группами, затем «Без борта». */
-  const groups = useMemo<TimelineGroup[]>(() => {
+  const groups = useMemo<PlanGroup[]>(() => {
     const byType = new Map<string, typeof fleet>();
     for (const aircraft of fleet) {
       const label = localized(aircraft.type?.name) || aircraft.typeId;
       byType.set(label, [...(byType.get(label) ?? []), aircraft]);
     }
 
-    const result: TimelineGroup[] = [];
+    const result: PlanGroup[] = [];
     let order = 0;
     for (const [label, list] of [...byType.entries()].sort(([a], [b]) => a.localeCompare(b))) {
       const sorted = [...list].sort((a, b) => a.registration.localeCompare(b.registration));
@@ -159,6 +166,8 @@ export function GanttBoard({
       for (const aircraft of sorted) {
         result.push({
           id: aircraft.id,
+          nestedInGroup: `type:${label}`,
+          treeLevel: 1,
           content: escapeHtml(aircraft.registration),
           title: t(`aircraftStatus.${aircraft.status}`),
           className: aircraft.status === 'serviceable' ? '' : `soc-gantt-aircraft is-${aircraft.status}`,
