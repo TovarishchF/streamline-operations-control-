@@ -22,6 +22,7 @@ from django.utils.translation import gettext_lazy as _
 from ulid import ULID
 
 from core.clock import now
+from core.sample_data import is_generating
 
 
 class DataSource(models.TextChoices):
@@ -74,6 +75,11 @@ class BaseModel(models.Model):
     def save(self, *args: Any, **kwargs: Any) -> None:
         if not self.id:
             self.id = make_id(self.id_prefix)
+        if self._state.adding and is_generating():
+            # Запись, созданная генератором через общий сервис, — тоже
+            # запись генератора (`core.sample_data.generating`).
+            self.is_generated = True
+            self.data_source = DataSource.SYNTHETIC
         current = now()
         if not self.created_at:
             self.created_at = current

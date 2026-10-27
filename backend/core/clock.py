@@ -14,9 +14,36 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
+from contextvars import ContextVar
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from django.conf import settings
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+_frozen: ContextVar[datetime | None] = ContextVar("clock_frozen", default=None)
+
+
+@contextmanager
+def frozen(moment: datetime) -> Iterator[None]:
+    """Часы стоят на `moment` внутри блока.
+
+    Генератор данных проводит прошедшие события через те же сервисы, что
+    и человек: заказ за три дня до вылета, подтверждение через час, счёт
+    после прилёта. Сервисы ставят метки по `now()`, и без остановки часов
+    вся история набора случилась бы в одну секунду запуска генератора.
+
+    `real_now()` не останавливается: журнал действий и обменов помнит,
+    когда запись сделана на самом деле.
+    """
+    token = _frozen.set(moment)
+    try:
+        yield
+    finally:
+        _frozen.reset(token)
 
 
 def _model_offset() -> timedelta:
@@ -41,6 +68,9 @@ def _model_offset() -> timedelta:
 
 def now() -> datetime:
     """Текущее время в UTC с учётом модельного смещения."""
+    moment = _frozen.get()
+    if moment is not None:
+        return moment
     return datetime.now(UTC) + _model_offset()
 
 
