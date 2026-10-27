@@ -46,6 +46,28 @@ async function pickOption(
     .click();
 }
 
+/**
+ * Строка слота в ожидании ответа. Реестр постраничный: подтверждённые
+ * прежними прогонами слоты вытесняют ожидающие с первой страницы, и строка
+ * ищется листанием, как искал бы диспетчер. Фильтр по состоянию на 360 px
+ * не достать: заголовок уходит под закреплённую колонку действий.
+ */
+async function requestedRow(page: Page): Promise<Locator> {
+  const rows = page
+    .locator('.ant-table-row')
+    .filter({ has: page.getByRole('button', { name: 'Внести ответ' }) });
+  await expect(page.locator('.ant-table-row').first()).toBeVisible();
+  const next = page.locator('.ant-pagination-next');
+  while (
+    (await rows.count()) === 0 &&
+    (await next.count()) > 0 &&
+    !(await next.evaluate((item) => item.classList.contains('ant-pagination-disabled')))
+  ) {
+    await next.click();
+  }
+  return rows.first();
+}
+
 test.describe('Слоты', () => {
   test.beforeEach(async ({ page }) => {
     await signInAs(page, 'usr_disp1');
@@ -90,10 +112,7 @@ test.describe('Слоты', () => {
   });
 
   test('кнопка «Внести ответ» подтверждает слот', async ({ page }) => {
-    const row = page
-      .locator('.ant-table-row')
-      .filter({ has: page.getByRole('button', { name: 'Внести ответ' }) })
-      .first();
+    const row = await requestedRow(page);
     await expect(row, 'на стенде нет слотов в ожидании ответа').toBeVisible();
 
     await row.getByRole('button', { name: 'Внести ответ' }).click();
@@ -114,11 +133,8 @@ test.describe('Слоты', () => {
   });
 
   test('непонятый ответ просит решение, а не молчит', async ({ page }) => {
-    const row = page
-      .locator('.ant-table-row')
-      .filter({ has: page.getByRole('button', { name: 'Внести ответ' }) })
-      .first();
-    await expect(row).toBeVisible();
+    const row = await requestedRow(page);
+    await expect(row, 'на стенде нет слотов в ожидании ответа').toBeVisible();
 
     await row.getByRole('button', { name: 'Внести ответ' }).click();
     const form = dialog(page);

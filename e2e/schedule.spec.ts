@@ -105,9 +105,22 @@ test.describe('Суточный план', () => {
     // Линия «сейчас» — по часам сервера, своей меткой, а не часами браузера
     await expect(page.locator('.vis-custom-time.now')).toBeAttached();
 
-    // Двигается только рейс, который ещё не состоялся
-    const bar = page.locator('.vis-item.soc-bar.vis-editable').first();
-    test.skip((await bar.count()) === 0, 'в окне планшета нет рейса, который можно двигать');
+    // Двигается только рейс, который ещё не состоялся, и видимый целиком
+    // с запасом на перенос: на 360 px окно планшета — сотня пикселей,
+    // и полоса у края обрезана, её середина вне планшета.
+    const SHIFT = 24;
+    const panel = await page.locator('.vis-panel.vis-center').boundingBox();
+    if (!panel) throw new Error('нет области планшета');
+    let bar: Locator | undefined;
+    for (const candidate of await page.locator('.vis-item.soc-bar.vis-editable').all()) {
+      const edges = await candidate.boundingBox();
+      if (edges && edges.x >= panel.x && edges.x + edges.width + SHIFT <= panel.x + panel.width) {
+        bar = candidate;
+        break;
+      }
+    }
+    test.skip(bar === undefined, 'в окне планшета нет рейса, который можно двигать');
+    if (!bar) return;
     await bar.click();
     const box = await bar.boundingBox();
     if (!box) throw new Error('полоса без размеров');
@@ -118,7 +131,7 @@ test.describe('Суточный план', () => {
     );
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
-    await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.move(box.x + box.width / 2 + SHIFT, box.y + box.height / 2, { steps: 8 });
     await page.mouse.up();
 
     // Перенос ушёл на сервер: меняется вылет, длительность сохраняет сервер
@@ -129,7 +142,7 @@ test.describe('Суточный план', () => {
 
     // Новый конфликт сервер не сохраняет без причины — диалог спрашивает её.
     // Ветка выбирается по ответу сервера, а не по тому, успел ли диалог
-    // появиться: на 360 px те же 80 px — почти сутки, и конфликт вероятнее.
+    // появиться: на 360 px тот же сдвиг — несколько часов, и конфликт вероятнее.
     if (response.status() === 409) {
       const conflict = dialog(page).filter({ hasText: 'Конфликт расписания' });
       await expect(conflict).toBeVisible();
