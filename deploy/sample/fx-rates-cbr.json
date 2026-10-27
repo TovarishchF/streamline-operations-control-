@@ -1,0 +1,3614 @@
+[
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBEP9JQV7R4BC8CA5WQ0T",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.513Z",
+   "updated_at": "2026-10-26T08:31:09.513Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-06-30",
+   "currency": "EUR",
+   "rate": "88.647200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBEP6SCKG3BVAP8PYJ50V",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.510Z",
+   "updated_at": "2026-10-26T08:31:09.510Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-06-30",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBEP7NHWWKYFT9P2B2WX1",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.511Z",
+   "updated_at": "2026-10-26T08:31:09.511Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-06-30",
+   "currency": "USD",
+   "rate": "77.753900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBE7RBFKT6MCTQ8VKDNEX",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.048Z",
+   "updated_at": "2026-10-26T08:31:09.048Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-01",
+   "currency": "EUR",
+   "rate": "89.274300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBE7NBCHYHK9FG618A671",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.045Z",
+   "updated_at": "2026-10-26T08:31:09.045Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-01",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBE7Q3M8195R7J4AKDS1Y",
+  "fields": {
+   "created_at": "2026-10-26T08:31:09.047Z",
+   "updated_at": "2026-10-26T08:31:09.047Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-01",
+   "currency": "USD",
+   "rate": "78.269600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBDR81AE2A7G2ADQMGCC6",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.552Z",
+   "updated_at": "2026-10-26T08:31:08.552Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-02",
+   "currency": "EUR",
+   "rate": "89.175400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBDR5VFJNA6QGMBN320J4",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.549Z",
+   "updated_at": "2026-10-26T08:31:08.549Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-02",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBDR71A6NXKBP3RWJXFPD",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.551Z",
+   "updated_at": "2026-10-26T08:31:08.551Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-02",
+   "currency": "USD",
+   "rate": "78.265200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBD8MV3MBC0J3TZ2WCRWT",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.052Z",
+   "updated_at": "2026-10-26T08:31:08.052Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-03",
+   "currency": "EUR",
+   "rate": "88.706900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBD8H3KRY5B0X17CG8KQE",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.049Z",
+   "updated_at": "2026-10-26T08:31:08.049Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-03",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNBD8J991RS0ZAR6B3T9M6",
+  "fields": {
+   "created_at": "2026-10-26T08:31:08.050Z",
+   "updated_at": "2026-10-26T08:31:08.050Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-03",
+   "currency": "USD",
+   "rate": "77.929300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB5A8P8GNQ12P5B32K77A",
+  "fields": {
+   "created_at": "2026-10-26T08:30:59.912Z",
+   "updated_at": "2026-10-26T08:31:07.445Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-04",
+   "currency": "EUR",
+   "rate": "88.030400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB5A5GQ62AKMD0FH4JEDM",
+  "fields": {
+   "created_at": "2026-10-26T08:30:59.909Z",
+   "updated_at": "2026-10-26T08:31:07.442Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-04",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB5A77X1W7NBNQ690VMTK",
+  "fields": {
+   "created_at": "2026-10-26T08:30:59.911Z",
+   "updated_at": "2026-10-26T08:31:07.444Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-04",
+   "currency": "USD",
+   "rate": "77.226400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB117TRQKGDN232AAD1NM",
+  "fields": {
+   "created_at": "2026-10-26T08:30:55.527Z",
+   "updated_at": "2026-10-26T08:30:55.527Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-07",
+   "currency": "EUR",
+   "rate": "89.259500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB113FYMP0PJEN51638K3",
+  "fields": {
+   "created_at": "2026-10-26T08:30:55.523Z",
+   "updated_at": "2026-10-26T08:30:55.523Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-07",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB115AGRVNG0HKCZZAF59",
+  "fields": {
+   "created_at": "2026-10-26T08:30:55.525Z",
+   "updated_at": "2026-10-26T08:30:55.525Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-07",
+   "currency": "USD",
+   "rate": "77.969500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB0FAHBP694VCYNW9ASK6",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.954Z",
+   "updated_at": "2026-10-26T08:30:54.954Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-08",
+   "currency": "EUR",
+   "rate": "86.897600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB0F6YEG5ZQW939B93SR8",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.950Z",
+   "updated_at": "2026-10-26T08:30:54.950Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-08",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNB0F867J3TSDSNMXPX5YX",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.952Z",
+   "updated_at": "2026-10-26T08:30:54.952Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-08",
+   "currency": "USD",
+   "rate": "76.125800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZYF61HZPC0F9D67VVRR",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.415Z",
+   "updated_at": "2026-10-26T08:30:54.415Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-09",
+   "currency": "EUR",
+   "rate": "87.351100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZYCFYQJKVM8RYZM1MN5",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.412Z",
+   "updated_at": "2026-10-26T08:30:54.412Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-09",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZYE515WGHZ6FEB1M4VZ",
+  "fields": {
+   "created_at": "2026-10-26T08:30:54.414Z",
+   "updated_at": "2026-10-26T08:30:54.414Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-09",
+   "currency": "USD",
+   "rate": "76.402600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZGH8Q76BWNSF08J7W3R",
+  "fields": {
+   "created_at": "2026-10-26T08:30:53.969Z",
+   "updated_at": "2026-10-26T08:30:53.969Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-10",
+   "currency": "EUR",
+   "rate": "86.590600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZGEVJ908TB7FVS493H9",
+  "fields": {
+   "created_at": "2026-10-26T08:30:53.966Z",
+   "updated_at": "2026-10-26T08:30:53.966Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-10",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAZGGQFR0ZZBHTN5JK19F",
+  "fields": {
+   "created_at": "2026-10-26T08:30:53.968Z",
+   "updated_at": "2026-10-26T08:30:53.968Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-10",
+   "currency": "USD",
+   "rate": "75.930000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXZZ3ZDECXYT3AH1TB77",
+  "fields": {
+   "created_at": "2026-10-26T08:30:52.415Z",
+   "updated_at": "2026-10-26T08:30:53.497Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-11",
+   "currency": "EUR",
+   "rate": "87.666100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXZW4VXQ8488HFHGQ3VK",
+  "fields": {
+   "created_at": "2026-10-26T08:30:52.412Z",
+   "updated_at": "2026-10-26T08:30:53.494Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-11",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXZX787ABBY5Y0PCTJ24",
+  "fields": {
+   "created_at": "2026-10-26T08:30:52.413Z",
+   "updated_at": "2026-10-26T08:30:53.496Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-11",
+   "currency": "USD",
+   "rate": "76.664700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXF4C0C8QJZBZEJ6KQCB",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.876Z",
+   "updated_at": "2026-10-26T08:30:51.876Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-14",
+   "currency": "EUR",
+   "rate": "87.578100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXF0YQ40V1J0NEKD53GE",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.872Z",
+   "updated_at": "2026-10-26T08:30:51.872Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-14",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAXF2KJF747KHAKY5W9Y8",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.874Z",
+   "updated_at": "2026-10-26T08:30:51.874Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-14",
+   "currency": "USD",
+   "rate": "76.621300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWZMHX90EES30RWH00G4",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.380Z",
+   "updated_at": "2026-10-26T08:30:51.380Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-15",
+   "currency": "EUR",
+   "rate": "88.525900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWZGY645DDH4835CQSB2",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.376Z",
+   "updated_at": "2026-10-26T08:30:51.376Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-15",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWZJVXWRMSJEC82YCN3X",
+  "fields": {
+   "created_at": "2026-10-26T08:30:51.378Z",
+   "updated_at": "2026-10-26T08:30:51.378Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-15",
+   "currency": "USD",
+   "rate": "77.491200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWJ8YK8VTZCGD7WE92RT",
+  "fields": {
+   "created_at": "2026-10-26T08:30:50.952Z",
+   "updated_at": "2026-10-26T08:30:50.952Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-16",
+   "currency": "EUR",
+   "rate": "88.909700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWJ5KBQPM78AAR7X18HS",
+  "fields": {
+   "created_at": "2026-10-26T08:30:50.949Z",
+   "updated_at": "2026-10-26T08:30:50.949Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-16",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAWJ7AQWVTMWGJEJFJJBW",
+  "fields": {
+   "created_at": "2026-10-26T08:30:50.951Z",
+   "updated_at": "2026-10-26T08:30:50.951Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-16",
+   "currency": "USD",
+   "rate": "77.956800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNASNN6ARCE0WNBHZ1D33P",
+  "fields": {
+   "created_at": "2026-10-26T08:30:47.989Z",
+   "updated_at": "2026-10-26T08:30:47.989Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-17",
+   "currency": "EUR",
+   "rate": "89.329600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNASNJRBG6JMTQ64B6PYRZ",
+  "fields": {
+   "created_at": "2026-10-26T08:30:47.986Z",
+   "updated_at": "2026-10-26T08:30:47.986Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-17",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNASNM166X7STTKT6CX770",
+  "fields": {
+   "created_at": "2026-10-26T08:30:47.988Z",
+   "updated_at": "2026-10-26T08:30:47.988Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-17",
+   "currency": "USD",
+   "rate": "78.318100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAGP6N71PFGAAG08KE9A2",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.790Z",
+   "updated_at": "2026-10-26T08:30:43.608Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-18",
+   "currency": "EUR",
+   "rate": "89.899800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAGP38WBNFP8GG961MSTJ",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.787Z",
+   "updated_at": "2026-10-26T08:30:43.605Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-18",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAGP5Q71S0FN31GJZQ2XE",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.789Z",
+   "updated_at": "2026-10-26T08:30:43.607Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-18",
+   "currency": "USD",
+   "rate": "78.398700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAG7MMKWHP1DMR02Y3PRW",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.324Z",
+   "updated_at": "2026-10-26T08:30:38.324Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-21",
+   "currency": "EUR",
+   "rate": "89.554200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAG7HRP12R6N0KW3AHC2T",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.321Z",
+   "updated_at": "2026-10-26T08:30:38.321Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-21",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAG7K9WJZ02BNAFGTSNTJ",
+  "fields": {
+   "created_at": "2026-10-26T08:30:38.323Z",
+   "updated_at": "2026-10-26T08:30:38.323Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-21",
+   "currency": "USD",
+   "rate": "78.315900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAFN1TMCPMHFK78440DSR",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.729Z",
+   "updated_at": "2026-10-26T08:30:37.729Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-22",
+   "currency": "EUR",
+   "rate": "89.755800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAFMXXXN6CDMST84PS648",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.725Z",
+   "updated_at": "2026-10-26T08:30:37.725Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-22",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAFMZXMC5GWQG4M62ZPVB",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.727Z",
+   "updated_at": "2026-10-26T08:30:37.727Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-22",
+   "currency": "USD",
+   "rate": "78.554000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAF6W9FTTG2FTAEJ38KP0",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.277Z",
+   "updated_at": "2026-10-26T08:30:37.277Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-23",
+   "currency": "EUR",
+   "rate": "89.603400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAF6RQ6HZ8MZR7DS6E56E",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.272Z",
+   "updated_at": "2026-10-26T08:30:37.272Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-23",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAF6VCXMZ3FDWPEXC3F5D",
+  "fields": {
+   "created_at": "2026-10-26T08:30:37.275Z",
+   "updated_at": "2026-10-26T08:30:37.275Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-23",
+   "currency": "USD",
+   "rate": "78.475600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAESAHRQCSC6DW8PY0PJX",
+  "fields": {
+   "created_at": "2026-10-26T08:30:36.842Z",
+   "updated_at": "2026-10-26T08:30:36.842Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-24",
+   "currency": "EUR",
+   "rate": "89.444300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAES7AB6G0W6P0EQFV5ZR",
+  "fields": {
+   "created_at": "2026-10-26T08:30:36.839Z",
+   "updated_at": "2026-10-26T08:30:36.839Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-24",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAES9GSWSE11P8G3FDA51",
+  "fields": {
+   "created_at": "2026-10-26T08:30:36.841Z",
+   "updated_at": "2026-10-26T08:30:36.841Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-24",
+   "currency": "USD",
+   "rate": "78.404900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAD79VPH296AH3DSG6CR5",
+  "fields": {
+   "created_at": "2026-10-26T08:30:35.241Z",
+   "updated_at": "2026-10-26T08:30:36.339Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-25",
+   "currency": "EUR",
+   "rate": "88.892700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAD76NRG1W15WZY0VKEMW",
+  "fields": {
+   "created_at": "2026-10-26T08:30:35.238Z",
+   "updated_at": "2026-10-26T08:30:36.336Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-25",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAD77PTS37Y1CHWV5EVVS",
+  "fields": {
+   "created_at": "2026-10-26T08:30:35.239Z",
+   "updated_at": "2026-10-26T08:30:36.337Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-25",
+   "currency": "USD",
+   "rate": "78.030800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAAB4M0J9PJCGNMS23XBA",
+  "fields": {
+   "created_at": "2026-10-26T08:30:32.292Z",
+   "updated_at": "2026-10-26T08:30:32.292Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-28",
+   "currency": "EUR",
+   "rate": "88.760200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAAB0SVE2PA7QMWBA79VA",
+  "fields": {
+   "created_at": "2026-10-26T08:30:32.288Z",
+   "updated_at": "2026-10-26T08:30:32.288Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-28",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNAAB29K3K41WB8KY4MMYD",
+  "fields": {
+   "created_at": "2026-10-26T08:30:32.290Z",
+   "updated_at": "2026-10-26T08:30:32.290Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-28",
+   "currency": "USD",
+   "rate": "78.017200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA5ZY7HYWXK41Z9ZF23EF",
+  "fields": {
+   "created_at": "2026-10-26T08:30:27.838Z",
+   "updated_at": "2026-10-26T08:30:27.838Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-29",
+   "currency": "EUR",
+   "rate": "89.629200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA5ZV0NAQX27AVWA9JHVJ",
+  "fields": {
+   "created_at": "2026-10-26T08:30:27.835Z",
+   "updated_at": "2026-10-26T08:30:27.835Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-29",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA5ZXK2TS9SVZ4E8T3BW0",
+  "fields": {
+   "created_at": "2026-10-26T08:30:27.837Z",
+   "updated_at": "2026-10-26T08:30:27.837Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-29",
+   "currency": "USD",
+   "rate": "78.698000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA1M35MFEFAHV2V146PF9",
+  "fields": {
+   "created_at": "2026-10-26T08:30:23.363Z",
+   "updated_at": "2026-10-26T08:30:23.363Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-30",
+   "currency": "EUR",
+   "rate": "90.205100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA1KXNA4W3VMXP2YK585Z",
+  "fields": {
+   "created_at": "2026-10-26T08:30:23.357Z",
+   "updated_at": "2026-10-26T08:30:23.357Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-30",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VNA1M06YH6CQTB6WF6K91P",
+  "fields": {
+   "created_at": "2026-10-26T08:30:23.360Z",
+   "updated_at": "2026-10-26T08:30:23.360Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-30",
+   "currency": "USD",
+   "rate": "79.357000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CCA8AJXX14M7VPDEYY4D",
+  "fields": {
+   "created_at": "2026-09-13T21:04:43.848Z",
+   "updated_at": "2026-10-26T08:30:22.885Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-31",
+   "currency": "EUR",
+   "rate": "90.877600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CCA0ZHQ66CAD9PCYPMYA",
+  "fields": {
+   "created_at": "2026-09-13T21:04:43.840Z",
+   "updated_at": "2026-10-26T08:30:22.881Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-31",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CCA4VB71WMB809NFJ40V",
+  "fields": {
+   "created_at": "2026-09-13T21:04:43.844Z",
+   "updated_at": "2026-10-26T08:30:22.884Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-07-31",
+   "currency": "USD",
+   "rate": "79.857300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CBCP7JZDK5P8JVBZ0QGA",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.902Z",
+   "updated_at": "2026-10-26T08:30:22.468Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-01",
+   "currency": "EUR",
+   "rate": "91.192500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CBCF6MQJHEEFFTS4MFX5",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.895Z",
+   "updated_at": "2026-10-26T08:30:22.466Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-01",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CBCKFMDDJ3Y9KN74F8V5",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.899Z",
+   "updated_at": "2026-10-26T08:30:22.467Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-01",
+   "currency": "USD",
+   "rate": "79.463700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CB1SX8X2DWT4ZSB33AZ9",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.553Z",
+   "updated_at": "2026-10-26T08:30:20.635Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-04",
+   "currency": "EUR",
+   "rate": "91.958900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CB1H95V1PXN9XHMSN0P1",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.545Z",
+   "updated_at": "2026-10-26T08:30:20.632Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-04",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CB1P6YMRMA7JA2E85FAQ",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.550Z",
+   "updated_at": "2026-10-26T08:30:20.634Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-04",
+   "currency": "USD",
+   "rate": "80.068700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CARDC3TFA3RFJC4FH91W",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.253Z",
+   "updated_at": "2026-10-26T08:30:20.204Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-05",
+   "currency": "EUR",
+   "rate": "93.582400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CAR7AT386C849QNAY1MV",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.247Z",
+   "updated_at": "2026-10-26T08:30:20.201Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-05",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CARA86FP2MXDAGB88BRD",
+  "fields": {
+   "created_at": "2026-09-13T21:04:42.250Z",
+   "updated_at": "2026-10-26T08:30:20.203Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-05",
+   "currency": "USD",
+   "rate": "81.129100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CAF3DCTN5QKZAK7583H5",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.955Z",
+   "updated_at": "2026-10-26T08:30:19.744Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-06",
+   "currency": "EUR",
+   "rate": "93.190100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CAES9GCQKW2EAY5PA126",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.945Z",
+   "updated_at": "2026-10-26T08:30:19.740Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-06",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CAEX4KJ1AH5510D855EV",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.949Z",
+   "updated_at": "2026-10-26T08:30:19.742Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-06",
+   "currency": "USD",
+   "rate": "80.929300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CA46PV7550NP0F85ZTV6",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.607Z",
+   "updated_at": "2026-10-26T08:30:19.150Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-07",
+   "currency": "EUR",
+   "rate": "94.058500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CA3XK0Z88DXHS2A26QX4",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.597Z",
+   "updated_at": "2026-10-26T08:30:19.147Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-07",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9CA424W4JVPWGJV58NT5N",
+  "fields": {
+   "created_at": "2026-09-13T21:04:41.602Z",
+   "updated_at": "2026-10-26T08:30:19.149Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-07",
+   "currency": "USD",
+   "rate": "81.407700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C5YYEQ5MTHRGMKAR4VJ7",
+  "fields": {
+   "created_at": "2026-09-13T21:04:37.342Z",
+   "updated_at": "2026-10-26T08:30:17.067Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-08",
+   "currency": "EUR",
+   "rate": "94.836600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C5YJNSYYX6BESJ92158H",
+  "fields": {
+   "created_at": "2026-09-13T21:04:37.330Z",
+   "updated_at": "2026-10-26T08:30:17.064Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-08",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C5YRYG5ZN8WC6QKKPXPX",
+  "fields": {
+   "created_at": "2026-09-13T21:04:37.336Z",
+   "updated_at": "2026-10-26T08:30:17.066Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-08",
+   "currency": "USD",
+   "rate": "82.166500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C1S8MB3FJHMTDNZJ9BH0",
+  "fields": {
+   "created_at": "2026-09-13T21:04:33.064Z",
+   "updated_at": "2026-10-26T08:30:07.447Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-11",
+   "currency": "EUR",
+   "rate": "95.286000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C1RX617DM35FZHCZ86DH",
+  "fields": {
+   "created_at": "2026-09-13T21:04:33.053Z",
+   "updated_at": "2026-10-26T08:30:07.443Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-11",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9C1S46PA8PJ1VAZFQ6N9F",
+  "fields": {
+   "created_at": "2026-09-13T21:04:33.060Z",
+   "updated_at": "2026-10-26T08:30:07.445Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-11",
+   "currency": "USD",
+   "rate": "82.606000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXME38C9CT9YXQSKKERM",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.814Z",
+   "updated_at": "2026-10-26T08:30:07.002Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-12",
+   "currency": "EUR",
+   "rate": "95.183400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXM7HZN7HBNFCR0JAVPD",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.807Z",
+   "updated_at": "2026-10-26T08:30:06.999Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-12",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXMAJBSFA4055Y1J1NFX",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.810Z",
+   "updated_at": "2026-10-26T08:30:07.001Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-12",
+   "currency": "USD",
+   "rate": "82.374200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXB5ZG7ZQ593SCFH0FPK",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.517Z",
+   "updated_at": "2026-10-26T08:30:06.489Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-13",
+   "currency": "EUR",
+   "rate": "95.779300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXAXV6AJR5QX08D8PF8V",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.509Z",
+   "updated_at": "2026-10-26T08:30:06.486Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-13",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BXB0HR2PJV5XNXSTEKVD",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.512Z",
+   "updated_at": "2026-10-26T08:30:06.488Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-13",
+   "currency": "USD",
+   "rate": "82.997700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BWWP64DY02ZM9QM42HYW",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.054Z",
+   "updated_at": "2026-10-26T08:30:05.864Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-14",
+   "currency": "EUR",
+   "rate": "96.753800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BWWFG27TPSDH91DRNDK8",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.047Z",
+   "updated_at": "2026-10-26T08:30:05.860Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-14",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BWWJ3J5D185JH3T09Z8W",
+  "fields": {
+   "created_at": "2026-09-13T21:04:28.050Z",
+   "updated_at": "2026-10-26T08:30:05.862Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-14",
+   "currency": "USD",
+   "rate": "83.805800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVZ2FMBYV9CYBEKG27PT",
+  "fields": {
+   "created_at": "2026-09-13T21:04:27.106Z",
+   "updated_at": "2026-10-26T08:30:05.411Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-15",
+   "currency": "EUR",
+   "rate": "97.514100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVYV495NDG9814XQ9BN1",
+  "fields": {
+   "created_at": "2026-09-13T21:04:27.099Z",
+   "updated_at": "2026-10-26T08:30:05.408Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-15",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVYZ6JEWAMXTGGE4NT5J",
+  "fields": {
+   "created_at": "2026-09-13T21:04:27.103Z",
+   "updated_at": "2026-10-26T08:30:05.410Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-15",
+   "currency": "USD",
+   "rate": "84.544900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVNNJ620SE14XXSSWY2N",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.805Z",
+   "updated_at": "2026-10-26T08:30:01.402Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-18",
+   "currency": "EUR",
+   "rate": "98.335200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVND4C34958P6RA4W1JW",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.797Z",
+   "updated_at": "2026-10-26T08:30:01.399Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-18",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVNJJPCWAARSMVPHTPEP",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.802Z",
+   "updated_at": "2026-10-26T08:30:01.401Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-18",
+   "currency": "USD",
+   "rate": "85.013600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVC8MM5N9HGZQZHBG2R3",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.504Z",
+   "updated_at": "2026-10-26T08:29:56.923Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-19",
+   "currency": "EUR",
+   "rate": "98.731200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVC1DSXH9R2QRFCBXJQ6",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.497Z",
+   "updated_at": "2026-10-26T08:29:56.920Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-19",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BVC5B0YDAPSWGT2DEG04",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.501Z",
+   "updated_at": "2026-10-26T08:29:56.921Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-19",
+   "currency": "USD",
+   "rate": "85.164500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BV2WWAGAD3VR0ESM6VSB",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.205Z",
+   "updated_at": "2026-10-26T08:29:52.559Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-20",
+   "currency": "EUR",
+   "rate": "98.545700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BV2NVPFJQ890P5J6ASVR",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.197Z",
+   "updated_at": "2026-10-26T08:29:52.555Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-20",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BV2S8GV0NKQ46D6GA013",
+  "fields": {
+   "created_at": "2026-09-13T21:04:26.201Z",
+   "updated_at": "2026-10-26T08:29:52.557Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-20",
+   "currency": "USD",
+   "rate": "85.129300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BTSHWMMB84AND2Q8BNTF",
+  "fields": {
+   "created_at": "2026-09-13T21:04:25.905Z",
+   "updated_at": "2026-10-26T08:29:52.012Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-21",
+   "currency": "EUR",
+   "rate": "96.733500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BTS9GXPH0CDHM1A12A3M",
+  "fields": {
+   "created_at": "2026-09-13T21:04:25.897Z",
+   "updated_at": "2026-10-26T08:29:52.009Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-21",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BTSDA2MC3SNAH7XPJBS8",
+  "fields": {
+   "created_at": "2026-09-13T21:04:25.901Z",
+   "updated_at": "2026-10-26T08:29:52.010Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-21",
+   "currency": "USD",
+   "rate": "83.355000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSV5MYPKW8CFJWVFXF60",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.933Z",
+   "updated_at": "2026-10-26T08:29:51.450Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-22",
+   "currency": "EUR",
+   "rate": "96.860100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSTYTSK1PV2Y0WQKGJWW",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.926Z",
+   "updated_at": "2026-10-26T08:29:51.447Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-22",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSV20DAR5QG9696HGMGZ",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.930Z",
+   "updated_at": "2026-10-26T08:29:51.449Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-22",
+   "currency": "USD",
+   "rate": "82.921100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSEPGNJWSB6W4VX9W277",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.534Z",
+   "updated_at": "2026-10-26T08:29:49.927Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-25",
+   "currency": "EUR",
+   "rate": "97.438400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSEF3KVPHCCBV3ZQ4GS3",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.527Z",
+   "updated_at": "2026-10-26T08:29:49.924Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-25",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BSEKAB0V3V9DSRWGBYXR",
+  "fields": {
+   "created_at": "2026-09-13T21:04:24.531Z",
+   "updated_at": "2026-10-26T08:29:49.925Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-25",
+   "currency": "USD",
+   "rate": "83.287800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BPJP4XPCNNR5VWBY2Y2M",
+  "fields": {
+   "created_at": "2026-09-13T21:04:21.590Z",
+   "updated_at": "2026-10-26T08:29:48.441Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-26",
+   "currency": "EUR",
+   "rate": "98.518200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BPJG72TKSE13P0PT6206",
+  "fields": {
+   "created_at": "2026-09-13T21:04:21.584Z",
+   "updated_at": "2026-10-26T08:29:48.438Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-26",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BPJK2JBZ2A7H5CTWRPZW",
+  "fields": {
+   "created_at": "2026-09-13T21:04:21.587Z",
+   "updated_at": "2026-10-26T08:29:48.439Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-26",
+   "currency": "USD",
+   "rate": "84.463500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BJDKYE0RN98GNB184253",
+  "fields": {
+   "created_at": "2026-09-13T21:04:17.331Z",
+   "updated_at": "2026-10-26T08:29:45.369Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-27",
+   "currency": "EUR",
+   "rate": "98.289700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BJD8WJSZQWWAREZ64DKE",
+  "fields": {
+   "created_at": "2026-09-13T21:04:17.320Z",
+   "updated_at": "2026-10-26T08:29:45.365Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-27",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BJDE6FHVSRTVA9ATSMJ0",
+  "fields": {
+   "created_at": "2026-09-13T21:04:17.326Z",
+   "updated_at": "2026-10-26T08:29:45.367Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-27",
+   "currency": "USD",
+   "rate": "84.282000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BE85E41V00BNRJV3186Y",
+  "fields": {
+   "created_at": "2026-09-13T21:04:13.061Z",
+   "updated_at": "2026-10-26T08:29:40.887Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-28",
+   "currency": "EUR",
+   "rate": "100.299800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BE7Y8P4R36WHG71HMN4K",
+  "fields": {
+   "created_at": "2026-09-13T21:04:13.054Z",
+   "updated_at": "2026-10-26T08:29:40.885Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-28",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BE81ZDNTHAQC324E9C1Y",
+  "fields": {
+   "created_at": "2026-09-13T21:04:13.057Z",
+   "updated_at": "2026-10-26T08:29:40.886Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-28",
+   "currency": "USD",
+   "rate": "85.954100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BDAHRRKJD61J25A6KPRJ",
+  "fields": {
+   "created_at": "2026-09-13T21:04:12.113Z",
+   "updated_at": "2026-10-26T08:29:36.503Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-29",
+   "currency": "EUR",
+   "rate": "99.682000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BDA9C17QDPWMV0SZ6DZ6",
+  "fields": {
+   "created_at": "2026-09-13T21:04:12.105Z",
+   "updated_at": "2026-10-26T08:29:36.501Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-29",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BDADM5YAM38X597KFVH0",
+  "fields": {
+   "created_at": "2026-09-13T21:04:12.109Z",
+   "updated_at": "2026-10-26T08:29:36.502Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-08-29",
+   "currency": "USD",
+   "rate": "85.600700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BD0H0G6B1MB1WVACBFD2",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.793Z",
+   "updated_at": "2026-10-26T08:29:34.543Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-01",
+   "currency": "EUR",
+   "rate": "100.571400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BD099X03NB0BMNH7PM7M",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.785Z",
+   "updated_at": "2026-10-26T08:29:34.540Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-01",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BD0E48QJ9AEYQG2FMQKX",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.790Z",
+   "updated_at": "2026-10-26T08:29:34.542Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-01",
+   "currency": "USD",
+   "rate": "86.379300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCQH9RP93T5EMGAE95E1",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.505Z",
+   "updated_at": "2026-10-26T08:29:33.689Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-02",
+   "currency": "EUR",
+   "rate": "100.598800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCQB47W53B02PXPB84CJ",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.499Z",
+   "updated_at": "2026-10-26T08:29:33.686Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-02",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCQENZTPAXSWM17D47K1",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.503Z",
+   "updated_at": "2026-10-26T08:29:33.688Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-02",
+   "currency": "USD",
+   "rate": "86.753000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCCXJCAW35D1QWH6ACJE",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.165Z",
+   "updated_at": "2026-10-26T08:29:33.102Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-03",
+   "currency": "EUR",
+   "rate": "100.828700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCCNVX4H1C2YSFD6HDAG",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.157Z",
+   "updated_at": "2026-10-26T08:29:33.100Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-03",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BCCSPTM0TZB8WNXBFK9W",
+  "fields": {
+   "created_at": "2026-09-13T21:04:11.161Z",
+   "updated_at": "2026-10-26T08:29:33.101Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-03",
+   "currency": "USD",
+   "rate": "86.996300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BC3DP3J1W238KPX4M7YB",
+  "fields": {
+   "created_at": "2026-09-13T21:04:10.861Z",
+   "updated_at": "2026-10-26T08:29:32.586Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-04",
+   "currency": "EUR",
+   "rate": "100.598000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BC35DZP37MHQE7ZMEZVY",
+  "fields": {
+   "created_at": "2026-09-13T21:04:10.853Z",
+   "updated_at": "2026-10-26T08:29:32.583Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-04",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BC3ABQN07KFD5JSNEDR6",
+  "fields": {
+   "created_at": "2026-09-13T21:04:10.858Z",
+   "updated_at": "2026-10-26T08:29:32.585Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-04",
+   "currency": "USD",
+   "rate": "86.887200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BB3Z0N9N45DZTT2FXNN6",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.855Z",
+   "updated_at": "2026-10-26T08:29:32.107Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-05",
+   "currency": "EUR",
+   "rate": "100.569300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BB3R2ZM8G2Y67SGSZ898",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.848Z",
+   "updated_at": "2026-10-26T08:29:32.104Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-05",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BB3WRFYAANTBQJPVA7E1",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.852Z",
+   "updated_at": "2026-10-26T08:29:32.106Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-05",
+   "currency": "USD",
+   "rate": "86.585700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAT895JF2NVSDQ754MRS",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.544Z",
+   "updated_at": "2026-10-26T08:29:20.406Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-08",
+   "currency": "EUR",
+   "rate": "100.171100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAT1NF56MNBNZPDJ6EEV",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.537Z",
+   "updated_at": "2026-10-26T08:29:20.403Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-08",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAT5C4WEQMWJM82G1KAR",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.541Z",
+   "updated_at": "2026-10-26T08:29:20.405Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-08",
+   "currency": "USD",
+   "rate": "86.190900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAH1BAW9R51J0GAHEG1B",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.249Z",
+   "updated_at": "2026-10-26T08:29:19.929Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-09",
+   "currency": "EUR",
+   "rate": "100.498900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAGSR8R59E9B022T3E5D",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.241Z",
+   "updated_at": "2026-10-26T08:29:19.925Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-09",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BAGYRGH9YVYKZZMF03XA",
+  "fields": {
+   "created_at": "2026-09-13T21:04:09.246Z",
+   "updated_at": "2026-10-26T08:29:19.927Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-09",
+   "currency": "USD",
+   "rate": "86.473000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BA85NA3TQT0ZTYM4JE4M",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.965Z",
+   "updated_at": "2026-10-26T08:29:19.493Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-10",
+   "currency": "EUR",
+   "rate": "99.252500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BA7YMWGQ4E4W0184KETF",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.958Z",
+   "updated_at": "2026-10-26T08:29:19.490Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-10",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9BA817AJFBJ0G2PMA8CSE",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.961Z",
+   "updated_at": "2026-10-26T08:29:19.491Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-10",
+   "currency": "USD",
+   "rate": "85.459400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B9XSPT8ZP5JJQHE7P4AN",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.633Z",
+   "updated_at": "2026-10-26T08:29:18.951Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-11",
+   "currency": "EUR",
+   "rate": "98.285600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B9XJ0R6E962ZWGPSD3NA",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.626Z",
+   "updated_at": "2026-10-26T08:29:18.947Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-11",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B9XPX1GM8SEQ9D10PQ3M",
+  "fields": {
+   "created_at": "2026-09-13T21:04:08.630Z",
+   "updated_at": "2026-10-26T08:29:18.949Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-11",
+   "currency": "USD",
+   "rate": "84.350800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B2YJN1SAW7KY8FJ6EW3X",
+  "fields": {
+   "created_at": "2026-09-13T21:04:01.490Z",
+   "updated_at": "2026-10-26T08:29:18.450Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-12",
+   "currency": "EUR",
+   "rate": "97.872800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B2YB6K88N0T5PA68E15Y",
+  "fields": {
+   "created_at": "2026-09-13T21:04:01.483Z",
+   "updated_at": "2026-10-26T08:29:18.446Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-12",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M2E9B2YF78J0C6SV34C4VFZF",
+  "fields": {
+   "created_at": "2026-09-13T21:04:01.487Z",
+   "updated_at": "2026-10-26T08:29:18.448Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-12",
+   "currency": "USD",
+   "rate": "84.256900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN807GHCACNVQTTYS3TVG1",
+  "fields": {
+   "created_at": "2026-10-26T08:29:16.400Z",
+   "updated_at": "2026-10-26T08:29:16.400Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-15",
+   "currency": "EUR",
+   "rate": "97.762600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN806WKA6G95E5PJFEEAB6",
+  "fields": {
+   "created_at": "2026-10-26T08:29:16.380Z",
+   "updated_at": "2026-10-26T08:29:16.380Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-15",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN806X5PR9CDABGJJWWAYY",
+  "fields": {
+   "created_at": "2026-10-26T08:29:16.381Z",
+   "updated_at": "2026-10-26T08:29:16.381Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-15",
+   "currency": "USD",
+   "rate": "84.336300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7XHD776Z4XKS8AW7F0YM",
+  "fields": {
+   "created_at": "2026-10-26T08:29:13.645Z",
+   "updated_at": "2026-10-26T08:29:13.645Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-16",
+   "currency": "EUR",
+   "rate": "97.301200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7XH91WZEY8TS4MD19HC1",
+  "fields": {
+   "created_at": "2026-10-26T08:29:13.641Z",
+   "updated_at": "2026-10-26T08:29:13.641Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-16",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7XHB176Y433BGF90JD54",
+  "fields": {
+   "created_at": "2026-10-26T08:29:13.643Z",
+   "updated_at": "2026-10-26T08:29:13.643Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-16",
+   "currency": "USD",
+   "rate": "84.236200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7S8SDJCPEYSD1H3GK0A2",
+  "fields": {
+   "created_at": "2026-10-26T08:29:09.273Z",
+   "updated_at": "2026-10-26T08:29:09.273Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-17",
+   "currency": "EUR",
+   "rate": "97.127500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7S8QHXHN8T7M7Z624V77",
+  "fields": {
+   "created_at": "2026-10-26T08:29:09.271Z",
+   "updated_at": "2026-10-26T08:29:09.271Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-17",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7S8R48805CMW0TC71F98",
+  "fields": {
+   "created_at": "2026-10-26T08:29:09.272Z",
+   "updated_at": "2026-10-26T08:29:09.272Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-17",
+   "currency": "USD",
+   "rate": "84.173200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7MSAMCEH2H3XW1NE4JXB",
+  "fields": {
+   "created_at": "2026-10-26T08:29:04.682Z",
+   "updated_at": "2026-10-26T08:29:04.682Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-18",
+   "currency": "EUR",
+   "rate": "97.498400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7MS6CQ0R3JKF9JPHBWNG",
+  "fields": {
+   "created_at": "2026-10-26T08:29:04.678Z",
+   "updated_at": "2026-10-26T08:29:04.678Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-18",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7MS8SNQ89YKKYY5TJHND",
+  "fields": {
+   "created_at": "2026-10-26T08:29:04.680Z",
+   "updated_at": "2026-10-26T08:29:04.680Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-18",
+   "currency": "USD",
+   "rate": "84.509300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7K8Q85Q5DH813CVGGM25",
+  "fields": {
+   "created_at": "2026-10-26T08:29:03.127Z",
+   "updated_at": "2026-10-26T08:29:04.073Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-19",
+   "currency": "EUR",
+   "rate": "96.667100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7K8M1FTKSTKW36S1NMG3",
+  "fields": {
+   "created_at": "2026-10-26T08:29:03.124Z",
+   "updated_at": "2026-10-26T08:29:04.070Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-19",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7K8P3R8CAQF26DE5Q50H",
+  "fields": {
+   "created_at": "2026-10-26T08:29:03.126Z",
+   "updated_at": "2026-10-26T08:29:04.071Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-19",
+   "currency": "USD",
+   "rate": "84.197500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7JNV8DJRK20QFWNTEVH5",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.523Z",
+   "updated_at": "2026-10-26T08:29:02.523Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-22",
+   "currency": "EUR",
+   "rate": "96.373300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7JNR4E4BCVKE8VZ9V24J",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.520Z",
+   "updated_at": "2026-10-26T08:29:02.520Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-22",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7JNTMH9GGJC0M3A5GW07",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.522Z",
+   "updated_at": "2026-10-26T08:29:02.522Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-22",
+   "currency": "USD",
+   "rate": "84.095400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7J7QDXFFRD8G6VPY0TG9",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.071Z",
+   "updated_at": "2026-10-26T08:29:02.071Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-23",
+   "currency": "EUR",
+   "rate": "96.591500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7J7KS152VYZKV0BY1Y2M",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.067Z",
+   "updated_at": "2026-10-26T08:29:02.067Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-23",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7J7NNSY2FCC1YD4220K5",
+  "fields": {
+   "created_at": "2026-10-26T08:29:02.069Z",
+   "updated_at": "2026-10-26T08:29:02.069Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-23",
+   "currency": "USD",
+   "rate": "84.065700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M39KV837Q1FHZCFFMN5H6QYF",
+  "fields": {
+   "created_at": "2026-09-24T11:47:06.471Z",
+   "updated_at": "2026-10-26T08:29:01.448Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-24",
+   "currency": "EUR",
+   "rate": "96.744200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M39KV82XPY8DPV272DBWYT3Z",
+  "fields": {
+   "created_at": "2026-09-24T11:47:06.461Z",
+   "updated_at": "2026-10-26T08:29:01.444Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-24",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M39KV833DZF0NPWXH7TB8AQ5",
+  "fields": {
+   "created_at": "2026-09-24T11:47:06.467Z",
+   "updated_at": "2026-10-26T08:29:01.446Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-24",
+   "currency": "USD",
+   "rate": "84.396900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7H4JP2EJK8HHS6H1BJDH",
+  "fields": {
+   "created_at": "2026-10-26T08:29:00.946Z",
+   "updated_at": "2026-10-26T08:29:00.946Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-25",
+   "currency": "EUR",
+   "rate": "96.885900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7H4G18SFBQ6ESDGFJVB8",
+  "fields": {
+   "created_at": "2026-10-26T08:29:00.944Z",
+   "updated_at": "2026-10-26T08:29:00.944Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-25",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7H4HM4P4ETSAQR2G48EP",
+  "fields": {
+   "created_at": "2026-10-26T08:29:00.945Z",
+   "updated_at": "2026-10-26T08:29:00.945Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-25",
+   "currency": "USD",
+   "rate": "84.905700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3GTK3GHKEND9RM1R4XKYN2V",
+  "fields": {
+   "created_at": "2026-09-27T06:59:40.689Z",
+   "updated_at": "2026-10-26T08:29:00.419Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-26",
+   "currency": "EUR",
+   "rate": "95.870900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3GTK3GACF8CEBWPE4HHVHV0",
+  "fields": {
+   "created_at": "2026-09-27T06:59:40.682Z",
+   "updated_at": "2026-10-26T08:29:00.415Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-26",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3GTK3GEFG8C2KX02G1FRJW7",
+  "fields": {
+   "created_at": "2026-09-27T06:59:40.686Z",
+   "updated_at": "2026-10-26T08:29:00.417Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-26",
+   "currency": "USD",
+   "rate": "84.341400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7541MHB9KDBHPEEZ7906",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.641Z",
+   "updated_at": "2026-10-26T08:28:48.641Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-29",
+   "currency": "EUR",
+   "rate": "96.249900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN753VEG5QJKMBWYD1BYMD",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.635Z",
+   "updated_at": "2026-10-26T08:28:48.635Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-29",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN753Y50RJ6279XTW8XKFY",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.638Z",
+   "updated_at": "2026-10-26T08:28:48.638Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-29",
+   "currency": "USD",
+   "rate": "84.407500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN74GA0G8Q2QRYW47V76PZ",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.010Z",
+   "updated_at": "2026-10-26T08:28:48.010Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-30",
+   "currency": "EUR",
+   "rate": "96.062500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN74G7DDP5CQZMNM68SVXZ",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.007Z",
+   "updated_at": "2026-10-26T08:28:48.007Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-30",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN74G8NAQR0XWGAVK21W27",
+  "fields": {
+   "created_at": "2026-10-26T08:28:48.008Z",
+   "updated_at": "2026-10-26T08:28:48.008Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-09-30",
+   "currency": "USD",
+   "rate": "84.428300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN7420H3YMRH1A8NWC8MWV",
+  "fields": {
+   "created_at": "2026-10-26T08:28:47.552Z",
+   "updated_at": "2026-10-26T08:28:47.552Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-01",
+   "currency": "EUR",
+   "rate": "94.881000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN741VVTFDTRQQHJRAN1MK",
+  "fields": {
+   "created_at": "2026-10-26T08:28:47.547Z",
+   "updated_at": "2026-10-26T08:28:47.547Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-01",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN741YEKBXCDPECAC0Q2KZ",
+  "fields": {
+   "created_at": "2026-10-26T08:28:47.550Z",
+   "updated_at": "2026-10-26T08:28:47.550Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-01",
+   "currency": "USD",
+   "rate": "83.558800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3XY8ANZYHS7WQVPYJ1YG7W0",
+  "fields": {
+   "created_at": "2026-10-02T09:13:49.503Z",
+   "updated_at": "2026-10-26T08:28:40.790Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-02",
+   "currency": "EUR",
+   "rate": "94.525200"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3XY8ANQCX6FFNCFWM0A14G0",
+  "fields": {
+   "created_at": "2026-10-02T09:13:49.495Z",
+   "updated_at": "2026-10-26T08:28:40.787Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-02",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M3XY8ANWZBJSGRTJ4QBGMC30",
+  "fields": {
+   "created_at": "2026-10-02T09:13:49.500Z",
+   "updated_at": "2026-10-26T08:28:40.789Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-02",
+   "currency": "USD",
+   "rate": "83.245400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6KJQSHPNJRC0FY36GCCS",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.679Z",
+   "updated_at": "2026-10-26T08:28:36.407Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-03",
+   "currency": "EUR",
+   "rate": "94.320100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6KJKZQBZKWGCP2RR0XTD",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.675Z",
+   "updated_at": "2026-10-26T08:28:36.400Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-03",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6KJNJKX34WWS8790RN0S",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.677Z",
+   "updated_at": "2026-10-26T08:28:36.403Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-03",
+   "currency": "USD",
+   "rate": "83.483900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6K28GD733QSEM3ERHJTA",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.152Z",
+   "updated_at": "2026-10-26T08:28:30.152Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-06",
+   "currency": "EUR",
+   "rate": "95.334900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6K24Q7F2MH2E3JBM8C37",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.148Z",
+   "updated_at": "2026-10-26T08:28:30.148Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-06",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6K262HZGG2RX8Y11KBXZ",
+  "fields": {
+   "created_at": "2026-10-26T08:28:30.150Z",
+   "updated_at": "2026-10-26T08:28:30.150Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-06",
+   "currency": "USD",
+   "rate": "84.930900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6JMBY99EZPNT47CVW5SJ",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.707Z",
+   "updated_at": "2026-10-26T08:28:29.707Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-07",
+   "currency": "EUR",
+   "rate": "96.031300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6JM6AGJY6PZQ1HWFSFP4",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.702Z",
+   "updated_at": "2026-10-26T08:28:29.702Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-07",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6JM9ZY5P6EXNEWSN52K3",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.705Z",
+   "updated_at": "2026-10-26T08:28:29.705Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-07",
+   "currency": "USD",
+   "rate": "85.711600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6J0G9ECD4NJZRMFKH9CW",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.072Z",
+   "updated_at": "2026-10-26T08:28:29.072Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-08",
+   "currency": "EUR",
+   "rate": "96.328700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6J0D1GXVBMW8PYXKG09T",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.069Z",
+   "updated_at": "2026-10-26T08:28:29.069Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-08",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6J0EJB77KPWABVJTGNPV",
+  "fields": {
+   "created_at": "2026-10-26T08:28:29.070Z",
+   "updated_at": "2026-10-26T08:28:29.070Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-08",
+   "currency": "USD",
+   "rate": "85.481100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6HHGH3YFC5NFEB616G4Y",
+  "fields": {
+   "created_at": "2026-10-26T08:28:28.592Z",
+   "updated_at": "2026-10-26T08:28:28.592Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-09",
+   "currency": "EUR",
+   "rate": "95.470900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6HHCN647FASJ3N7VR4ER",
+  "fields": {
+   "created_at": "2026-10-26T08:28:28.588Z",
+   "updated_at": "2026-10-26T08:28:28.588Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-09",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6HHECYC4DMXSEDYNB377",
+  "fields": {
+   "created_at": "2026-10-26T08:28:28.590Z",
+   "updated_at": "2026-10-26T08:28:28.590Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-09",
+   "currency": "USD",
+   "rate": "85.417300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6D90Q0RM4K52TJGFD1WE",
+  "fields": {
+   "created_at": "2026-10-26T08:28:24.224Z",
+   "updated_at": "2026-10-26T08:28:27.668Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-10",
+   "currency": "EUR",
+   "rate": "94.974500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6D8XJKEJX8P4Z9W6GX27",
+  "fields": {
+   "created_at": "2026-10-26T08:28:24.221Z",
+   "updated_at": "2026-10-26T08:28:27.665Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-10",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6D8YVA0526ZN2D9W1YKV",
+  "fields": {
+   "created_at": "2026-10-26T08:28:24.222Z",
+   "updated_at": "2026-10-26T08:28:27.667Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-10",
+   "currency": "USD",
+   "rate": "84.904800"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6919NVGXGAADXGKWD2G3",
+  "fields": {
+   "created_at": "2026-10-26T08:28:19.881Z",
+   "updated_at": "2026-10-26T08:28:19.881Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-13",
+   "currency": "EUR",
+   "rate": "94.035500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN69162DRXXZKZSFQR3D04",
+  "fields": {
+   "created_at": "2026-10-26T08:28:19.878Z",
+   "updated_at": "2026-10-26T08:28:19.878Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-13",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6918Q0NKNX04C6PTTPCS",
+  "fields": {
+   "created_at": "2026-10-26T08:28:19.880Z",
+   "updated_at": "2026-10-26T08:28:19.880Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-13",
+   "currency": "USD",
+   "rate": "83.915300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN64M6FJJ9ZJNAAY6WGDA8",
+  "fields": {
+   "created_at": "2026-10-26T08:28:15.366Z",
+   "updated_at": "2026-10-26T08:28:15.366Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-14",
+   "currency": "EUR",
+   "rate": "93.772300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN64M355BQ5V412RY1NMGC",
+  "fields": {
+   "created_at": "2026-10-26T08:28:15.363Z",
+   "updated_at": "2026-10-26T08:28:15.363Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-14",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN64M5XM813X3QQBBZXKS0",
+  "fields": {
+   "created_at": "2026-10-26T08:28:15.365Z",
+   "updated_at": "2026-10-26T08:28:15.365Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-14",
+   "currency": "USD",
+   "rate": "83.867500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN645CS7WVQ4XFFM5KQNJW",
+  "fields": {
+   "created_at": "2026-10-26T08:28:14.892Z",
+   "updated_at": "2026-10-26T08:28:14.892Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-15",
+   "currency": "EUR",
+   "rate": "93.922900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6459D3EYJFZWBAVP98EF",
+  "fields": {
+   "created_at": "2026-10-26T08:28:14.889Z",
+   "updated_at": "2026-10-26T08:28:14.889Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-15",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN645AR0HCRC0A4T3MTDNK",
+  "fields": {
+   "created_at": "2026-10-26T08:28:14.890Z",
+   "updated_at": "2026-10-26T08:28:14.890Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-15",
+   "currency": "USD",
+   "rate": "83.949700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M51YW83FBTZQA4W24F5V0WW5",
+  "fields": {
+   "created_at": "2026-10-16T08:57:21.775Z",
+   "updated_at": "2026-10-26T08:28:14.440Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-16",
+   "currency": "EUR",
+   "rate": "93.769300"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M51YW838KXXY55491YAVYM8T",
+  "fields": {
+   "created_at": "2026-10-16T08:57:21.768Z",
+   "updated_at": "2026-10-26T08:28:14.436Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-16",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M51YW83D82TRZ8AR0QTCF48R",
+  "fields": {
+   "created_at": "2026-10-16T08:57:21.773Z",
+   "updated_at": "2026-10-26T08:28:14.438Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-16",
+   "currency": "USD",
+   "rate": "83.760000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN62CM8S822S56ABQ507F0",
+  "fields": {
+   "created_at": "2026-10-26T08:28:13.076Z",
+   "updated_at": "2026-10-26T08:28:14.043Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-17",
+   "currency": "EUR",
+   "rate": "93.718700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN62CHXX6ZZ7RZ84DV2DY3",
+  "fields": {
+   "created_at": "2026-10-26T08:28:13.073Z",
+   "updated_at": "2026-10-26T08:28:14.040Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-17",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN62CKA3G2Z517923XB7WS",
+  "fields": {
+   "created_at": "2026-10-26T08:28:13.075Z",
+   "updated_at": "2026-10-26T08:28:14.042Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-17",
+   "currency": "USD",
+   "rate": "83.617700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61X2DSHQJJV71XF8MTM3",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.578Z",
+   "updated_at": "2026-10-26T08:28:12.578Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-20",
+   "currency": "EUR",
+   "rate": "93.231600"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61X030NJNQR6X2V5HG08",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.576Z",
+   "updated_at": "2026-10-26T08:28:12.576Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-20",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61X1F4SJJ4KZC50EFJMG",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.577Z",
+   "updated_at": "2026-10-26T08:28:12.577Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-20",
+   "currency": "USD",
+   "rate": "82.850400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61EPA97JNZK61R07S1E0",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.118Z",
+   "updated_at": "2026-10-26T08:28:12.118Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-21",
+   "currency": "EUR",
+   "rate": "93.041700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61EJAH0EFCJ5S1Z5QXZB",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.114Z",
+   "updated_at": "2026-10-26T08:28:12.114Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-21",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN61EMJC9W3CT6HAW252VT",
+  "fields": {
+   "created_at": "2026-10-26T08:28:12.116Z",
+   "updated_at": "2026-10-26T08:28:12.116Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-21",
+   "currency": "USD",
+   "rate": "82.887900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN611974RCB2GMK9W010DW",
+  "fields": {
+   "created_at": "2026-10-26T08:28:11.689Z",
+   "updated_at": "2026-10-26T08:28:11.689Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-22",
+   "currency": "EUR",
+   "rate": "91.933700"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6114YZ1V7PYN88S0NE9S",
+  "fields": {
+   "created_at": "2026-10-26T08:28:11.684Z",
+   "updated_at": "2026-10-26T08:28:11.684Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-22",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5VN6117RJWYNYPPRVBA9Q9T",
+  "fields": {
+   "created_at": "2026-10-26T08:28:11.687Z",
+   "updated_at": "2026-10-26T08:28:11.687Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-22",
+   "currency": "USD",
+   "rate": "81.973900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5KY26SS2EVAR5QR416YHJFB",
+  "fields": {
+   "created_at": "2026-10-23T08:29:28.249Z",
+   "updated_at": "2026-10-26T08:28:11.275Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-23",
+   "currency": "EUR",
+   "rate": "91.136400"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5KY26SHBF92S6DANVFJE83Y",
+  "fields": {
+   "created_at": "2026-10-23T08:29:28.241Z",
+   "updated_at": "2026-10-26T08:28:11.273Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-23",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5KY26SP6N05J8EWKZGSPDJS",
+  "fields": {
+   "created_at": "2026-10-23T08:29:28.246Z",
+   "updated_at": "2026-10-26T08:28:11.274Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-23",
+   "currency": "USD",
+   "rate": "81.125500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5SYKVTXBGCNSA8FPPNTQGGS",
+  "fields": {
+   "created_at": "2026-10-25T16:34:33.437Z",
+   "updated_at": "2026-10-26T08:28:10.852Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-24",
+   "currency": "EUR",
+   "rate": "90.242900"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5SYKVTCHF9F9P10KQZAT4JW",
+  "fields": {
+   "created_at": "2026-10-25T16:34:33.420Z",
+   "updated_at": "2026-10-26T08:28:10.849Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-24",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5SYKVTQF4WG77FTX810H7KZ",
+  "fields": {
+   "created_at": "2026-10-25T16:34:33.431Z",
+   "updated_at": "2026-10-26T08:28:10.850Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-24",
+   "currency": "USD",
+   "rate": "80.538100"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5XZ3H8RM03JKSJGEW1ZK709",
+  "fields": {
+   "created_at": "2026-10-27T06:00:04.632Z",
+   "updated_at": "2026-10-27T06:00:04.632Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-27",
+   "currency": "EUR",
+   "rate": "90.093500"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5XZ3H8F2MFH42BT5RR4RNWP",
+  "fields": {
+   "created_at": "2026-10-27T06:00:04.623Z",
+   "updated_at": "2026-10-27T06:00:04.623Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-27",
+   "currency": "RUB",
+   "rate": "1.000000"
+  }
+ },
+ {
+  "model": "billing.fxrate",
+  "pk": "fxr_01M5XZ3H8N3M344D63X495J9BS",
+  "fields": {
+   "created_at": "2026-10-27T06:00:04.629Z",
+   "updated_at": "2026-10-27T06:00:04.629Z",
+   "is_generated": false,
+   "data_source": "imported",
+   "version": 1,
+   "on_date": "2026-10-27",
+   "currency": "USD",
+   "rate": "80.490900"
+  }
+ }
+]

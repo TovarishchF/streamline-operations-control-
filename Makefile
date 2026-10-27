@@ -5,7 +5,7 @@
 .PHONY: help up down restart logs migrate makemigrations shell superuser \
         seed-reference seed-sample sample-reset setup-beat \
         api-schema api-types lint types test test-e2e test-load test-restore check \
-        venv install format
+        venv install format manuals release
 
 COMPOSE       := docker compose
 PROFILE       ?= dev
@@ -118,3 +118,11 @@ test-restore:  ## Испытание восстановления из копи�
 
 check: lint types test  ## Обязательно перед коммитом (CLAUDE.md § 8 п. 7)
 	@echo "Проверки пройдены."
+
+# ─────────────────────────── Поставка ───────────────────────────
+
+manuals:  ## Руководства в PDF (pandoc, WeasyPrint в контейнере api) → artifacts/manuals/
+	./scripts/build_manuals.sh
+
+release:  ## Поставка для передачи: исходники без рабочих документов и руководства → release/
+	./scripts/build_release.sh
