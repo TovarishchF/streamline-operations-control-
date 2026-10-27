@@ -3,6 +3,22 @@ import tseslint from 'typescript-eslint';
 import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 
+// Библиотеки, запрещённые везде, включая domain/ (CLAUDE.md § 5).
+const FORBIDDEN_LIBRARIES = [
+  {
+    name: 'moment',
+    message:
+      'moment.js в проекте не используется (CLAUDE.md § 5): даты — dayjs. ' +
+      'moment есть в node_modules только как внутренняя зависимость vis-timeline.',
+  },
+  {
+    name: 'vis-timeline',
+    message:
+      'Планшет берёт автономную сборку vis-timeline/standalone: обычная тянет ' +
+      'moment как зависимость проекта.',
+  },
+];
+
 export default tseslint.config(
   { ignores: ['dist', 'node_modules'] },
   js.configs.recommended,
@@ -44,6 +60,7 @@ export default tseslint.config(
                 'Денежные расчёты не живут в компонентах. Используйте значения с сервера ' +
                 'или функции из src/domain/ (CLAUDE.md § 3 п. 16).',
             },
+            ...FORBIDDEN_LIBRARIES,
           ],
         },
       ],
@@ -67,12 +84,12 @@ export default tseslint.config(
   {
     // В слое domain/ расчёты разрешены — для этого он и существует
     files: ['src/domain/**/*.ts', 'src/shared/format/**/*.ts'],
-    rules: { 'no-restricted-imports': 'off' },
+    rules: { 'no-restricted-imports': ['error', { paths: FORBIDDEN_LIBRARIES }] },
   },
   {
     // Модуль часов — единственное место, где Date создаётся напрямую.
     // Ровно так же на сервере исключён core/clock.py.
-    files: ['src/shared/clock/**/*.ts', 'src/mocks/**/*.ts'],
+    files: ['src/shared/clock/**/*.ts'],
     rules: { 'no-restricted-syntax': 'off' },
   },
   {

@@ -15,7 +15,8 @@ export function KpiTile({
   extra,
   footnote,
 }: {
-  label: string;
+  /** Подпись; в виджете дашборда её заменяет заголовок карточки. */
+  label?: string;
   value: ReactNode;
   unit?: string;
   tone?: 'default' | 'warning' | 'critical';
@@ -25,10 +26,12 @@ export function KpiTile({
 }): JSX.Element {
   return (
     <div className="soc-kpi">
-      <div className="soc-kpi__label">
-        <span>{label}</span>
-        {extra}
-      </div>
+      {label || extra ? (
+        <div className="soc-kpi__label">
+          <span>{label}</span>
+          {extra}
+        </div>
+      ) : null}
       <div className="soc-kpi__row">
         <div className={tone === 'default' ? 'soc-kpi__value' : `soc-kpi__value is-${tone}`}>
           {value}

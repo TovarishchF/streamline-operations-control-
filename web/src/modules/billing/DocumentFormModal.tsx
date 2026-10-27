@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { useCreateInvoice, useCreateQuote, useQuotes } from '@/api/documents';
-import { useFlights } from '@/api/flights';
+import { useFlight, useFlights } from '@/api/flights';
 import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 import { applyApiError } from '@/shared/ui/form-errors';
 import { Notice } from '@/shared/ui/Notice';
@@ -44,8 +44,22 @@ export function DocumentFormModal({
   const [form] = Form.useForm<FormValues>();
   const [banner, setBanner] = useState<string | null>(null);
   const [selectedFlight, setSelectedFlight] = useState<string | undefined>(flightId);
+  const [flightSearch, setFlightSearch] = useState('');
 
-  const flights = useFlights({}).data?.data ?? [];
+  // Рейс ищется на сервере: в первой странице плана нужного рейса может
+  // не оказаться, а выбирать из неё — значит не найти только что созданный.
+  const flights = useFlights({ search: flightSearch, perPage: 30, ordering: '-stdUtc' }).data?.data ?? [];
+  const flightOptions = flights.map((flight) => ({
+    value: flight.id,
+    label: `${flight.number} · ${flight.depIcao}→${flight.arrIcao} · ${flight.clientName}`,
+  }));
+  const current = useFlight(selectedFlight).data;
+  if (current && !flightOptions.some((option) => option.value === current.id)) {
+    flightOptions.unshift({
+      value: current.id,
+      label: `${current.number} · ${current.depIcao}→${current.arrIcao}`,
+    });
+  }
   // Котировки по выбранному рейсу: счёт сопоставляется именно с ней,
   // и предлагать чужие незачем.
   const quotes = useQuotes({ flightId: selectedFlight ?? '' }).data?.data ?? [];
@@ -124,12 +138,10 @@ export function DocumentFormModal({
         >
           <Select
             showSearch
-            optionFilterProp="label"
+            filterOption={false}
+            onSearch={setFlightSearch}
             onChange={setSelectedFlight}
-            options={flights.map((flight) => ({
-              value: flight.id,
-              label: `${flight.number} · ${flight.depIcao}→${flight.arrIcao} · ${flight.clientName}`,
-            }))}
+            options={flightOptions}
           />
         </Form.Item>
 

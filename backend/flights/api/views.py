@@ -6,21 +6,23 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Any, ClassVar, cast
 
-from django.db.models import QuerySet
+from django.db.models import Prefetch, Q, QuerySet
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.models import User
-from accounts.permissions import Permission
+from accounts.permissions import Permission, has_permission
 from audit.api.views import AuditEntrySerializer
 from audit.models import AuditEntityType, AuditEntry
+from billing.services import margin as margin_service
 from catalog.models import Service
 from core.api.idempotency import IdempotencyMixin, IdempotentCreateMixin
 from core.api.permissions import HasRolePermission
@@ -48,7 +50,7 @@ from flights.api.serializers import (
 )
 from flights.models import Flight, FlightRequest, FlightTemplate, Slot
 from flights.services import conflicts as conflict_detector
-from flights.services import generation, planning, transitions
+from flights.services import generation, planning, selection, transitions
 from flights.services import slots as slot_services
 from orders.api.serializers import ServiceOrderCreateSerializer, ServiceOrderSerializer
 from orders.models import ServiceOrder
@@ -106,7 +108,12 @@ class FlightViewSet(
 
     queryset = Flight.objects.select_related(
         "client", "aircraft", "aircraft__type"
-    ).prefetch_related("service_orders", "aircraft__approvals")
+    ).prefetch_related(
+        # Услуга нужна марже: цена продажи заявки без снимка считается
+        # по тарифу категории услуги.
+        Prefetch("service_orders", queryset=ServiceOrder.objects.select_related("service")),
+        "aircraft__approvals",
+    )
     serializer_class = FlightSerializer
     idempotency = "required"
     tenant_client_field = "client_id"
@@ -119,6 +126,10 @@ class FlightViewSet(
         "status": Permission.FLIGHT_STATUS,
         "history": Permission.SCHEDULE_VIEW,
         "services": Permission.SERVICE_ORDER,
+        # Заявки рейса смотрят и те, кто их не заказывает: финансист
+        # выставляет по ним счёт, руководитель разбирает маржу. Порталам
+        # этот путь закрыт — у них свои ответы без закупочных цен.
+        "services:GET": (Permission.SERVICE_ORDER, Permission.BILLING_MARGIN_VIEW),
     }
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
@@ -157,39 +168,42 @@ class FlightViewSet(
     def get_serializer_class(self) -> type[Any]:
         return FlightListSerializer if self.action == "list" else FlightSerializer
 
+    def list(self, request: Request, *args: Any, **kwargs: Any) -> Response:
+        """Суточный план с маржой по странице `[ТЗ 3.4.3]` (`SPEC.md § 7.4`).
+
+        Маржа считается пачкой на страницу, а не отдельным расчётом на строку.
+        Роль без права на маржу её не получает: клиент видит свои рейсы,
+        но не нашу маржу на них.
+        """
+        queryset = self.filter_queryset(self.get_queryset())
+        role = str(getattr(request.user, "role", ""))
+        sees_margin = has_permission(role, Permission.BILLING_MARGIN_VIEW)
+
+        threshold = selection.margin_threshold(request.query_params)
+        if threshold is not None:
+            # Отбор по марже раскрывал бы маржу тому, кому её не видно.
+            if not sees_margin:
+                raise PermissionDenied
+            queryset = selection.below_margin(queryset, threshold)
+
+        descending = selection.wants_margin_order(request.query_params)
+        if descending is not None:
+            # Сортировка по марже — та же граница, что у отбора по ней.
+            if not sees_margin:
+                raise PermissionDenied
+            queryset = selection.by_margin(queryset, descending=descending)
+
+        page = self.paginate_queryset(queryset)
+        flights = list(page) if page is not None else list(queryset)
+
+        context = self.get_serializer_context()
+        if sees_margin:
+            context["margins"] = margin_service.percents_for(flights)
+        data = FlightListSerializer(flights, many=True, context=context).data
+        return self.get_paginated_response(data) if page is not None else Response(data)
+
     def get_queryset(self) -> QuerySet[Flight]:
-        queryset = super().get_queryset()
-        params = self.request.query_params
-
-        if params.get("status"):
-            queryset = queryset.filter(status__in=params["status"].split(","))
-        if params.get("clientId"):
-            queryset = queryset.filter(client_id=params["clientId"])
-        if params.get("aircraftId"):
-            queryset = queryset.filter(aircraft_id=params["aircraftId"])
-        if params.get("from"):
-            queryset = queryset.filter(std_utc__gte=params["from"])
-        if params.get("to"):
-            queryset = queryset.filter(std_utc__lte=params["to"])
-        if params.get("airport"):
-            from django.db.models import Q
-
-            icao = params["airport"].upper()
-            queryset = queryset.filter(Q(dep_icao=icao) | Q(arr_icao=icao))
-        if params.get("type"):
-            queryset = queryset.filter(type=params["type"])
-        if params.get("search"):
-            from django.db.models import Q
-
-            needle = params["search"].strip()
-            queryset = queryset.filter(
-                Q(number__icontains=needle)
-                | Q(dep_icao__istartswith=needle)
-                | Q(arr_icao__istartswith=needle)
-                | Q(client__name__icontains=needle)
-                | Q(aircraft__registration__icontains=needle)
-            )
-        return queryset
+        return selection.apply(super().get_queryset(), self.request.query_params)
 
     def partial_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         flight = self.get_object()
@@ -201,6 +215,7 @@ class FlightViewSet(
             "depIcao": "dep_icao",
             "arrIcao": "arr_icao",
             "stdUtc": "std_utc",
+            "staUtc": "sta_utc",
             "paxCount": "pax_count",
             "remarks": "remarks",
         }
@@ -209,7 +224,12 @@ class FlightViewSet(
             for key, value in payload.validated_data.items()
             if key in mapping
         }
-        planning.update_route(flight, actor=cast(User, request.user), **changes)
+        planning.update_route(
+            flight,
+            actor=cast(User, request.user),
+            override_reason=payload.validated_data.get("conflictOverrideReason", ""),
+            **changes,
+        )
         return Response(FlightSerializer(flight).data)
 
     @extend_schema(
@@ -230,6 +250,7 @@ class FlightViewSet(
             actor=cast(User, request.user),
             reason_code=payload.validated_data["reasonCode"],
             comment=payload.validated_data["comment"],
+            complete_without_invoice=payload.validated_data["completeWithoutInvoice"],
         )
         return Response(FlightSerializer(flight).data)
 
@@ -262,7 +283,13 @@ class FlightViewSet(
                 .select_related("service", "vendor", "contract", "flight")
                 .prefetch_related("documents")
             )
-            return Response({"data": ServiceOrderSerializer(queryset, many=True).data})
+            return Response(
+                {
+                    "data": ServiceOrderSerializer(
+                        queryset, many=True, context={"request": request}
+                    ).data
+                }
+            )
 
         return self.idempotent(request, lambda: self._create_service_order(request, flight))
 
@@ -282,7 +309,10 @@ class FlightViewSet(
             override_reason=data["overrideReason"],
             actor=cast(User, request.user),
         )
-        return Response(ServiceOrderSerializer(order).data, status=status.HTTP_201_CREATED)
+        return Response(
+            ServiceOrderSerializer(order, context={"request": request}).data,
+            status=status.HTTP_201_CREATED,
+        )
 
     @extend_schema(
         summary="История изменений рейса",
@@ -291,11 +321,31 @@ class FlightViewSet(
     )
     @action(detail=True, methods=["get"])
     def history(self, request: Request, pk: str | None = None) -> Response:
+        """Журнал по рейсу `[ТЗ 3.1.3]`: сам рейс, его заявки и документы.
+
+        История рейса без его заявок не отвечает на вопрос «что происходило
+        с рейсом»: подтверждение поставщика, отказ и переназначение —
+        это события рейса, записанные на заявку.
+        """
+        from billing.models import Invoice, Quote
+
         flight = self.get_object()
-        entries = AuditEntry.objects.filter(
-            entity_type=AuditEntityType.FLIGHT, entity_id=flight.pk
+        orders = flight.service_orders.values("pk")
+        quotes = Quote.objects.filter(flight=flight).values("pk")
+        invoices = Invoice.objects.filter(flight=flight).values("pk")
+        related = (
+            Q(entity_type=AuditEntityType.FLIGHT, entity_id=flight.pk)
+            | Q(entity_type=AuditEntityType.SERVICE_ORDER, entity_id__in=orders)
+            | Q(entity_type=AuditEntityType.QUOTE, entity_id__in=quotes)
+            | Q(entity_type=AuditEntityType.INVOICE, entity_id__in=invoices)
         )
-        return Response({"data": AuditEntrySerializer(entries, many=True).data})
+        entries = AuditEntry.objects.filter(related).order_by("ts", "id")
+        # Постранично, как в контракте (`PagedResponse`): у рейса,
+        # который жил долго, журнал набирается в сотни записей.
+        page = self.paginate_queryset(entries)
+        if page is None:
+            return Response({"data": AuditEntrySerializer(entries, many=True).data})
+        return self.get_paginated_response(AuditEntrySerializer(page, many=True).data)
 
 
 class ScheduleExportView(IdempotencyMixin, APIView):
@@ -325,8 +375,6 @@ class ScheduleExportView(IdempotencyMixin, APIView):
         from accounts.permissions import TENANT_SCOPED_ROLES
 
         if str(getattr(request.user, "role", "")) in TENANT_SCOPED_ROLES:
-            from rest_framework.exceptions import PermissionDenied
-
             raise PermissionDenied
 
         def produce() -> Response:
@@ -349,37 +397,42 @@ class ScheduleExportView(IdempotencyMixin, APIView):
         return self.idempotent(request, produce)
 
     def _selection(self, request: Request) -> QuerySet[Flight]:
-        """Выборка по тем же параметрам, что и `GET /flights`."""
-        from django.db.models import Q
-
-        params = request.query_params
-        queryset = Flight.objects.all()
-
-        if params.get("status"):
-            queryset = queryset.filter(status__in=params["status"].split(","))
-        if params.get("clientId"):
-            queryset = queryset.filter(client_id=params["clientId"])
-        if params.get("aircraftId"):
-            queryset = queryset.filter(aircraft_id=params["aircraftId"])
-        if params.get("from"):
-            queryset = queryset.filter(std_utc__gte=params["from"])
-        if params.get("to"):
-            queryset = queryset.filter(std_utc__lte=params["to"])
-        if params.get("airport"):
-            icao = params["airport"].upper()
-            queryset = queryset.filter(Q(dep_icao=icao) | Q(arr_icao=icao))
-        if params.get("type"):
-            queryset = queryset.filter(type=params["type"])
-        if params.get("search"):
-            needle = params["search"].strip()
-            queryset = queryset.filter(
-                Q(number__icontains=needle)
-                | Q(dep_icao__istartswith=needle)
-                | Q(arr_icao__istartswith=needle)
-                | Q(client__name__icontains=needle)
-                | Q(aircraft__registration__icontains=needle)
+        """Выборка по тем же параметрам и тем же правилам, что и `GET /flights`."""
+        queryset = selection.apply(
+            Flight.objects.select_related("client", "aircraft"), request.query_params
+        )
+        threshold = selection.margin_threshold(request.query_params)
+        if threshold is not None:
+            role = str(getattr(request.user, "role", ""))
+            if not has_permission(role, Permission.BILLING_MARGIN_VIEW):
+                raise PermissionDenied
+            queryset = selection.below_margin(
+                queryset.prefetch_related(
+                    Prefetch(
+                        "service_orders", queryset=ServiceOrder.objects.select_related("service")
+                    )
+                ),
+                threshold,
             )
-        return queryset.order_by("std_utc")
+        descending = selection.wants_margin_order(request.query_params)
+        if descending is not None:
+            role = str(getattr(request.user, "role", ""))
+            if not has_permission(role, Permission.BILLING_MARGIN_VIEW):
+                raise PermissionDenied
+            queryset = selection.by_margin(queryset, descending=descending)
+        return queryset
+
+
+def _moment(raw: str | None) -> datetime | None:
+    if not raw:
+        return None
+    try:
+        parsed = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        from rest_framework.exceptions import ValidationError
+
+        raise ValidationError({"period": "Ожидается дата и время ISO 8601"}) from None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC)
 
 
 class ScheduleConflictsView(APIView):
@@ -401,8 +454,13 @@ class ScheduleConflictsView(APIView):
     def get(self, request: Request) -> Response:
         from core import clock
 
-        since = clock.now()
-        until = since + timedelta(days=CONFLICT_HORIZON_DAYS)
+        # Период — по контракту; без него — горизонт планирования от сейчас.
+        # Карточка рейса спрашивает конфликты только своего рейса: считать
+        # их по всему месяцу ради одной строки незачем.
+        since = _moment(request.query_params.get("from")) or clock.now()
+        until = _moment(request.query_params.get("to")) or since + timedelta(
+            days=CONFLICT_HORIZON_DAYS
+        )
 
         flights = (
             Flight.objects.filter(std_utc__gte=since, std_utc__lte=until)

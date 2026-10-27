@@ -128,7 +128,7 @@ class ServiceOrderViewSet(
                 order=order, changes=changes, actor=cast(User, request.user)
             )
 
-        return Response(ServiceOrderSerializer(order).data)
+        return Response(ServiceOrderSerializer(order, context={"request": request}).data)
 
     @extend_schema(
         summary="Переход статуса заявки",
@@ -166,7 +166,7 @@ class ServiceOrderViewSet(
             actor=cast(User, request.user),
             comment=data["comment"] or data["reasonCode"],
         )
-        return Response(ServiceOrderSerializer(order).data)
+        return Response(ServiceOrderSerializer(order, context={"request": request}).data)
 
     @extend_schema(
         summary="Переназначение поставщика после отказа",
@@ -188,7 +188,8 @@ class ServiceOrderViewSet(
                 actor=cast(User, request.user),
             )
             return Response(
-                ServiceOrderSerializer(replacement).data, status=status.HTTP_201_CREATED
+                ServiceOrderSerializer(replacement, context={"request": request}).data,
+                status=status.HTTP_201_CREATED,
             )
 
         return self.idempotent(request, produce)

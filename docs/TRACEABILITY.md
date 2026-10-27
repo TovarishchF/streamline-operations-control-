@@ -43,12 +43,12 @@
 |---|---|---|---|---|---|---|---|---|
 | T-3.1.1-01 | 3.1.1 | Создание рейса с указанием типа ВС и бортового номера | `flights.services.create_flight` | `POST /flights` | `/flights/new` | `test_create_flight` | M4 | план |
 | T-3.1.1-02 | 3.1.1 | Маршрут: аэропорты вылета и прилёта | `Flight.dep_icao`, `arr_icao` | `POST /flights` | `/flights/new` | `test_create_flight_route` | M4 | план |
-| T-3.1.1-03 | 3.1.1 | Дата и время по UTC и местному | хранение UTC, отображение по `timezoneMode` | `GET /flights/{id}` | карточка рейса | `test_local_time_rendering` | M4, M10 | план |
+| T-3.1.1-03 | 3.1.1 | Дата и время по UTC и местному | хранение UTC; на экране UTC с подписью `Z`, в карточке рядом — местное время аэропорта со смещением; ввод времени — в UTC, как подписано поле | `GET /flights/{id}` | карточка рейса | `web/src/shared/format/timezone.test.ts`, `e2e/operations.spec.ts` «время вылета уходит на сервер в UTC, как подписано» (браузер в `Asia/Yekaterinburg`) | M4, M10 | реализовано |
 | T-3.1.1-04 | 3.1.1 | Регулярные рейсы: шаблоны повторяющихся маршрутов | `flights.FlightTemplate` | `GET/POST /flight-templates` | `/schedule/templates` | `test_template_crud` | M4 | план |
 | T-3.1.1-05 | 3.1.1 | Генерация серии рейсов из шаблона | `flights.services.generate_series` | `POST /flight-templates/{id}/generate` | `/schedule/templates` | `test_series_dst_boundary` | M4 | план |
-| T-3.1.1-06 | 3.1.1 | Gantt-диаграмма, интерактивный планшет загрузки парка | `web/modules/schedule`, vis-timeline | `GET /flights` | `/schedule` | Playwright `schedule-gantt` | M10 | план |
-| T-3.1.1-07 | 3.1.1 | Перетаскивание рейса: время, продолжительность, смена борта | `web/modules/schedule` | `PATCH /flights/{id}` | `/schedule` | Playwright `gantt-drag` | M10 | план |
-| T-3.1.1-08 | 3.1.1 | Табличный вид с фильтрацией по дате, борту, статусу, типу рейса | `django-filter` + таблица | `GET /flights` | `/schedule` | `test_flight_filters` | M4, M10 | план |
+| T-3.1.1-06 | 3.1.1 | Gantt-диаграмма, интерактивный планшет загрузки парка | `web/modules/schedule/GanttBoard.tsx`, vis-timeline (ADR-015): борта по типам ВС, строка «Без борта», конфликты, линия текущего времени по часам сервера, масштабы сутки / трое суток / неделя | `GET /flights`, `GET /flights/conflicts` | `/schedule` | `e2e/screenshots.spec.ts` `01-schedule-gantt` (1600 и 360 px) | M10 | реализовано |
+| T-3.1.1-07 | 3.1.1 | Перетаскивание рейса: время, продолжительность, смена борта | `GanttBoard.tsx`: перенос полосы — вылет, край — прилёт, другая строка — смена борта; при конфликте сервер требует причину, диалог её спрашивает, отказ возвращает полосу | `PATCH /flights/{id}` | `/schedule` | `e2e/schedule.spec.ts` «планшет переносит полосу через сервер (SPEC § 4.1)», 1600 и 360 px — перенос вылета и вопрос о конфликте; край и смена строки испытанием не покрыты | M10 | реализовано |
+| T-3.1.1-08 | 3.1.1 | Табличный вид с фильтрацией по дате, борту, статусу, типу рейса | фильтры `SPEC.md § 4.2` на сервере; таблица с пресетами и скрытием колонок (localforage, ADR-015), массовыми действиями | `GET /flights` | `/schedule` | `flights/tests/test_selection.py`, `e2e/schedule.spec.ts` (массовые действия), `e2e/operations.spec.ts` (поиск в таблице) | M4, M10 | реализовано |
 | T-3.1.1-09 | 3.1.1 | Подсветка конфликтов расписания | `flights.services.conflicts` | `GET /flights/conflicts` | `/schedule` | `test_conflict_overlap`, `test_conflict_turnaround` | M4 | план |
 | T-3.1.2-01 | 3.1.2 | Статус «Запланирован» | автомат, состояние `planned` | `POST /flights/{id}/status` | карточка рейса | `test_fsm_flight_planned` | M4 | план |
 | T-3.1.2-02 | 3.1.2 | Статус «В работе» | состояние `in_work`, guard `start` | `POST /flights/{id}/status` | карточка рейса | `test_fsm_start_guard` | M4 | план |
@@ -62,10 +62,10 @@
 | T-3.1.3-02 | 3.1.3 | Автоматическая рассылка уведомлений клиентам при изменении | `comms`, шаблон `flight_schedule_changed` | `GET /outbox` | `/communications/outbox` | `test_schedule_change_notifies_client` | M8 | план |
 | T-3.1.3-03 | 3.1.3 | Автоматическая рассылка уведомлений поставщикам при изменении | `comms`, шаблон `order_changed` | `GET /outbox` | `/communications/outbox` | `test_schedule_change_notifies_vendors` | M8 | план |
 | T-3.1.3-04 | 3.1.3 | История изменений по рейсу (аудит-лог) | `audit.AuditEntry`, diff в JSONB | `GET /flights/{id}/history` | вкладка «История» | `test_audit_diff_on_update` | M3, M4 | план |
-| T-3.1.4-01 | 3.1.4 | Панель рейса: данные о клиенте | карточка рейса, вкладка «Обзор» | `GET /flights/{id}` | `/flights/:id/overview` | Playwright `flight-card` | M10 | план |
-| T-3.1.4-02 | 3.1.4 | Панель рейса: список заказанных услуг со статусами | вкладка «Услуги» | `GET /flights/{id}/services` | `/flights/:id/services` | Playwright `flight-card` | M10 | план |
-| T-3.1.4-03 | 3.1.4 | Панель рейса: информация о поставщиках по каждой услуге | вкладка «Услуги» | `GET /flights/{id}/services` | `/flights/:id/services` | Playwright `flight-card` | M10 | план |
-| T-3.1.4-04 | 3.1.4 | Панель рейса: финансовая сводка (доход, расход, маржа) | вкладка «Финансы» | `GET /flights/{id}/margin` | `/flights/:id/finance` | `test_margin_modes` | M7, M10 | план |
+| T-3.1.4-01 | 3.1.4 | Панель рейса: данные о клиенте | карточка рейса, вкладка «Обзор» | `GET /flights/{id}` | `/flights/:id/overview` | `e2e/screenshots.spec.ts` `02-flight-card`, `e2e/scenario.spec.ts` | M10 | реализовано |
+| T-3.1.4-02 | 3.1.4 | Панель рейса: список заказанных услуг со статусами | вкладка «Услуги» | `GET /flights/{id}/services` | `/flights/:id/services` | `e2e/screenshots.spec.ts` `03-flight-services`, `e2e/scenario.spec.ts` | M10 | реализовано |
+| T-3.1.4-03 | 3.1.4 | Панель рейса: информация о поставщиках по каждой услуге | вкладка «Услуги» | `GET /flights/{id}/services` | `/flights/:id/services` | `e2e/screenshots.spec.ts` `03-flight-services`, `e2e/scenario.spec.ts` | M10 | реализовано |
+| T-3.1.4-04 | 3.1.4 | Панель рейса: финансовая сводка (доход, расход, маржа) | вкладка «Финансы»: три режима, курс из снимка рядом с суммами | `GET /flights/{id}/margin` | `/flights/:id/finance` | `billing/tests/test_margin.py`, `e2e/scenario.spec.ts` «маржа, аудит и исходящие отражают сценарий» | M7, M10 | реализовано |
 
 ---
 
@@ -81,7 +81,7 @@
 | T-3.2.1-06 | 3.2.1 | Разрешительные документы: пермиты на пролёт, слоты | категория `permits` + `Slot` (ADR-026) | `GET /slots` | `/slots` | `test_applying_an_answer_moves_the_slot` | M4 | реализовано |
 | T-3.2.1-07 | 3.2.1 | Противообледенительная обработка с привязкой к погодным условиям | категория `deicing`, адаптер `WX`, правило ADR-029 | `GET /catalog/services` | мастер заказа | `test_deicing_weather_rule` | M5, M13 | план |
 | T-3.2.1-08 | 3.2.1 | Заказ кейтеринга через специализированные системы | адаптер `VENDOR_API` | `GET /integrations` | `/admin/integrations` | `test_adapter_vendor_api` | M14 | план (без подключения, G-12) |
-| T-3.2.2-01 | 3.2.2 | Выбор услуг из каталога при создании рейса | мастер заказа услуги | `POST /flights/{id}/services` | `/flights/:id/services` | Playwright `order-service` | M5, M10 | план |
+| T-3.2.2-01 | 3.2.2 | Выбор услуг из каталога при создании рейса | мастер заказа услуги: категория, услуга, обязательные атрибуты, поставщик с результатом проверок | `POST /flights/{id}/services` | `/flights/:id/services` | `orders/tests/test_orders_api.py`, `e2e/scenario.spec.ts` «диспетчер заказывает три услуги у разных поставщиков» | M5, M10 | реализовано |
 | T-3.2.2-02 | 3.2.2 | Автопроверка: доступность услуги в аэропорту | `orders.services.checks.availability` | `POST /flights/{id}/services` | мастер заказа | `test_check_service_unavailable` | M5 | план |
 | T-3.2.2-03 | 3.2.2 | Автопроверка: наличие действующего контракта с поставщиком | `orders.services.checks.contract_valid` | `POST /flights/{id}/services` | мастер заказа | `test_check_contract_expired` | M5 | план |
 | T-3.2.2-04 | 3.2.2 | Автопроверка: актуальность цен и тарифов | `orders.services.checks.price_valid` | `POST /flights/{id}/services` | мастер заказа | `test_check_price_outdated` | M5 | план |
@@ -142,7 +142,7 @@
 | T-3.4.3-02 | 3.4.3 | Доход от клиента (сумма счёта) | режим `fact` | `GET /flights/{id}/margin` | `/flights/:id/finance` | `test_margin_fact` | M7 | план |
 | T-3.4.3-03 | 3.4.3 | Расход на поставщиков (сумма заявок на оплату) | режим `fact` | `GET /flights/{id}/margin` | `/flights/:id/finance` | `test_margin_cost` | M7 | план |
 | T-3.4.3-04 | 3.4.3 | Маржа в валюте и процентах | `margin`, `marginPct` (null при нулевой выручке) | `GET /flights/{id}/margin` | `/flights/:id/finance` | `test_margin_zero_revenue` | M7 | план |
-| T-3.4.3-05 | 3.4.3 | Оперативная замена поставщика при низкой марже | порог + сравнение кандидатов с пересчётом маржи | `POST /vendors/suggest` | `/flights/:id/finance` | `test_low_margin_suggestion` | M7, M10 | план |
+| T-3.4.3-05 | 3.4.3 | Оперативная замена поставщика при низкой марже | порог с уведомлением; в карточке — предупреждение с действием «Подобрать более дешёвого поставщика», ведущим к услугам рейса, где у каждой заявки сравнение кандидатов с влиянием на маржу; замена — отменой и переназначением | `POST /vendors/suggest`, `POST /service-orders/{id}/reassign` | `/flights/:id/services` | `billing/tests/test_margin.py::test_low_margin_notifies_once`, `counterparties/tests/test_suggest.py::test_margin_impact_follows_the_clients_tariff`, `e2e/scenario.spec.ts` «поставщик отказывает, диспетчер переназначает» | M7, M10 | реализовано |
 
 ---
 
@@ -182,7 +182,7 @@
 | T-3.6.1-07 | 3.6.1 | Журнал изменений рейсов за период | отчёт `flight_audit` | `GET /reports/flight_audit` | `/reports/:code` | `test_flight_audit_shows_status_changes` | M9 | реализовано |
 | T-3.6.2-01 | 3.6.2 | Дашборд диспетчера: текущий статус рейсов, критические задержки | `reports.dashboards.dispatcher` | `GET /dashboards/dispatcher` | `/dashboards/dispatcher` | `test_dashboard_dispatcher` | M9 | план |
 | T-3.6.2-02 | 3.6.2 | Дашборд руководителя: количество рейсов, загрузка, маржинальность по клиентам | `reports.dashboards.manager` | `GET /dashboards/manager` | `/dashboards/manager` | `test_dashboard_manager` | M9 | план |
-| T-3.6.2-03 | 3.6.2 | Настройка виджетов под роль пользователя | раскладка на пользователя | `PUT /dashboards/{role}/layout` | дашборды | `test_dashboard_layout_persist` | M9, M10 | план |
+| T-3.6.2-03 | 3.6.2 | Настройка виджетов под роль пользователя | раскладка на пользователя: добавление, удаление, порядок и размер виджетов в режиме правки | `PUT /dashboards/{role}/layout` | дашборды | `reports/tests/test_dashboards.py::test_layout_is_saved_per_user`, `test_impossible_layout_is_refused` | M9, M10 | реализовано |
 | T-3.6.3-01 | 3.6.3 | Выгрузка отчётов в PDF | WeasyPrint | `POST /reports/{code}/export` | `/reports/:code` | `test_pdf_is_produced` | M9 | реализовано |
 | T-3.6.3-02 | 3.6.3 | Выгрузка отчётов в Excel (XLSX) | openpyxl | `POST /reports/{code}/export` | `/reports/:code` | `test_xlsx_money_cells_are_numbers` | M9 | реализовано |
 | T-3.6.3-03 | 3.6.3 | Выгрузка отчётов в CSV | стандартный `csv` | `POST /reports/{code}/export` | `/reports/:code` | `test_csv_carries_the_same_numbers_as_the_report` | M9 | реализовано |
@@ -195,7 +195,7 @@
 
 | ID | Пункт | Требование | Реализация | Эндпоинт | Экран | Тест | Веха | Статус |
 |---|---|---|---|---|---|---|---|---|
-| T-4.1-01 | 4.1 | Веб-приложение как основной интерфейс | React 18 + Vite + Ant Design | — | все | Playwright | M10 | план |
+| T-4.1-01 | 4.1 | Веб-приложение как основной интерфейс | React 18 + Vite + Ant Design, все экраны на настоящем API; PWA; вёрстка от 360 px | — | все | `e2e/` целиком в профилях 1600 и 360 px, `e2e/screenshots.spec.ts` (46 экранов без ошибок консоли и горизонтального скролла) | M10 | реализовано |
 | T-4.1-02 | 4.1 | Мобильное приложение Android | Expo, EAS Build (ADR-006) | — | мобильные экраны | Maestro + установка на устройство | M12 | план |
 | T-4.1-03 | 4.1 | Мобильное приложение iOS | Expo, TestFlight (ADR-006) | — | мобильные экраны | Maestro + TestFlight | M12 | план |
 | T-4.1-04 | 4.1 | Профиль «полевой персонал» | профиль диспетчера с урезанными правами | `/auth/me` | мобильные экраны | `test_permissions_field_staff` | M12 | требует решения (G-50) |
@@ -231,15 +231,15 @@
 | T-4.3-15 | 4.3 | Заявка поставщика на согласование | очередь руководителя, одобрение заводит карточку и доступ, отказ — с причиной (ADR-037) | `GET /registration-requests`, `POST /registration-requests/{id}/approve`, `.../reject` | `/admin/registrations` | `accounts/tests/test_registration.py` | M4 | реализовано |
 | T-4.3-16 | 4.3 | Подтверждение адреса почты при регистрации | одноразовая ссылка, в базе хэш; доставка через общую очередь исходящих | `POST /auth/register/confirm` | `/register/confirm` | `test_the_link_works_once`, `test_wrong_token_confirms_nothing` | M4 | реализовано (доставка — заглушка до боевого SMTP) |
 | T-4.4-01 | 4.4 | Одновременная работа до 50 пользователей без деградации | — | — | — | k6, профиль 50 VU, 15 мин | M15 | план |
-| T-4.4-02 | 4.4 | Открытие карточки рейса не более 2 секунд | — | `GET /flights/{id}` | `/flights/:id` | k6 `p95 < 2000` + LCP (ADR-017) | M15 | план |
+| T-4.4-02 | 4.4 | Открытие карточки рейса не более 2 секунд | — | `GET /flights/{id}` | `/flights/:id` | k6 `p95 < 2000` + LCP (ADR-017); браузерный замер без нагрузки — `e2e/perf.spec.ts`, протокол в `artifacts/perf/` | M10, M15 | в работе |
 | T-4.4-03 | 4.4 | Расчёт маржинальности не более 5 секунд | кэш Redis, чистая функция | `GET /flights/{id}/margin` | `/flights/:id/finance` | k6 `p95 < 5000` | M15 | план |
 | T-4.4-04 | 4.4 | Восстановление после сбоя не более 30 минут | pgBackRest, инструкция администратора | — | — | учебное восстановление с хронометражом | M15 | план |
 | T-4.4-05 | 4.4 | Резервное копирование ежедневно | pgBackRest: полная еженедельно, инкрементальная ежедневно, WAL непрерывно | — | — | журнал заданий | M15, M16 | план |
 | T-4.4-06 | 4.4 | Хранение резервных копий 30 дней | политика хранения pgBackRest | — | — | проверка политики | M15 | план |
-| T-4.5-01 | 4.5 | Интерфейс на русском языке | `i18next`, `ru` | — | все | `test_no_hardcoded_strings` | M1, M10 | план |
-| T-4.5-02 | 4.5 | Интерфейс на английском языке | `i18next`, `en` | — | все | `test_locale_completeness` | M1, M10 | план |
+| T-4.5-01 | 4.5 | Интерфейс на русском языке | `i18next`, `ru`; в компонентах нет русского текста вне `t()` | — | все | `web/src/shared/i18n/no-hardcoded-text.test.ts` | M1, M10 | реализовано |
+| T-4.5-02 | 4.5 | Интерфейс на английском языке | `i18next`, `en` | — | все | `web/src/shared/i18n/i18n.test.ts` (ключи ru и en совпадают, пустых нет) | M1, M10 | реализовано |
 | T-4.5-03 | 4.5 | Наименования справочников на двух языках | `name_ru` / `name_en` (ADR-031) | справочные | справочники | `catalog/tests/test_reference.py::test_verified_airports_have_russian_names` | M3 | реализовано |
-| T-4.5-04 | 4.5 | Отображение данных в разных часовых поясах (UTC / локальное) | `timezoneMode`, обязательная подпись зоны | — | все | `test_timezone_modes` | M10 | план |
+| T-4.5-04 | 4.5 | Отображение данных в разных часовых поясах (UTC / локальное) | обязательная подпись зоны; UTC везде, местное время аэропорта в карточке рейса, зона пользователя в часах шапки. **Не сделано:** экраны не переключаются по настройке пользователя `timezoneMode` — она хранится, но не применяется | — | все | `web/src/shared/format/timezone.test.ts` | M10 | в работе |
 
 ---
 
@@ -249,7 +249,7 @@
 |---|---|---|---|---|---|---|
 | T-5-01 | 5, этап 1 | Утверждённый протокол требований | `GAPS.md`, `DECISIONS.md`, `openapi.yaml`, письмо заказчику | подпись заказчика | M0 | в работе |
 | T-5-02 | 5, этап 2 | Кликабельные макеты для утверждения | веб-клиент на статических данных | утверждение заказчиком, скриншоты в `artifacts/screenshots/m2/` | M2 | план |
-| T-5-03 | 5, этап 3 | Рабочее ядро системы | M3–M10 | `make check` зелёный, сквозной сценарий | M3–M10 | план |
+| T-5-03 | 5, этап 3 | Рабочее ядро системы | M3–M10 | `make check` зелёный, сквозной сценарий `e2e/scenario.spec.ts`; остатки M7 и M9 — `TASKS.md` | M3–M10 | в работе |
 | T-5-04 | 5, этап 4 | Мобильные клиенты | M12 | установка на устройства | M12 | план |
 | T-5-05 | 5, этап 5 | Пройдены тесты стыковки | M13, M14 | тесты адаптеров, кассеты | M13, M14 | план |
 | T-5-06 | 5, этап 6 | Отчёт о тестировании | M15 | отчёты инструментов в `artifacts/` | M15 | план |

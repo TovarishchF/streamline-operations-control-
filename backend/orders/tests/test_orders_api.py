@@ -85,9 +85,47 @@ def test_order_is_created_with_price_snapshot(
     assert body["purchaseCost"] == {"amount": "77000.0000", "currency": "RUB"}
     assert body["contractTermsSnapshot"]["deferDays"] == 14
     assert body["slaConfirmDeadline"] is not None
-    # Цена продажи считается по тарифам клиента — их пока нет, и выдавать
-    # закупку за продажу нельзя (`CLAUDE.md § 4`)
-    assert body["salePrice"] is None
+    # Цена продажи — снимок при назначении (ADR-022). Тарифных правил
+    # у клиента нет — наценка по умолчанию 15 %: 77 000 × 1,15 = 88 550.
+    assert body["salePrice"] == {"amount": "88550.0000", "currency": "RUB"}
+    assert body["tariffRuleId"] is None
+
+
+def test_required_attributes_are_checked(
+    as_role: Callable[..., APIClient],
+    flight: Flight,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+    contract: VendorContract,
+    fuel_price: VendorPrice,
+) -> None:
+    """Обязательные атрибуты заказа (`SPEC.md § 5.1`): без объёма топливо не заказать."""
+    fuel_service.required_attributes = [
+        {"key": "volumeL", "type": "number", "required": True},
+        {"key": "grade", "type": "enum", "options": ["JetA1", "Avgas"], "required": True},
+    ]
+    fuel_service.save(update_fields=["required_attributes"])
+    api = as_role(Role.DISPATCHER)
+
+    refused = api.post(
+        services_url(flight),
+        payload(fuel_service, vendor_alpha, attributes={"grade": "Diesel"}),
+        format="json",
+        headers=idempotent("order-attr-000001"),
+    )
+    assert refused.status_code == status.HTTP_400_BAD_REQUEST, refused.data
+    problems = refused.json()["error"]["details"]["attributes"]
+    assert set(problems) == {"volumeL", "grade"}
+    assert not ServiceOrder.objects.exists()
+
+    accepted = api.post(
+        services_url(flight),
+        payload(fuel_service, vendor_alpha, attributes={"volumeL": "1000", "grade": "JetA1"}),
+        format="json",
+        headers=idempotent("order-attr-000002"),
+    )
+    assert accepted.status_code == status.HTTP_201_CREATED, accepted.data
+    assert accepted.json()["attributes"] == {"volumeL": "1000", "grade": "JetA1"}
 
 
 def test_price_change_does_not_rewrite_placed_order(
@@ -542,3 +580,33 @@ def test_client_does_not_reach_service_orders_at_all(
     """
     api = as_role(Role.CLIENT, client=client_alpha)
     assert api.get(ORDERS_URL).status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_finance_reads_flight_orders_but_cannot_place_them(
+    as_role: Callable[..., APIClient],
+    placed_order: ServiceOrder,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+) -> None:
+    """Финансист видит заявки рейса — по ним он выставляет счёт, — но не заказывает."""
+    api = as_role(Role.FINANCE)
+    url = services_url(placed_order.flight)
+
+    listed = api.get(url)
+    assert listed.status_code == status.HTTP_200_OK
+    assert [item["id"] for item in listed.json()["data"]] == [placed_order.pk]
+
+    placed = api.post(
+        url, payload(fuel_service, vendor_alpha), format="json", headers=idempotent("fin-0000001")
+    )
+    assert placed.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_portals_do_not_read_flight_orders(
+    as_role: Callable[..., APIClient], placed_order: ServiceOrder, client_alpha: Client
+) -> None:
+    api = as_role(Role.CLIENT, client=client_alpha)
+    assert api.get(services_url(placed_order.flight)).status_code in (
+        status.HTTP_403_FORBIDDEN,
+        status.HTTP_404_NOT_FOUND,
+    )

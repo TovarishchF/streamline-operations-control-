@@ -13,26 +13,42 @@ from __future__ import annotations
 from typing import Any, ClassVar, cast
 
 from django.db.models import Prefetch, QuerySet
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from django.shortcuts import get_object_or_404
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
 from rest_framework import mixins, status, viewsets
-from rest_framework.exceptions import ValidationError
+from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from accounts.models import Organization, User
-from accounts.permissions import Permission
+from accounts.permissions import Permission, has_permission
+from billing.api.serializers import (
+    TariffRuleCreateSerializer,
+    TariffRuleSerializer,
+    TariffSimulateRequestSerializer,
+    TariffSimulateResultSerializer,
+)
+from billing.models import TariffRule
+from billing.services import margin as margin_service
+from billing.services import tariffs as tariff_service
+from catalog.models import Service
 from core.api.idempotency import IdempotentCreateMixin
 from core.api.serializers import ErrorResponseSerializer
 from core.api.viewsets import SocViewSetMixin
+from core.money import Money
 from counterparties import services
 from counterparties.api.serializers import (
     ClientCreateSerializer,
     ClientSerializer,
+    VendorCandidateSerializer,
     VendorContractCreateSerializer,
     VendorContractSerializer,
     VendorCreateSerializer,
+    VendorRatingSerializer,
     VendorSerializer,
     VendorServiceMappingSerializer,
+    VendorSuggestRequestSerializer,
     payment_terms_to_fields,
 )
 from counterparties.models import (
@@ -42,6 +58,8 @@ from counterparties.models import (
     VendorContract,
     VendorServiceMapping,
 )
+from counterparties.services import rating as rating_service
+from counterparties.services import suggest as suggest_service
 
 
 @extend_schema_view(
@@ -73,6 +91,10 @@ class ClientViewSet(
         "list": Permission.CLIENT_VIEW,
         "retrieve": Permission.CLIENT_VIEW,
         "create": Permission.CLIENT_EDIT,
+        # Чтение и запись тарифа различаются методом, а действие одно:
+        # право проверяется в самом действии.
+        "tariffs": (Permission.TARIFF_VIEW, Permission.TARIFF_EDIT),
+        "simulate": Permission.TARIFF_VIEW,
     }
 
     def get_queryset(self) -> QuerySet[Client]:
@@ -111,6 +133,103 @@ class ClientViewSet(
             )
 
         return self.idempotent(request, produce)
+
+
+    @extend_schema(
+        methods=["GET"],
+        summary="Тарифные правила клиента",
+        tags=["counterparties"],
+        responses={
+            200: inline_serializer(
+                "TariffRuleList", fields={"data": TariffRuleSerializer(many=True)}
+            ),
+            404: ErrorResponseSerializer,
+        },
+    )
+    @extend_schema(
+        methods=["POST"],
+        summary="Добавление тарифного правила",
+        tags=["counterparties"],
+        request=TariffRuleCreateSerializer,
+        responses={201: TariffRuleSerializer, 400: ErrorResponseSerializer},
+    )
+    @action(detail=True, methods=["get", "post"])
+    def tariffs(self, request: Request, pk: str | None = None) -> Response:
+        """Тарифы клиента `[ТЗ 3.4.1]`: правила с областью, способом и периодом."""
+        client = get_object_or_404(Client, pk=pk)
+
+        if request.method == "GET":
+            rules = TariffRule.objects.filter(client=client).select_related("service")
+            return Response({"data": TariffRuleSerializer(rules, many=True).data})
+
+        role = str(getattr(request.user, "role", ""))
+        if not has_permission(role, Permission.TARIFF_EDIT):
+            raise PermissionDenied
+
+        def produce() -> Response:
+            payload = TariffRuleCreateSerializer(data=request.data)
+            payload.is_valid(raise_exception=True)
+            data = payload.validated_data
+            scope = data["scope"]
+            pricing = data["pricing"]
+            discount = data.get("discount") or {}
+            price = pricing.get("price")
+            rule = tariff_service.create_rule(
+                client=client,
+                service=Service.objects.filter(pk=scope.get("serviceId")).first()
+                if scope.get("serviceId")
+                else None,
+                category=scope.get("category") or "",
+                airport_icao=scope.get("airportIcao") or "",
+                mode=pricing["mode"],
+                markup_percent=pricing.get("markupPercent"),
+                fixed_price=Money.of(price["amount"], price["currency"]) if price else None,
+                discount_kind=discount.get("kind", ""),
+                discount_value=discount.get("value"),
+                valid_from=data["validFrom"],
+                valid_to=data["validTo"],
+                actor=cast(User, request.user),
+            )
+            # Цены продажи в заявках без снимка и маржа рейсов клиента
+            # считаются по тарифам — прежний расчёт больше не верен.
+            margin_service.client_tariffs_changed(client.pk)
+            return Response(TariffRuleSerializer(rule).data, status=status.HTTP_201_CREATED)
+
+        return self.idempotent(request, produce)
+
+    @extend_schema(
+        summary="Песочница тарифа",
+        tags=["counterparties"],
+        request=TariffSimulateRequestSerializer,
+        responses={200: TariffSimulateResultSerializer, 404: ErrorResponseSerializer},
+    )
+    @action(detail=True, methods=["post"], url_path="tariffs/simulate")
+    def simulate(self, request: Request, pk: str | None = None) -> Response:
+        """Какое правило сработало и почему `[ТЗ 3.4.1]` (`SPEC.md § 7.1`).
+
+        Чтение через POST: ключ идемпотентности не нужен (ADR-018).
+        """
+        client = get_object_or_404(Client, pk=pk)
+        payload = TariffSimulateRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+        unit = data.get("purchasePrice")
+        result = tariff_service.simulate(
+            client=client,
+            service=Service.objects.get(pk=data["serviceId"]),
+            airport_icao=data["airportIcao"],
+            moment=data["onDate"],
+            quantity=data["quantity"],
+            purchase_unit_price=Money.of(unit["amount"], unit["currency"]) if unit else None,
+        )
+        return Response(
+            {
+                "salePrice": result.amount.to_json(),
+                "appliedRuleId": result.rule.pk if result.rule else None,
+                "explanation": result.steps,
+                "candidateRules": result.candidates,
+            }
+        )
 
 
 def _organization_of(user: User) -> Organization:
@@ -173,6 +292,10 @@ class VendorViewSet(
         "retrieve": Permission.VENDOR_VIEW,
         "create": Permission.VENDOR_EDIT,
         "partial_update": Permission.VENDOR_EDIT,
+        "rating": Permission.VENDOR_VIEW,
+        # Подбор — расчёт без записи: им пользуется и тот, кто выбирает
+        # поставщика, и тот, кто смотрит реестр.
+        "suggest": (Permission.VENDOR_ASSIGN, Permission.VENDOR_VIEW),
     }
 
     def get_queryset(self) -> QuerySet[Vendor]:
@@ -254,6 +377,68 @@ class VendorViewSet(
             actor=request.user,  # type: ignore[arg-type]
         )
         return Response(VendorSerializer(updated).data)
+
+
+    @extend_schema(
+        summary="Рейтинг поставщика с разложением на составляющие",
+        tags=["counterparties"],
+        responses={200: VendorRatingSerializer, 404: ErrorResponseSerializer},
+    )
+    @action(detail=True, methods=["get"])
+    def rating(self, request: Request, pk: str | None = None) -> Response:
+        """Рейтинг вычисляется, а не вводится `[ТЗ 3.3.1]` (`DOMAIN.md § 7.4`).
+
+        Неактивный поставщик тоже имеет историю: карточку выведенного
+        из обращения открывают, чтобы понять, почему его вывели.
+        """
+        vendor = get_object_or_404(Vendor, pk=pk)
+        return Response(rating_service.to_contract(rating_service.rating_for(vendor)))
+
+    @extend_schema(
+        summary="Подбор поставщика",
+        tags=["counterparties"],
+        request=VendorSuggestRequestSerializer,
+        responses={
+            200: inline_serializer(
+                "VendorCandidateList", fields={"data": VendorCandidateSerializer(many=True)}
+            ),
+            400: ErrorResponseSerializer,
+        },
+    )
+    @action(detail=False, methods=["post"])
+    def suggest(self, request: Request) -> Response:
+        """Кандидаты с баллами и влиянием на маржу `[ТЗ 3.3.2]` (`DOMAIN.md § 7.5`).
+
+        Чтение через POST: ключ идемпотентности не нужен (ADR-018), расчёт
+        ничего не записывает.
+        """
+        from flights.models import Flight
+
+        payload = VendorSuggestRequestSerializer(data=request.data)
+        payload.is_valid(raise_exception=True)
+        data = payload.validated_data
+
+        service = Service.objects.filter(pk=data["serviceId"], is_active=True).first()
+        if service is None:
+            raise ValidationError({"serviceId": "Услуга не найдена в каталоге"})
+        flight = None
+        if data.get("flightId"):
+            flight = Flight.objects.filter(pk=data["flightId"]).first()
+            if flight is None:
+                raise ValidationError({"flightId": "Рейс не найден"})
+
+        candidates = suggest_service.suggest(
+            service=service,
+            airport_icao=data["airportIcao"],
+            moment=data["onDate"],
+            quantity=data["quantity"],
+            mode=data["mode"],
+            custom_weights=data.get("weights"),
+            flight=flight,
+        )
+        return Response(
+            {"data": [suggest_service.to_contract(candidate) for candidate in candidates]}
+        )
 
 
 def _certificates_payload(certificates: list[dict[str, Any]]) -> list[dict[str, Any]]:

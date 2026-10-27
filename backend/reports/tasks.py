@@ -140,3 +140,16 @@ def _send_subscription(subscription: ReportSubscription, current: datetime) -> N
             kind=AttachmentKind.OTHER,
             owner=message,
         )
+
+
+@shared_task(name="reports.refresh_views")  # type: ignore[misc]
+def refresh_views() -> str:
+    """Обновление агрегатного пути маржи для дашбордов (ADR-012).
+
+    Идемпотентна: повторное обновление пересчитывает те же представления.
+    `CONCURRENTLY` не блокирует чтение — дашборд открывается и во время
+    обновления.
+    """
+    from reports.services import dashboards
+
+    return dashboards.refresh_views().isoformat()

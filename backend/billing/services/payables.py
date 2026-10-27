@@ -26,6 +26,7 @@ from billing.models import Payable, PayableStatus
 from billing.services import numbering
 from core import clock
 from core.exceptions import DomainError
+from orders.services import costs
 
 if TYPE_CHECKING:
     from accounts.models import User
@@ -47,7 +48,9 @@ class PayableNotPending(DomainError):
 def defer_days_for(order: ServiceOrder) -> int:
     """Отсрочка оплаты из снимка условий контракта (ADR-025)."""
     snapshot = order.contract_terms_snapshot or {}
-    value = snapshot.get("paymentDeferDays")
+    # Снимок пишется ключом `deferDays` (`orders.services.orders`); прежний
+    # ключ читается для заявок, оформленных до исправления.
+    value = snapshot.get("deferDays", snapshot.get("paymentDeferDays"))
     if value is None and order.contract is not None:
         value = order.contract.payment_defer_days
     try:
@@ -74,7 +77,10 @@ def create_for_order(*, order: ServiceOrder, actor: User | None = None) -> Payab
     if existing is not None:
         return existing
 
-    amount = order.purchase_cost_amount or Decimal(0)
+    # Платим за оказанное: стоимость по фактическому количеству (ADR-020),
+    # по тому же снимку цены, что зафиксирован при заказе.
+    cost = costs.actual_cost(order)
+    amount = cost.amount if cost is not None else Decimal(0)
     if amount <= 0:
         return None
 

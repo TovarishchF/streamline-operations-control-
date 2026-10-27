@@ -99,6 +99,87 @@ def test_payable_appears_when_the_service_is_completed(
     assert payable.number.startswith("SOC-P-")
 
 
+def test_payable_amount_follows_the_actual_quantity(
+    flight: Flight,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+    contract: Any,
+    fuel_price: Any,
+    dispatcher: User,
+) -> None:
+    """ADR-020: заказали 1000 л, залили 1200 л — платим за 1200 по цене снимка.
+
+    70 ₽/л × 1200 = 84 000, ночная надбавка 10 % — 92 400.
+    """
+    order = order_services.create_order(
+        flight=flight,
+        service=fuel_service,
+        leg="departure",
+        quantity=Decimal("1000.0000"),
+        vendor=vendor_alpha,
+        attributes={},
+        override_reason="",
+        actor=dispatcher,
+    )
+    transitions.apply_transition(order, "confirm", actor=dispatcher)
+    transitions.apply_transition(order, "begin", actor=dispatcher)
+    started = now()
+    order = order_services.update_order(
+        order=order,
+        changes={
+            "actual_start_at": started,
+            "actual_end_at": started + timedelta(minutes=30),
+            "actual_quantity": Decimal("1200.0000"),
+        },
+        actor=dispatcher,
+    )
+    transitions.apply_transition(order, "finish", actor=dispatcher)
+
+    payable = Payable.objects.get(service_orders=order)
+    assert payable.amount == Decimal("92400.0000")
+
+
+def test_due_date_uses_the_snapshot_not_the_current_contract(
+    flight: Flight,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+    contract: Any,
+    fuel_price: Any,
+    dispatcher: User,
+) -> None:
+    """Договор изменили между заказом и выполнением — срок по условиям заказа."""
+    order = order_services.create_order(
+        flight=flight,
+        service=fuel_service,
+        leg="departure",
+        quantity=Decimal("1000.0000"),
+        vendor=vendor_alpha,
+        attributes={},
+        override_reason="",
+        actor=dispatcher,
+    )
+    contract.payment_defer_days = 90
+    contract.save()
+
+    transitions.apply_transition(order, "confirm", actor=dispatcher)
+    transitions.apply_transition(order, "begin", actor=dispatcher)
+    started = now()
+    order = order_services.update_order(
+        order=order,
+        changes={
+            "actual_start_at": started,
+            "actual_end_at": started + timedelta(minutes=30),
+            "actual_quantity": Decimal("1000.0000"),
+        },
+        actor=dispatcher,
+    )
+    transitions.apply_transition(order, "finish", actor=dispatcher)
+
+    payable = Payable.objects.get(service_orders=order)
+    assert order.completed_at is not None
+    assert payable.due_date == order.completed_at + timedelta(days=14)
+
+
 def test_payable_is_created_once(completed_order: ServiceOrder, dispatcher: User) -> None:
     """Обязательство возникает один раз, сколько бы раз ни позвали."""
     again = payables.create_for_order(order=completed_order, actor=dispatcher)

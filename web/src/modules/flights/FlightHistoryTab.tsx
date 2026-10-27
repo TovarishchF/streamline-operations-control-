@@ -4,7 +4,8 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
 import type { AuditEntry } from '@/api/types';
-import { AUDIT } from '@/mocks/admin';
+import { useFlightHistory } from '@/api/flights';
+import { QueryState } from '@/shared/ui/QueryState';
 import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 
 /**
@@ -53,17 +54,14 @@ export function AuditActor({ entry }: { entry: AuditEntry }): JSX.Element {
 }
 
 /**
- * История изменений рейса `[ТЗ 3.1.3]`.
+ * История изменений рейса `[ТЗ 3.1.3]`: сам рейс, его заявки и документы.
  *
  * Записи генератора данных помечены `seed` и подписаны системой —
  * они не выдаются за действия людей (`CLAUDE.md § 4`).
  */
 export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Element {
   const { t } = useTranslation();
-  const suffix = flightId.slice(-3);
-  const entries = AUDIT.filter(
-    (entry) => entry.entityId === flightId || entry.entityId.startsWith(`so_${suffix}`),
-  );
+  const history = useFlightHistory(flightId);
 
   const columns: DataColumns<AuditEntry> = [
     {
@@ -77,6 +75,12 @@ export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Elemen
       key: 'actor',
       width: 210,
       render: (_, row) => <AuditActor entry={row} />,
+    },
+    {
+      title: t('audit.entity'),
+      dataIndex: 'entityType',
+      width: 130,
+      render: (value: string) => t(`auditEntity.${value}`, value),
     },
     {
       title: t('audit.action'),
@@ -95,14 +99,18 @@ export function FlightHistoryTab({ flightId }: { flightId: string }): JSX.Elemen
   ];
 
   return (
-    <DataTable<AuditEntry>
-      size="small"
-      rowKey="id"
-      columns={columns}
-      dataSource={entries}
-      pagination={false}
-      scroll={{ x: 900 }}
-      locale={{ emptyText: <EmptyState description={t('audit.emptyForFlight')} /> }}
-    />
+    <QueryState query={history}>
+      {(page) => (
+        <DataTable<AuditEntry>
+          size="small"
+          rowKey="id"
+          columns={columns}
+          dataSource={page.data}
+          pagination={false}
+          scroll={{ x: 1000 }}
+          locale={{ emptyText: <EmptyState description={t('audit.emptyForFlight')} /> }}
+        />
+      )}
+    </QueryState>
   );
 }

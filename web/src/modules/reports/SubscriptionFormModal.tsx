@@ -13,6 +13,7 @@ import {
   type ReportSubscription,
 } from '@/api/reports';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const SCHEDULES: ReportSchedule[] = ['daily', 'weekly', 'monthly'];
 
@@ -145,7 +146,7 @@ export function SubscriptionFormModal({
             autoFocus
             options={definitions.map((definition) => ({
               value: definition.code,
-              label: definition.name.ru,
+              label: localizedName(definition.name),
             }))}
           />
         </Form.Item>

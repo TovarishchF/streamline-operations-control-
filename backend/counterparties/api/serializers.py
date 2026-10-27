@@ -8,6 +8,7 @@
 
 from __future__ import annotations
 
+from decimal import Decimal
 from typing import Any
 
 from rest_framework import serializers
@@ -347,3 +348,75 @@ class VendorServiceMappingSerializer(serializers.ModelSerializer):  # type: igno
                 {"vendorCode": "Для этого кода поставщика соответствие уже заведено"}
             )
         return attrs
+
+
+# ─────────────────────────── Рейтинг и подбор ───────────────────────────
+
+
+class VendorRatingComponentsSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """Составляющая без данных — `null`, а не ноль и не единица (G-55)."""
+
+    onTimeConfirmRate = serializers.CharField(allow_null=True)  # noqa: N815
+    slaComplianceRate = serializers.CharField(allow_null=True)  # noqa: N815
+    billingAccuracy = serializers.CharField(allow_null=True)  # noqa: N815
+    qualityScore = serializers.CharField(allow_null=True)  # noqa: N815
+
+
+class VendorRatingSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`VendorRating` из контракта (`DOMAIN.md § 7.4`)."""
+
+    sufficientData = serializers.BooleanField()  # noqa: N815
+    rating = serializers.CharField(allow_null=True)
+    orderCount = serializers.IntegerField()  # noqa: N815
+    components = VendorRatingComponentsSerializer()
+    weights = serializers.DictField(child=serializers.CharField())
+
+
+class SuggestWeightsSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    price = serializers.DecimalField(
+        max_digits=6, decimal_places=4, min_value=Decimal(0), default=Decimal(0)
+    )
+    rating = serializers.DecimalField(
+        max_digits=6, decimal_places=4, min_value=Decimal(0), default=Decimal(0)
+    )
+    proximity = serializers.DecimalField(
+        max_digits=6, decimal_places=4, min_value=Decimal(0), default=Decimal(0)
+    )
+
+
+class VendorSuggestRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`VendorSuggestRequest` из контракта (`DOMAIN.md § 7.5`)."""
+
+    serviceId = serializers.CharField()  # noqa: N815
+    airportIcao = serializers.CharField(min_length=4, max_length=4)  # noqa: N815
+    onDate = serializers.DateTimeField()  # noqa: N815
+    quantity = serializers.DecimalField(
+        max_digits=18, decimal_places=4, min_value=Decimal("0.0001"), default=Decimal(1)
+    )
+    flightId = serializers.CharField(required=False, allow_null=True, allow_blank=True)  # noqa: N815
+    mode = serializers.ChoiceField(
+        choices=["price", "rating", "proximity", "balanced", "custom"], default="balanced"
+    )
+    weights = SuggestWeightsSerializer(required=False)
+
+    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
+        if attrs["mode"] == "custom" and not attrs.get("weights"):
+            raise serializers.ValidationError(
+                {"weights": "Для режима «свои веса» веса обязательны"}
+            )
+        return attrs
+
+
+class VendorCandidateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`VendorCandidate` из контракта: разложение балла обязательно."""
+
+    vendorId = serializers.CharField()  # noqa: N815
+    vendorName = serializers.CharField()  # noqa: N815
+    cost = MoneySerializer()
+    priceScore = serializers.CharField()  # noqa: N815
+    ratingScore = serializers.CharField()  # noqa: N815
+    proximityScore = serializers.CharField()  # noqa: N815
+    totalScore = serializers.CharField()  # noqa: N815
+    distanceKm = serializers.FloatField(allow_null=True)  # noqa: N815
+    hasBaseAtAirport = serializers.BooleanField()  # noqa: N815
+    marginImpact = MoneySerializer(allow_null=True)  # noqa: N815

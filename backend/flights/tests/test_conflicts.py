@@ -45,7 +45,7 @@ class TestAircraftState:
 
         found = conflicts.detect(_flight(client_alpha, aircraft, 6))
 
-        assert [item.kind for item in found] == ["aircraft_aog"]
+        assert [item.kind for item in found] == ["aircraft_unserviceable"]
         assert aircraft.registration in found[0].message
 
     def test_maintenance_is_a_conflict(
@@ -56,7 +56,7 @@ class TestAircraftState:
 
         found = conflicts.detect(_flight(client_alpha, aircraft, 6))
 
-        assert [item.kind for item in found] == ["aircraft_maintenance"]
+        assert [item.kind for item in found] == ["aircraft_unserviceable"]
 
     def test_serviceable_aircraft_is_clean(
         self, airports: dict[str, Airport], client_alpha: Client, aircraft: Aircraft
@@ -166,7 +166,7 @@ class TestApprovals:
         found = [
             item
             for item in conflicts.detect(_flight(client_alpha, aircraft, 24 * 5))
-            if item.kind == "approval_expired"
+            if item.kind == "expired_approval"
         ]
 
         assert len(found) == 1
@@ -186,7 +186,7 @@ class TestApprovals:
         found = [
             item
             for item in conflicts.detect(_flight(client_alpha, aircraft, 6))
-            if item.kind == "approval_expired"
+            if item.kind == "expired_approval"
         ]
 
         assert found == []
@@ -217,7 +217,7 @@ class TestAuditRecord:
         entry = AuditEntry.objects.get(entity_id=flight.pk, action="schedule_conflict")
         assert "AOG" in entry.comment
         assert entry.after is not None
-        assert entry.after["conflicts"][0]["kind"] == "aircraft_aog"
+        assert entry.after["conflicts"][0]["kind"] == "aircraft_unserviceable"
 
     def test_clean_flight_writes_no_conflict_entry(
         self,

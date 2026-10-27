@@ -231,3 +231,118 @@ export function useCheckIntegration() {
     },
   });
 }
+
+// ─────────────────────────── Правила SLA ───────────────────────────
+
+export const slaRuleSchema = z.object({
+  id: z.string(),
+  scope: z.object({ category: z.string().nullable(), vendorId: z.string().nullable() }),
+  confirmMinutes: z.number().int(),
+  completionMinutes: z.number().int().nullable(),
+  penalty: z.object({ kind: z.enum(['none', 'fixed', 'percent']), value: z.string().nullable() }),
+});
+
+export type SlaRuleRow = z.infer<typeof slaRuleSchema>;
+
+export function useSlaRules(): UseQueryResult<{ data: SlaRuleRow[] }> {
+  return useQuery({
+    queryKey: ['sla-rules'],
+    queryFn: ({ signal }) =>
+      request('/sla-rules', z.object({ data: z.array(slaRuleSchema) }), { signal }),
+  });
+}
+
+export interface CreateSlaRuleInput {
+  scope: { category: string | null; vendorId: string | null };
+  confirmMinutes: number;
+  completionMinutes: number | null;
+  penalty: { kind: 'none' | 'fixed' | 'percent'; value: string | null };
+}
+
+/** Новое правило вытесняет прежнее той же области — история сохраняется (G-39). */
+export function useCreateSlaRule() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateSlaRuleInput) =>
+      request('/sla-rules', slaRuleSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['sla-rules'] });
+    },
+  });
+}
+
+// ─────────────────────────── Настройки ───────────────────────────
+
+export const settingsSchema = z.object({
+  lowMarginThresholdPercent: z.string(),
+  defaultMarkupPercent: z.string(),
+  documentNumberMasks: z.object({ quote: z.string(), invoice: z.string(), payable: z.string() }),
+  fxPolicy: z.enum(['document_date', 'order_date']),
+  slaWeights: z.record(z.string()),
+  vendorSuggestWeights: z.record(z.string()),
+  contractExpiryReminders: z.array(z.number().int()),
+  deicingRule: z.object({ tempWithPrecipC: z.number().int(), tempAlwaysC: z.number().int() }),
+  pdRetentionMonths: z.number().int(),
+  clockOffsetSeconds: z.number().int(),
+  clockScale: z.number().int(),
+  sampleData: z.boolean(),
+});
+
+export type SettingsRow = z.infer<typeof settingsSchema>;
+
+export function useSettings(enabled = true): UseQueryResult<SettingsRow> {
+  return useQuery({
+    queryKey: ['settings'],
+    queryFn: ({ signal }) => request('/settings', settingsSchema, { signal }),
+    enabled,
+  });
+}
+
+export function useUpdateSettings() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (changes: Partial<Omit<SettingsRow, 'sampleData'>>) =>
+      request('/settings', settingsSchema, { method: 'PATCH', body: changes }),
+    onSuccess: (updated) => {
+      queryClient.setQueryData(['settings'], updated);
+      // Порог и наценка участвуют в марже; модельное время — в часах всех экранов.
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin'] });
+      void queryClient.invalidateQueries({ queryKey: ['clock'] });
+    },
+  });
+}
+
+// ─────────────────────────── Производительность ───────────────────────────
+
+export const performanceReportSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  metrics: z.array(
+    z.object({
+      name: z.string(),
+      source: z.enum(['server', 'client']),
+      p50Ms: z.number().int().nullable(),
+      p95Ms: z.number().int().nullable(),
+      p99Ms: z.number().int().nullable(),
+      sampleCount: z.number().int(),
+      thresholdMs: z.number().int(),
+      withinThreshold: z.boolean().nullable(),
+    }),
+  ),
+});
+
+export type PerformanceReportRow = z.infer<typeof performanceReportSchema>;
+
+export function usePerformance(range: { from: string; to: string }): UseQueryResult<PerformanceReportRow> {
+  const query = new URLSearchParams(range).toString();
+  return useQuery({
+    queryKey: ['performance', query],
+    queryFn: ({ signal }) => request(`/performance?${query}`, performanceReportSchema, { signal }),
+  });
+}

@@ -13,6 +13,7 @@ import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { ScrDrawer } from './ScrDrawer';
 import { SlotAnswerModal } from './SlotAnswerModal';
 import { SlotFormModal } from './SlotFormModal';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   requested: 'progress', confirmed: 'done', rejected: 'critical', cancelled: 'cancelled',
@@ -52,7 +53,7 @@ export function SlotsPage(): JSX.Element {
         <Space direction="vertical" size={0}>
           <Mono>{value}</Mono>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {airports[value]?.name.ru}
+            {localizedName(airports[value]?.name)}
           </Typography.Text>
         </Space>
       ),
@@ -119,6 +120,11 @@ export function SlotsPage(): JSX.Element {
           {t('slots.newRequest')}
         </Button>
       </Space>
+
+      {/* Подключения нет — экран говорит об этом прямо (`CLAUDE.md § 4`, ADR-039). */}
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        {t('slots.manualHint')}
+      </Typography.Text>
 
       {slots.isError ? <Alert type="error" showIcon message={t('common.error')} /> : null}
 

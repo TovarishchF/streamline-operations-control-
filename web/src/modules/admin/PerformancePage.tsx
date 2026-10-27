@@ -1,36 +1,64 @@
-import type { JSX } from 'react';
-import { Card, Space, Tag, Typography } from 'antd';
+import { useMemo, useState, type JSX } from 'react';
+import { Card, Segmented, Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import { PERFORMANCE } from '@/mocks/admin';
-import { Mono, UtcTime } from '@/shared/ui/primitives';
+import { usePerformance, type PerformanceReportRow } from '@/api/admin';
+import { useClock } from '@/shared/clock/useClock';
+import { QueryState } from '@/shared/ui/QueryState';
+import { EmptyState, Mono, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
-interface Metric {
-  name: string;
-  source: 'server' | 'client';
-  p50Ms: number;
-  p95Ms: number;
-  p99Ms: number;
-  sampleCount: number;
-  thresholdMs: number;
-  withinThreshold: boolean;
+type Metric = PerformanceReportRow['metrics'][number];
+
+const PERIOD_HOURS = { day: 24, week: 168, month: 720 } as const;
+type Period = keyof typeof PERIOD_HOURS;
+
+function Milliseconds({ value }: { value: number | null }): JSX.Element {
+  const { t } = useTranslation();
+  return value === null ? (
+    <Typography.Text type="secondary">—</Typography.Text>
+  ) : (
+    <Mono>{t('performance.ms', { value })}</Mono>
+  );
 }
 
 /**
  * Измеренные показатели производительности `[ТЗ 4.4]`.
  *
- * **Фактические перцентили за период, а не синтетика** (`SPEC.md § 3`).
+ * **Фактические перцентили за период, а не синтетика** (`SPEC.md § 3`):
+ * серверные — по времени ответов API, клиентские — по замерам браузеров
+ * пользователей (`POST /performance/samples`).
  *
  * ADR-017: норматив считается выполненным при одновременном выполнении двух
- * условий — серверного `p95 http_req_duration` и клиентского времени до
- * `largest-contentful-paint`. Заказчик под «открытием карточки за 2 секунды»
- * понимает время до отрисовки экрана, а не длительность одного вызова API;
- * метод согласуется до испытаний, а не после неудобного результата.
+ * условий — серверного `p95` и клиентского времени до отрисовки экрана.
+ * Метрика без замеров за период — «нет данных», а не «выполнено».
  */
 export function PerformancePage(): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { nowUtc } = useClock();
+  const [period, setPeriod] = useState<Period>('day');
+
+  // Конец периода — по часу, а не по секунде: иначе отчёт перезапрашивался
+  // бы с каждым тиком часов.
+  const hour = Math.floor(nowUtc.getTime() / 3_600_000);
+  const range = useMemo(() => {
+    const to = new Date((hour + 1) * 3_600_000);
+    const from = new Date(to.getTime() - PERIOD_HOURS[period] * 3_600_000);
+    return { from: from.toISOString(), to: to.toISOString() };
+  }, [hour, period]);
+  const report = usePerformance(range);
+  const locale = i18n.language.startsWith('en') ? 'en-GB' : 'ru-RU';
+
+  const verdict = (value: boolean | null): JSX.Element => {
+    if (value === null) return <Tag style={{ margin: 0 }}>{t('performance.noData')}</Tag>;
+    const token = value ? STATUS_TOKENS.done : STATUS_TOKENS.critical;
+    return (
+      <Tag style={{ margin: 0, color: token.color, background: token.background, borderColor: token.border }}>
+        {value ? t('performance.within') : t('performance.exceeded')}
+      </Tag>
+    );
+  };
 
   const columns: DataColumns<Metric> = [
     {
@@ -52,51 +80,34 @@ export function PerformancePage(): JSX.Element {
         </Tag>
       ),
     },
-    {
-      title: 'p50', dataIndex: 'p50Ms', width: 100, align: 'right',
-      render: (value: number) => <Mono>{value} ms</Mono>,
-    },
+    { title: 'p50', dataIndex: 'p50Ms', width: 100, align: 'right', render: (value: number | null) => <Milliseconds value={value} /> },
     {
       title: 'p95', dataIndex: 'p95Ms', width: 110, align: 'right',
-      render: (value: number, row) => (
-        <Mono>
-          <span
-            style={{
-              color: row.withinThreshold ? STATUS_TOKENS.done.color : STATUS_TOKENS.critical.color,
-              fontWeight: 600,
-            }}
-          >
-            {value} ms
-          </span>
-        </Mono>
+      render: (value: number | null, row) => (
+        <span
+          style={{
+            color:
+              row.withinThreshold === null
+                ? undefined
+                : row.withinThreshold
+                  ? STATUS_TOKENS.done.color
+                  : STATUS_TOKENS.critical.color,
+            fontWeight: 600,
+          }}
+        >
+          <Milliseconds value={value} />
+        </span>
       ),
     },
-    {
-      title: 'p99', dataIndex: 'p99Ms', width: 100, align: 'right',
-      render: (value: number) => <Mono>{value} ms</Mono>,
-    },
-    {
-      title: t('performance.threshold'), dataIndex: 'thresholdMs', width: 130, align: 'right',
-      render: (value: number) => <Mono>{value} ms</Mono>,
-    },
+    { title: 'p99', dataIndex: 'p99Ms', width: 100, align: 'right', render: (value: number | null) => <Milliseconds value={value} /> },
+    { title: t('performance.threshold'), dataIndex: 'thresholdMs', width: 130, align: 'right', render: (value: number) => <Milliseconds value={value} /> },
     {
       title: t('performance.samples'), dataIndex: 'sampleCount', width: 110, align: 'right',
-      render: (value: number) => <Mono>{value.toLocaleString('ru-RU')}</Mono>,
+      render: (value: number) => <Mono>{value.toLocaleString(locale)}</Mono>,
     },
     {
       title: t('performance.verdict'), dataIndex: 'withinThreshold', width: 140,
-      render: (value: boolean) => (
-        <Tag
-          style={{
-            margin: 0,
-            color: value ? STATUS_TOKENS.done.color : STATUS_TOKENS.critical.color,
-            background: value ? STATUS_TOKENS.done.background : STATUS_TOKENS.critical.background,
-            borderColor: value ? STATUS_TOKENS.done.border : STATUS_TOKENS.critical.border,
-          }}
-        >
-          {value ? t('performance.within') : t('performance.exceeded')}
-        </Tag>
-      ),
+      render: (value: boolean | null) => verdict(value),
     },
   ];
 
@@ -106,24 +117,43 @@ export function PerformancePage(): JSX.Element {
 
       <Card size="small">
         <Space size={16} wrap>
+          <Segmented
+            value={period}
+            onChange={(value) => {
+              setPeriod(value as Period);
+            }}
+            options={[
+              { label: t('performance.periodDay'), value: 'day' },
+              { label: t('performance.periodWeek'), value: 'week' },
+              { label: t('performance.periodMonth'), value: 'month' },
+            ]}
+          />
           <Typography.Text type="secondary">{t('performance.period')}:</Typography.Text>
-          <UtcTime value={PERFORMANCE.from} withDate />
+          <UtcTime value={range.from} withDate />
           <span>—</span>
-          <UtcTime value={PERFORMANCE.to} withDate />
+          <UtcTime value={range.to} withDate />
         </Space>
       </Card>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<Metric>
-          size="small"
-          rowKey={(row) => `${row.name}_${row.source}`}
-          columns={columns}
-          dataSource={PERFORMANCE.metrics as Metric[]}
-          pagination={false}
-          scroll={{ x: 1150 }}
-        />
+        <QueryState query={report}>
+          {(data) => (
+            <DataTable<Metric>
+              size="small"
+              rowKey={(row) => `${row.name}_${row.source}`}
+              columns={columns}
+              dataSource={data.metrics}
+              pagination={false}
+              scroll={{ x: 1150 }}
+              locale={{ emptyText: <EmptyState description={t('performance.noData')} /> }}
+            />
+          )}
+        </QueryState>
       </Card>
 
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+        {t('performance.methodHint')}
+      </Typography.Text>
     </Space>
   );
 }

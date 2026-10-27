@@ -144,6 +144,7 @@ DEFINITIONS: dict[str, Definition] = {
             Column("rejected", "Отклонено", "Rejected", type="number"),
             Column("slaBreaches", "Нарушений SLA", "SLA breaches", type="number"),
             Column("onTimeRate", "Подтверждено в срок", "Confirmed on time", type="percent"),
+            Column("rating", "Рейтинг", "Rating", type="number"),
             Column("volume", "Объём закупки", "Purchase volume", type="money"),
         ],
         totals=["orders", "completed", "rejected", "slaBreaches", "volume"],

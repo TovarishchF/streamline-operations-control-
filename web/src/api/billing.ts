@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { currencyCodeSchema, moneySchema, pagedSchema, type Paged } from './catalog';
 import { download, newIdempotencyKey, request } from './client';
+import { timed } from '@/shared/perf/measure';
 
 export const fxSnapshotSchema = z.object({
   date: z.string(),
@@ -292,6 +293,113 @@ export function useCreateVendorServiceMapping() {
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['vendor-service-mappings'] });
+    },
+  });
+}
+
+// ─────────────────────────── Маржа рейса ───────────────────────────
+
+export const marginModeSchema = z.enum(['plan', 'fact', 'mixed']);
+
+export type MarginMode = z.infer<typeof marginModeSchema>;
+
+/**
+ * `MarginResult` из контракта (`DOMAIN.md § 7.3`).
+ *
+ * Отрицательная маржа приходит как есть, при нулевой выручке процента
+ * нет (`null`, а не ноль). Курс рейса — рядом: суммы приведены по нему.
+ */
+export const marginResultSchema = z.object({
+  mode: marginModeSchema,
+  currency: currencyCodeSchema,
+  revenue: moneySchema,
+  cost: moneySchema,
+  margin: moneySchema,
+  marginPercent: z.string().nullable(),
+  planPortionPercent: z.string().nullable(),
+  isBelowThreshold: z.boolean(),
+  thresholdPercent: z.string(),
+  fx: fxSnapshotSchema.partial().extend({ rates: z.record(z.string()) }),
+  calculatedAt: z.string(),
+});
+
+export type MarginResultRow = z.infer<typeof marginResultSchema>;
+
+export function useFlightMargin(
+  flightId: string | undefined,
+  mode: MarginMode = 'mixed',
+  enabled = true,
+): UseQueryResult<MarginResultRow> {
+  return useQuery({
+    queryKey: ['flight-margin', flightId, mode],
+    // Норматив ТЗ 4.4 на расчёт маржи: время ответа, замеренное клиентом.
+    queryFn: ({ signal }) =>
+      timed('margin_calc', () =>
+        request(`/flights/${flightId ?? ''}/margin?mode=${mode}`, marginResultSchema, { signal }),
+      ),
+    enabled: Boolean(flightId) && enabled,
+  });
+}
+
+// ─────────────────────────── Платежи ───────────────────────────
+
+export const paymentSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  amount: moneySchema,
+  receivedAt: z.string(),
+  allocations: z.array(z.object({ invoiceId: z.string(), amount: moneySchema })),
+  source: z.enum(['manual', 'onec', 'edo']),
+  externalId: z.string(),
+  comment: z.string(),
+  fxRate: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+export type PaymentRow = z.infer<typeof paymentSchema>;
+
+export function usePayments(params: {
+  invoiceId?: string;
+  clientId?: string;
+}): UseQueryResult<Paged<PaymentRow>> {
+  const query = new URLSearchParams({ perPage: '200' });
+  if (params.invoiceId) query.set('invoiceId', params.invoiceId);
+  if (params.clientId) query.set('clientId', params.clientId);
+
+  return useQuery({
+    queryKey: ['payments', query.toString()],
+    queryFn: ({ signal }) =>
+      request(`/payments?${query.toString()}`, pagedSchema(paymentSchema), { signal }),
+  });
+}
+
+export interface RegisterPaymentInput {
+  clientId: string;
+  amount: z.infer<typeof moneySchema>;
+  receivedAt: string;
+  allocations: { invoiceId: string; amount: z.infer<typeof moneySchema> }[];
+  externalId?: string;
+  comment?: string;
+}
+
+/**
+ * Регистрация поступления (ADR-019). Статус счёта после неё выводит
+ * сервер из суммы платежей — клиент его не присваивает.
+ */
+export function useRegisterPayment() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: RegisterPaymentInput) =>
+      request('/payments', paymentSchema, {
+        method: 'POST',
+        body: { ...input, source: 'manual' },
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['payments'] });
+      void queryClient.invalidateQueries({ queryKey: ['invoice'] });
+      void queryClient.invalidateQueries({ queryKey: ['invoices'] });
     },
   });
 }

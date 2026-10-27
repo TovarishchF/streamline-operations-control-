@@ -17,8 +17,14 @@ from audit.models import AuditEntityType, AuditSource
 from billing.services import fx
 from catalog.models import Airport
 from core import clock, geo
-from core.exceptions import DomainError
-from flights.models import Flight, FlightRequest, FlightRequestStatus, FlightTemplate
+from core.exceptions import DomainError, ScheduleConflict
+from flights.models import (
+    Flight,
+    FlightRequest,
+    FlightRequestStatus,
+    FlightStatus,
+    FlightTemplate,
+)
 from flights.services import conflicts as conflict_detector
 
 if TYPE_CHECKING:
@@ -144,7 +150,11 @@ def create_flight(
 
 
 def record_conflicts(
-    flight: Flight, *, actor: User | None = None, source: AuditSource = AuditSource.USER
+    flight: Flight,
+    *,
+    actor: User | None = None,
+    source: AuditSource = AuditSource.USER,
+    reason: str = "",
 ) -> list[conflict_detector.Conflict]:
     """Записывает обнаруженные конфликты в журнал.
 
@@ -162,33 +172,126 @@ def record_conflicts(
         action="schedule_conflict",
         actor=actor,
         after={"conflicts": [{"kind": item.kind, "reason": item.message} for item in found]},
-        comment="; ".join(item.message for item in found),
+        comment="; ".join(item.message for item in found)
+        + (f". Подтверждено: {reason}" if reason.strip() else ""),
         source=source,
         is_generated=flight.is_generated,
     )
     return found
 
 
-@transaction.atomic
-def update_route(flight: Flight, *, actor: User | None = None, **changes: Any) -> Flight:
-    """Изменяет параметры рейса и пересчитывает маршрут.
+# Поля, изменение которых двигает рейс в расписании: по ним проверяются
+# новые конфликты и уходят письма клиенту и поставщикам `[ТЗ 3.1.3]`.
+SCHEDULE_FIELDS = ("std_utc", "sta_utc", "aircraft_id", "dep_icao", "arr_icao")
+ROUTE_FIELDS = ("aircraft_id", "dep_icao", "arr_icao")
+AUDITED_FIELDS = (*SCHEDULE_FIELDS, "pax_count", "remarks")
 
-    Пересчёт обязателен: смена аэропорта или борта меняет расстояние,
-    время в пути и заправку, а рассинхронизованные расчётные поля хуже,
-    чем их отсутствие.
+# Завершённый и отменённый рейс — история: его не правят.
+CLOSED_STATUSES = (FlightStatus.COMPLETED, FlightStatus.CANCELLED)
+# Вылетевший рейс уже случился: время и маршрут фиксируют фактические
+# отметки, а не перенос по расписанию.
+DEPARTED_STATUSES = (FlightStatus.IN_FLIGHT, FlightStatus.ARRIVED)
+
+
+class ScheduleChangeInvalid(DomainError):
+    """Прилёт раньше вылета и прочие невозможные правки расписания."""
+
+    code = "VALIDATION_ERROR"
+
+
+def _conflict_keys(found: list[conflict_detector.Conflict]) -> set[tuple[str, str | None]]:
+    return {(item.kind, item.related_flight_id) for item in found}
+
+
+@transaction.atomic
+def update_route(
+    flight: Flight,
+    *,
+    actor: User | None = None,
+    override_reason: str = "",
+    **changes: Any,
+) -> Flight:
+    """Изменяет параметры рейса `[ТЗ 3.1.3]` (`SPEC.md § 4.1`).
+
+    Сценарий один для формы и для перетаскивания на планшете: проверка
+    конфликтов → подтверждение с причиной → аудит → письма в исходящие.
+
+    * Смена маршрута или борта пересчитывает расстояние, время в пути
+      и заправку. Сдвиг по времени сохраняет длительность рейса: полоса,
+      перенесённая на планшете, не меняет своей ширины. Явный `sta_utc` —
+      растягивание полосы — задаёт длительность.
+    * Конфликт не запрещает сохранение, но новый конфликт, появившийся
+      от этой правки, требует причины (`override_reason`); без неё —
+      отказ со списком конфликтов. Причина идёт в аудит.
     """
+    if flight.status in CLOSED_STATUSES:
+        raise ScheduleChangeInvalid(
+            f"Рейс в состоянии «{flight.get_status_display()}» не изменяется",
+            {"status": flight.status},
+        )
+    schedule_keys = {"std_utc", "sta_utc", "aircraft", "aircraft_id", "dep_icao", "arr_icao"}
+    if flight.status in DEPARTED_STATUSES and schedule_keys & set(changes):
+        raise ScheduleChangeInvalid(
+            "Рейс уже вылетел: время и маршрут не переносятся, фиксируется факт",
+            {"status": flight.status},
+        )
+
     before = audit.snapshot(
         flight,
-        fields=["dep_icao", "arr_icao", "std_utc", "aircraft_id", "pax_count", "remarks"],
+        fields=list(AUDITED_FIELDS),
     )
+    previous_std, previous_sta = flight.std_utc, flight.sta_utc
+    conflicts_before = _conflict_keys(conflict_detector.detect(flight))
+    duration = flight.sta_utc - flight.std_utc
 
+    explicit_sta = changes.pop("sta_utc", None)
     for field, value in changes.items():
         setattr(flight, field, value)
 
+    # Сравнение по снимку, а не по ключам правки: борт назначают и полем
+    # `aircraft_id`, и объектом `aircraft`.
+    current_route = audit.snapshot(flight, fields=list(ROUTE_FIELDS))
+    route_changed = any(before.get(field) != current_route[field] for field in ROUTE_FIELDS)
     route = compute_route(flight.dep_icao, flight.arr_icao, flight.aircraft)
     for field, value in route.items():
         setattr(flight, field, value)
-    flight.sta_utc = flight.std_utc + timedelta(minutes=route["block_time_min"])
+
+    if explicit_sta is not None:
+        flight.sta_utc = explicit_sta
+    elif route_changed:
+        flight.sta_utc = flight.std_utc + timedelta(minutes=route["block_time_min"])
+    else:
+        flight.sta_utc = flight.std_utc + duration
+    if flight.sta_utc <= flight.std_utc:
+        raise ScheduleChangeInvalid(
+            "Прилёт должен быть позже вылета", {"stdUtc": flight.std_utc.isoformat()}
+        )
+
+    after = audit.snapshot(
+        flight,
+        fields=list(AUDITED_FIELDS),
+    )
+    schedule_changed = any(before.get(field) != after.get(field) for field in SCHEDULE_FIELDS)
+
+    found = conflict_detector.detect(flight) if schedule_changed else []
+    introduced = [
+        item for item in found if (item.kind, item.related_flight_id) not in conflicts_before
+    ]
+    if introduced and not override_reason.strip():
+        raise ScheduleConflict(
+            "Изменение создаёт конфликт расписания. Подтвердите с указанием причины "
+            "или выберите другое время или борт.",
+            {
+                "conflicts": [
+                    {
+                        "kind": item.kind,
+                        "message": item.message,
+                        "relatedFlightId": item.related_flight_id,
+                    }
+                    for item in introduced
+                ]
+            },
+        )
 
     flight.save()
 
@@ -198,14 +301,55 @@ def update_route(flight: Flight, *, actor: User | None = None, **changes: Any) -
         action="updated",
         actor=actor,
         before=before,
-        after=audit.snapshot(
-            flight,
-            fields=["dep_icao", "arr_icao", "std_utc", "aircraft_id", "pax_count", "remarks"],
-        ),
+        after=after,
+        comment=override_reason,
         is_generated=flight.is_generated,
     )
-    record_conflicts(flight, actor=actor)
+    if schedule_changed:
+        record_conflicts(flight, actor=actor, reason=override_reason)
+        _announce_schedule_change(
+            flight, previous_std=previous_std, previous_sta=previous_sta, reason=override_reason
+        )
+        from billing.services import margin
+
+        # Тариф выбирается на дату оказания: перенос рейса может сменить правило.
+        margin.flight_changed(flight.pk)
     return flight
+
+
+def _announce_schedule_change(
+    flight: Flight, *, previous_std: datetime, previous_sta: datetime, reason: str
+) -> None:
+    """Последствия переноса `[ТЗ 3.1.3]`: сроки заявок и письма клиенту и поставщикам."""
+    from comms.services import events as comms_events
+    from orders.models import ServiceOrderStatus
+    from orders.services import sla
+
+    if flight.std_utc != previous_std:
+        comms_events.flight_rescheduled(flight, previous_std=previous_std, reason=reason)
+
+    active = flight.service_orders.exclude(
+        status__in=(
+            ServiceOrderStatus.COMPLETED,
+            ServiceOrderStatus.CANCELLED,
+            ServiceOrderStatus.REJECTED,
+        )
+    ).select_related("service", "vendor", "flight")
+    for order in active:
+        departure = order.leg == "departure"
+        previous = previous_std if departure else previous_sta
+        moment = flight.std_utc if departure else flight.sta_utc
+        if previous == moment:
+            continue
+        if sla.follow_flight(order, previous_moment=previous, moment=moment):
+            order.save(
+                update_fields=[
+                    "sla_confirm_deadline", "sla_completion_deadline", "updated_at", "version",
+                ]
+            )
+        # Черновик поставщику не отправлялся — и об изменении ему писать нечего.
+        if order.vendor_id and order.status != ServiceOrderStatus.DRAFT:
+            comms_events.order_changed(order, previous_moment=previous, moment=moment)
 
 
 @transaction.atomic
@@ -335,3 +479,64 @@ def create_template(*, data: dict[str, Any], actor: User) -> FlightTemplate:
         is_generated=template.is_generated,
     )
     return template
+
+
+class FlightRequestInvalid(DomainError):
+    """Заявка клиента на рейс противоречит сама себе или чужому шаблону."""
+
+    code = "VALIDATION_ERROR"
+
+
+@transaction.atomic
+def submit_request(
+    *,
+    client: Client,
+    dep_icao: str,
+    arr_icao: str,
+    requested_std_utc: datetime,
+    pax_count: int,
+    comment: str,
+    template: FlightTemplate | None,
+    actor: User,
+) -> FlightRequest:
+    """Заявка клиента на рейс из портала `[ТЗ 3.5.3]`.
+
+    Рейсом она становится только после подтверждения диспетчером
+    (`SPEC § 2.2`, сноска). Заявка клиента из набора генератора —
+    тоже запись набора (ADR-038): иначе очистка набора наткнулась бы
+    на ссылку введённого на сгенерированное.
+    """
+    dep, arr = dep_icao.upper(), arr_icao.upper()
+    if dep == arr:
+        raise FlightRequestInvalid("Аэропорты вылета и прилёта совпадают")
+    known = set(Airport.objects.filter(icao__in=[dep, arr]).values_list("icao", flat=True))
+    missing = [code for code in (dep, arr) if code not in known]
+    if missing:
+        raise AirportNotFound(
+            f"Аэропорта нет в справочнике: {', '.join(missing)}", {"icao": missing}
+        )
+    if requested_std_utc <= clock.now():
+        raise FlightRequestInvalid("Время вылета в заявке уже прошло")
+    if template is not None and template.client_id != client.pk:
+        raise FlightRequestInvalid("Шаблон принадлежит другому клиенту")
+
+    request = FlightRequest.objects.create(
+        organization=client.organization,
+        client=client,
+        dep_icao=dep,
+        arr_icao=arr,
+        requested_std_utc=requested_std_utc,
+        pax_count=pax_count,
+        comment=comment,
+        is_generated=client.is_generated,
+    )
+    audit.record(
+        entity_type=AuditEntityType.CLIENT,
+        entity_id=client.pk,
+        action="flight_request_submitted",
+        actor=actor,
+        after=audit.snapshot(request),
+        comment=f"По шаблону {template.name}" if template is not None else "",
+        is_generated=request.is_generated,
+    )
+    return request

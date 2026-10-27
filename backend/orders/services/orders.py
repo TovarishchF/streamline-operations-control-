@@ -9,8 +9,7 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
@@ -18,13 +17,15 @@ from django.utils.translation import gettext as _
 
 from audit import services as audit
 from audit.models import AuditEntityType
+from billing.services import margin as margin_service
+from billing.services import tariffs as tariff_service
 from catalog import services as catalog_services
 from comms.services import events as comms_events
 from core import clock
-from core.exceptions import ServiceCheckFailed
+from core.exceptions import DomainError, ServiceCheckFailed
 from flights.models import ServiceLeg
 from orders.models import ServiceOrder, ServiceOrderStatus
-from orders.services import checks, transitions
+from orders.services import checks, sla, transitions
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -33,13 +34,6 @@ if TYPE_CHECKING:
     from catalog.models import Service, VendorPrice
     from counterparties.models import Vendor, VendorContract
     from flights.models import Flight
-
-# Срок на подтверждение заявки поставщиком (`DOMAIN.md § 7.6`). Справочник
-# правил SLA по категориям появится вместе с реестром правил; до него
-# действует общий срок, и он объявлен здесь одной величиной, а не рассыпан
-# по коду.
-DEFAULT_CONFIRM_SLA_HOURS = 4
-
 
 def airport_for_leg(flight: Flight, leg: str) -> str:
     return flight.dep_icao if leg == ServiceLeg.DEPARTURE else flight.arr_icao
@@ -74,6 +68,46 @@ def _apply_price_snapshot(
         "mode": contract.payment_mode,
         "deferDays": contract.payment_defer_days,
     }
+    tariff_service.snapshot_sale(order)
+
+
+class OrderAttributesInvalid(DomainError):
+    """Не заполнены обязательные атрибуты заказа (`SPEC.md § 5.1`)."""
+
+    code = "VALIDATION_ERROR"
+
+
+def validate_attributes(service: Service, attributes: dict[str, Any]) -> dict[str, Any]:
+    """Обязательные атрибуты услуги заданы и подходят по типу.
+
+    Для топлива это марка и объём: без них поставщик не может выполнить
+    заявку, а принятая без них заявка вернулась бы уточнением по почте.
+    """
+    problems: dict[str, str] = {}
+    for spec in service.required_attributes or []:
+        key = str(spec.get("key", ""))
+        value = attributes.get(key)
+        if value is None or value == "":
+            if spec.get("required"):
+                problems[key] = _("Обязательный атрибут не заполнен")
+            continue
+        kind = spec.get("type")
+        if kind == "number":
+            try:
+                if Decimal(str(value)) < 0:
+                    problems[key] = _("Значение не может быть отрицательным")
+            except InvalidOperation:
+                problems[key] = _("Ожидается число")
+        elif kind == "enum" and value not in (spec.get("options") or []):
+            problems[key] = _("Значение не из списка")
+        elif kind == "boolean" and not isinstance(value, bool):
+            problems[key] = _("Ожидается да или нет")
+    if problems:
+        raise OrderAttributesInvalid(
+            _("Не заполнены атрибуты заказа: %(keys)s") % {"keys": ", ".join(sorted(problems))},
+            {"attributes": problems},
+        )
+    return attributes
 
 
 def _check_failure(context: checks.OrderContext) -> ServiceCheckFailed:
@@ -120,6 +154,7 @@ def create_order(
     """
     airport = airport_for_leg(flight, leg)
     moment = service_moment(flight, leg)
+    validate_attributes(service, attributes)
 
     order = ServiceOrder(
         flight=flight,
@@ -144,6 +179,7 @@ def create_order(
             comment=_("Черновик без поставщика"),
             is_generated=order.is_generated,
         )
+        margin_service.flight_changed(order.flight_id)
         return order
 
     context = checks.run(
@@ -179,14 +215,8 @@ def create_order(
     assert context.contract is not None
     _apply_price_snapshot(order, price=context.price, contract=context.contract)
 
-    now = clock.now()
-    order.ordered_at = now
-    order.sla_confirm_deadline = min(
-        now + timedelta(hours=DEFAULT_CONFIRM_SLA_HOURS),
-        # Дедлайн не может быть позже самого оказания: подтверждение,
-        # пришедшее после вылета, ничего не подтверждает.
-        moment,
-    )
+    order.ordered_at = clock.now()
+    sla.apply_deadlines(order, ordered_at=order.ordered_at, moment=moment)
     order.save()
     # Статус меняется переходом, а не присвоением (`CLAUDE.md § 3` п. 3).
     # Метод объявлен динамически из файла автомата, поэтому вызывается
@@ -211,6 +241,7 @@ def create_order(
     # Заявка ушла поставщику — письмо ставится в очередь. Отправка уходит
     # наружу только после фиксации транзакции (`CLAUDE.md § 3` п. 13).
     comms_events.order_placed(order)
+    margin_service.flight_changed(order.flight_id)
     return order
 
 
@@ -250,6 +281,7 @@ def assign_vendor(*, order: ServiceOrder, vendor: Vendor, actor: User) -> Servic
         after=audit.snapshot(order),
         is_generated=order.is_generated,
     )
+    margin_service.flight_changed(order.flight_id)
     return order
 
 
@@ -304,7 +336,8 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
         setattr(order, field, value)
 
     # Количество изменилось — закупочная стоимость пересчитывается
-    # по тому же снимку цены, а не по текущему прайсу.
+    # по тому же снимку цены, а не по текущему прайсу; цена продажи —
+    # по тарифу на новое количество.
     if "quantity" in changes and order.purchase_unit_amount is not None:
         order.purchase_cost_amount = catalog_services.purchase_cost(
             unit_amount=order.purchase_unit_amount,
@@ -313,6 +346,7 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
             surcharges=order.purchase_surcharges,
             min_charge_amount=order.purchase_min_charge_amount,
         ).amount
+        tariff_service.snapshot_sale(order)
 
     order.save()
 
@@ -325,4 +359,5 @@ def update_order(*, order: ServiceOrder, changes: dict[str, Any], actor: User) -
         after=audit.snapshot(order),
         is_generated=order.is_generated,
     )
+    margin_service.flight_changed(order.flight_id)
     return order

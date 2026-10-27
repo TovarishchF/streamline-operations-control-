@@ -232,3 +232,190 @@ export function useCreateContract() {
     },
   });
 }
+
+// ─────────────────────────── Тарифы клиента ───────────────────────────
+
+export const tariffRuleSchema = z.object({
+  id: z.string(),
+  clientId: z.string(),
+  scope: z.object({
+    serviceId: z.string().nullable().optional(),
+    category: z.string().nullable().optional(),
+    airportIcao: z.string().nullable().optional(),
+  }),
+  pricing: z.union([
+    z.object({ mode: z.literal('cost_plus'), markupPercent: z.string() }),
+    z.object({ mode: z.literal('fixed'), price: moneySchema }),
+    z.object({ mode: z.literal('pass_through') }),
+  ]),
+  discount: z.object({ kind: z.enum(['percent', 'fixed']), value: z.string() }).nullable(),
+  validFrom: z.string(),
+  validTo: z.string(),
+  // Приоритет считает сервер (`DOMAIN.md § 7.2`): он выводится из области
+  // правила, и считать его в браузере значило бы повторять формулу.
+  priority: z.number().int(),
+});
+
+export type TariffRuleRow = z.infer<typeof tariffRuleSchema>;
+
+export function useClientTariffs(
+  clientId: string | undefined,
+  enabled = true,
+): UseQueryResult<{ data: TariffRuleRow[] }> {
+  return useQuery({
+    queryKey: ['client-tariffs', clientId],
+    queryFn: ({ signal }) =>
+      request(`/clients/${clientId ?? ''}/tariffs`, z.object({ data: z.array(tariffRuleSchema) }), {
+        signal,
+      }),
+    enabled: Boolean(clientId) && enabled,
+  });
+}
+
+export interface CreateTariffInput {
+  scope: { serviceId?: string | null; category?: string | null; airportIcao?: string | null };
+  pricing:
+    | { mode: 'cost_plus'; markupPercent: string }
+    | { mode: 'fixed'; price: z.infer<typeof moneySchema> }
+    | { mode: 'pass_through' };
+  discount?: { kind: 'percent' | 'fixed'; value: string } | null;
+  validFrom: string;
+  validTo: string;
+}
+
+export function useCreateTariff(clientId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: CreateTariffInput) =>
+      request(`/clients/${clientId}/tariffs`, tariffRuleSchema, {
+        method: 'POST',
+        body: input,
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['client-tariffs', clientId] });
+      // Снимки цен продажи не меняются (ADR-022), а маржа рейсов без снимка — да.
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin'] });
+    },
+  });
+}
+
+export const tariffSimulationSchema = z.object({
+  salePrice: moneySchema,
+  appliedRuleId: z.string().nullable(),
+  explanation: z.array(z.object({ step: z.string(), detail: z.string(), value: z.string() })),
+  candidateRules: z.array(
+    z.object({
+      ruleId: z.string(),
+      priority: z.number().int(),
+      selected: z.boolean(),
+      reason: z.string(),
+    }),
+  ),
+});
+
+export type TariffSimulation = z.infer<typeof tariffSimulationSchema>;
+
+export interface SimulateTariffInput {
+  serviceId: string;
+  airportIcao: string;
+  onDate: string;
+  quantity: string;
+  purchasePrice?: z.infer<typeof moneySchema> | null;
+}
+
+/**
+ * Песочница тарифа: какое правило сработало и почему `[ТЗ 3.4.1]`.
+ *
+ * Чтение через POST — запрос, а не изменение, поэтому это запрос с ключом
+ * по параметрам, а не мутация: повторный показ тех же параметров берётся
+ * из кэша.
+ */
+export function useTariffSimulation(
+  clientId: string | undefined,
+  input: SimulateTariffInput | null,
+): UseQueryResult<TariffSimulation> {
+  return useQuery({
+    queryKey: ['tariff-simulation', clientId, input],
+    queryFn: ({ signal }) =>
+      request(`/clients/${clientId ?? ''}/tariffs/simulate`, tariffSimulationSchema, {
+        method: 'POST',
+        body: input,
+        signal,
+      }),
+    enabled: Boolean(clientId) && input !== null,
+    retry: false,
+  });
+}
+
+// ─────────────────────── Рейтинг и подбор поставщика ───────────────────────
+
+export const vendorRatingSchema = z.object({
+  sufficientData: z.boolean(),
+  rating: z.string().nullable(),
+  orderCount: z.number().int(),
+  // Составляющая без данных — `null`, а не ноль (G-55).
+  components: z.object({
+    onTimeConfirmRate: z.string().nullable(),
+    slaComplianceRate: z.string().nullable(),
+    billingAccuracy: z.string().nullable(),
+    qualityScore: z.string().nullable(),
+  }),
+  weights: z.record(z.string()),
+});
+
+export type VendorRatingRow = z.infer<typeof vendorRatingSchema>;
+
+export function useVendorRating(vendorId: string | undefined): UseQueryResult<VendorRatingRow> {
+  return useQuery({
+    queryKey: ['vendor-rating', vendorId],
+    queryFn: ({ signal }) =>
+      request(`/vendors/${vendorId ?? ''}/rating`, vendorRatingSchema, { signal }),
+    enabled: Boolean(vendorId),
+  });
+}
+
+export const vendorCandidateSchema = z.object({
+  vendorId: z.string(),
+  vendorName: z.string(),
+  cost: moneySchema,
+  priceScore: z.string(),
+  ratingScore: z.string(),
+  proximityScore: z.string(),
+  totalScore: z.string(),
+  distanceKm: z.number().nullable(),
+  hasBaseAtAirport: z.boolean(),
+  marginImpact: moneySchema.nullable(),
+});
+
+export type VendorCandidateRow = z.infer<typeof vendorCandidateSchema>;
+
+export type SuggestMode = 'price' | 'rating' | 'proximity' | 'balanced' | 'custom';
+
+export interface SuggestInput {
+  serviceId: string;
+  airportIcao: string;
+  onDate: string;
+  quantity: string;
+  flightId?: string;
+  mode: SuggestMode;
+  weights?: { price: string; rating: string; proximity: string };
+}
+
+/** Таблица сравнения кандидатов с разложением балла (`DOMAIN.md § 7.5`). */
+export function useVendorSuggest(
+  input: SuggestInput | null,
+): UseQueryResult<{ data: VendorCandidateRow[] }> {
+  return useQuery({
+    queryKey: ['vendor-suggest', input],
+    queryFn: ({ signal }) =>
+      request('/vendors/suggest', z.object({ data: z.array(vendorCandidateSchema) }), {
+        method: 'POST',
+        body: input,
+        signal,
+      }),
+    enabled: input !== null,
+    placeholderData: (previous) => previous,
+  });
+}

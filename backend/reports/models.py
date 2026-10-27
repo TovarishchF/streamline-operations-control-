@@ -56,3 +56,36 @@ class ReportSubscription(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.code} · {self.get_schedule_display()}"
+
+
+class DashboardRole(models.TextChoices):
+    DISPATCHER = "dispatcher", _("Диспетчер")
+    MANAGER = "manager", _("Руководитель")
+
+
+class DashboardLayout(BaseModel):
+    """Раскладка виджетов дашборда на пользователя `[ТЗ 3.6.2]`.
+
+    Состав и положение виджетов — `[{code, x, y, w, h}]`. Пользователь,
+    не настраивавший дашборд, видит раскладку по умолчанию, и записи
+    для него нет: умолчание живёт в коде и меняется вместе с составом
+    виджетов, а не застывает в базе.
+    """
+
+    id_prefix: ClassVar[str] = "dbl"
+
+    user = models.ForeignKey(
+        "accounts.User", on_delete=models.CASCADE, related_name="dashboard_layouts"
+    )
+    role = models.CharField(max_length=16, choices=DashboardRole.choices)
+    widgets = models.JSONField(default=list)
+
+    class Meta:
+        verbose_name = _("Раскладка дашборда")
+        verbose_name_plural = _("Раскладки дашбордов")
+        constraints = (
+            models.UniqueConstraint(fields=("user", "role"), name="dashboard_layout_per_user"),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.user_id}: {self.role}"

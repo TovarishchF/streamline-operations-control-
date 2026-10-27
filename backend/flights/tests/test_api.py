@@ -23,6 +23,7 @@ if TYPE_CHECKING:
 
     from rest_framework.test import APIClient
 
+    from accounts.models import User
     from catalog.models import Airport
     from counterparties.models import Client
     from fleet.models import Aircraft
@@ -185,6 +186,8 @@ class TestTransitionEndpoint:
 
         actions = {item["action"] for item in response.data["data"]}
         assert {"created", "status_changed"} <= actions
+        # Форма `PagedResponse` из контракта.
+        assert response.data["meta"]["total"] == len(response.data["data"])
 
 
 @pytest.mark.django_db
@@ -208,7 +211,7 @@ class TestConflictsEndpoint:
         kinds = {item["kind"] for item in response.data["data"]}
         assert "overlap" in kinds
         overlap = next(item for item in response.data["data"] if item["kind"] == "overlap")
-        assert overlap["severity"] == "critical"
+        assert overlap["severity"] == "blocking"
         assert overlap["message"]
 
 
@@ -304,3 +307,27 @@ class TestIdempotency:
 
         assert response.status_code == 400
         assert response.data["error"]["code"] == "IDEMPOTENCY_KEY_REQUIRED"
+
+
+@pytest.mark.django_db
+def test_history_includes_the_flight_orders(
+    as_role: Callable[..., APIClient], flight_in_work: Flight, dispatcher: User
+) -> None:
+    """`ТЗ 3.1.3`: события заявок рейса — часть его истории."""
+    from audit import services as audit
+    from audit.models import AuditEntityType
+
+    order = flight_in_work.service_orders.first()
+    assert order is not None
+    audit.record(
+        entity_type=AuditEntityType.SERVICE_ORDER,
+        entity_id=order.pk,
+        action="status_changed",
+        actor=dispatcher,
+        after={"status": "ordered"},
+    )
+
+    body = as_role(Role.DISPATCHER).get(f"/api/v1/flights/{flight_in_work.pk}/history").json()
+
+    kinds = {entry["entityType"] for entry in body["data"]}
+    assert kinds == {"flight", "service_order"}

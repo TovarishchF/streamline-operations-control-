@@ -4,14 +4,14 @@ import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { PaperClipOutlined, PlusOutlined, SwapOutlined, WarningOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 
-import { ApiError } from '@/api/client';
 import type { Flight } from '@/api/flights';
 import { useOrderTransition, type ServiceOrderRow } from '@/api/orders';
 import { Can } from '@/shared/auth/Can';
-import { useClock } from '@/shared/clock/useClock';
 import { usePermission } from '@/shared/auth/session';
+import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
 import { EmptyState, MoneyText, Mono, ServiceStatusTag, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { FinishOrderModal, transitionErrorText } from './FinishOrderModal';
 import { ServiceOrderWizard } from './ServiceOrderWizard';
 import { VendorSuggestModal } from '@/modules/vendors/VendorSuggestModal';
 
@@ -31,10 +31,11 @@ export function FlightServicesTab({
 }): JSX.Element {
   const { t } = useTranslation();
   const { message, modal } = App.useApp();
-  const { nowUtc } = useClock();
+  const localized = useLocalizedName();
   const transition = useOrderTransition();
   const [wizardOpen, setWizardOpen] = useState(false);
   const [suggestFor, setSuggestFor] = useState<ServiceOrderRow | null>(null);
+  const [finishing, setFinishing] = useState<ServiceOrderRow | null>(null);
   const canSeePurchase = usePermission('billing.purchase_price.view');
 
   const columns: DataColumns<ServiceOrderRow> = [
@@ -43,7 +44,7 @@ export function FlightServicesTab({
       render: (_, row) => (
         <Space direction="vertical" size={0}>
           <Space size={6}>
-            <span>{row.service?.name.ru ?? row.serviceId}</span>
+            <span>{row.service ? localized(row.service.name) : row.serviceId}</span>
             {row.replacedOrderId ? (
               <Tooltip title={t('service.reassignedFrom')}>
                 <SwapOutlined style={{ color: STATUS_TOKENS.progress.color }} />
@@ -179,7 +180,7 @@ export function FlightServicesTab({
               <Button
                 size="small"
                 type="primary"
-                onClick={() => { runTransition(row.id, 'finish'); }}
+                onClick={() => { setFinishing(row); }}
               >
                 {t('serviceTransition.finish')}
               </Button>
@@ -201,31 +202,16 @@ export function FlightServicesTab({
    * Переход заявки. Условия проверяет сервер против того же определения
    * автомата, из которого строит машину клиент (ADR-015).
    *
-   * Переход `finish` требует фактического времени и количества (ADR-020):
-   * они спрашиваются здесь же, чтобы между сохранением карточки и нажатием
-   * «Выполнена» заявка не оказалась в состоянии, которого автомат не знает.
+   * Переход `finish` идёт через диалог: фактические время и количество
+   * спрашиваются, а не подставляются текущим моментом (ADR-020).
    */
   const runTransition = (
     id: string,
-    name: 'confirm' | 'begin' | 'finish' | 'reject',
-    extra: { comment?: string; actualQuantity?: string } = {},
+    name: 'confirm' | 'begin' | 'reject',
+    comment?: string,
   ): void => {
-    const order = orders.find((item) => item.id === id);
-    const now = nowUtc.toISOString();
-
     transition
-      .mutateAsync({
-        id,
-        transition: name,
-        ...extra,
-        ...(name === 'finish'
-          ? {
-              actualStartAt: order?.startedAt ?? now,
-              actualEndAt: now,
-              actualQuantity: extra.actualQuantity ?? order?.quantity ?? '1',
-            }
-          : {}),
-      })
+      .mutateAsync({ id, transition: name, ...(comment ? { comment } : {}) })
       .then(() => {
         void message.success(
           t('service.transitionDone', { transition: t(`serviceTransition.${name}`) }),
@@ -234,16 +220,7 @@ export function FlightServicesTab({
       .catch((error: unknown) => {
         // Список невыполненных условий точнее общего текста: человеку
         // нужно знать, чего именно не хватает (`SPEC.md § 4.4`).
-        const unmet =
-          error instanceof ApiError && Array.isArray(error.details['unmetConditions'])
-            ? (error.details['unmetConditions'] as { message: string }[])
-                .map((item) => item.message)
-                .join('; ')
-            : '';
-        void message.error(
-          unmet ||
-            (error instanceof ApiError ? error.message : t('service.transitionFailed')),
-        );
+        void message.error(transitionErrorText(error, t('service.transitionFailed')));
       });
   };
 
@@ -265,7 +242,13 @@ export function FlightServicesTab({
       okButtonProps: { danger: true },
       cancelText: t('common.cancel'),
       onOk: () => {
-        runTransition(id, 'reject', { comment: reason });
+        if (!reason.trim()) {
+          void message.error(t('service.rejectReasonRequired'));
+          // Отказ без причины сервер не примет: диалог остаётся открытым.
+          return Promise.reject(new Error('reason required'));
+        }
+        runTransition(id, 'reject', reason);
+        return undefined;
       },
     });
   };
@@ -335,6 +318,8 @@ export function FlightServicesTab({
         flight={flight}
         onClose={() => { setSuggestFor(null); }}
       />
+
+      <FinishOrderModal order={finishing} onClose={() => { setFinishing(null); }} />
     </Space>
   );
 }

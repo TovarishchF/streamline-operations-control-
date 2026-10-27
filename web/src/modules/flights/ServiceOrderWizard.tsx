@@ -1,7 +1,7 @@
 import { useMemo, useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Tag,
-  Typography,
+  Alert, App, Button, Form, Input, InputNumber, List, Modal, Radio, Select, Space, Steps, Switch,
+  Tag, Typography,
 } from 'antd';
 import { CheckCircleTwoTone, CloseCircleTwoTone, WarningTwoTone } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +21,7 @@ import { useClock } from '@/shared/clock/useClock';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { Notice } from '@/shared/ui/Notice';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
   'fuel',
@@ -63,7 +64,9 @@ export function ServiceOrderWizard({
   const [serviceId, setServiceId] = useState<string | null>(null);
   const [leg, setLeg] = useState<'departure' | 'arrival'>('departure');
   const [vendorId, setVendorId] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState<string>('1');
+  // Обязательные атрибуты услуги (`SPEC.md § 5.1`): для топлива — объём и марка.
+  const [attributes, setAttributes] = useState<Record<string, string | boolean>>({});
   const [overrideReason, setOverrideReason] = useState('');
   // Проверки, которые вернул сервер в отказе. Они точнее предварительных
   // и замещают их: между показом и отправкой прайс мог закончиться.
@@ -160,6 +163,11 @@ export function ServiceOrderWizard({
     ];
   }, [service, candidates, vendorId, contractByVendor, serviceMoment, airport, nowUtc, t]);
 
+  const missingAttributes = (service?.requiredAttributes ?? []).filter((attr) => {
+    const value = attributes[attr.key];
+    return attr.required && (value === undefined || value === '');
+  });
+
   const checks = serverChecks.length > 0 ? serverChecks : localChecks;
   const blockingFailed = checks.some((check) => check.blocking && !check.passed);
   const softFailed = checks.some((check) => !check.blocking && !check.passed);
@@ -174,7 +182,8 @@ export function ServiceOrderWizard({
     setCategory(null);
     setServiceId(null);
     setVendorId(null);
-    setQuantity(1);
+    setQuantity('1');
+    setAttributes({});
     setOverrideReason('');
     setServerChecks([]);
   };
@@ -195,8 +204,9 @@ export function ServiceOrderWizard({
         leg,
         // Количество уходит строкой: деньги и количества в JSON числом
         // с плавающей точкой не передаются (`CLAUDE.md § 3` п. 1).
-        quantity: quantity.toFixed(4),
+        quantity,
         vendorId,
+        attributes,
         ...(overrideReason.trim() ? { overrideReason: overrideReason.trim() } : {}),
       })
       .then(() => {
@@ -233,7 +243,7 @@ export function ServiceOrderWizard({
           {step < 2 ? (
             <Button
               type="primary"
-              disabled={step === 0 ? !serviceId : !vendorId}
+              disabled={step === 0 ? !serviceId || missingAttributes.length > 0 : !vendorId}
               onClick={() => { setStep((s) => s + 1); }}
             >
               {t('common.next')}
@@ -286,10 +296,11 @@ export function ServiceOrderWizard({
                 onChange={(value: string) => {
                   setServiceId(value);
                   setVendorId(null);
+                  setAttributes({});
                 }}
                 options={services.map((item) => ({
                   value: item.id,
-                  label: `${item.name.ru} (${item.code})`,
+                  label: `${localizedName(item.name)} (${item.code})`,
                 }))}
               />
             </Form.Item>
@@ -314,22 +325,63 @@ export function ServiceOrderWizard({
                 label={`${t('service.quantity')}, ${t(`serviceUnit.${service.unit}`)}`}
                 required
               >
-                <InputNumber
-                  min={0.0001}
+                <InputNumber<string>
+                  stringMode
+                  min="0.0001"
+                  precision={4}
                   value={quantity}
-                  onChange={(value) => { setQuantity(value ?? 1); }}
+                  onChange={(value) => { setQuantity(value ?? '1'); }}
                   style={{ width: 180 }}
                 />
               </Form.Item>
             ) : null}
 
-            {(service?.requiredAttributes?.length ?? 0) > 0 ? (
-              <Alert
-                type="info"
-                message={t('service.requiredAttributes')}
-                description={service?.requiredAttributes?.map((attr) => attr.key).join(', ')}
-              />
-            ) : null}
+            {(service?.requiredAttributes ?? []).map((attr) => (
+              <Form.Item
+                key={attr.key}
+                label={t(`service.attribute.${attr.key}`, attr.key)}
+                required={attr.required}
+              >
+                {attr.type === 'number' ? (
+                  <InputNumber<string>
+                    stringMode
+                    min="0"
+                    style={{ width: 180 }}
+                    value={typeof attributes[attr.key] === 'string' ? (attributes[attr.key] as string) : null}
+                    onChange={(value) => {
+                      setAttributes((current) => ({ ...current, [attr.key]: value ?? '' }));
+                    }}
+                  />
+                ) : attr.type === 'enum' ? (
+                  <Select
+                    style={{ width: 220 }}
+                    value={typeof attributes[attr.key] === 'string' ? (attributes[attr.key] as string) : undefined}
+                    onChange={(value: string) => {
+                      setAttributes((current) => ({ ...current, [attr.key]: value }));
+                    }}
+                    options={(attr.options ?? []).map((option) => ({
+                      value: option,
+                      label: t(`service.attributeOption.${option}`, option),
+                    }))}
+                  />
+                ) : attr.type === 'boolean' ? (
+                  <Switch
+                    checked={attributes[attr.key] === true}
+                    onChange={(checked) => {
+                      setAttributes((current) => ({ ...current, [attr.key]: checked }));
+                    }}
+                  />
+                ) : (
+                  <Input
+                    style={{ width: 260 }}
+                    value={typeof attributes[attr.key] === 'string' ? (attributes[attr.key] as string) : ''}
+                    onChange={(event) => {
+                      setAttributes((current) => ({ ...current, [attr.key]: event.target.value }));
+                    }}
+                  />
+                )}
+              </Form.Item>
+            ))}
           </Form>
         ) : null}
 

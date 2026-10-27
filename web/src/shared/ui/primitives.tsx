@@ -13,6 +13,7 @@ import { Alert, Empty, Skeleton, Space, Tooltip, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import type { Money } from '@/api/types';
+import { formatAmount } from '@/domain/money';
 import {
   FLIGHT_STATUS_TOKENS,
   SERVICE_ORDER_STATUS_TOKENS,
@@ -62,12 +63,7 @@ export function MoneyText({
 }) {
   if (!value) return <Typography.Text type="secondary">—</Typography.Text>;
 
-  const numeric = Number.parseFloat(value.amount);
-  const negative = numeric < 0;
-  const formatted = Math.abs(numeric).toLocaleString('ru-RU', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+  const { negative, digits } = formatAmount(value.amount);
 
   const color = colorBySign
     ? negative
@@ -78,7 +74,7 @@ export function MoneyText({
   return (
     <span style={{ ...MONO, color, fontWeight: strong ? 600 : undefined, whiteSpace: 'nowrap' }}>
       {negative ? '−' : ''}
-      {formatted}
+      {digits}
       {showCurrency ? ` ${CURRENCY_SIGN[value.currency] ?? value.currency}` : ''}
     </span>
   );

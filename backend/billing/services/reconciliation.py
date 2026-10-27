@@ -37,6 +37,7 @@ from billing.models import VendorInvoice, VendorInvoiceLine
 from core import clock
 from core.exceptions import DomainError
 from core.money import DISPLAY_QUANT
+from orders.services import costs
 
 if TYPE_CHECKING:
     from accounts.models import User
@@ -144,12 +145,15 @@ def _matches(line: Line, order: ServiceOrder) -> bool:
 
 
 def _order_amount(order: ServiceOrder) -> Decimal:
-    return order.purchase_cost_amount or Decimal(0)
+    """Наша сумма — по фактическому количеству (ADR-020): поставщик выставляет
+    за оказанное, и сравнивать его счёт с плановой суммой значило бы
+    находить расхождение там, где его нет."""
+    cost = costs.actual_cost(order)
+    return cost.amount if cost is not None else Decimal(0)
 
 
 def _order_quantity(order: ServiceOrder) -> Decimal:
-    quantity = order.actual_quantity if order.actual_quantity is not None else order.quantity
-    return Decimal(quantity)
+    return costs.actual_quantity(order)
 
 
 def reconcile(*, vendor: Vendor, currency: str, lines: list[Line]) -> dict[str, Any]:

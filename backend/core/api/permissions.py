@@ -59,6 +59,11 @@ class HasRolePermission(BasePermission):
         if not declared:
             return None
         action = getattr(view, "action", None) or request.method or ""
+        # Действие, принимающее и чтение, и запись, объявляет права
+        # раздельно: «services:GET» — смотреть заявки, «services» — заказывать.
+        by_method = f"{action}:{request.method}"
+        if by_method in declared:
+            return _as_tuple(declared[by_method])
         if action in declared:
             return _as_tuple(declared[action])
         if "default" in declared:

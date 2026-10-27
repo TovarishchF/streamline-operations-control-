@@ -114,10 +114,22 @@ class Notification(BaseModel):
 
     read_at = models.DateTimeField(null=True, blank=True)
 
+    # Ключ идемпотентности (`DOMAIN.md § 9`): `contract_expiry:ctr_…:30`.
+    # Фоновая задача, запущенная повторно, не заводит второе уведомление
+    # о том же событии. Пустой ключ — событие повторяемое.
+    dedupe_key = models.CharField(max_length=128, blank=True)
+
     class Meta:
         verbose_name = _("Уведомление")
         verbose_name_plural = _("Уведомления")
         ordering = ("-created_at", "-id")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("user", "dedupe_key"),
+                condition=~models.Q(dedupe_key=""),
+                name="notification_dedupe_per_user",
+            ),
+        )
         indexes = (
             # Колокольчик считает непрочитанные у текущего пользователя —
             # это самый частый запрос экрана.
@@ -179,10 +191,21 @@ class OutboxMessage(BaseModel):
     # четверть часа и её нельзя положить в закладки.
     eml_key = models.CharField(max_length=512, blank=True)
 
+    # Ключ идемпотентности (`DOMAIN.md § 9`): повторная постановка
+    # с тем же ключом игнорируется.
+    dedupe_key = models.CharField(max_length=128, blank=True)
+
     class Meta:
         verbose_name = _("Исходящее сообщение")
         verbose_name_plural = _("Исходящие")
         ordering = ("-created_at", "-id")
+        constraints = (
+            models.UniqueConstraint(
+                fields=("dedupe_key",),
+                condition=~models.Q(dedupe_key=""),
+                name="outbox_dedupe_key_unique",
+            ),
+        )
         indexes = (
             models.Index(
                 fields=("next_attempt_at",),

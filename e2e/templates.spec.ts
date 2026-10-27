@@ -45,6 +45,20 @@ async function closeDropdown(page: Page): Promise<void> {
   await page.locator('.ant-modal-header').click();
 }
 
+/** Открывает форму шаблона и заполняет её; сохранение — за вызывающим. */
+async function fillTemplate(page: Page, name: string): Promise<Locator> {
+  await page.getByRole('button', { name: 'Создать шаблон' }).click();
+  const form = dialog(page);
+  await form.getByLabel('Шаблон', { exact: true }).fill(name);
+  await pickOption(form, page, 'Клиент');
+  await pickOption(form, page, 'Тип ВС');
+  await form.getByLabel('Аэропорт вылета').fill('UUWW');
+  await form.getByLabel('Аэропорт прилёта').fill('ULLI');
+  await pickOption(form, page, 'Дни недели', 'Пн');
+  await closeDropdown(page);
+  return form;
+}
+
 /** Выбор дня в правой панели календаря: это следующий месяц. */
 async function pickDay(page: Page, day: number): Promise<void> {
   await page
@@ -75,16 +89,7 @@ test.describe('Шаблоны рейсов', () => {
 
   test('кнопка «Создать шаблон» заводит шаблон', async ({ page }) => {
     const name = `Проба Шаблон ${RUN}`;
-
-    await page.getByRole('button', { name: 'Создать шаблон' }).click();
-    const form = dialog(page);
-    await form.getByLabel('Шаблон', { exact: true }).fill(name);
-    await pickOption(form, page, 'Клиент');
-    await pickOption(form, page, 'Тип ВС');
-    await form.getByLabel('Аэропорт вылета').fill('UUWW');
-    await form.getByLabel('Аэропорт прилёта').fill('ULLI');
-    await pickOption(form, page, 'Дни недели', 'Пн');
-    await closeDropdown(page);
+    const form = await fillTemplate(page, name);
 
     const created = page.waitForResponse(
       (response) =>
@@ -114,9 +119,15 @@ test.describe('Шаблоны рейсов', () => {
   });
 
   test('кнопка «Сгенерировать» создаёт серию рейсов', async ({ page }) => {
-    const row = page.locator('.ant-table-row').first();
-    await expect(row, 'на стенде нет шаблонов').toBeVisible();
+    // Серия — на свой шаблон. Генерация пропускает уже созданные даты,
+    // и повторный прогон на общем шаблоне за те же дни справедливо
+    // получал бы пустую серию.
+    const name = `Проба Серия ${RUN}`;
+    const template = await fillTemplate(page, name);
+    await template.getByRole('button', { name: 'Создать' }).click();
+    await expect(template).toBeHidden();
 
+    const row = page.locator('.ant-table-row', { hasText: name });
     await row.getByRole('button', { name: 'Сгенерировать серию' }).click();
     const form = dialog(page);
 

@@ -565,3 +565,97 @@ class VendorInvoiceLine(BaseModel):
 
     def __str__(self) -> str:
         return f"{self.position}. {self.service_code} {self.amount}"
+
+
+class PaymentSource(models.TextChoices):
+    """Откуда пришли сведения о платеже (ADR-019)."""
+
+    MANUAL = "manual", _("Введён вручную")
+    ONEC = "onec", _("Из 1С")
+    EDO = "edo", _("Из ЭДО")
+
+
+class Payment(BaseModel):
+    """Поступление от клиента `[ТЗ 3.4.1]` (ADR-019).
+
+    Статус счёта вычисляется из суммы распределённых платежей, а не
+    присваивается: без записи платежа «оплачен» был бы просто словом,
+    а дебиторка по срокам — невычислимой.
+
+    Курс фиксируется на дату поступления: платёж в валюте, отличной
+    от рублей, пересчитывается в отчётах по тому курсу, по которому
+    его получили, а не по сегодняшнему.
+    """
+
+    id_prefix: ClassVar[str] = "pmt"
+
+    client = models.ForeignKey(
+        "counterparties.Client", on_delete=models.PROTECT, related_name="payments"
+    )
+    amount = models.DecimalField(max_digits=18, decimal_places=4)
+    currency = models.CharField(max_length=3)
+    received_at = models.DateTimeField(db_index=True)
+    # Сколько рублей стоила единица валюты платежа на дату поступления.
+    # Пусто, если курса на эту дату не было: подставлять выдуманный нельзя.
+    fx_rate = models.DecimalField(max_digits=18, decimal_places=6, null=True, blank=True)
+    source = models.CharField(
+        max_length=8, choices=PaymentSource.choices, default=PaymentSource.MANUAL
+    )
+    external_id = models.CharField(max_length=128, blank=True)
+    comment = models.TextField(blank=True)
+
+    class Meta:
+        verbose_name = _("Платёж клиента")
+        verbose_name_plural = _("Платежи клиентов")
+        ordering = ("-received_at", "-created_at")
+        constraints = (
+            models.CheckConstraint(
+                condition=models.Q(amount__gt=0),
+                name="payment_amount_positive",
+                violation_error_message=_("Сумма платежа должна быть больше нуля"),
+            ),
+            # Один и тот же платёж из 1С или ЭДО, пришедший дважды, — дубль,
+            # а не второе поступление.
+            models.UniqueConstraint(
+                fields=("source", "external_id"),
+                condition=~models.Q(external_id=""),
+                name="payment_external_id_unique",
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.client_id}: {self.amount} {self.currency}"
+
+
+class PaymentAllocation(BaseModel):
+    """Часть платежа, отнесённая на счёт.
+
+    Платёж может закрывать несколько счетов, счёт — оплачиваться
+    несколькими платежами. Сумма — в валюте счёта: так оплата сравнивается
+    с итогом счёта без пересчёта на дату показа.
+    """
+
+    id_prefix: ClassVar[str] = "pal"
+
+    payment = models.ForeignKey(Payment, on_delete=models.CASCADE, related_name="allocations")
+    invoice = models.ForeignKey(Invoice, on_delete=models.PROTECT, related_name="allocations")
+    amount = models.DecimalField(max_digits=18, decimal_places=4)
+    currency = models.CharField(max_length=3)
+
+    class Meta:
+        verbose_name = _("Распределение платежа")
+        verbose_name_plural = _("Распределения платежей")
+        ordering = ("payment", "created_at")
+        constraints = (
+            models.CheckConstraint(
+                condition=models.Q(amount__gt=0),
+                name="payment_allocation_amount_positive",
+                violation_error_message=_("Сумма распределения должна быть больше нуля"),
+            ),
+            models.UniqueConstraint(
+                fields=("payment", "invoice"), name="payment_allocation_unique_per_invoice"
+            ),
+        )
+
+    def __str__(self) -> str:
+        return f"{self.payment_id} → {self.invoice_id}: {self.amount} {self.currency}"

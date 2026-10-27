@@ -65,12 +65,16 @@ async function fillPeriod(page: Page): Promise<void> {
   const format = (value: Date): string =>
     `${String(value.getDate()).padStart(2, '0')}.${String(value.getMonth() + 1).padStart(2, '0')}.${String(value.getFullYear())}`;
 
+  // Как вводит человек: начало, Enter переводит курсор на конец периода.
+  // Заполнение второго поля напрямую на узком экране сбрасывало первое.
   const range = page.locator('.ant-picker-range input');
   await range.first().click();
-  await range.first().fill(format(from));
+  await page.keyboard.type(format(from));
   await page.keyboard.press('Enter');
-  await range.nth(1).fill(format(to));
+  await page.keyboard.type(format(to));
   await page.keyboard.press('Enter');
+  await expect(range.first()).toHaveValue(format(from));
+  await expect(range.nth(1)).toHaveValue(format(to));
 }
 
 test.describe('Отчётность', () => {

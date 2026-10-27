@@ -184,6 +184,7 @@ export function useCreateOrder() {
       void queryClient.invalidateQueries({ queryKey: ['service-orders'] });
       // Переходы рейса зависят от состава заявок (`DOMAIN.md § 5.1`)
       void queryClient.invalidateQueries({ queryKey: ['flight', order.flightId] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin', order.flightId] });
     },
   });
 }
@@ -211,6 +212,8 @@ export function useOrderTransition() {
       void queryClient.invalidateQueries({ queryKey: ['flight-orders', order.flightId] });
       void queryClient.invalidateQueries({ queryKey: ['service-orders'] });
       void queryClient.invalidateQueries({ queryKey: ['flight', order.flightId] });
+      // Состав заявок в расчёте маржи зависит от статуса (`DOMAIN.md § 7.3`).
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin', order.flightId] });
     },
   });
 }
@@ -228,6 +231,8 @@ export function useReassignOrder() {
     onSuccess: (order) => {
       void queryClient.invalidateQueries({ queryKey: ['flight-orders', order.flightId] });
       void queryClient.invalidateQueries({ queryKey: ['service-orders'] });
+      void queryClient.invalidateQueries({ queryKey: ['flight', order.flightId] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin', order.flightId] });
     },
   });
 }

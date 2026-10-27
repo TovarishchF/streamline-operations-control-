@@ -58,6 +58,9 @@ test.describe('генератор данных', () => {
     // Экран того же раздела: подпункты раздела раскрыты.
     await page.goto('/admin/users');
     await expect(page.getByRole('heading').first()).toBeVisible();
+    // На узком экране меню — в выдвижной панели за кнопкой «Меню».
+    const menu = page.getByRole('button', { name: 'Меню', exact: true });
+    if (await menu.isVisible()) await menu.click();
 
     const entry = page.getByRole('link', { name: 'Генератор данных' });
     await expect(entry).toHaveCount(enabled ? 1 : 0);

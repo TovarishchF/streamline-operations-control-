@@ -15,7 +15,7 @@ from __future__ import annotations
 from datetime import timedelta
 from typing import TYPE_CHECKING, Any, ClassVar
 
-from django.db import transaction
+from django.db import IntegrityError, transaction
 from django.utils.translation import gettext as _
 
 from comms.models import MessageChannel, MessageTemplate, OutboxMessage, OutboxStatus
@@ -62,20 +62,36 @@ def enqueue(
     related: tuple[str, str] | None = None,
     attachment_ids: list[str] | None = None,
     is_generated: bool = False,
+    dedupe_key: str = "",
 ) -> OutboxMessage:
-    """Ставит собранное сообщение в очередь."""
+    """Ставит собранное сообщение в очередь.
 
-    message = OutboxMessage.objects.create(
-        channel=channel,
-        to=to,
-        template_code=template_code,
-        subject=subject[:255],
-        body=body,
-        related_entity_type=related[0] if related else "",
-        related_entity_id=related[1] if related else "",
-        status=OutboxStatus.QUEUED,
-        is_generated=is_generated or sample_data.enabled(),
-    )
+    С ключом идемпотентности (`DOMAIN.md § 9`) повторная постановка
+    возвращает уже поставленное сообщение, а не второе письмо.
+    """
+    if dedupe_key:
+        existing = OutboxMessage.objects.filter(dedupe_key=dedupe_key).first()
+        if existing is not None:
+            return existing
+
+    try:
+        with transaction.atomic():
+            message = OutboxMessage.objects.create(
+                channel=channel,
+                to=to,
+                template_code=template_code,
+                subject=subject[:255],
+                body=body,
+                related_entity_type=related[0] if related else "",
+                related_entity_id=related[1] if related else "",
+                status=OutboxStatus.QUEUED,
+                dedupe_key=dedupe_key,
+                is_generated=is_generated or sample_data.enabled(),
+            )
+    except IntegrityError:
+        if not dedupe_key:
+            raise
+        return OutboxMessage.objects.get(dedupe_key=dedupe_key)
 
     if attachment_ids:
         from core.services import attachments as attachment_service
@@ -92,6 +108,7 @@ def enqueue_from_template(
     data: dict[str, Any],
     related: tuple[str, str] | None = None,
     attachment_ids: list[str] | None = None,
+    dedupe_key: str = "",
 ) -> OutboxMessage:
     """Собирает сообщение по шаблону и ставит в очередь.
 
@@ -118,6 +135,7 @@ def enqueue_from_template(
         template_code=template.code,
         related=related,
         attachment_ids=attachment_ids,
+        dedupe_key=dedupe_key,
     )
 
 

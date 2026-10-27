@@ -7,27 +7,18 @@ import type { Dayjs } from 'dayjs';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useAirports } from '@/api/catalog';
+import { useAirportsByIcao } from '@/api/catalog';
 import { ApiError } from '@/api/client';
 import { useFleet } from '@/api/fleet';
 import { useCreateFlight } from '@/api/flights';
 import { useClients } from '@/api/counterparties';
+import { estimateRoute } from '@/domain/route';
 import { useClock } from '@/shared/clock/useClock';
+import { AirportSelect } from '@/shared/ui/AirportSelect';
 import { DateTimePicker } from '@/shared/ui/DateTimePicker';
 import { Mono } from '@/shared/ui/primitives';
 
 const FLIGHT_TYPES = ['charter', 'ferry', 'ambulance', 'cargo', 'technical'] as const;
-
-/** Ортодромия по гаверсинусу — та же формула, что на сервере (`DOMAIN.md § 7.8`). */
-function haversineNm(a: [number, number], b: [number, number]): number {
-  const toRad = (deg: number) => (deg * Math.PI) / 180;
-  const dLat = toRad(b[0] - a[0]);
-  const dLon = toRad(b[1] - a[1]);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a[0])) * Math.cos(toRad(b[0])) * Math.sin(dLon / 2) ** 2;
-  return (6371 * 2 * Math.asin(Math.sqrt(h))) / 1.852;
-}
 
 interface FormValues {
   clientId: string;
@@ -59,9 +50,7 @@ export function FlightCreatePage(): JSX.Element {
 
   // Справочники и парк — с сервера: создать рейс в аэропорт, которого нет
   // в справочнике, сервер не даст, и предлагать такой выбор нельзя.
-  const airportsQuery = useAirports({ perPage: 200 });
   const fleetQuery = useFleet();
-  const airports = useMemo(() => airportsQuery.data?.data ?? [], [airportsQuery.data]);
   const fleet = useMemo(() => fleetQuery.data?.data ?? [], [fleetQuery.data]);
   const clients = useClients().data?.data ?? [];
   const createFlight = useCreateFlight();
@@ -70,27 +59,19 @@ export function FlightCreatePage(): JSX.Element {
   const [dep, setDep] = useState<string>('UUWW');
   const [arr, setArr] = useState<string>('ULLI');
   const [aircraftId, setAircraftId] = useState<string | undefined>();
+  const airports = useAirportsByIcao([dep, arr]);
 
   /**
-   * Предварительная оценка для формы.
-   *
-   * Окончательный расчёт делает сервер (`DOMAIN § 7.8`) — здесь он повторён,
-   * чтобы диспетчер видел расстояние и время в пути до отправки формы.
-   * Значения после создания берутся из ответа сервера, а не отсюда.
+   * Предварительная оценка для формы — расчётом `domain/route`, тем же,
+   * что выполнит сервер (`DOMAIN § 7.8`). Значения после создания берутся
+   * из ответа сервера, а не отсюда.
    */
   const estimate = useMemo(() => {
-    const from = airports.find((item) => item.icao === dep);
-    const to = airports.find((item) => item.icao === arr);
+    const from = airports[dep];
+    const to = airports[arr];
     if (!from || !to) return null;
-
-    const aircraft = aircraftId ? fleet.find((item) => item.id === aircraftId) : undefined;
-    const speed = aircraft?.type?.cruiseSpeedKts ?? 450;
-    const burn = aircraft?.type?.fuelBurnKgPerHour ?? 1000;
-
-    const distanceNm = Math.round(haversineNm([from.lat, from.lon], [to.lat, to.lon]));
-    const blockTimeMin = Math.round((distanceNm / speed) * 60 + 20);
-
-    return { distanceNm, blockTimeMin, fuelPlanKg: Math.round((blockTimeMin / 60) * burn * 1.1) };
+    const type = aircraftId ? fleet.find((item) => item.id === aircraftId)?.type : undefined;
+    return estimateRoute(from, to, type ?? null);
   }, [airports, fleet, dep, arr, aircraftId]);
 
   const sameAirport = dep === arr;
@@ -166,15 +147,12 @@ export function FlightCreatePage(): JSX.Element {
 
                 <Col xs={24} md={12}>
                   <Form.Item label={t('flight.departure')} required>
-                    <Select
-                      showSearch
-                      optionFilterProp="label"
+                    <AirportSelect
                       value={dep}
-                      onChange={setDep}
-                      options={airports.map((a) => ({
-                        value: a.icao,
-                        label: `${a.icao} — ${a.city}`,
-                      }))}
+                      aria-label={t('flight.departure')}
+                      onChange={(value) => {
+                        if (value) setDep(value);
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -185,15 +163,12 @@ export function FlightCreatePage(): JSX.Element {
                     validateStatus={sameAirport ? 'error' : undefined}
                     help={sameAirport ? t('flight.sameAirport') : undefined}
                   >
-                    <Select
-                      showSearch
-                      optionFilterProp="label"
+                    <AirportSelect
                       value={arr}
-                      onChange={setArr}
-                      options={airports.map((a) => ({
-                        value: a.icao,
-                        label: `${a.icao} — ${a.city}`,
-                      }))}
+                      aria-label={t('flight.arrival')}
+                      onChange={(value) => {
+                        if (value) setArr(value);
+                      }}
                     />
                   </Form.Item>
                 </Col>
@@ -268,11 +243,14 @@ export function FlightCreatePage(): JSX.Element {
                   </Descriptions.Item>
                   <Descriptions.Item label={t('flight.blockTime')}>
                     <Mono>
-                      {Math.floor(estimate.blockTimeMin / 60)} ч {estimate.blockTimeMin % 60} м
+                      {t('flight.blockTimeValue', {
+                        h: Math.floor(estimate.blockTimeMin / 60),
+                        m: estimate.blockTimeMin % 60,
+                      })}
                     </Mono>
                   </Descriptions.Item>
                   <Descriptions.Item label={t('flight.fuelPlan')}>
-                    <Mono>{estimate.fuelPlanKg} кг</Mono>
+                    <Mono>{t('flight.fuelValue', { kg: estimate.fuelPlanKg })}</Mono>
                   </Descriptions.Item>
                 </Descriptions>
               ) : null}

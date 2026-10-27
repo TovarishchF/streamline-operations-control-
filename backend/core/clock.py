@@ -30,7 +30,13 @@ def _model_offset() -> timedelta:
 
     from core.models import Settings  # локальный импорт: избегаем цикла при загрузке
 
-    return timedelta(seconds=Settings.get_solo().clock_offset_seconds)
+    current = Settings.get_solo()
+    offset = timedelta(seconds=current.clock_offset_seconds)
+    if current.clock_scale > 1 and current.clock_anchor_at is not None:
+        # Ускорение: с момента якоря модельное время идёт в `scale` раз
+        # быстрее настоящего.
+        offset += (datetime.now(UTC) - current.clock_anchor_at) * (current.clock_scale - 1)
+    return offset
 
 
 def now() -> datetime:
@@ -48,8 +54,17 @@ def real_now() -> datetime:
 
 
 def is_shifted() -> bool:
-    """Включено ли модельное время. Уходит в ответ `/clock` и в записи аудита."""
-    return _model_offset() != timedelta(0)
+    """Включено ли модельное время. Уходит в ответ `/clock` и в записи аудита.
+
+    Ускорение без смещения — тоже модельное время: уже через секунду
+    часы стенда разойдутся с настоящими.
+    """
+    if not getattr(settings, "SAMPLE_DATA", False):
+        return False
+    from core.models import Settings
+
+    current = Settings.get_solo()
+    return bool(current.clock_offset_seconds != 0 or current.clock_scale > 1)
 
 
 def today() -> datetime:

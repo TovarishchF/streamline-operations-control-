@@ -77,6 +77,7 @@ LOCAL_APPS = [
     "integrations",
     "audit",
     "sampledata",
+    "portals",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -91,6 +92,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Замеры нормативов ТЗ 4.4 для `/admin/performance` (ADR-017).
+    "core.middleware.PerformanceMiddleware",
     "django_prometheus.middleware.PrometheusAfterMiddleware",
 ]
 

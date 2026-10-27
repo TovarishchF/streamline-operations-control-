@@ -14,6 +14,7 @@ import { VendorPriceFormModal } from '@/modules/catalog/VendorPriceFormModal';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
 import { Can } from '@/shared/auth/Can';
 import { DateText, EmptyState, Field, MoneyText, Mono } from '@/shared/ui/primitives';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 /**
  * Профиль поставщика `[ТЗ 3.3.1]`.
@@ -32,7 +33,7 @@ export function VendorCardPage(): JSX.Element {
   const contracts = useContracts({ vendorId: id }).data?.data ?? [];
   const prices = useVendorPrices({ vendorId: id }).data?.data ?? [];
   const serviceNames = new Map(
-    (useServices().data?.data ?? []).map((service) => [service.id, service.name.ru]),
+    (useServices().data?.data ?? []).map((service) => [service.id, localizedName(service.name)]),
   );
 
   const priceColumns: DataColumns<VendorPriceRow> = [

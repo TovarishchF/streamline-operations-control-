@@ -41,7 +41,8 @@ from billing.api.payables import (
     ReconciliationResolveView,
     ReconciliationTemplateView,
 )
-from billing.api.views import FxRatesView
+from billing.api.payments import PaymentViewSet
+from billing.api.views import FlightMarginView, FxRatesView
 from catalog.api.views import (
     AircraftTypeViewSet,
     AirportViewSet,
@@ -56,6 +57,8 @@ from comms.api.views import (
     OutboxViewSet,
 )
 from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
+from core.api.performance import PerformanceReportView, PerformanceSamplesView
+from core.api.settings import SettingsView
 from core.api.views import ClockView, HealthView
 from counterparties.api.views import (
     ClientViewSet,
@@ -77,7 +80,17 @@ from integrations.api.views import (
     IntegrationListView,
     IntegrationLogListView,
 )
+from orders.api.sla import SlaRuleListView
 from orders.api.views import ServiceOrderViewSet
+from portals.api.views import (
+    ClientDocumentsView,
+    ClientFlightRequestView,
+    ClientFlightsView,
+    VendorOrdersView,
+    VendorPayablesView,
+    VendorPerformanceView,
+)
+from reports.api.dashboards import DashboardLayoutView, DashboardView
 from reports.api.views import (
     ReportBuildView,
     ReportCatalogView,
@@ -106,6 +119,7 @@ router.register("fleet", AircraftViewSet, basename="aircraft")
 router.register("quotes", QuoteViewSet, basename="quote")
 router.register("invoices", InvoiceViewSet, basename="invoice")
 router.register("payables", PayableViewSet, basename="payable")
+router.register("payments", PaymentViewSet, basename="payment")
 router.register(
     "vendor-service-mappings",
     VendorServiceMappingViewSet,
@@ -144,6 +158,9 @@ auth_urls: list[URLPattern | URLResolver] = [
 api_v1: list[URLPattern | URLResolver] = [
     path("health", HealthView.as_view(), name="health"),
     path("clock", ClockView.as_view(), name="clock"),
+    path("settings", SettingsView.as_view(), name="settings"),
+    path("performance", PerformanceReportView.as_view(), name="performance"),
+    path("performance/samples", PerformanceSamplesView.as_view(), name="performance-samples"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
     path("reconciliation", ReconciliationListView.as_view(), name="reconciliation-list"),
@@ -176,6 +193,7 @@ api_v1: list[URLPattern | URLResolver] = [
     ),
     path("flights/conflicts", ScheduleConflictsView.as_view(), name="flight-conflicts"),
     path("flights/export", ScheduleExportView.as_view(), name="flight-export"),
+    path("flights/<str:pk>/margin", FlightMarginView.as_view(), name="flight-margin"),
     path("sample-data/generate", SampleDataGenerateView.as_view(), name="sample-data-generate"),
     path("sample-data/reset", SampleDataResetView.as_view(), name="sample-data-reset"),
     path("sample-data/purge", SampleDataPurgeView.as_view(), name="sample-data-purge"),
@@ -185,6 +203,27 @@ api_v1: list[URLPattern | URLResolver] = [
         "integrations/<str:code>/test",
         IntegrationCheckView.as_view(),
         name="integration-check",
+    ),
+    path("sla-rules", SlaRuleListView.as_view(), name="sla-rules"),
+    path("portal/client/flights", ClientFlightsView.as_view(), name="portal-client-flights"),
+    path(
+        "portal/client/documents", ClientDocumentsView.as_view(), name="portal-client-documents"
+    ),
+    path(
+        "portal/client/flight-requests",
+        ClientFlightRequestView.as_view(),
+        name="portal-client-flight-requests",
+    ),
+    path("portal/vendor/orders", VendorOrdersView.as_view(), name="portal-vendor-orders"),
+    path("portal/vendor/payables", VendorPayablesView.as_view(), name="portal-vendor-payables"),
+    path(
+        "portal/vendor/performance",
+        VendorPerformanceView.as_view(),
+        name="portal-vendor-performance",
+    ),
+    path("dashboards/<str:role>", DashboardView.as_view(), name="dashboard"),
+    path(
+        "dashboards/<str:role>/layout", DashboardLayoutView.as_view(), name="dashboard-layout"
     ),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),

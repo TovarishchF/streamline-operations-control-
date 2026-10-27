@@ -34,9 +34,10 @@ const RUN = Date.now()
  * Периоды по одной тройке (поставщик, услуга, аэропорт) не пересекаются —
  * это проверяет сервер. Повторный прогон с тем же периодом получил бы
  * законный отказ, и испытание падало бы на собственных данных вместо
- * поведения приложения.
+ * поведения приложения. Из сорока лет прогоны уже повторялись, поэтому
+ * выбор — из семи тысяч восьмисот.
  */
-const PRICE_YEAR = 2030 + (Date.now() % 40);
+const PRICE_YEAR = 2100 + (Date.now() % 7800);
 
 /**
  * Выбор значения в открывающемся списке Ant Design.
@@ -119,6 +120,8 @@ test.describe('Реестры и справочники', () => {
     await submit(page);
 
     await expectSaved(page);
+    // Реестр постраничный и упорядочен по наименованию — ищем, как человек.
+    await page.getByPlaceholder('Наименование поставщика').fill(name);
     await expect(page.getByRole('link', { name })).toBeVisible();
   });
 
@@ -219,6 +222,10 @@ test.describe('Реестры и справочники', () => {
     // Фильтр по умолчанию — «требуют внимания»; только что заведённый
     // договор действует, поэтому переключаемся на полный реестр.
     await page.locator('.ant-segmented-item', { hasText: 'Все' }).click();
+    // Реестр постраничный: договор ищется фильтром по номеру.
+    await page.locator('th', { hasText: 'Номер договора' }).locator('.ant-table-filter-trigger').click();
+    await page.getByPlaceholder('Найти в столбце').fill(number);
+    await page.keyboard.press('Enter');
     await expect(page.getByText(number, { exact: true })).toBeVisible();
 
     // Скан действительно приложен к договору, а не просто загружен

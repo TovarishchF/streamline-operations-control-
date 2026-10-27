@@ -97,6 +97,62 @@ test.describe('Суточный план', () => {
     (await popup).close();
   });
 
+  test('планшет переносит полосу через сервер (SPEC § 4.1)', async ({ page }) => {
+    await page.goto('/schedule', { waitUntil: 'networkidle' });
+
+    const bars = page.locator('.vis-item.soc-bar');
+    await expect(bars.first()).toBeVisible();
+    // Линия «сейчас» — по часам сервера, своей меткой, а не часами браузера
+    await expect(page.locator('.vis-custom-time.now')).toBeAttached();
+
+    // Двигается только рейс, который ещё не состоялся, и видимый целиком
+    // с запасом на перенос: на 360 px окно планшета — сотня пикселей,
+    // и полоса у края обрезана, её середина вне планшета.
+    const SHIFT = 24;
+    const panel = await page.locator('.vis-panel.vis-center').boundingBox();
+    if (!panel) throw new Error('нет области планшета');
+    let bar: Locator | undefined;
+    for (const candidate of await page.locator('.vis-item.soc-bar.vis-editable').all()) {
+      const edges = await candidate.boundingBox();
+      if (edges && edges.x >= panel.x && edges.x + edges.width + SHIFT <= panel.x + panel.width) {
+        bar = candidate;
+        break;
+      }
+    }
+    test.skip(bar === undefined, 'в окне планшета нет рейса, который можно двигать');
+    if (!bar) return;
+    await bar.click();
+    const box = await bar.boundingBox();
+    if (!box) throw new Error('полоса без размеров');
+
+    const saved = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' && /\/api\/v1\/flights\/flt_/.test(response.url()),
+    );
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + SHIFT, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+
+    // Перенос ушёл на сервер: меняется вылет, длительность сохраняет сервер
+    const response = await saved;
+    const body = response.request().postDataJSON() as Record<string, unknown>;
+    expect(body).toHaveProperty('stdUtc');
+    expect(body).not.toHaveProperty('staUtc');
+
+    // Новый конфликт сервер не сохраняет без причины — диалог спрашивает её.
+    // Ветка выбирается по ответу сервера, а не по тому, успел ли диалог
+    // появиться: на 360 px тот же сдвиг — несколько часов, и конфликт вероятнее.
+    if (response.status() === 409) {
+      const conflict = dialog(page).filter({ hasText: 'Конфликт расписания' });
+      await expect(conflict).toBeVisible();
+      await conflict.getByRole('button', { name: 'Отмена' }).click();
+    } else {
+      expect(response.status(), await response.text()).toBe(200);
+      await expect(page.getByText(/перенесён/)).toBeVisible();
+    }
+  });
+
   test('массовые действия недоступны без выбора', async ({ page }) => {
     await openTable(page);
 

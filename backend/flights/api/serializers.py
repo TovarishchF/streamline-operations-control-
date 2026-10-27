@@ -16,7 +16,7 @@ from flights.models import (
 )
 from flights.services import conflicts as conflict_detector
 from flights.services import transitions
-from orders.models import ServiceOrderStatus
+from orders.models import ServiceOrderStatus, outstanding
 
 # Заявки, которые ещё требуют внимания диспетчера.
 UNSETTLED_ORDER_STATUSES = (
@@ -96,7 +96,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         return [
             name
             for name in transitions.available_transitions(obj)
-            if not transitions.check_guards(obj, name)
+            if not transitions.unmet_conditions(obj, name)
         ]
 
     def get_blockedTransitions(self, obj: Flight) -> list[dict[str, Any]]:  # noqa: N802
@@ -107,7 +107,7 @@ class FlightSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         """
         blocked = []
         for name in transitions.available_transitions(obj):
-            problems = transitions.check_guards(obj, name)
+            problems = transitions.unmet_conditions(obj, name)
             if problems:
                 blocked.append({"transition": name, "unmetConditions": problems})
         return blocked
@@ -154,16 +154,28 @@ class FlightListSerializer(serializers.ModelSerializer):  # type: ignore[type-ar
         """
         orders = getattr(obj, "_prefetched_objects_cache", {}).get("service_orders")
         if orders is not None:
-            return sum(1 for order in orders if order.status in UNSETTLED_ORDER_STATUSES)
-        return obj.service_orders.filter(status__in=UNSETTLED_ORDER_STATUSES).count()
+            # Отказ, вместо которого заказана замена, улажен.
+            replaced = {order.replaced_order_id for order in orders if order.replaced_order_id}
+            return sum(
+                1
+                for order in orders
+                if order.status in UNSETTLED_ORDER_STATUSES and order.pk not in replaced
+            )
+        return (
+            outstanding(obj.service_orders.all())
+            .filter(status__in=UNSETTLED_ORDER_STATUSES)
+            .count()
+        )
 
     def get_marginPercent(self, obj: Flight) -> str | None:  # noqa: N802
-        """Маржа появится вместе с биллингом (M7).
+        """Маржа рейса в режиме `mixed` (`DOMAIN.md § 7.3`).
 
-        Поле отдаётся пустым, а не выдуманным: подставить сюда число
-        значило бы показать диспетчеру расчёт, которого не было.
+        Считается списком на страницу заранее и приходит в контексте.
+        Пусто — у роли нет права на маржу или её не посчитать (нет курса):
+        подставить ноль значило бы показать расчёт, которого не было.
         """
-        return None
+        margins: dict[str, str | None] = self.context.get("margins", {})
+        return margins.get(obj.pk)
 
     def get_hasConflicts(self, obj: Flight) -> bool:  # noqa: N802
         return bool(conflict_detector.detect(obj))
@@ -188,26 +200,46 @@ class FlightCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
 
 class FlightUpdateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`FlightUpdate` из контракта.
+
+    `staUtc` задаёт длительность — растягивание полосы на планшете;
+    `conflictOverrideReason` — причина, с которой подтверждён конфликт,
+    появившийся от этой правки (`SPEC.md § 4.1`).
+    """
+
     aircraftId = serializers.CharField(required=False, allow_null=True)  # noqa: N815
     depIcao = serializers.CharField(required=False, min_length=4, max_length=4)  # noqa: N815
     arrIcao = serializers.CharField(required=False, min_length=4, max_length=4)  # noqa: N815
     stdUtc = serializers.DateTimeField(required=False)  # noqa: N815
+    staUtc = serializers.DateTimeField(required=False)  # noqa: N815
     paxCount = serializers.IntegerField(required=False)  # noqa: N815
     remarks = serializers.CharField(required=False, allow_blank=True)
+    conflictOverrideReason = serializers.CharField(  # noqa: N815
+        required=False, allow_blank=True, default=""
+    )
+
+    def validate_aircraftId(self, value: str | None) -> str | None:  # noqa: N802
+        from fleet.models import Aircraft
+
+        if value and not Aircraft.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("Борт не найден")
+        return value or None
 
 
 class FlightTransitionSerializer(serializers.Serializer):  # type: ignore[type-arg]
     transition = serializers.CharField()
     reasonCode = serializers.CharField(required=False, allow_blank=True, default="")  # noqa: N815
     comment = serializers.CharField(required=False, allow_blank=True, default="")
+    completeWithoutInvoice = serializers.BooleanField(required=False, default=False)  # noqa: N815
 
 
 class ConflictSerializer(serializers.Serializer):  # type: ignore[type-arg]
     kind = serializers.CharField()
     flightId = serializers.CharField()  # noqa: N815
     relatedFlightId = serializers.CharField(allow_null=True)  # noqa: N815
+    aircraftId = serializers.CharField(allow_null=True)  # noqa: N815
     message = serializers.CharField()
-    severity = serializers.CharField()
+    severity = serializers.ChoiceField(choices=["warning", "blocking"])
 
 
 class TemplateServiceSerializer(serializers.Serializer):  # type: ignore[type-arg]
@@ -341,14 +373,15 @@ class SlotAnswerSerializer(serializers.Serializer):  # type: ignore[type-arg]
 
 
 def conflict_payload(flight: Flight, item: conflict_detector.Conflict) -> dict[str, Any]:
-    """Конфликт в форме контракта."""
-    # Неисправный борт и пересечение рейсов — разного веса: первое срывает
-    # рейс, второе чаще всего улаживается сдвигом расписания.
-    critical = item.kind in ("aircraft_aog", "overlap")
+    """Конфликт в форме контракта (`ScheduleConflict`)."""
+    # Неисправный борт и пересечение рейсов срывают рейс; разворот короче
+    # нормы и истекающий допуск чаще улаживаются без отмены.
+    blocking = item.kind in ("aircraft_unserviceable", "overlap")
     return {
         "kind": item.kind,
         "flightId": flight.pk,
         "relatedFlightId": item.related_flight_id,
+        "aircraftId": flight.aircraft_id,
         "message": item.message,
-        "severity": "critical" if critical else "warning",
+        "severity": "blocking" if blocking else "warning",
     }

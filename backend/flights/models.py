@@ -66,6 +66,10 @@ class Flight(BaseModel):
 
     id_prefix: ClassVar[str] = "flt"
 
+    # Явный отказ от счёта при завершении (`DOMAIN.md § 5.1`). Не поле:
+    # это признак одного запроса перехода, сохраняется он записью аудита.
+    invoice_waived: bool = False
+
     organization = models.ForeignKey(Organization, on_delete=models.PROTECT, related_name="flights")
     number = models.CharField(max_length=32, unique=True, db_index=True)
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name="flights")

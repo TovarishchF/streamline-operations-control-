@@ -71,6 +71,9 @@ def token_from_outbox(request: RegistrationRequest) -> str:
 
     message = OutboxMessage.objects.filter(related_entity_id=request.pk).first()
     assert message is not None, "письмо подтверждения не поставлено в очередь"
+    # Адрес — в той форме, которую понимает отправка: без него письмо
+    # стояло в очереди с ошибкой «нет получателя» и не уходило никогда.
+    assert message.to == [{"address": request.email, "name": request.contact_name}]
     found = re.search(r"token=([A-Za-z0-9_-]+)", message.body)
     assert found is not None, "в письме нет ссылки подтверждения"
     return found.group(1)

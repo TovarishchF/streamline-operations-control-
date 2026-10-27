@@ -242,3 +242,63 @@ export function useDeleteSubscription() {
     },
   });
 }
+
+// ─────────────────────────── Дашборды ───────────────────────────
+
+export type DashboardRole = 'dispatcher' | 'manager';
+
+export const dashboardLayoutItemSchema = z.object({
+  code: z.string(),
+  x: z.number().int(),
+  y: z.number().int(),
+  w: z.number().int(),
+  h: z.number().int(),
+});
+
+export type DashboardLayoutItem = z.infer<typeof dashboardLayoutItemSchema>;
+
+export const dashboardDataSchema = z.object({
+  // Данные виджета различаются по коду; каждый виджет разбирает свои
+  // своей схемой (`modules/dashboards/widgets`), а здесь — общий конверт.
+  widgets: z.array(
+    z.object({
+      code: z.string(),
+      title: z.object({ ru: z.string(), en: z.string() }),
+      data: z.record(z.unknown()),
+    }),
+  ),
+  generatedAt: z.string().nullable(),
+  layout: z.object({ widgets: z.array(dashboardLayoutItemSchema) }),
+});
+
+export type DashboardData = z.infer<typeof dashboardDataSchema>;
+
+export function useDashboard(
+  role: DashboardRole,
+  options: { refetchMs?: number } = {},
+): UseQueryResult<DashboardData> {
+  return useQuery({
+    queryKey: ['dashboard', role],
+    queryFn: ({ signal }) => request(`/dashboards/${role}`, dashboardDataSchema, { signal }),
+    ...(options.refetchMs ? { refetchInterval: options.refetchMs } : {}),
+  });
+}
+
+/** Раскладка виджетов сохраняется на пользователя `[ТЗ 3.6.2]`. */
+export function useSaveDashboardLayout(role: DashboardRole) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (widgets: DashboardLayoutItem[]) =>
+      request(
+        `/dashboards/${role}/layout`,
+        z.object({ widgets: z.array(dashboardLayoutItemSchema) }),
+        { method: 'PUT', body: { widgets } },
+      ),
+    onSuccess: (saved) => {
+      queryClient.setQueryData<DashboardData>(['dashboard', role], (current) =>
+        current ? { ...current, layout: saved } : current,
+      );
+    },
+  });
+}

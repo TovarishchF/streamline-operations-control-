@@ -27,6 +27,7 @@ from orders.models import ServiceOrder, machine_transitions
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+    from datetime import datetime
 
     from accounts.models import User
 
@@ -222,6 +223,7 @@ def apply_transition(
 
     before = audit.snapshot(order, fields=["status", "confirmed_at", "started_at", "completed_at"])
     previous_status = order.status
+    breach_already_known = order.sla_breached
 
     apply_transition_method(order, name)
 
@@ -234,11 +236,28 @@ def apply_transition(
             setattr(order, field, now)
             changed.append(field)
 
+    if name == "order" and order.sla_confirm_deadline is None:
+        # Черновик, заказанный переходом, а не при создании: сроки SLA
+        # ставятся здесь, иначе фоновая проверка его никогда не увидит.
+        from orders.services import sla
+
+        sla.apply_deadlines(order, ordered_at=order.ordered_at or now, moment=_moment(order))
+        changed.extend(["sla_confirm_deadline", "sla_completion_deadline"])
+
+    if name == "finish":
+        from billing.services import tariffs
+        from orders.services import sla
+
+        order.sla_completion_breached = sla.completion_breached(order)
+        tariffs.snapshot_actuals(order)
+        changed.extend(["sla_completion_breached", "actual_cost_amount", "actual_sale_amount"])
+
     if name == "confirm" and order.sla_confirm_deadline is not None:
         # Нарушение SLA фиксируется в момент подтверждения, а не вычисляется
         # на лету: дедлайн и факт подтверждения — разные величины, и после
         # сдвига модельного времени вычисление задним числом соврёт.
-        order.sla_breached = now > order.sla_confirm_deadline
+        # Нарушение, уже отмеченное фоновой задачей, не снимается.
+        order.sla_breached = order.sla_breached or now > order.sla_confirm_deadline
         changed.append("sla_breached")
 
     if definition.get("requiresReason"):
@@ -261,11 +280,36 @@ def apply_transition(
     )
 
     if source != AuditSource.SEED:
-        _announce(order, name, actor)
+        _announce(
+            order,
+            name,
+            actor,
+            breach_already_known=breach_already_known,
+            previous_status=previous_status,
+            comment=comment,
+        )
+
+    # Состав заявок в расчёте маржи зависит от статуса (`DOMAIN.md § 7.3`).
+    from billing.services import margin as margin_service
+
+    margin_service.flight_changed(order.flight_id)
     return order
 
 
-def _announce(order: ServiceOrder, name: str, actor: User | None) -> None:
+def _moment(order: ServiceOrder) -> datetime:
+    """Плановое время оказания: вылет для одного плеча, прилёт для другого."""
+    return order.flight.std_utc if order.leg == "departure" else order.flight.sta_utc
+
+
+def _announce(
+    order: ServiceOrder,
+    name: str,
+    actor: User | None,
+    *,
+    breach_already_known: bool,
+    previous_status: str,
+    comment: str,
+) -> None:
     """Уведомления по итогу перехода `[ТЗ 3.5.1]`.
 
     Вынесено отдельно, чтобы переход не разрастался: автомат отвечает
@@ -273,9 +317,19 @@ def _announce(order: ServiceOrder, name: str, actor: User | None) -> None:
     """
     from comms.services import events as comms_events
 
-    if name == "confirm":
+    if name == "order":
+        # Заявка ушла поставщику `[ТЗ 3.2.2]`. При создании с поставщиком
+        # письмо ставит сервис заказа, а здесь — черновик, заказанный позже.
+        comms_events.order_placed(order)
+    elif name == "cancel":
+        # Отмена черновика поставщика не касается: заявки он не получал.
+        if order.vendor_id and previous_status != "draft":
+            comms_events.order_cancelled(order, reason=comment)
+    elif name == "confirm":
         comms_events.order_answered(order, confirmed=True, actor=actor)
-        if order.sla_breached:
+        # О нарушении, которое уже нашла фоновая задача, диспетчер
+        # знает: второе уведомление о том же событии — шум.
+        if order.sla_breached and not breach_already_known:
             comms_events.order_sla_breached(order)
     elif name == "reject":
         comms_events.order_answered(order, confirmed=False, actor=actor)

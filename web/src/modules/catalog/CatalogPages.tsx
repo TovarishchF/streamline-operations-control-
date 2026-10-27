@@ -12,6 +12,7 @@ import { ServiceFormModal } from './ServiceFormModal';
 import { VendorPriceFormModal } from './VendorPriceFormModal';
 import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 /**
  * Каталог услуг `[ТЗ 3.2.1]`.
@@ -90,7 +91,7 @@ export function ServicesCatalogPage(): JSX.Element {
       width: 110,
       align: 'right',
       sorter: (a, b) => a.leadTimeH - b.leadTimeH,
-      render: (value: number) => <Mono>{value} ч</Mono>,
+      render: (value: number) => <Mono>{t('common.hoursValue', { value })}</Mono>,
     },
     {
       title: t('catalog.flags'),
@@ -214,7 +215,7 @@ export function VendorPricesPage(): JSX.Element {
 
   const services = useServices().data?.data ?? [];
   const airports = useAirports({ search: airportSearch, perPage: 30 }).data?.data ?? [];
-  const serviceNames = new Map(services.map((service) => [service.id, service.name.ru]));
+  const serviceNames = new Map(services.map((service) => [service.id, localizedName(service.name)]));
 
   // Фильтрация на сервере: прайс растёт быстрее справочника услуг,
   // и выкачивать его целиком ради двух выпадающих списков незачем.
@@ -342,7 +343,7 @@ export function VendorPricesPage(): JSX.Element {
               placeholder={t('service.name')}
               value={serviceId}
               onChange={setServiceId}
-              options={services.map((service) => ({ value: service.id, label: service.name.ru }))}
+              options={services.map((service) => ({ value: service.id, label: localizedName(service.name) }))}
             />
           </Col>
         </Row>

@@ -1,6 +1,6 @@
-import type { JSX } from 'react';
+import { Suspense, type JSX } from 'react';
 import {
-  Button, ConfigProvider, Dropdown, Layout, Menu, Typography, Select,
+  Button, ConfigProvider, Dropdown, Layout, Menu, Skeleton, Typography, Select,
 } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -58,7 +58,7 @@ export function PortalLayout(): JSX.Element {
       {/* Кабинет заказчика видит знак поставщика услуги, а не служебное
           сокращение: это его подрядчик, а не внутренняя система. */}
       <Layout.Header
-        className="soc-chrome"
+        className="soc-chrome soc-portal-header"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -66,7 +66,6 @@ export function PortalLayout(): JSX.Element {
           height: 64,
           lineHeight: '64px',
           background: SOC_COLORS.chrome,
-          paddingInline: 24,
         }}
       >
         <img
@@ -77,10 +76,14 @@ export function PortalLayout(): JSX.Element {
 
         <span
           aria-hidden="true"
+          className="soc-hide-sm"
           style={{ width: 1, height: 24, background: SOC_COLORS.chromeLine }}
         />
 
-        <Typography.Text style={{ color: SOC_COLORS.onChrome, fontSize: 14, fontWeight: 500 }}>
+        <Typography.Text
+          className="soc-hide-sm"
+          style={{ color: SOC_COLORS.onChrome, fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap' }}
+        >
           {user?.role === 'client' ? t('portal.client.title') : t('portal.vendor.title')}
         </Typography.Text>
 
@@ -106,8 +109,13 @@ export function PortalLayout(): JSX.Element {
         />
 
         <Dropdown menu={{ items: userItems }} trigger={['click']}>
-          <Button size="small" icon={<UserOutlined />} className="soc-user-button">
-            <span className="soc-user-name">{user?.name ?? ''}</span>
+          <Button
+            size="small"
+            icon={<UserOutlined />}
+            className="soc-user-button"
+            aria-label={user?.name ?? t('auth.signOut')}
+          >
+            <span className="soc-user-name soc-hide-sm">{user?.name ?? ''}</span>
           </Button>
         </Dropdown>
       </Layout.Header>
@@ -115,10 +123,10 @@ export function PortalLayout(): JSX.Element {
       {/* Навигация — на светлом рельсе под обвязкой: контраст отдан
           содержимому, а не полосе с названием. */}
       <nav
+        className="soc-portal-nav"
         style={{
           background: SOC_COLORS.surface,
           borderBottom: `1px solid ${SOC_COLORS.line}`,
-          paddingInline: 24,
         }}
       >
         <Menu
@@ -129,8 +137,13 @@ export function PortalLayout(): JSX.Element {
         />
       </nav>
 
-      <Layout.Content style={{ padding: 24, maxWidth: 1148, width: '100%', margin: '0 auto' }}>
-        <Outlet />
+      <Layout.Content
+        className="soc-portal-content"
+        style={{ maxWidth: 1148, width: '100%', margin: '0 auto' }}
+      >
+        <Suspense fallback={<Skeleton active paragraph={{ rows: 8 }} />}>
+          <Outlet />
+        </Suspense>
       </Layout.Content>
       </Layout>
     </ConfigProvider>

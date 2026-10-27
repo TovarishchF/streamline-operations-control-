@@ -1,4 +1,4 @@
-import { useEffect, type JSX } from 'react';
+import { lazy, useEffect, type JSX } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Spin } from 'antd';
 
@@ -11,43 +11,58 @@ import {
   useTwoFactorSetupRequired,
 } from '@/shared/auth/session';
 import { HOME_BY_ROLE } from './layout/navigation';
+import { startPerformanceReporting, useNavigationTracker } from '@/shared/perf/measure';
 
 import { RegistrationConfirmPage } from '@/modules/auth/RegistrationConfirmPage';
-import { RegistrationQueuePage } from '@/modules/admin/RegistrationQueuePage';
 import { LoginPage } from '@/modules/auth/LoginPage';
 import { TwoFactorSetupPage } from '@/modules/auth/TwoFactorSetupPage';
-import { SchedulePage } from '@/modules/schedule/SchedulePage';
-import { FlightTemplatesPage } from '@/modules/schedule/FlightTemplatesPage';
-import { FlightCardPage } from '@/modules/flights/FlightCardPage';
-import { FlightCreatePage } from '@/modules/flights/FlightCreatePage';
-import { RequestsPage } from '@/modules/requests/RequestsPage';
-import { SlotsPage } from '@/modules/slots/SlotsPage';
-import { ServicesCatalogPage, VendorPricesPage } from '@/modules/catalog/CatalogPages';
-import { VendorsPage } from '@/modules/vendors/VendorsPage';
-import { VendorCardPage } from '@/modules/vendors/VendorCardPage';
-import { ContractsPage } from '@/modules/contracts/ContractsPage';
-import { ClientsPage } from '@/modules/clients/ClientsPage';
-import { ClientCardPage } from '@/modules/clients/ClientCardPage';
-import { FleetPage } from '@/modules/fleet/FleetPage';
-import { AirportsPage } from '@/modules/airports/AirportsPage';
-import { QuotesPage, InvoicesPage } from '@/modules/billing/DocumentsPages';
-import { DocumentCardPage } from '@/modules/billing/DocumentCardPage';
-import { PayablesPage } from '@/modules/billing/PayablesPage';
-import { ReconciliationPage } from '@/modules/billing/ReconciliationPage';
-import { FxPage } from '@/modules/billing/FxPage';
-import { OutboxPage, InboxPage } from '@/modules/comms/CommsPages';
-import { MessageTemplatesPage } from '@/modules/comms/MessageTemplatesPage';
-import { ReportsPage, ReportViewPage } from '@/modules/reports/ReportsPages';
-import { DispatcherDashboard } from '@/modules/dashboards/DispatcherDashboard';
-import { ManagerDashboard } from '@/modules/dashboards/ManagerDashboard';
-import { ClientFlightsPage, ClientDocumentsPage, ClientRequestPage } from '@/modules/portals/ClientPortal';
-import { VendorOrdersPage } from '@/modules/portals/VendorOrdersPage';
-import { VendorPerformancePage, VendorPayablesPage } from '@/modules/portals/VendorPortal';
-import { UsersPage, SlaPage, SampleDataPage, ApiDocsPage } from '@/modules/admin/AdminPages';
-import { AuditPage } from '@/modules/admin/AuditPage';
-import { IntegrationsPage } from '@/modules/admin/IntegrationsPage';
-import { PerformancePage } from '@/modules/admin/PerformancePage';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
+
+// Экран загружается при первом открытии, а не вместе с приложением:
+// карточке рейса не нужны планшет, графики и отчёты, а в одном пакете они
+// удлиняли первую загрузку, по которой меряется норматив ТЗ 4.4 (ADR-017).
+const RegistrationQueuePage = lazy(() => import('@/modules/admin/RegistrationQueuePage').then((m) => ({ default: m.RegistrationQueuePage })));
+const SchedulePage = lazy(() => import('@/modules/schedule/SchedulePage').then((m) => ({ default: m.SchedulePage })));
+const FlightTemplatesPage = lazy(() => import('@/modules/schedule/FlightTemplatesPage').then((m) => ({ default: m.FlightTemplatesPage })));
+const FlightCardPage = lazy(() => import('@/modules/flights/FlightCardPage').then((m) => ({ default: m.FlightCardPage })));
+const FlightCreatePage = lazy(() => import('@/modules/flights/FlightCreatePage').then((m) => ({ default: m.FlightCreatePage })));
+const RequestsPage = lazy(() => import('@/modules/requests/RequestsPage').then((m) => ({ default: m.RequestsPage })));
+const SlotsPage = lazy(() => import('@/modules/slots/SlotsPage').then((m) => ({ default: m.SlotsPage })));
+const ServicesCatalogPage = lazy(() => import('@/modules/catalog/CatalogPages').then((m) => ({ default: m.ServicesCatalogPage })));
+const VendorPricesPage = lazy(() => import('@/modules/catalog/CatalogPages').then((m) => ({ default: m.VendorPricesPage })));
+const VendorsPage = lazy(() => import('@/modules/vendors/VendorsPage').then((m) => ({ default: m.VendorsPage })));
+const VendorCardPage = lazy(() => import('@/modules/vendors/VendorCardPage').then((m) => ({ default: m.VendorCardPage })));
+const ContractsPage = lazy(() => import('@/modules/contracts/ContractsPage').then((m) => ({ default: m.ContractsPage })));
+const ClientsPage = lazy(() => import('@/modules/clients/ClientsPage').then((m) => ({ default: m.ClientsPage })));
+const ClientCardPage = lazy(() => import('@/modules/clients/ClientCardPage').then((m) => ({ default: m.ClientCardPage })));
+const FleetPage = lazy(() => import('@/modules/fleet/FleetPage').then((m) => ({ default: m.FleetPage })));
+const AirportsPage = lazy(() => import('@/modules/airports/AirportsPage').then((m) => ({ default: m.AirportsPage })));
+const QuotesPage = lazy(() => import('@/modules/billing/DocumentsPages').then((m) => ({ default: m.QuotesPage })));
+const InvoicesPage = lazy(() => import('@/modules/billing/DocumentsPages').then((m) => ({ default: m.InvoicesPage })));
+const DocumentCardPage = lazy(() => import('@/modules/billing/DocumentCardPage').then((m) => ({ default: m.DocumentCardPage })));
+const PayablesPage = lazy(() => import('@/modules/billing/PayablesPage').then((m) => ({ default: m.PayablesPage })));
+const ReconciliationPage = lazy(() => import('@/modules/billing/ReconciliationPage').then((m) => ({ default: m.ReconciliationPage })));
+const FxPage = lazy(() => import('@/modules/billing/FxPage').then((m) => ({ default: m.FxPage })));
+const OutboxPage = lazy(() => import('@/modules/comms/CommsPages').then((m) => ({ default: m.OutboxPage })));
+const InboxPage = lazy(() => import('@/modules/comms/CommsPages').then((m) => ({ default: m.InboxPage })));
+const MessageTemplatesPage = lazy(() => import('@/modules/comms/MessageTemplatesPage').then((m) => ({ default: m.MessageTemplatesPage })));
+const ReportsPage = lazy(() => import('@/modules/reports/ReportsPages').then((m) => ({ default: m.ReportsPage })));
+const ReportViewPage = lazy(() => import('@/modules/reports/ReportsPages').then((m) => ({ default: m.ReportViewPage })));
+const DispatcherDashboard = lazy(() => import('@/modules/dashboards/DispatcherDashboard').then((m) => ({ default: m.DispatcherDashboard })));
+const ManagerDashboard = lazy(() => import('@/modules/dashboards/ManagerDashboard').then((m) => ({ default: m.ManagerDashboard })));
+const ClientFlightsPage = lazy(() => import('@/modules/portals/ClientPortal').then((m) => ({ default: m.ClientFlightsPage })));
+const ClientDocumentsPage = lazy(() => import('@/modules/portals/ClientPortal').then((m) => ({ default: m.ClientDocumentsPage })));
+const ClientRequestPage = lazy(() => import('@/modules/portals/ClientPortal').then((m) => ({ default: m.ClientRequestPage })));
+const VendorOrdersPage = lazy(() => import('@/modules/portals/VendorOrdersPage').then((m) => ({ default: m.VendorOrdersPage })));
+const VendorPerformancePage = lazy(() => import('@/modules/portals/VendorPortal').then((m) => ({ default: m.VendorPerformancePage })));
+const VendorPayablesPage = lazy(() => import('@/modules/portals/VendorPortal').then((m) => ({ default: m.VendorPayablesPage })));
+const UsersPage = lazy(() => import('@/modules/admin/AdminPages').then((m) => ({ default: m.UsersPage })));
+const SampleDataPage = lazy(() => import('@/modules/admin/AdminPages').then((m) => ({ default: m.SampleDataPage })));
+const ApiDocsPage = lazy(() => import('@/modules/admin/AdminPages').then((m) => ({ default: m.ApiDocsPage })));
+const SlaPage = lazy(() => import('@/modules/admin/SlaPage').then((m) => ({ default: m.SlaPage })));
+const AuditPage = lazy(() => import('@/modules/admin/AuditPage').then((m) => ({ default: m.AuditPage })));
+const IntegrationsPage = lazy(() => import('@/modules/admin/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })));
+const PerformancePage = lazy(() => import('@/modules/admin/PerformancePage').then((m) => ({ default: m.PerformancePage })));
 
 /** Редирект на стартовый экран роли: у каждой роли он свой (`SPEC.md § 3`). */
 function RoleHome(): JSX.Element {
@@ -76,6 +91,13 @@ export function AppRoutes(): JSX.Element {
     // после каждого обновления вкладки.
     void restore();
   }, [restore]);
+
+  useNavigationTracker();
+  useEffect(() => {
+    // Замеры уходят на сервер от имени пользователя (ADR-017): до входа
+    // отправлять их некуда.
+    if (status === 'authenticated') startPerformanceReporting();
+  }, [status]);
 
   // Пока сессия восстанавливается — ждём. Уйти на экран входа в этот момент
   // значит потерять адрес, который открывал пользователь: после входа он

@@ -7,7 +7,16 @@ from typing import Any
 
 from rest_framework import serializers
 
-from billing.models import DocumentLine, Invoice, Quote
+from billing.models import DocumentLine, Invoice, Quote, TariffMode
+from catalog.models import Airport, Service, ServiceCategory
+from core.money import SUPPORTED_CURRENCIES
+
+
+class PlainMoneySerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`Money` из контракта: сумма строкой с четырьмя знаками, валюта из перечня."""
+
+    amount = serializers.DecimalField(max_digits=18, decimal_places=4, coerce_to_string=True)
+    currency = serializers.ChoiceField(choices=sorted(SUPPORTED_CURRENCIES))
 
 
 class DocumentLineSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
@@ -114,13 +123,10 @@ class InvoiceSerializer(serializers.ModelSerializer):  # type: ignore[type-arg]
         return totals_of(obj)
 
     def get_paidAmount(self, obj: Invoice) -> dict[str, str]:  # noqa: N802
-        """Оплаченная сумма считается из платежей (ADR-019).
+        """Оплаченная сумма — сумма распределённых платежей (ADR-019)."""
+        from billing.services import payments
 
-        Платежи — следующий слой той же вехи; до него здесь ноль,
-        а не выдуманная сумма. Статус счёта вычисляется из платежей,
-        поэтому «оплачен» тоже пока не выставляется.
-        """
-        return {"amount": "0.0000", "currency": obj.currency}
+        return {"amount": str(payments.paid_amount(obj)), "currency": obj.currency}
 
 
 class QuoteCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
@@ -178,6 +184,78 @@ class TariffRuleSerializer(serializers.Serializer):  # type: ignore[type-arg]
         if not obj.discount_kind:
             return None
         return {"kind": obj.discount_kind, "value": str(obj.discount_value or Decimal(0))}
+
+
+class TariffScopeSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    serviceId = serializers.CharField(required=False, allow_null=True, allow_blank=True)  # noqa: N815
+    category = serializers.ChoiceField(
+        choices=ServiceCategory.choices, required=False, allow_null=True, allow_blank=True
+    )
+    airportIcao = serializers.CharField(  # noqa: N815
+        required=False, allow_null=True, allow_blank=True, max_length=4
+    )
+
+    def validate_serviceId(self, value: str | None) -> str | None:  # noqa: N802
+        if value and not Service.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("Услуга не найдена в каталоге")
+        return value or None
+
+    def validate_airportIcao(self, value: str | None) -> str:  # noqa: N802
+        if not value:
+            return ""
+        if not Airport.objects.filter(icao=value.upper()).exists():
+            raise serializers.ValidationError(f"Аэропорт {value.upper()} не найден в справочнике")
+        return value.upper()
+
+
+class TariffPricingSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    mode = serializers.ChoiceField(choices=TariffMode.choices)
+    markupPercent = serializers.DecimalField(  # noqa: N815
+        max_digits=6, decimal_places=4, required=False, allow_null=True, min_value=Decimal(0)
+    )
+    price = PlainMoneySerializer(required=False, allow_null=True)
+
+
+class TariffDiscountSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    kind = serializers.ChoiceField(choices=[("percent", "percent"), ("fixed", "fixed")])
+    value = serializers.DecimalField(max_digits=18, decimal_places=4, min_value=Decimal(0))
+
+
+class TariffRuleCreateSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`TariffRuleCreate` из контракта. `id` и `clientId` в запросе не принимаются:
+    идентификатор выдаёт сервер, клиент задан путём."""
+
+    scope = TariffScopeSerializer()
+    pricing = TariffPricingSerializer()
+    discount = TariffDiscountSerializer(required=False, allow_null=True)
+    validFrom = serializers.DateTimeField()  # noqa: N815
+    validTo = serializers.DateTimeField()  # noqa: N815
+
+
+class TariffSimulateRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`TariffSimulateRequest` из контракта."""
+
+    serviceId = serializers.CharField()  # noqa: N815
+    airportIcao = serializers.CharField(min_length=4, max_length=4)  # noqa: N815
+    onDate = serializers.DateTimeField()  # noqa: N815
+    quantity = serializers.DecimalField(
+        max_digits=18, decimal_places=4, min_value=Decimal("0.0001"), default=Decimal(1)
+    )
+    purchasePrice = PlainMoneySerializer(required=False, allow_null=True)  # noqa: N815
+
+    def validate_serviceId(self, value: str) -> str:  # noqa: N802
+        if not Service.objects.filter(pk=value).exists():
+            raise serializers.ValidationError("Услуга не найдена в каталоге")
+        return value
+
+
+class TariffSimulateResultSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`TariffSimulateResult` из контракта: шаги расчёта и рассмотренные правила."""
+
+    salePrice = PlainMoneySerializer()  # noqa: N815
+    appliedRuleId = serializers.CharField(allow_null=True)  # noqa: N815
+    explanation = serializers.ListField(child=serializers.DictField())
+    candidateRules = serializers.ListField(child=serializers.DictField())  # noqa: N815
 
 
 class ExportRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]

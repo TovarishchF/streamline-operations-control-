@@ -7,6 +7,7 @@ import { useAirports } from '@/api/catalog';
 import { useFlights } from '@/api/flights';
 import { useCreateSlot, type SlotKind } from '@/api/slots';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 interface FormValues {
   flightId: string;
@@ -107,7 +108,7 @@ export function SlotFormModal({
             loading={airports.isLoading}
             options={(airports.data?.data ?? []).map((airport) => ({
               value: airport.icao,
-              label: `${airport.icao} · ${airport.name.ru}`,
+              label: `${airport.icao} · ${localizedName(airport.name)}`,
             }))}
             notFoundContent={
               <Typography.Text type="secondary">{t('slots.noCoordinated')}</Typography.Text>

@@ -20,6 +20,7 @@ import { EmptyState, Mono } from '@/shared/ui/primitives';
 import { Notice } from '@/shared/ui/Notice';
 
 import { TemplateFormModal } from './TemplateFormModal';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const WEEKDAY_KEYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -54,7 +55,7 @@ export function FlightTemplatesPage(): JSX.Element {
     (useAircraftTypes().data?.data ?? []).map((type) => [type.id, type.icaoType]),
   );
   const services = new Map(
-    (useServices().data?.data ?? []).map((service) => [service.id, service.name.ru]),
+    (useServices().data?.data ?? []).map((service) => [service.id, localizedName(service.name)]),
   );
 
   const generate = async (): Promise<void> => {
@@ -175,6 +176,7 @@ export function FlightTemplatesPage(): JSX.Element {
           <Form layout="vertical">
             <Form.Item label={t('template.period')} required>
               <DatePicker.RangePicker
+                format="DD.MM.YYYY"
                 style={{ width: '100%' }}
                 value={period}
                 onChange={(value) => {

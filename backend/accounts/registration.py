@@ -159,7 +159,7 @@ def send_confirmation(*, request: RegistrationRequest, token: str, base_url: str
     )
     outbox.enqueue(
         channel="email",
-        to=[{"email": request.email, "name": request.contact_name}],
+        to=[{"address": request.email, "name": request.contact_name}],
         subject="Подтверждение адреса · SOC",
         body=body,
         related=("registration", request.pk),
