@@ -18,7 +18,13 @@ from billing.services import fx
 from catalog.models import Airport
 from core import clock, geo
 from core.exceptions import DomainError, ScheduleConflict
-from flights.models import Flight, FlightRequest, FlightRequestStatus, FlightTemplate
+from flights.models import (
+    Flight,
+    FlightRequest,
+    FlightRequestStatus,
+    FlightStatus,
+    FlightTemplate,
+)
 from flights.services import conflicts as conflict_detector
 
 if TYPE_CHECKING:
@@ -180,6 +186,12 @@ SCHEDULE_FIELDS = ("std_utc", "sta_utc", "aircraft_id", "dep_icao", "arr_icao")
 ROUTE_FIELDS = ("aircraft_id", "dep_icao", "arr_icao")
 AUDITED_FIELDS = (*SCHEDULE_FIELDS, "pax_count", "remarks")
 
+# Завершённый и отменённый рейс — история: его не правят.
+CLOSED_STATUSES = (FlightStatus.COMPLETED, FlightStatus.CANCELLED)
+# Вылетевший рейс уже случился: время и маршрут фиксируют фактические
+# отметки, а не перенос по расписанию.
+DEPARTED_STATUSES = (FlightStatus.IN_FLIGHT, FlightStatus.ARRIVED)
+
 
 class ScheduleChangeInvalid(DomainError):
     """Прилёт раньше вылета и прочие невозможные правки расписания."""
@@ -212,6 +224,18 @@ def update_route(
       от этой правки, требует причины (`override_reason`); без неё —
       отказ со списком конфликтов. Причина идёт в аудит.
     """
+    if flight.status in CLOSED_STATUSES:
+        raise ScheduleChangeInvalid(
+            f"Рейс в состоянии «{flight.get_status_display()}» не изменяется",
+            {"status": flight.status},
+        )
+    schedule_keys = {"std_utc", "sta_utc", "aircraft", "aircraft_id", "dep_icao", "arr_icao"}
+    if flight.status in DEPARTED_STATUSES and schedule_keys & set(changes):
+        raise ScheduleChangeInvalid(
+            "Рейс уже вылетел: время и маршрут не переносятся, фиксируется факт",
+            {"status": flight.status},
+        )
+
     before = audit.snapshot(
         flight,
         fields=list(AUDITED_FIELDS),

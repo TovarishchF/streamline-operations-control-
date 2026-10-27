@@ -190,3 +190,34 @@ def test_client_cannot_move_flights(
         format="json",
     )
     assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_completed_flight_is_not_rescheduled(
+    as_role: Callable[..., APIClient], flight_with_aircraft: Flight
+) -> None:
+    from flights.models import FlightStatus
+
+    Flight.objects.filter(pk=flight_with_aircraft.pk).update(status=FlightStatus.COMPLETED)
+    response = as_role(Role.DISPATCHER).patch(
+        url(flight_with_aircraft), {"remarks": "Поздняя правка"}, format="json"
+    )
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+
+
+def test_departed_flight_keeps_its_schedule_but_takes_remarks(
+    as_role: Callable[..., APIClient], flight_with_aircraft: Flight
+) -> None:
+    from flights.models import FlightStatus
+
+    Flight.objects.filter(pk=flight_with_aircraft.pk).update(status=FlightStatus.IN_FLIGHT)
+    api = as_role(Role.DISPATCHER)
+
+    moved = api.patch(
+        url(flight_with_aircraft),
+        {"stdUtc": (flight_with_aircraft.std_utc + timedelta(hours=1)).isoformat()},
+        format="json",
+    )
+    assert moved.status_code == status.HTTP_400_BAD_REQUEST
+
+    noted = api.patch(url(flight_with_aircraft), {"remarks": "Пассажир с собакой"}, format="json")
+    assert noted.status_code == status.HTTP_200_OK
