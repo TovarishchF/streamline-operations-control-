@@ -335,3 +335,64 @@ def create_template(*, data: dict[str, Any], actor: User) -> FlightTemplate:
         is_generated=template.is_generated,
     )
     return template
+
+
+class FlightRequestInvalid(DomainError):
+    """Заявка клиента на рейс противоречит сама себе или чужому шаблону."""
+
+    code = "VALIDATION_ERROR"
+
+
+@transaction.atomic
+def submit_request(
+    *,
+    client: Client,
+    dep_icao: str,
+    arr_icao: str,
+    requested_std_utc: datetime,
+    pax_count: int,
+    comment: str,
+    template: FlightTemplate | None,
+    actor: User,
+) -> FlightRequest:
+    """Заявка клиента на рейс из портала `[ТЗ 3.5.3]`.
+
+    Рейсом она становится только после подтверждения диспетчером
+    (`SPEC § 2.2`, сноска). Заявка клиента из набора генератора —
+    тоже запись набора (ADR-038): иначе очистка набора наткнулась бы
+    на ссылку введённого на сгенерированное.
+    """
+    dep, arr = dep_icao.upper(), arr_icao.upper()
+    if dep == arr:
+        raise FlightRequestInvalid("Аэропорты вылета и прилёта совпадают")
+    known = set(Airport.objects.filter(icao__in=[dep, arr]).values_list("icao", flat=True))
+    missing = [code for code in (dep, arr) if code not in known]
+    if missing:
+        raise AirportNotFound(
+            f"Аэропорта нет в справочнике: {', '.join(missing)}", {"icao": missing}
+        )
+    if requested_std_utc <= clock.now():
+        raise FlightRequestInvalid("Время вылета в заявке уже прошло")
+    if template is not None and template.client_id != client.pk:
+        raise FlightRequestInvalid("Шаблон принадлежит другому клиенту")
+
+    request = FlightRequest.objects.create(
+        organization=client.organization,
+        client=client,
+        dep_icao=dep,
+        arr_icao=arr,
+        requested_std_utc=requested_std_utc,
+        pax_count=pax_count,
+        comment=comment,
+        is_generated=client.is_generated,
+    )
+    audit.record(
+        entity_type=AuditEntityType.CLIENT,
+        entity_id=client.pk,
+        action="flight_request_submitted",
+        actor=actor,
+        after=audit.snapshot(request),
+        comment=f"По шаблону {template.name}" if template is not None else "",
+        is_generated=request.is_generated,
+    )
+    return request

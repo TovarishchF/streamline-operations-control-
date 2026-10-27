@@ -80,6 +80,14 @@ from integrations.api.views import (
 )
 from orders.api.sla import SlaRuleListView
 from orders.api.views import ServiceOrderViewSet
+from portals.api.views import (
+    ClientDocumentsView,
+    ClientFlightRequestView,
+    ClientFlightsView,
+    VendorOrdersView,
+    VendorPayablesView,
+    VendorPerformanceView,
+)
 from reports.api.views import (
     ReportBuildView,
     ReportCatalogView,
@@ -191,6 +199,22 @@ api_v1: list[URLPattern | URLResolver] = [
         name="integration-check",
     ),
     path("sla-rules", SlaRuleListView.as_view(), name="sla-rules"),
+    path("portal/client/flights", ClientFlightsView.as_view(), name="portal-client-flights"),
+    path(
+        "portal/client/documents", ClientDocumentsView.as_view(), name="portal-client-documents"
+    ),
+    path(
+        "portal/client/flight-requests",
+        ClientFlightRequestView.as_view(),
+        name="portal-client-flight-requests",
+    ),
+    path("portal/vendor/orders", VendorOrdersView.as_view(), name="portal-vendor-orders"),
+    path("portal/vendor/payables", VendorPayablesView.as_view(), name="portal-vendor-payables"),
+    path(
+        "portal/vendor/performance",
+        VendorPerformanceView.as_view(),
+        name="portal-vendor-performance",
+    ),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),
     path("reports/<str:code>/export", ReportExportView.as_view(), name="report-export"),
