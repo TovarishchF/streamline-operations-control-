@@ -308,8 +308,26 @@ def to_contract(result: Margin, flight: Flight) -> dict[str, Any]:
 # обновление выборки генератором), — устаревшая цифра живёт минуты, а не дни.
 
 
-def _key(flight_id: str, mode: str) -> str:
-    return f"soc:margin:v1:{flight_id}:{mode}"
+GENERATION_KEY = "soc:margin:generation"
+
+
+def _generation() -> int:
+    """Поколение кэша маржи: настройки и тарифы меняют все расчёты сразу,
+    и перебирать ключи всех рейсов незачем — достаточно сменить поколение."""
+    value = cache.get(GENERATION_KEY)
+    return int(value) if value is not None else 0
+
+
+def invalidate_all() -> None:
+    try:
+        cache.incr(GENERATION_KEY)
+    except ValueError:
+        cache.set(GENERATION_KEY, 1, None)
+
+
+def _key(flight_id: str, mode: str, generation: int | None = None) -> str:
+    current = _generation() if generation is None else generation
+    return f"soc:margin:v2:{current}:{flight_id}:{mode}"
 
 
 def cached(flight: Flight, mode: str) -> dict[str, Any]:
@@ -322,7 +340,8 @@ def cached(flight: Flight, mode: str) -> dict[str, Any]:
 
 
 def invalidate(flight_id: str) -> None:
-    cache.delete_many([_key(flight_id, mode) for mode in MODES])
+    generation = _generation()
+    cache.delete_many([_key(flight_id, mode, generation) for mode in MODES])
 
 
 def flight_changed(flight_id: str) -> None:
@@ -343,10 +362,12 @@ def flight_changed(flight_id: str) -> None:
 
 
 def client_tariffs_changed(client_id: str) -> None:
-    from flights.models import Flight
+    """Тарифы клиента изменились: прежние расчёты его рейсов неверны.
 
-    for flight_id in Flight.objects.filter(client_id=client_id).values_list("pk", flat=True):
-        invalidate(flight_id)
+    Сбрасывается всё поколение, а не рейсы клиента по одному: у крупного
+    клиента рейсов сотни, а правка тарифа — событие редкое.
+    """
+    invalidate_all()
 
 
 def percents_for(flights: list[Flight]) -> dict[str, str | None]:
@@ -356,7 +377,8 @@ def percents_for(flights: list[Flight]) -> dict[str, str | None]:
     и итоги счетов — двумя запросами на всю страницу. Рейс, маржу которого
     не посчитать (нет курса), получает пусто, а не ноль.
     """
-    keys = {flight.pk: _key(flight.pk, "mixed") for flight in flights}
+    generation = _generation()
+    keys = {flight.pk: _key(flight.pk, "mixed", generation) for flight in flights}
     found: dict[str, dict[str, Any]] = cache.get_many(list(keys.values()))
     missing = [flight for flight in flights if keys[flight.pk] not in found]
 

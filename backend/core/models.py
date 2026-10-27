@@ -166,8 +166,13 @@ class Settings(SingletonModel):
     pd_retention_months = models.PositiveSmallIntegerField(default=60)
 
     # Модельное время (ADR-014). Изменяется только при SAMPLE_DATA=true.
+    # Модельный момент = настоящий + смещение + (масштаб − 1) × время,
+    # прошедшее с якоря: при ускорении ×60 час проходит за минуту.
+    # При каждой смене масштаба или перемотке якорь переставляется
+    # на настоящий момент, а смещение — на накопленное к нему.
     clock_offset_seconds = models.IntegerField(default=0)
     clock_scale = models.PositiveSmallIntegerField(default=1)
+    clock_anchor_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name = _("Настройки системы")
@@ -236,3 +241,38 @@ class Attachment(BaseModel):
 
     def __str__(self) -> str:
         return self.file_name
+
+
+class PerformanceSource(models.TextChoices):
+    SERVER = "server", _("Сервер")
+    CLIENT = "client", _("Клиент")
+
+
+class PerformanceSample(models.Model):
+    """Замер производительности `[ТЗ 4.4]` (ADR-017).
+
+    Серверный — время ответа эндпоинта, записанное посредником; клиентский —
+    время от навигации до отрисовки экрана, присланное веб-клиентом.
+    `/admin/performance` показывает перцентили по этим замерам, а не
+    декларацию. Время — настоящее, не модельное: замер о реальном моменте
+    (`core.clock.real_now`).
+
+    Не наследует `BaseModel`: у замера нет ни происхождения данных,
+    ни версии, а таблица пишется на каждый запрос к карточке рейса —
+    лишние колонки здесь только место.
+    """
+
+    name = models.CharField(max_length=32)
+    source = models.CharField(max_length=8, choices=PerformanceSource.choices)
+    duration_ms = models.PositiveIntegerField()
+    recorded_at = models.DateTimeField(db_index=True)
+    route = models.CharField(max_length=255, blank=True)
+    kind = models.CharField(max_length=16, blank=True)
+
+    class Meta:
+        verbose_name = _("Замер производительности")
+        verbose_name_plural = _("Замеры производительности")
+        indexes = (models.Index(fields=("name", "source", "recorded_at")),)
+
+    def __str__(self) -> str:
+        return f"{self.source}:{self.name} {self.duration_ms} мс"

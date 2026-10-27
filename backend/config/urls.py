@@ -57,6 +57,8 @@ from comms.api.views import (
     OutboxViewSet,
 )
 from core.api.attachments import AttachmentConfirmView, AttachmentCreateView
+from core.api.performance import PerformanceReportView, PerformanceSamplesView
+from core.api.settings import SettingsView
 from core.api.views import ClockView, HealthView
 from counterparties.api.views import (
     ClientViewSet,
@@ -156,6 +158,9 @@ auth_urls: list[URLPattern | URLResolver] = [
 api_v1: list[URLPattern | URLResolver] = [
     path("health", HealthView.as_view(), name="health"),
     path("clock", ClockView.as_view(), name="clock"),
+    path("settings", SettingsView.as_view(), name="settings"),
+    path("performance", PerformanceReportView.as_view(), name="performance"),
+    path("performance/samples", PerformanceSamplesView.as_view(), name="performance-samples"),
     path("auth/", include(auth_urls)),
     path("fx-rates", FxRatesView.as_view(), name="fx-rates"),
     path("reconciliation", ReconciliationListView.as_view(), name="reconciliation-list"),
