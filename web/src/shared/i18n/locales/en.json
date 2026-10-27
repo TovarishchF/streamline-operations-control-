@@ -649,7 +649,12 @@
     "noEvents": "No unread events",
     "distanceValue": "{{nm}} NM",
     "blockTimeValue": "{{h}} h {{m}} min",
-    "fuelValue": "{{kg}} kg"
+    "fuelValue": "{{kg}} kg",
+    "edit": "Edit flight {{number}}",
+    "updated": "Flight {{number}} updated",
+    "stdMoveHint": "Changing only the departure moves the whole flight and keeps its duration",
+    "arrivalBeforeDeparture": "Arrival must be after departure",
+    "transitionTarget": "Status: {{from}} → {{to}}"
   },
   "flightStatus": {
     "aog": "AOG / delay",

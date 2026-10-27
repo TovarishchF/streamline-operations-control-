@@ -15,6 +15,7 @@ export function AirportSelect({
   value,
   onChange,
   allowClear,
+  disabled,
   placeholder,
   style,
   'aria-label': ariaLabel,
@@ -22,6 +23,7 @@ export function AirportSelect({
   value?: string | null;
   onChange?: (value: string | undefined) => void;
   allowClear?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   style?: CSSProperties;
   'aria-label'?: string;
@@ -55,6 +57,7 @@ export function AirportSelect({
         onChange?.(undefined);
       }}
       {...(allowClear ? { allowClear } : {})}
+      {...(disabled ? { disabled } : {})}
       {...(placeholder ? { placeholder } : {})}
       {...(style ? { style } : {})}
       {...(ariaLabel ? { 'aria-label': ariaLabel } : {})}

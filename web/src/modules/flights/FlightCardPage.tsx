@@ -28,6 +28,7 @@ import { Notice } from '@/shared/ui/Notice';
 import { FlightServicesTab } from './FlightServicesTab';
 import { FlightFinanceTab } from './FlightFinanceTab';
 import { FlightDocumentsTab } from './FlightDocumentsTab';
+import { FlightEditModal } from './FlightEditModal';
 import { FlightHistoryTab } from './FlightHistoryTab';
 import { StatusPanel } from './StatusPanel';
 
@@ -61,6 +62,7 @@ export function FlightCardPage(): JSX.Element {
   const localized = useLocalizedName();
   const { id, tab } = useParams<{ id: string; tab?: string }>();
   const [contextOpen, setContextOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
   const canSeeMargin = usePermission('billing.margin.view');
 
   const flightQuery = useFlight(id);
@@ -284,6 +286,17 @@ export function FlightCardPage(): JSX.Element {
                   </Space>
                 </Field>
               ) : null}
+              {flight.status !== 'completed' && flight.status !== 'cancelled' ? (
+                <Can permission="flight.edit">
+                  <Button
+                    onClick={() => {
+                      setEditing(true);
+                    }}
+                  >
+                    {t('common.edit')}
+                  </Button>
+                </Can>
+              ) : null}
               <Button
                 onClick={() => {
                   setContextOpen(true);
@@ -347,6 +360,16 @@ export function FlightCardPage(): JSX.Element {
           }}
         />
       </Card>
+
+      {editing ? (
+        <FlightEditModal
+          flight={flight}
+          open
+          onClose={() => {
+            setEditing(false);
+          }}
+        />
+      ) : null}
 
       {/* Правая панель «Контекст»: дедлайны, события, быстрые действия */}
       <Drawer

@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 
 import { ApiError } from '@/api/client';
 import { useFlightTransition, type Flight, type FlightTransition } from '@/api/flights';
-import flightMachine from '@shared/state-machines/flight.json';
+import flightDefinition from '@shared/state-machines/flight.json';
+import { flightMachine, targetOf } from '@/domain/machines';
 import { Can } from '@/shared/auth/Can';
 import { FLIGHT_REASON_CODES } from './reasons';
 
@@ -32,7 +33,7 @@ const MAIN_LINE = ['planned', 'in_work', 'ready_for_departure', 'in_flight', 'ar
  * поставщикам уходят только об отменённых заявках.
  */
 function effectsOf(transition: FlightTransition): string[] {
-  const definition = flightMachine.transitions.find((item) => item.name === transition);
+  const definition = flightDefinition.transitions.find((item) => item.name === transition);
   const effects: string[] = definition?.effects ?? [];
   const cascade = effects.includes('cancel_all_orders');
   return effects.filter(
@@ -62,6 +63,8 @@ export function StatusPanel({ flight }: { flight: Flight }): JSX.Element {
   const completeBlocked = flight.blockedTransitions.some((item) => item.transition === 'complete');
 
   const needsReason = pending?.transition === 'cancel' || pending?.transition === 'aog';
+  // Куда ведёт переход — по машине из того же определения, что у сервера.
+  const target = pending ? targetOf(flightMachine, flight.status, pending.transition) : null;
   const needsComment = needsReason || pending?.withoutInvoice === true;
 
   const close = (): void => {
@@ -185,6 +188,15 @@ export function StatusPanel({ flight }: { flight: Flight }): JSX.Element {
         }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
+          {target ? (
+            <Typography.Text>
+              {t('flight.transitionTarget', {
+                from: t(`flightStatus.${flight.status}`),
+                to: t(`flightStatus.${target}`),
+              })}
+            </Typography.Text>
+          ) : null}
+
           {pending ? (
             <Alert
               type="info"

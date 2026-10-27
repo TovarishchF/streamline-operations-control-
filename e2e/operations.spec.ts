@@ -90,6 +90,22 @@ test.describe('Операции', () => {
     });
   });
 
+  test('изменение рейса уходит на сервер только изменёнными полями', async ({ page }) => {
+    await asDispatcher(page);
+    await page.goto(`/flights/${await anyFlightId(page, 'planned')}`);
+
+    await page.getByRole('button', { name: 'Изменить' }).click();
+    const dialog = page.locator('.ant-modal-content');
+    const pax = String(2 + (Date.now() % 7));
+    await dialog.locator('.ant-form-item', { hasText: 'Пассажиров' }).locator('input').fill(pax);
+
+    const saved = page.waitForRequest((request) => request.method() === 'PATCH');
+    await dialog.getByRole('button', { name: 'Сохранить' }).click();
+    // Правка числа пассажиров не трогает расписание и не переспрашивает о конфликтах
+    expect((await saved).postDataJSON()).toEqual({ paxCount: Number(pax) });
+    await expect(page.getByText(/изменён/)).toBeVisible();
+  });
+
   test('переход статуса заблокирован, пока не выполнены условия', async ({ page }) => {
     await asDispatcher(page);
     await page.goto(`/flights/${await anyFlightId(page, 'planned')}`);
@@ -104,47 +120,9 @@ test.describe('Операции', () => {
     await expect(page.getByRole('button', { name: 'Отменить', exact: true })).toBeVisible();
   });
 
-  // Заявки на услуги переезжают на настоящий API вместе с M5: подбор
-  // поставщика, снимок цены и SLA живут там. Сейчас мастер работает на
-  // наборе для макетов, а рейс приходит с сервера, и подобрать поставщика
-  // под настоящую услугу ему нечем. Ослаблять проверку нельзя — она про то,
-  // что кнопка выполняет операцию, а не открывает окно.
-  test.fixme('заказ услуги появляется в списке заявок рейса', async ({ page }) => {
-    await asDispatcher(page);
-    // Рейс берётся из расписания: карточка работает на настоящем API,
-    // и выдуманного идентификатора там нет.
-    await page.goto(`/flights/${await anyFlightId(page)}/services`);
-
-    // Ждём саму вкладку, а не строки: у рейса без заявок их нет вовсе,
-    // и это нормальное начальное состояние. Кнопка на пустом экране
-    // продублирована в заголовке и в подсказке — берём первую.
-    const order = page.getByRole('button', { name: 'Заказать услугу' }).first();
-    await expect(order).toBeVisible();
-    const before = await page.locator('tbody tr.ant-table-row').count();
-
-    await order.click();
-    const modal = page.locator('.ant-modal-content');
-
-    // Шаг 1: категория и услуга
-    await pickOption(page, modal.locator('.ant-select').nth(0));
-    await pickOption(page, modal.locator('.ant-select').nth(1));
-    await modal.getByRole('button', { name: 'Далее' }).click();
-
-    // Шаг 2: поставщик
-    await modal.locator('.ant-list-item').first().click();
-    await modal.getByRole('button', { name: 'Далее' }).click();
-
-    // Шаг 3: проверки. Лидтайм нарушен (рейс в прошлом) — это неблокирующая
-    // проверка, но она требует подтверждения с причиной (SPEC § 5.2).
-    const override = modal.locator('textarea');
-    if (await override.isVisible()) {
-      await override.fill('Согласовано с поставщиком по телефону');
-    }
-    await modal.getByRole('button', { name: 'Отправить заявку' }).click();
-
-    await expect(page.locator('tbody tr.ant-table-row')).toHaveCount(before + 1);
-    await expect(page.getByText('Заказана').first()).toBeVisible();
-  });
+  // Заказ услуги через мастер проверяет сквозной сценарий (`scenario.spec.ts`):
+  // у рейсов генератора нет поставщиков с ценами, и заказать для них нечего,
+  // а сценарий заводит своих поставщиков настоящей регистрацией.
 
   test('подтверждение заявки клиента создаёт рейс', async ({ page }) => {
     await asDispatcher(page);

@@ -649,7 +649,12 @@
     "noEvents": "Непрочитанных событий нет",
     "distanceValue": "{{nm}} NM",
     "blockTimeValue": "{{h}} ч {{m}} мин",
-    "fuelValue": "{{kg}} кг"
+    "fuelValue": "{{kg}} кг",
+    "edit": "Изменение рейса {{number}}",
+    "updated": "Рейс {{number}} изменён",
+    "stdMoveHint": "Изменение только вылета переносит рейс целиком, длительность сохраняется",
+    "arrivalBeforeDeparture": "Прилёт должен быть позже вылета",
+    "transitionTarget": "Статус: {{from}} → {{to}}"
   },
   "flightStatus": {
     "aog": "AOG / задержка",
