@@ -112,8 +112,9 @@ test.describe('Суточный план', () => {
     const box = await bar.boundingBox();
     if (!box) throw new Error('полоса без размеров');
 
-    const saved = page.waitForRequest(
-      (request) => request.method() === 'PATCH' && /\/api\/v1\/flights\/flt_/.test(request.url()),
+    const saved = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' && /\/api\/v1\/flights\/flt_/.test(response.url()),
     );
     await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
     await page.mouse.down();
@@ -121,15 +122,20 @@ test.describe('Суточный план', () => {
     await page.mouse.up();
 
     // Перенос ушёл на сервер: меняется вылет, длительность сохраняет сервер
-    const body = (await saved).postDataJSON() as Record<string, unknown>;
+    const response = await saved;
+    const body = response.request().postDataJSON() as Record<string, unknown>;
     expect(body).toHaveProperty('stdUtc');
     expect(body).not.toHaveProperty('staUtc');
 
-    // Новый конфликт сервер не сохраняет без причины — диалог спрашивает её
-    const conflict = dialog(page).filter({ hasText: 'Конфликт расписания' });
-    if (await conflict.isVisible()) {
+    // Новый конфликт сервер не сохраняет без причины — диалог спрашивает её.
+    // Ветка выбирается по ответу сервера, а не по тому, успел ли диалог
+    // появиться: на 360 px те же 80 px — почти сутки, и конфликт вероятнее.
+    if (response.status() === 409) {
+      const conflict = dialog(page).filter({ hasText: 'Конфликт расписания' });
+      await expect(conflict).toBeVisible();
       await conflict.getByRole('button', { name: 'Отмена' }).click();
     } else {
+      expect(response.status(), await response.text()).toBe(200);
       await expect(page.getByText(/перенесён/)).toBeVisible();
     }
   });

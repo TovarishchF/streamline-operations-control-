@@ -57,10 +57,19 @@ test.describe('Коммуникации', () => {
   test('кнопка «Повторить» отправляет сообщение с ошибкой', async ({ page }) => {
     await page.goto('/communications/outbox', { waitUntil: 'networkidle' });
 
-    // Берётся первая строка с кнопкой повтора: она есть у неотправленных —
-    // и у тех, что в очереди, и у тех, что с ошибкой. Отбирать по одному
-    // состоянию значило бы зависеть от того, что осталось на стенде
-    // от предыдущего прогона.
+    // Кнопка повтора есть у неотправленных — и в очереди, и с ошибкой.
+    // Сначала берётся сообщение с ошибкой: оно ждёт человека, и фоновая
+    // отправка его не трогает. Сообщение из очереди воркер может отправить
+    // между загрузкой списка и нажатием, и сервер справедливо откажет
+    // в повторе, — поэтому оно берётся, только если ошибок на стенде
+    // не осталось от предыдущих прогонов.
+    const failed = page.waitForResponse(
+      (response) => response.url().includes('/api/v1/outbox?') && response.url().includes('status=failed'),
+    );
+    await page.locator('.ant-segmented-item', { hasText: 'Ошибка' }).click();
+    const { data } = (await (await failed).json()) as { data: unknown[] };
+    if (data.length === 0) await page.locator('.ant-segmented-item', { hasText: 'Все' }).click();
+
     const row = page
       .locator('.ant-table-row')
       .filter({ has: page.getByRole('button', { name: 'Повторить' }) })
