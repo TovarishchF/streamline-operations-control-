@@ -325,3 +325,17 @@ def _attach_transitions() -> None:
 
 
 _attach_transitions()
+
+
+def outstanding(queryset: models.QuerySet[ServiceOrder]) -> models.QuerySet[ServiceOrder]:
+    """Заявки без отклонённых, вместо которых уже заказаны новые.
+
+    Отказ поставщика остаётся в истории (переназначение создаёт новую
+    заявку, а не правит отклонённую), но улаженным: вместо него работает
+    замена. Иначе рейс с одним переназначением навсегда застревал бы
+    на условиях «нет отклонённых заявок» и «все заявки закрыты».
+    """
+    replaced = models.Exists(ServiceOrder.objects.filter(replaced_order=models.OuterRef("pk")))
+    return queryset.annotate(has_replacement=replaced).filter(
+        ~models.Q(status=ServiceOrderStatus.REJECTED) | models.Q(has_replacement=False)
+    )

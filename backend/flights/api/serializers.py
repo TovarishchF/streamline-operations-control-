@@ -16,7 +16,7 @@ from flights.models import (
 )
 from flights.services import conflicts as conflict_detector
 from flights.services import transitions
-from orders.models import ServiceOrderStatus
+from orders.models import ServiceOrderStatus, outstanding
 
 # Заявки, которые ещё требуют внимания диспетчера.
 UNSETTLED_ORDER_STATUSES = (
@@ -154,8 +154,18 @@ class FlightListSerializer(serializers.ModelSerializer):  # type: ignore[type-ar
         """
         orders = getattr(obj, "_prefetched_objects_cache", {}).get("service_orders")
         if orders is not None:
-            return sum(1 for order in orders if order.status in UNSETTLED_ORDER_STATUSES)
-        return obj.service_orders.filter(status__in=UNSETTLED_ORDER_STATUSES).count()
+            # Отказ, вместо которого заказана замена, улажен.
+            replaced = {order.replaced_order_id for order in orders if order.replaced_order_id}
+            return sum(
+                1
+                for order in orders
+                if order.status in UNSETTLED_ORDER_STATUSES and order.pk not in replaced
+            )
+        return (
+            outstanding(obj.service_orders.all())
+            .filter(status__in=UNSETTLED_ORDER_STATUSES)
+            .count()
+        )
 
     def get_marginPercent(self, obj: Flight) -> str | None:  # noqa: N802
         """Маржа рейса в режиме `mixed` (`DOMAIN.md § 7.3`).

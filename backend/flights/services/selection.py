@@ -11,10 +11,11 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING
 
-from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
+from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Subquery, Value, When
+from django.db.models.functions import Coalesce
 from rest_framework.exceptions import ValidationError
 
-from orders.models import ServiceOrder, ServiceOrderStatus
+from orders.models import ServiceOrder, ServiceOrderStatus, outstanding
 
 if TYPE_CHECKING:
     from django.db.models import QuerySet
@@ -74,7 +75,9 @@ def apply(queryset: QuerySet[Flight], params: QueryDict) -> QuerySet[Flight]:
         queryset = queryset.filter(type=_param(params, "type"))
     if _param(params, "hasUnconfirmedServices") in ("true", "false"):
         unsettled = Exists(
-            ServiceOrder.objects.filter(flight=OuterRef("pk"), status__in=UNSETTLED)
+            outstanding(ServiceOrder.objects.all()).filter(
+                flight=OuterRef("pk"), status__in=UNSETTLED
+            )
         )
         queryset = queryset.filter(
             unsettled if _param(params, "hasUnconfirmedServices") == "true" else ~unsettled
@@ -91,8 +94,16 @@ def apply(queryset: QuerySet[Flight], params: QueryDict) -> QuerySet[Flight]:
     raw = _param(params, "ordering")
     if raw.lstrip("-") == "unconfirmedServicesCount":
         # Счётчик колонки — те же неулаженные заявки, что в строке плана.
+        unsettled_count = (
+            outstanding(ServiceOrder.objects.filter(flight=OuterRef("pk")))
+            .filter(status__in=UNSETTLED)
+            .order_by()
+            .values("flight")
+            .annotate(total=Count("pk"))
+            .values("total")
+        )
         queryset = queryset.annotate(
-            unsettled_count=Count("service_orders", filter=Q(service_orders__status__in=UNSETTLED))
+            unsettled_count=Coalesce(Subquery(unsettled_count), 0)
         )
         field = "-unsettled_count" if raw.startswith("-") else "unsettled_count"
         return queryset.order_by(field, "std_utc", "number")

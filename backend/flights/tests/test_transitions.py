@@ -417,3 +417,27 @@ class TestEffects:
             )
 
         assert not OutboxMessage.objects.exists()
+
+
+@pytest.mark.django_db
+class TestReassignedRejection:
+    """Отказ, вместо которого заказана замена, улажен (`DOMAIN.md § 5.1`)."""
+
+    def test_replaced_rejection_does_not_block_readiness(
+        self, flight_in_work: Flight, dispatcher: User
+    ) -> None:
+        rejected = flight_in_work.service_orders.get()
+        ServiceOrder.objects.filter(pk=rejected.pk).update(status=ServiceOrderStatus.REJECTED)
+        assert transitions.unmet_conditions(flight_in_work, "ready")
+
+        replacement = _order(flight_in_work, "HND_BASIC", replaced_order=rejected)
+        ServiceOrder.objects.filter(pk=replacement.pk).update(status=ServiceOrderStatus.CONFIRMED)
+
+        assert transitions.unmet_conditions(flight_in_work, "ready") == []
+
+    def test_unreplaced_rejection_still_blocks(
+        self, flight_in_work: Flight, dispatcher: User
+    ) -> None:
+        flight_in_work.service_orders.update(status=ServiceOrderStatus.REJECTED)
+        problems = transitions.unmet_conditions(flight_in_work, "ready")
+        assert any("Отклонены" in problem for problem in problems)

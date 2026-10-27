@@ -19,7 +19,7 @@ from django.utils.translation import gettext as _
 from catalog.models import Airport, ServiceCategory
 from fleet.models import AircraftStatus
 from flights.models import SlotStatus
-from orders.models import ServiceOrderStatus
+from orders.models import ServiceOrderStatus, outstanding
 
 if TYPE_CHECKING:
     from flights.models import Flight
@@ -41,7 +41,7 @@ def has_at_least_one_service_order(flight: Flight) -> str | None:
 
 
 def all_orders_confirmed_or_completed(flight: Flight) -> str | None:
-    pending = flight.service_orders.exclude(
+    pending = outstanding(flight.service_orders.all()).exclude(
         status__in=[*SETTLED_STATUSES, ServiceOrderStatus.CANCELLED]
     )
     names = [order.service.code for order in pending.select_related("service")]
@@ -51,7 +51,8 @@ def all_orders_confirmed_or_completed(flight: Flight) -> str | None:
 
 
 def no_rejected_orders(flight: Flight) -> str | None:
-    rejected = flight.service_orders.filter(status=ServiceOrderStatus.REJECTED)
+    # Отказ, вместо которого заказана замена, улажен.
+    rejected = outstanding(flight.service_orders.all()).filter(status=ServiceOrderStatus.REJECTED)
     names = [order.service.code for order in rejected.select_related("service")]
     if names:
         return _("Отклонены заявки: %(codes)s") % {"codes": ", ".join(sorted(names))}
@@ -108,7 +109,7 @@ def arrival_time_reached_or_manual(flight: Flight) -> str | None:
 
 
 def all_orders_completed_or_cancelled(flight: Flight) -> str | None:
-    open_orders = flight.service_orders.exclude(
+    open_orders = outstanding(flight.service_orders.all()).exclude(
         status__in=[ServiceOrderStatus.COMPLETED, ServiceOrderStatus.CANCELLED]
     )
     names = [order.service.code for order in open_orders.select_related("service")]
