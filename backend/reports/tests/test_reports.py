@@ -298,6 +298,32 @@ def test_vendors_report_counts_orders_and_sla_breaches(
     assert Decimal(row["onTimeRate"]) == Decimal("50.00")
 
 
+def test_vendors_report_agrees_with_the_vendor_rating(
+    as_role: Callable[..., APIClient],
+    make_completed_order: Callable[..., ServiceOrder],
+    flight: Flight,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+    contract: Any,
+    fuel_price: Any,
+    query: dict[str, str],
+) -> None:
+    """Приёмка M9: отчёт по поставщикам согласуется с рейтингами (M6)."""
+    for index in range(5):
+        make_completed_order(
+            flight=flight, service=fuel_service, vendor=vendor_alpha, breach_sla=index == 0
+        )
+
+    api = as_role(Role.MANAGER)
+    row = api.get(f"{REPORTS_URL}/{definitions.VENDORS}", query).json()["rows"][0]
+    card = api.get(f"/api/v1/vendors/{vendor_alpha.pk}/rating").json()
+
+    assert card["sufficientData"] is True
+    assert row["rating"] == card["rating"]
+    on_time = Decimal(card["components"]["onTimeConfirmRate"]) * 100
+    assert Decimal(row["onTimeRate"]) == on_time.quantize(Decimal("0.01"))
+
+
 # ─────────────────── Дебиторская задолженность ───────────────────
 
 

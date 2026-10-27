@@ -88,6 +88,7 @@ from portals.api.views import (
     VendorPayablesView,
     VendorPerformanceView,
 )
+from reports.api.dashboards import DashboardLayoutView, DashboardView
 from reports.api.views import (
     ReportBuildView,
     ReportCatalogView,
@@ -214,6 +215,10 @@ api_v1: list[URLPattern | URLResolver] = [
         "portal/vendor/performance",
         VendorPerformanceView.as_view(),
         name="portal-vendor-performance",
+    ),
+    path("dashboards/<str:role>", DashboardView.as_view(), name="dashboard"),
+    path(
+        "dashboards/<str:role>/layout", DashboardLayoutView.as_view(), name="dashboard-layout"
     ),
     path("reports", ReportCatalogView.as_view(), name="report-catalog"),
     path("reports/<str:code>", ReportBuildView.as_view(), name="report-build"),

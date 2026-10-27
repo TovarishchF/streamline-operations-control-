@@ -222,32 +222,43 @@ def _contributions(
     return contributions
 
 
-def _document_totals(invoices: Iterable[Invoice]) -> tuple[Money | None, Money | None]:
-    """Сборы и скидки уровня документа по выставленным счетам рейса (ADR-023)."""
+def _document_totals(
+    invoices: Iterable[Invoice], currency: str, rates: Mapping[str, Any]
+) -> tuple[Money | None, Money | None]:
+    """Сборы и скидки уровня документа по выставленным счетам рейса (ADR-023).
+
+    Пересчёт в валюту рейса — по каждому счёту отдельно: так же считает
+    агрегатный путь (ADR-012), и округление у них не расходится.
+    """
     fees: Money | None = None
     discounts: Money | None = None
     for invoice in invoices:
-        fees = (fees or Money.zero(invoice.currency)) + Money.of(
-            invoice.fees_amount, invoice.currency
+        fees = (fees or Money.zero(currency)) + fx.convert(
+            Money.of(invoice.fees_amount, invoice.currency), currency, rates
         )
-        discounts = (discounts or Money.zero(invoice.currency)) + Money.of(
-            invoice.discount_amount, invoice.currency
+        discounts = (discounts or Money.zero(currency)) + fx.convert(
+            Money.of(invoice.discount_amount, invoice.currency), currency, rates
         )
     return fees, discounts
 
 
 def contributions_for(flight: Flight) -> tuple[list[Contribution], Money | None, Money | None]:
     """Вклады заявок рейса и сборы со скидками выставленных счетов."""
+    # По заявке берётся строка последнего выставленного счёта: порядок задан
+    # явно, чтобы агрегатный путь (ADR-012) выбирал ту же строку.
     lines = {
         line.service_order_id: line
         for line in DocumentLine.objects.filter(
             invoice__flight=flight, invoice__status__in=BILLED, service_order__isnull=False
-        )
+        ).order_by("invoice__issued_at", "created_at")
         if line.service_order_id is not None
     }
     orders = flight.service_orders.select_related("service", "flight")
-    fees, discounts = _document_totals(flight.invoices.filter(status__in=BILLED))
-    return _contributions(flight, orders, lines, fx.rates_for(flight)), fees, discounts
+    rates = fx.rates_for(flight)
+    fees, discounts = _document_totals(
+        flight.invoices.filter(status__in=BILLED), flight.billing_currency, rates
+    )
+    return _contributions(flight, orders, lines, rates), fees, discounts
 
 
 def margin_for(flight: Flight, mode: str = "mixed") -> Margin:
@@ -352,9 +363,13 @@ def percents_for(flights: list[Flight]) -> dict[str, str | None]:
     if missing:
         ids = [flight.pk for flight in missing]
         lines: dict[str, dict[str, DocumentLine]] = {flight_id: {} for flight_id in ids}
-        for line in DocumentLine.objects.filter(
-            invoice__flight_id__in=ids, invoice__status__in=BILLED, service_order__isnull=False
-        ).select_related("invoice"):
+        for line in (
+            DocumentLine.objects.filter(
+                invoice__flight_id__in=ids, invoice__status__in=BILLED, service_order__isnull=False
+            )
+            .select_related("invoice")
+            .order_by("invoice__issued_at", "created_at")
+        ):
             if line.invoice is not None and line.service_order_id is not None:
                 lines[line.invoice.flight_id][line.service_order_id] = line
         invoices: dict[str, list[Invoice]] = {flight_id: [] for flight_id in ids}
@@ -365,7 +380,9 @@ def percents_for(flights: list[Flight]) -> dict[str, str | None]:
         for flight in missing:
             try:
                 rates = fx.rates_for(flight)
-                fees, discounts = _document_totals(invoices[flight.pk])
+                fees, discounts = _document_totals(
+                    invoices[flight.pk], flight.billing_currency, rates
+                )
                 result = compute(
                     _contributions(flight, flight.service_orders.all(), lines[flight.pk], rates),
                     mode="mixed",

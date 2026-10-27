@@ -222,6 +222,16 @@ def financial(params: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def vendors(params: dict[str, Any]) -> list[dict[str, Any]]:
+    """Объём, качество и нарушения поставщиков за период `[ТЗ 3.6.1]`.
+
+    Доля подтверждений в срок считается тем же правилом, что составляющая
+    рейтинга (`DOMAIN.md § 7.4`, G-55), — за период отчёта; колонка рейтинга —
+    тот же рейтинг, что в карточке поставщика. Иначе отчёт и карточка
+    противоречили бы друг другу (приёмка M9).
+    """
+    from counterparties.models import Vendor
+    from counterparties.services import rating
+
     start, end = _window(params)
     queryset = (
         ServiceOrder.objects.filter(ordered_at__range=(start, end), vendor__isnull=False)
@@ -250,19 +260,28 @@ def vendors(params: dict[str, Any]) -> list[dict[str, Any]]:
         volume[vendor_id] += order.purchase_cost_amount or Decimal(0)
         currency.setdefault(vendor_id, order.purchase_currency or "RUB")
 
-    return [
-        {
-            "vendor": row["vendor__name"],
-            "orders": row["orders"],
-            "completed": row["completed"],
-            "rejected": row["rejected"],
-            "slaBreaches": row["breaches"],
-            "onTimeRate": _percent(row["on_time"], row["confirmed"]),
-            "currency": currency.get(row["vendor_id"], "RUB"),
-            "volume": _money(volume[row["vendor_id"]], currency.get(row["vendor_id"], "RUB")),
-        }
-        for row in queryset
-    ]
+    weights = rating.weights()
+    rows = []
+    for row in queryset:
+        vendor = Vendor.objects.get(pk=row["vendor_id"])
+        period = rating.stats_for(vendor, since=start, until=end)
+        overall = rating.compute(rating.stats_for(vendor), weights)
+        rows.append(
+            {
+                "vendor": row["vendor__name"],
+                "orders": row["orders"],
+                "completed": row["completed"],
+                "rejected": row["rejected"],
+                "slaBreaches": row["breaches"],
+                "onTimeRate": _percent(period.confirmed_on_time, period.orders),
+                "rating": str(overall.rating) if overall.rating is not None else None,
+                "currency": currency.get(row["vendor_id"], "RUB"),
+                "volume": _money(
+                    volume[row["vendor_id"]], currency.get(row["vendor_id"], "RUB")
+                ),
+            }
+        )
+    return rows
 
 
 # ─────────────────── Дебиторская и кредиторская ───────────────────
