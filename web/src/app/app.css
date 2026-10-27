@@ -1749,8 +1749,9 @@ a.soc-code--link,
 }
 
 /* ── Планшет ──────────────────────────────────────────────────────── */
-/* Карточка GanttBoard. Колонка бортов прилипает слева: на трёх сутках
-   и неделе шкала прокручивается, борта остаются на месте. */
+/* Карточка GanttBoard на vis-timeline: полосы в цвет статуса с ведущей
+   кромкой 3 px, красная обводка конфликта, линия «сейчас» mark-red.
+   Стили библиотеки переопределяются здесь, а не правкой её файла. */
 .soc-gantt {
   position: relative;
   overflow: hidden;
@@ -1759,182 +1760,119 @@ a.soc-code--link,
   background: var(--surface);
 }
 
-.soc-gantt__scroll {
-  overflow-x: auto;
+.soc-gantt__hint {
+  display: block;
+  padding: 6px 12px;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
 }
 
-.soc-gantt__grid {
-  position: relative;
+.soc-gantt .vis-timeline {
+  border: 0;
+  font-family: var(--font-sans);
 }
 
-.soc-gantt__head,
-.soc-gantt__row {
-  display: grid;
-  grid-template-columns: var(--lab) minmax(0, 1fr);
-}
-
-.soc-gantt__head {
-  height: 36px;
-  border-bottom: 1px solid var(--line);
+.soc-gantt .vis-panel.vis-top,
+.soc-gantt .vis-panel.vis-left {
   background: var(--surface-sunken);
 }
 
-.soc-gantt__scale {
-  position: relative;
-}
-
-.soc-gantt__scale span {
-  position: absolute;
-  top: 0;
-  display: flex;
-  align-items: center;
-  height: 36px;
-  padding-left: 6px;
-  border-left: 1px solid var(--line);
+.soc-gantt .vis-time-axis .vis-text {
   font: 500 11px/1 var(--font-mono);
   color: var(--ink-3);
 }
 
-.soc-gantt__row {
-  height: var(--gantt-row-h);
-  border-bottom: 1px solid var(--line);
+.soc-gantt .vis-time-axis .vis-grid.vis-minor {
+  border-color: var(--chart-grid);
 }
 
-.soc-gantt__row:last-child {
-  border-bottom: 0;
-}
-
-.soc-gantt__row--group {
-  height: 30px;
-  background: var(--surface-sunken);
-}
-
-.soc-gantt__label {
-  position: sticky;
-  left: 0;
-  z-index: 4;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  overflow: hidden;
-  padding: 0 12px;
-  border-right: 1px solid var(--line);
-  background: var(--surface);
+.soc-gantt .vis-labelset .vis-label {
+  border-bottom-color: var(--line);
   font: 500 12px/1 var(--font-mono);
   color: var(--ink);
-  white-space: nowrap;
 }
 
-.soc-gantt__head .soc-gantt__label {
-  background: var(--surface-sunken);
-  font-family: var(--font-sans);
-}
-
-.soc-gantt__row--group .soc-gantt__label {
-  background: var(--surface-sunken);
+.soc-gantt .vis-labelset .vis-label.soc-gantt-type {
   font: 600 11px/16px var(--font-sans);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--ink-2);
 }
 
-/* Длинное название типа не обрывается посреди буквы. */
-.soc-gantt__type {
-  overflow: hidden;
-  text-overflow: ellipsis;
+.soc-gantt .vis-foreground .vis-group {
+  border-bottom-color: var(--line);
 }
 
-.soc-gantt__flag {
-  flex: none;
+/* Неисправный борт — точка у номера, как в реестре парка. */
+.soc-gantt .vis-label.soc-gantt-aircraft .vis-inner::after {
+  content: '';
+  display: inline-block;
   width: 6px;
   height: 6px;
+  margin-left: 8px;
   border-radius: 50%;
+  background: var(--status-warning-dot);
+  vertical-align: 1px;
+}
+
+.soc-gantt .vis-label.soc-gantt-aircraft.is-aog .vis-inner::after {
   background: var(--status-critical-dot);
 }
 
-.soc-gantt__flag.is-warn {
-  background: var(--status-warning-dot);
-}
-
-.soc-gantt__lane {
-  position: relative;
-  background-image: linear-gradient(to right, var(--chart-grid) 1px, transparent 1px);
-  background-size: calc(100% / var(--ticks)) 100%;
-}
-
 /* Полоса: заливка и обводка статуса, ведущая кромка 3 px цвета точки. */
-.soc-bar {
+.soc-gantt .vis-item.soc-bar {
   --fg: var(--status-neutral-fg);
   --bg: var(--status-neutral-bg);
   --ln: var(--status-neutral-line);
   --dot: var(--status-neutral-dot);
-  position: absolute;
-  top: calc((var(--gantt-row-h) - var(--gantt-bar-h)) / 2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 18px;
-  height: var(--gantt-bar-h);
-  overflow: hidden;
-  padding: 0 8px 0 7px;
+  border: 0;
   border-radius: var(--radius-xs);
   background: var(--bg);
   box-shadow: inset 0 0 0 1px var(--ln), inset 3px 0 0 var(--dot);
   font: 500 11px/1 var(--font-mono);
   color: var(--fg);
-  white-space: nowrap;
 }
 
-a.soc-bar:hover {
-  filter: brightness(0.97);
-  color: var(--fg);
+.soc-gantt .vis-item.soc-bar .vis-item-content {
+  padding: 6px 8px 6px 7px;
 }
 
-.soc-bar b {
+.soc-gantt .vis-item.soc-bar b {
   font-weight: 600;
-  color: var(--fg);
 }
 
-.soc-bar--progress { --fg: var(--status-progress-fg); --bg: var(--status-progress-bg); --ln: var(--status-progress-line); --dot: var(--status-progress-dot); }
-.soc-bar--ready { --fg: var(--status-ready-fg); --bg: var(--status-ready-bg); --ln: var(--status-ready-line); --dot: var(--status-ready-dot); }
-.soc-bar--active { --fg: var(--status-active-fg); --bg: var(--status-active-bg); --ln: var(--status-active-line); --dot: var(--status-active-dot); }
-.soc-bar--done { --fg: var(--status-done-fg); --bg: var(--status-done-bg); --ln: var(--status-done-line); --dot: var(--status-done-dot); }
-.soc-bar--cancelled { --fg: var(--status-cancelled-fg); --bg: var(--status-cancelled-bg); --ln: var(--status-cancelled-line); --dot: var(--status-cancelled-dot); text-decoration: line-through; }
-.soc-bar--critical { --fg: var(--status-critical-fg); --bg: var(--status-critical-bg); --ln: var(--status-critical-line); --dot: var(--status-critical-dot); }
-.soc-bar--warning { --fg: var(--status-warning-fg); --bg: var(--status-warning-bg); --ln: var(--status-warning-line); --dot: var(--status-warning-dot); }
+.soc-gantt .vis-item.soc-bar--progress { --fg: var(--status-progress-fg); --bg: var(--status-progress-bg); --ln: var(--status-progress-line); --dot: var(--status-progress-dot); }
+.soc-gantt .vis-item.soc-bar--ready { --fg: var(--status-ready-fg); --bg: var(--status-ready-bg); --ln: var(--status-ready-line); --dot: var(--status-ready-dot); }
+.soc-gantt .vis-item.soc-bar--active { --fg: var(--status-active-fg); --bg: var(--status-active-bg); --ln: var(--status-active-line); --dot: var(--status-active-dot); }
+.soc-gantt .vis-item.soc-bar--done { --fg: var(--status-done-fg); --bg: var(--status-done-bg); --ln: var(--status-done-line); --dot: var(--status-done-dot); }
+.soc-gantt .vis-item.soc-bar--cancelled { --fg: var(--status-cancelled-fg); --bg: var(--status-cancelled-bg); --ln: var(--status-cancelled-line); --dot: var(--status-cancelled-dot); text-decoration: line-through; }
+.soc-gantt .vis-item.soc-bar--critical { --fg: var(--status-critical-fg); --bg: var(--status-critical-bg); --ln: var(--status-critical-line); --dot: var(--status-critical-dot); }
+.soc-gantt .vis-item.soc-bar--warning { --fg: var(--status-warning-fg); --bg: var(--status-warning-bg); --ln: var(--status-warning-line); --dot: var(--status-warning-dot); }
 
-.soc-bar.is-conflict {
+.soc-gantt .vis-item.soc-bar.is-conflict {
   box-shadow: inset 0 0 0 1px var(--ln), inset 3px 0 0 var(--dot), 0 0 0 2px var(--status-critical-dot);
 }
 
-/* Линия «сейчас»: 2 px `mark-red` и метка времени над шкалой. */
-.soc-gantt__now {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  z-index: 3;
+/* Выделение — обводка бренда поверх цвета статуса, а не замена его. */
+.soc-gantt .vis-item.soc-bar.vis-selected {
+  box-shadow: inset 0 0 0 1px var(--ln), inset 3px 0 0 var(--dot), 0 0 0 2px var(--brand);
+}
+
+/* Линия «сейчас»: 2 px mark-red, по часам сервера (ADR-014). Её не тянут. */
+.soc-gantt .vis-custom-time.now {
+  width: 2px;
+  background-color: var(--mark-red);
   pointer-events: none;
 }
 
-.soc-now {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 0;
-  border-left: 2px solid var(--mark-red);
-}
-
-.soc-now span {
-  position: absolute;
-  top: 9px;
-  left: -1px;
-  transform: translateX(-50%);
-  padding: 2px 5px;
+.soc-gantt div.vis-tooltip {
+  padding: 6px 8px;
+  border: 1px solid var(--line);
   border-radius: var(--radius-xs);
-  background: var(--mark-red);
-  font: 600 10px/1 var(--font-mono);
-  color: var(--on-mark-red);
-  white-space: nowrap;
+  background: var(--surface);
+  box-shadow: var(--shadow-1, 0 2px 8px rgb(0 0 0 / 12%));
+  font: 400 12px/18px var(--font-sans);
+  color: var(--ink);
 }
 
 /* ── Курсы валют ──────────────────────────────────────────────────── */

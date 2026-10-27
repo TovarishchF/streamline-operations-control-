@@ -1,34 +1,45 @@
 import { useState, type JSX } from 'react';
-import { Alert, App, Form, Modal, Select, Table, Tag, Typography } from 'antd';
+import { Alert, App, Form, Input, Modal, Select, Table, Tag, Typography } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 
 import { ApiError } from '@/api/client';
 import { useVendors } from '@/api/counterparties';
 import { transitionFlight, type FlightRow } from '@/api/flights';
 import { assignOrderVendor, fetchFlightOrders } from '@/api/orders';
+import type { ServiceCategory } from '@/api/types';
+import { FLIGHT_REASON_CODES } from '@/modules/flights/reasons';
 import { Mono } from '@/shared/ui/primitives';
 
 /** Переходы, которые имеет смысл применять пачкой. */
 const TRANSITIONS = ['start', 'ready', 'cancel'] as const;
 
+const CATEGORIES: ServiceCategory[] = [
+  'fuel', 'handling', 'catering', 'transport', 'permits', 'deicing',
+];
+
 type Outcome = { flight: string; ok: boolean; detail: string };
 
 interface FormValues {
   transition?: (typeof TRANSITIONS)[number];
-  vendorId?: string;
   reasonCode?: string;
+  comment?: string;
+  category?: ServiceCategory;
+  vendorId?: string;
 }
 
 /**
- * Массовые действия над выбранными рейсами `[ТЗ 3.1.2, 3.3.2]`.
+ * Массовые действия над выбранными рейсами `[ТЗ 3.1.2, 3.3.2]` (`SPEC.md § 4.2`).
  *
  * Пачка выполняется **по одному рейсу**, а не одной операцией на сервере.
  * Так и должно быть: у каждого рейса свой автомат и свои условия перехода,
  * и рейс, который не может перейти, не должен отменять переход остальных.
  *
- * Поэтому и результат показывается построчно: «применено к 7 из 10»
- * без перечня тех трёх — это сообщение, после которого всё равно идут
- * проверять руками.
+ * Поставщик назначается по категории: черновикам заявок выбранной категории,
+ * а не всем черновикам рейса — топливная компания не оказывает кейтеринг.
+ *
+ * Результат показывается построчно: «применено к 7 из 10» без перечня
+ * тех трёх — это сообщение, после которого всё равно идут проверять руками.
  */
 export function BulkActionsModal({
   mode,
@@ -42,11 +53,13 @@ export function BulkActionsModal({
 }): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
+  const queryClient = useQueryClient();
   const [form] = Form.useForm<FormValues>();
   const [outcomes, setOutcomes] = useState<Outcome[]>([]);
   const [running, setRunning] = useState(false);
+  const category = Form.useWatch('category', form);
 
-  const vendors = useVendors();
+  const vendors = useVendors(category);
 
   const close = (): void => {
     form.resetFields();
@@ -69,16 +82,15 @@ export function BulkActionsModal({
             id: flight.id,
             transition: values.transition,
             ...(values.reasonCode ? { reasonCode: values.reasonCode } : {}),
+            ...(values.comment ? { comment: values.comment } : {}),
           });
-        } else if (mode === 'vendor' && values.vendorId) {
+        } else if (mode === 'vendor' && values.vendorId && values.category) {
           const orders = await fetchFlightOrders(flight.id);
-          const drafts = orders.filter((order) => order.status === 'draft');
+          const drafts = orders.filter(
+            (order) => order.status === 'draft' && order.service?.category === values.category,
+          );
           if (drafts.length === 0) {
-            collected.push({
-              flight: flight.number,
-              ok: false,
-              detail: t('schedule.bulkNoDrafts'),
-            });
+            collected.push({ flight: flight.number, ok: false, detail: t('schedule.bulkNoDrafts') });
             continue;
           }
           for (const order of drafts) {
@@ -93,6 +105,11 @@ export function BulkActionsModal({
 
     setOutcomes(collected);
     setRunning(false);
+    // Список, конфликты и маржа изменились у части рейсов — у каких,
+    // видно в таблице результата; перечитываются все.
+    void queryClient.invalidateQueries({ queryKey: ['flights'] });
+    void queryClient.invalidateQueries({ queryKey: ['flight-conflicts'] });
+    void queryClient.invalidateQueries({ queryKey: ['flight-orders'] });
 
     const failed = collected.filter((item) => !item.ok).length;
     if (failed === 0) {
@@ -107,7 +124,7 @@ export function BulkActionsModal({
   return (
     <Modal
       open={mode !== null}
-      width={680}
+      width="min(680px, calc(100vw - 32px))"
       title={mode === 'vendor' ? t('schedule.bulkVendor') : t('schedule.bulkStatus')}
       okText={t('schedule.bulkApply')}
       cancelText={outcomes.length > 0 ? t('common.back') : t('common.cancel')}
@@ -129,7 +146,7 @@ export function BulkActionsModal({
             <Form.Item
               name="transition"
               label={t('schedule.bulkTransition')}
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: t('common.required') }]}
             >
               <Select
                 autoFocus
@@ -147,42 +164,70 @@ export function BulkActionsModal({
               }
             >
               {({ getFieldValue }) =>
-                // Отмена требует причины — её спрашивает автомат, и спросить
-                // её здесь дешевле, чем получить отказ по каждому рейсу.
+                // Отмена требует причины и комментария (`SPEC.md § 4.4`):
+                // спросить их здесь дешевле, чем получить отказ по каждому рейсу.
                 getFieldValue('transition') === 'cancel' ? (
-                  <Form.Item
-                    name="reasonCode"
-                    label={t('flight.reasonCode')}
-                    rules={[{ required: true }]}
-                  >
-                    <Select
-                      options={['client_request', 'weather', 'technical', 'other'].map(
-                        (value) => ({ value, label: t(`reasonCode.${value}`) }),
-                      )}
-                    />
-                  </Form.Item>
+                  <>
+                    <Form.Item
+                      name="reasonCode"
+                      label={t('flight.reasonCode')}
+                      rules={[{ required: true, message: t('flight.reasonRequired') }]}
+                    >
+                      <Select
+                        options={FLIGHT_REASON_CODES.cancel.map((value) => ({
+                          value,
+                          label: t(`reasonCode.${value}`),
+                        }))}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      name="comment"
+                      label={t('flight.comment')}
+                      rules={[{ required: true, whitespace: true, message: t('flight.commentRequired') }]}
+                    >
+                      <Input.TextArea rows={2} />
+                    </Form.Item>
+                  </>
                 ) : null
               }
             </Form.Item>
           </>
         ) : (
-          <Form.Item
-            name="vendorId"
-            label={t('service.vendor')}
-            tooltip={t('schedule.bulkVendorHint')}
-            rules={[{ required: true }]}
-          >
-            <Select
-              autoFocus
-              showSearch
-              optionFilterProp="label"
-              loading={vendors.isLoading}
-              options={(vendors.data?.data ?? []).map((vendor) => ({
-                value: vendor.id,
-                label: vendor.name,
-              }))}
-            />
-          </Form.Item>
+          <>
+            <Form.Item
+              name="category"
+              label={t('service.category')}
+              rules={[{ required: true, message: t('common.required') }]}
+            >
+              <Select
+                autoFocus
+                options={CATEGORIES.map((value) => ({
+                  value,
+                  label: t(`serviceCategory.${value}`),
+                }))}
+                onChange={() => {
+                  form.setFieldValue('vendorId', undefined);
+                }}
+              />
+            </Form.Item>
+            <Form.Item
+              name="vendorId"
+              label={t('service.vendor')}
+              tooltip={t('schedule.bulkVendorHint')}
+              rules={[{ required: true, message: t('common.required') }]}
+            >
+              <Select
+                showSearch
+                optionFilterProp="label"
+                disabled={!category}
+                loading={vendors.isLoading}
+                options={(vendors.data?.data ?? []).map((vendor) => ({
+                  value: vendor.id,
+                  label: vendor.name,
+                }))}
+              />
+            </Form.Item>
+          </>
         )}
       </Form>
 

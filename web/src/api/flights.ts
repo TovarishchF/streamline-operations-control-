@@ -13,8 +13,9 @@ import {
 } from '@tanstack/react-query';
 import { z } from 'zod';
 
+import { auditEntrySchema, type AuditEntryRow } from './admin';
 import { pagedSchema, type Paged } from './catalog';
-import { newIdempotencyKey, request } from './client';
+import { ApiError, newIdempotencyKey, request } from './client';
 
 export const flightStatusSchema = z.enum([
   'planned',
@@ -123,21 +124,37 @@ export const flightSchema = z.object({
 
 export type Flight = z.infer<typeof flightSchema>;
 
+/** `ScheduleConflict` из контракта. */
 export const conflictSchema = z.object({
-  kind: z.string(),
+  kind: z.enum([
+    'overlap',
+    'turnaround',
+    'aircraft_unserviceable',
+    'expired_approval',
+    'missing_slot',
+  ]),
   flightId: z.string(),
   relatedFlightId: z.string().nullable(),
+  aircraftId: z.string().nullable().optional(),
   message: z.string(),
-  severity: z.enum(['critical', 'warning']),
+  severity: z.enum(['blocking', 'warning']),
 });
 
 export type ScheduleConflict = z.infer<typeof conflictSchema>;
 
+/** Отбор суточного плана — параметры `GET /flights` (`SPEC.md § 4.2`). */
 export interface FlightFilters {
   from?: string;
   to?: string;
   status?: string;
   clientId?: string;
+  aircraftId?: string;
+  aircraftTypeId?: string;
+  type?: string;
+  airport?: string;
+  hasUnconfirmedServices?: boolean;
+  marginBelowPercent?: string;
+  ordering?: string;
   search?: string;
   page?: number;
   perPage?: number;
@@ -153,13 +170,17 @@ function toQuery(filters: FlightFilters): string {
   return query.toString();
 }
 
-export function useFlights(filters: FlightFilters): UseQueryResult<Paged<FlightRow>> {
+export function useFlights(
+  filters: FlightFilters,
+  enabled = true,
+): UseQueryResult<Paged<FlightRow>> {
   const query = toQuery(filters);
   return useQuery({
     queryKey: ['flights', query],
     queryFn: ({ signal }) =>
       request(`/flights?${query}`, pagedSchema(flightRowSchema), { signal }),
     placeholderData: (previous) => previous,
+    enabled,
   });
 }
 
@@ -171,38 +192,42 @@ export function useFlight(id: string | undefined): UseQueryResult<Flight> {
   });
 }
 
-export function useScheduleConflicts(): UseQueryResult<{ data: ScheduleConflict[] }> {
+/**
+ * Конфликты расписания за период вылета.
+ *
+ * Без периода сервер считает горизонт планирования — месяц вперёд.
+ * Карточке рейса нужен один рейс: она спрашивает узкое окно вокруг его
+ * вылета, а не весь месяц ради одной строки.
+ */
+export function useScheduleConflicts(
+  range?: { from: string; to: string },
+): UseQueryResult<{ data: ScheduleConflict[] }> {
+  const query = range ? `?${new URLSearchParams(range).toString()}` : '';
   return useQuery({
-    queryKey: ['flight-conflicts'],
+    queryKey: ['flight-conflicts', query],
     queryFn: ({ signal }) =>
-      request('/flights/conflicts', z.object({ data: z.array(conflictSchema) }), { signal }),
+      request(`/flights/conflicts${query}`, z.object({ data: z.array(conflictSchema) }), {
+        signal,
+      }),
     // Конфликты зависят от состояния бортов и соседних рейсов: пересчитывать
     // их на каждый переход между экранами незачем, раз в минуту достаточно.
     staleTime: 60_000,
   });
 }
 
-export const flightHistorySchema = z.object({
-  data: z.array(
-    z.object({
-      id: z.string(),
-      ts: z.string(),
-      actorName: z.string(),
-      actorRole: z.string(),
-      source: z.enum(['user', 'seed', 'system']),
-      action: z.string(),
-      before: z.record(z.unknown()).nullable(),
-      after: z.record(z.unknown()).nullable(),
-      comment: z.string().nullable(),
-    }),
-  ),
-});
-
-export function useFlightHistory(id: string | undefined) {
+/**
+ * Журнал по рейсу: сам рейс, его заявки и документы (`PagedResponse`).
+ *
+ * Берётся первая страница наибольшего размера: карточке нужен журнал
+ * целиком, а у рейса он редко превышает двести записей.
+ */
+export function useFlightHistory(id: string | undefined): UseQueryResult<Paged<AuditEntryRow>> {
   return useQuery({
     queryKey: ['flight-history', id],
     queryFn: ({ signal }) =>
-      request(`/flights/${id ?? ''}/history`, flightHistorySchema, { signal }),
+      request(`/flights/${id ?? ''}/history?perPage=200`, pagedSchema(auditEntrySchema), {
+        signal,
+      }),
     enabled: Boolean(id),
   });
 }
@@ -237,16 +262,33 @@ export function useCreateFlight() {
   });
 }
 
+/** `FlightTransitionRequest` из контракта. */
+export interface FlightTransitionInput {
+  transition: FlightTransition;
+  reasonCode?: string;
+  comment?: string;
+  /** Явный отказ от счёта при завершении, требует причины в `comment`. */
+  completeWithoutInvoice?: boolean;
+}
+
 export function useFlightTransition(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: { transition: string; reasonCode?: string; comment?: string }) =>
-      request(`/flights/${id}/status`, flightSchema, { method: 'POST', body: input }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['flight', id] });
+    mutationFn: (input: FlightTransitionInput) =>
+      request(`/flights/${id}/status`, flightSchema, {
+        method: 'POST',
+        body: input,
+        // Контракт требует ключ (ADR-018): повтор перехода при обрыве связи
+        // не должен выполнить его дважды.
+        idempotencyKey: newIdempotencyKey(),
+      }),
+    onSuccess: (flight) => {
+      queryClient.setQueryData(['flight', id], flight);
       void queryClient.invalidateQueries({ queryKey: ['flights'] });
       void queryClient.invalidateQueries({ queryKey: ['flight-history', id] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-orders', id] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-margin', id] });
     },
   });
 }
@@ -258,14 +300,15 @@ export function useFlightTransition(id: string) {
  * обходит рейсы по очереди — у каждого свой автомат и свои условия,
  * и рейс, который не может перейти, не должен отменять переход остальных.
  */
-export async function transitionFlight(input: {
-  id: string;
-  transition: string;
-  reasonCode?: string;
-  comment?: string;
-}): Promise<Flight> {
+export async function transitionFlight(
+  input: FlightTransitionInput & { id: string },
+): Promise<Flight> {
   const { id, ...body } = input;
-  return request(`/flights/${id}/status`, flightSchema, { method: 'POST', body });
+  return request(`/flights/${id}/status`, flightSchema, {
+    method: 'POST',
+    body,
+    idempotencyKey: newIdempotencyKey(),
+  });
 }
 
 /**
@@ -291,15 +334,50 @@ const exportTicketSchema = z.object({
   expiresAt: z.string().nullable(),
 });
 
+/** Правка рейса — форма и планшет (`SPEC.md § 4.1`). */
+export interface FlightUpdateInput {
+  aircraftId?: string | null;
+  depIcao?: string;
+  arrIcao?: string;
+  stdUtc?: string;
+  staUtc?: string;
+  paxCount?: number;
+  remarks?: string;
+  /** Причина, с которой подтверждён конфликт, появившийся от правки. */
+  conflictOverrideReason?: string;
+}
+
+/**
+ * Изменение рейса одним запросом, без привязки к хуку: планшет двигает
+ * разные рейсы, и хук на идентификатор ему не подходит.
+ *
+ * Новый конфликт без причины сервер отклоняет 409 SCHEDULE_CONFLICT
+ * со списком конфликтов — его разбирает `conflictsFromError`.
+ */
+export async function updateFlight(id: string, input: FlightUpdateInput): Promise<Flight> {
+  return request(`/flights/${id}`, flightSchema, { method: 'PATCH', body: input });
+}
+
+export function conflictsFromError(error: unknown): { kind: string; message: string }[] {
+  if (!(error instanceof ApiError) || error.code !== 'SCHEDULE_CONFLICT') return [];
+  const raw = error.details['conflicts'];
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (item): item is { kind: string; message: string } =>
+      typeof item === 'object' && item !== null && 'kind' in item && 'message' in item,
+  );
+}
+
 export function useUpdateFlight(id: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: Record<string, unknown>) =>
-      request(`/flights/${id}`, flightSchema, { method: 'PATCH', body: input }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['flight', id] });
+    mutationFn: (input: FlightUpdateInput) => updateFlight(id, input),
+    onSuccess: (flight) => {
+      queryClient.setQueryData(['flight', id], flight);
       void queryClient.invalidateQueries({ queryKey: ['flights'] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-conflicts'] });
+      void queryClient.invalidateQueries({ queryKey: ['flight-history', id] });
     },
   });
 }
@@ -344,7 +422,10 @@ export function useApproveRequest() {
 
   return useMutation({
     mutationFn: (id: string) =>
-      request(`/flight-requests/${id}/approve`, flightSchema, { method: 'POST' }),
+      request(`/flight-requests/${id}/approve`, flightSchema, {
+        method: 'POST',
+        idempotencyKey: newIdempotencyKey(),
+      }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['flight-requests'] });
       void queryClient.invalidateQueries({ queryKey: ['flights'] });
@@ -360,6 +441,7 @@ export function useRejectRequest() {
       request(`/flight-requests/${input.id}/reject`, flightRequestSchema, {
         method: 'POST',
         body: { reason: input.reason },
+        idempotencyKey: newIdempotencyKey(),
       }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['flight-requests'] });

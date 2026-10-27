@@ -97,6 +97,43 @@ test.describe('Суточный план', () => {
     (await popup).close();
   });
 
+  test('планшет переносит полосу через сервер (SPEC § 4.1)', async ({ page }) => {
+    await page.goto('/schedule', { waitUntil: 'networkidle' });
+
+    const bars = page.locator('.vis-item.soc-bar');
+    await expect(bars.first()).toBeVisible();
+    // Линия «сейчас» — по часам сервера, своей меткой, а не часами браузера
+    await expect(page.locator('.vis-custom-time.now')).toBeAttached();
+
+    // Двигается только рейс, который ещё не состоялся
+    const bar = page.locator('.vis-item.soc-bar.vis-editable').first();
+    test.skip((await bar.count()) === 0, 'в окне планшета нет рейса, который можно двигать');
+    await bar.click();
+    const box = await bar.boundingBox();
+    if (!box) throw new Error('полоса без размеров');
+
+    const saved = page.waitForRequest(
+      (request) => request.method() === 'PATCH' && /\/api\/v1\/flights\/flt_/.test(request.url()),
+    );
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2 + 80, box.y + box.height / 2, { steps: 8 });
+    await page.mouse.up();
+
+    // Перенос ушёл на сервер: меняется вылет, длительность сохраняет сервер
+    const body = (await saved).postDataJSON() as Record<string, unknown>;
+    expect(body).toHaveProperty('stdUtc');
+    expect(body).not.toHaveProperty('staUtc');
+
+    // Новый конфликт сервер не сохраняет без причины — диалог спрашивает её
+    const conflict = dialog(page).filter({ hasText: 'Конфликт расписания' });
+    if (await conflict.isVisible()) {
+      await conflict.getByRole('button', { name: 'Отмена' }).click();
+    } else {
+      await expect(page.getByText(/перенесён/)).toBeVisible();
+    }
+  });
+
   test('массовые действия недоступны без выбора', async ({ page }) => {
     await openTable(page);
 

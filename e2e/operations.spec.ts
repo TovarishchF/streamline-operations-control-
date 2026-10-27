@@ -54,9 +54,9 @@ test.describe('Операции', () => {
     // Клиент
     await pickOption(page, page.locator('.ant-form-item', { hasText: 'Клиент' }).locator('.ant-select'));
 
-    // Время вылета. Кнопка «Сейчас» закрывает панель сама — подтверждения нет.
+    // Время вылета. «Сейчас (UTC)» берёт часы сервера, а не браузера (ADR-014).
     await page.locator('.ant-form-item', { hasText: 'Вылет' }).last().locator('input').first().click();
-    await page.locator('.ant-picker-now-btn').click();
+    await page.locator('.ant-picker-presets li', { hasText: 'Сейчас (UTC)' }).click();
 
     await page.getByRole('button', { name: 'Создать рейс', exact: true }).click();
 
@@ -77,16 +77,44 @@ test.describe('Операции', () => {
     await expect(page.getByText(number.trim()).first()).toBeVisible();
   });
 
+  test.describe('браузер не в UTC', () => {
+    // Диспетчер в Екатеринбурге (UTC+5). Поле подписано UTC — и должно
+    // отправлять UTC, а не местное время браузера (CLAUDE.md § 3 п. 2).
+    test.use({ timezoneId: 'Asia/Yekaterinburg' });
+
+    test('время вылета уходит на сервер в UTC, как подписано', async ({ page }) => {
+      await asDispatcher(page);
+      await page.goto('/flights/new');
+      await pickOption(page, page.locator('.ant-form-item', { hasText: 'Клиент' }).locator('.ant-select'));
+
+      const created = page.waitForRequest(
+        (request) => request.method() === 'POST' && request.url().endsWith('/api/v1/flights'),
+      );
+      const input = page.locator('.ant-form-item', { hasText: 'Вылет' }).last().locator('input').first();
+      await input.click();
+      await input.fill('15.12.2026 12:00Z');
+      // Enter подтверждает значение и отправляет форму
+      await input.press('Enter');
+
+      const body = (await created).postDataJSON() as { stdUtc: string };
+      expect(body.stdUtc).toBe('2026-12-15T12:00:00.000Z');
+      // И карточка показывает то же время с подписью зоны
+      await expect(page.getByText('15.12 12:00Z').first()).toBeVisible();
+    });
+  });
+
   test('переход статуса заблокирован, пока не выполнены условия', async ({ page }) => {
     await asDispatcher(page);
-    await page.goto(`/flights/${await anyFlightId(page, 'planned,in_work')}`);
+    await page.goto(`/flights/${await anyFlightId(page, 'planned')}`);
 
-    // У рейса без борта и заявок переход «Взять в работу» недоступен,
-    // но виден: скрывать его — значит прятать причину (SPEC § 4.4)
+    // Доступный переход — кнопка; недоступный кнопкой не показывается,
+    // но рядом виден перечень невыполненных условий (SPEC § 4.4).
     const start = page.getByRole('button', { name: 'Взять в работу' });
-    if (await start.isVisible()) {
-      await expect(start).toBeDisabled();
-    }
+    const blocked = page.getByText('«Взять в работу» недоступно:');
+    await expect(start.or(blocked)).toBeVisible();
+    // Отмена требует причины, но причину вводят в диалоге: она не числится
+    // невыполненным условием, и кнопка отмены у рейса в плане есть всегда.
+    await expect(page.getByRole('button', { name: 'Отменить', exact: true })).toBeVisible();
   });
 
   // Заявки на услуги переезжают на настоящий API вместе с M5: подбор
@@ -146,8 +174,11 @@ test.describe('Операции', () => {
 
     await page.goto('/communications/templates');
 
+    // Тема уникальна на прогон: повтор с прежней темой не менял бы шаблон,
+    // и кнопка сохранения справедливо оставалась бы неактивной.
+    const changed = `Изменённая тема письма ${String(Date.now())}`;
     const subject = page.locator('.ant-input').first();
-    await subject.fill('Изменённая тема письма');
+    await subject.fill(changed);
 
     // Кнопка сохранения активна, но изменение ещё не применено
     const save = page.getByRole('button', { name: 'Сохранить шаблон' });
@@ -161,7 +192,7 @@ test.describe('Операции', () => {
     await page.locator('.ant-modal-footer').getByRole('button', { name: 'Сохранить' }).click();
 
     await expect(page.getByText('Есть несохранённые правки')).toHaveCount(0);
-    await expect(subject).toHaveValue('Изменённая тема письма');
+    await expect(subject).toHaveValue(changed);
   });
 
   test('сортировка и изменение ширины столбца доступны в таблице', async ({ page }) => {

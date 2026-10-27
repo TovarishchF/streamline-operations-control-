@@ -1,35 +1,35 @@
-import { useMemo, useState, type JSX } from 'react';
-import { Alert, Modal, Radio, Slider, Space, Tag, Typography } from 'antd';
+import { useEffect, useState, type JSX } from 'react';
+import { Alert, App, Input, Modal, Radio, Slider, Space, Tag, Typography } from 'antd';
+import { useQueryClient } from '@tanstack/react-query';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
+import { ApiError } from '@/api/client';
+import {
+  useVendorSuggest,
+  type SuggestMode,
+  type VendorCandidateRow,
+} from '@/api/counterparties';
 import type { Flight } from '@/api/flights';
-import type { ServiceOrderRow } from '@/api/orders';
-import type { VendorCandidate } from '@/api/types';
-import { CONTRACT_BY_VENDOR, VENDOR_BY_ID, VENDOR_PRICES } from '@/mocks/counterparties';
+import { assignOrderVendor, useReassignOrder, type ServiceOrderRow } from '@/api/orders';
+import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
 import { MoneyText, Mono } from '@/shared/ui/primitives';
-import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { Notice } from '@/shared/ui/Notice';
 
-type Preset = 'price' | 'rating' | 'proximity' | 'balanced';
-
-const PRESETS: Record<Preset, [number, number, number]> = {
-  price: [1, 0, 0],
-  rating: [0, 1, 0],
-  proximity: [0, 0, 1],
-  balanced: [0.5, 0.3, 0.2],
-};
+type Weights = [number, number, number];
 
 /**
  * Подбор поставщика `[ТЗ 3.3.2]`.
  *
  * Перед применением показывается таблица сравнения кандидатов с разложением
  * балла на составляющие и влиянием на маржу рейса: **решение должно быть
- * объяснимым** (`SPEC.md § 6.2`). Цифра без разложения выглядит выдуманной,
- * и диспетчер ей не поверит.
+ * объяснимым** (`SPEC.md § 6.2`). Баллы считает сервер по `DOMAIN.md § 7.5`
+ * (`POST /vendors/suggest`); поставщики без действующего контракта в подбор
+ * не попадают.
  *
- * Формула — `DOMAIN.md § 7.5`. На сервере это `POST /vendors/suggest`;
- * здесь показан вид ответа.
+ * Назначить выбранного можно черновику (назначение) либо отклонённой или
+ * отменённой заявке (переназначение). У заявки в работе подбор — только
+ * сравнение: сменить поставщика у подтверждённой услуги нельзя.
  */
 export function VendorSuggestModal({
   order,
@@ -41,76 +41,89 @@ export function VendorSuggestModal({
   onClose: () => void;
 }): JSX.Element {
   const { t } = useTranslation();
-  const [preset, setPreset] = useState<Preset>('balanced');
-  const [weights, setWeights] = useState<[number, number, number]>(PRESETS.balanced);
+  const { message } = App.useApp();
+  const localized = useLocalizedName();
+  const queryClient = useQueryClient();
+  const reassign = useReassignOrder();
 
-  const candidates: VendorCandidate[] = useMemo(() => {
-    if (!order) return [];
+  const [mode, setMode] = useState<SuggestMode>('balanced');
+  const [weights, setWeights] = useState<Weights>([0.5, 0.3, 0.2]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [comment, setComment] = useState('');
+  const [assigning, setAssigning] = useState(false);
 
-    const prices = VENDOR_PRICES.filter(
-      (p) => p.serviceId === order.serviceId && p.airportIcao === order.airportIcao,
-    );
-    if (prices.length === 0) return [];
+  useEffect(() => {
+    setSelected(null);
+    setComment('');
+  }, [order?.id]);
 
-    const costs = prices.map((p) => Number.parseFloat(p.price.amount));
-    const minCost = Math.min(...costs);
-    const maxCost = Math.max(...costs);
-    const currentCost = Number.parseFloat(order.purchaseCost?.amount ?? '0');
-    const quantity = Number.parseFloat(order.quantity);
+  const suggest = useVendorSuggest(
+    order
+      ? {
+          serviceId: order.serviceId,
+          airportIcao: order.airportIcao,
+          onDate: order.leg === 'arrival' ? flight.staUtc : flight.stdUtc,
+          quantity: order.quantity,
+          flightId: flight.id,
+          mode,
+          ...(mode === 'custom'
+            ? {
+                weights: {
+                  price: weights[0].toFixed(2),
+                  rating: weights[1].toFixed(2),
+                  proximity: weights[2].toFixed(2),
+                },
+              }
+            : {}),
+        }
+      : null,
+  );
+  const candidates = suggest.data?.data ?? [];
+  const chosen = selected ?? candidates[0]?.vendorId ?? null;
 
-    const [wPrice, wRating, wProximity] = weights;
+  const canAssign = order?.status === 'draft';
+  const canReassign = order?.status === 'rejected' || order?.status === 'cancelled';
+  const canApply = (canAssign || canReassign) && chosen !== null && chosen !== order.vendorId;
 
-    return prices
-      .map((price) => {
-        const vendor = VENDOR_BY_ID.get(price.vendorId);
-        const cost = Number.parseFloat(price.price.amount);
-        const priceScore = maxCost === minCost ? 1 : 1 - (cost - minCost) / (maxCost - minCost);
-        const ratingScore = vendor?.rating?.sufficientData
-          ? Number.parseFloat(vendor.rating.rating ?? '0') / 5
-          : 0.5;
-        const hasBase = vendor?.coverage?.airports?.includes(order.airportIcao) ?? false;
-        const proximityScore = hasBase ? 1 : 0.4;
+  const apply = async (): Promise<void> => {
+    if (!order || !chosen) return;
+    setAssigning(true);
+    try {
+      if (canAssign) {
+        await assignOrderVendor({ id: order.id, vendorId: chosen });
+        await queryClient.invalidateQueries({ queryKey: ['flight-orders', order.flightId] });
+        await queryClient.invalidateQueries({ queryKey: ['flight-margin', order.flightId] });
+      } else {
+        await reassign.mutateAsync({ id: order.id, vendorId: chosen, comment });
+      }
+      void message.success(t('vendor.assigned'));
+      onClose();
+    } catch (error: unknown) {
+      void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+    } finally {
+      setAssigning(false);
+    }
+  };
 
-        const total = wPrice * priceScore + wRating * ratingScore + wProximity * proximityScore;
-        const marginImpact = (currentCost - cost * quantity).toFixed(4);
-
-        return {
-          vendorId: price.vendorId,
-          vendorName: vendor?.name ?? price.vendorId,
-          cost: { amount: (cost * quantity).toFixed(4), currency: price.price.currency },
-          priceScore: priceScore.toFixed(4),
-          ratingScore: ratingScore.toFixed(4),
-          proximityScore: proximityScore.toFixed(4),
-          totalScore: total.toFixed(4),
-          distanceKm: hasBase ? 0 : 45,
-          hasBaseAtAirport: hasBase,
-          marginImpact: { amount: marginImpact, currency: price.price.currency },
-        } satisfies VendorCandidate;
-      })
-      .sort((a, b) => Number.parseFloat(b.totalScore) - Number.parseFloat(a.totalScore));
-  }, [order, weights]);
-
-  const columns: DataColumns<VendorCandidate> = [
+  const columns: DataColumns<VendorCandidateRow> = [
     {
       title: t('vendor.name'),
       dataIndex: 'vendorName',
-      render: (value: string, row) => {
-        const contract = CONTRACT_BY_VENDOR.get(row.vendorId);
-        const current = order?.vendorId === row.vendorId;
-        return (
-          <Space direction="vertical" size={0}>
-            <Space size={6}>
-              <span>{value}</span>
-              {current ? <Tag color="blue">{t('vendor.current')}</Tag> : null}
-              {contract?.status === 'expired' ? <Tag color="red">{t('contract.expired')}</Tag> : null}
-              {contract?.status === 'expiring' ? <Tag color="orange">{t('contract.expiring')}</Tag> : null}
-            </Space>
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {row.hasBaseAtAirport ? t('vendor.hasBase') : t('vendor.distanceKm', { km: row.distanceKm })}
-            </Typography.Text>
+      render: (value: string, row) => (
+        <Space direction="vertical" size={0}>
+          <Space size={6} wrap>
+            <span>{value}</span>
+            {order?.vendorId === row.vendorId ? <Tag color="blue">{t('vendor.current')}</Tag> : null}
           </Space>
-        );
-      },
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {row.hasBaseAtAirport
+              ? t('vendor.hasBase')
+              : row.distanceKm === null
+                ? t('vendor.distanceUnknown')
+                : t('vendor.distanceKm', { km: row.distanceKm })}
+          </Typography.Text>
+        </Space>
+      ),
     },
     {
       title: t('vendor.cost'),
@@ -124,28 +137,28 @@ export function VendorSuggestModal({
       dataIndex: 'priceScore',
       width: 96,
       align: 'right',
-      render: (value: string) => <Mono>{Number.parseFloat(value).toFixed(2)}</Mono>,
+      render: (value: string) => <Mono>{value}</Mono>,
     },
     {
       title: t('vendor.ratingScore'),
       dataIndex: 'ratingScore',
       width: 96,
       align: 'right',
-      render: (value: string) => <Mono>{Number.parseFloat(value).toFixed(2)}</Mono>,
+      render: (value: string) => <Mono>{value}</Mono>,
     },
     {
       title: t('vendor.proximityScore'),
       dataIndex: 'proximityScore',
       width: 106,
       align: 'right',
-      render: (value: string) => <Mono>{Number.parseFloat(value).toFixed(2)}</Mono>,
+      render: (value: string) => <Mono>{value}</Mono>,
     },
     {
       title: t('vendor.totalScore'),
       dataIndex: 'totalScore',
       width: 100,
       align: 'right',
-      render: (value: string) => <Mono>{Number.parseFloat(value).toFixed(3)}</Mono>,
+      render: (value: string) => <Mono>{value}</Mono>,
     },
     {
       title: t('vendor.marginImpact'),
@@ -159,71 +172,102 @@ export function VendorSuggestModal({
   return (
     <Modal
       open={order !== null}
-      width={980}
-      title={t('vendor.suggestTitle', { service: order?.service?.name.ru ?? '' })}
-      okText={t('vendor.applySelected')}
-      cancelText={t('common.cancel')}
+      width="min(980px, calc(100vw - 32px))"
+      title={t('vendor.suggestTitle', { service: localized(order?.service?.name) })}
+      okText={canReassign ? t('vendor.reassignSelected') : t('vendor.applySelected')}
+      okButtonProps={{ disabled: !canApply, loading: assigning }}
+      cancelText={t('common.close')}
       onCancel={onClose}
-      onOk={onClose}
+      onOk={() => {
+        void apply();
+      }}
     >
       <Space direction="vertical" size={12} style={{ width: '100%' }}>
-        <Space size={12} wrap align="center">
-          <Radio.Group
-            size="small"
-            optionType="button"
-            value={preset}
-            onChange={(e) => {
-              const next = e.target.value as Preset;
-              setPreset(next);
-              setWeights(PRESETS[next]);
-            }}
-            options={[
-              { label: t('vendor.presetPrice'), value: 'price' },
-              { label: t('vendor.presetRating'), value: 'rating' },
-              { label: t('vendor.presetProximity'), value: 'proximity' },
-              { label: t('vendor.presetBalanced'), value: 'balanced' },
-            ]}
-          />
+        <Radio.Group
+          size="small"
+          optionType="button"
+          value={mode}
+          onChange={(e) => {
+            setMode(e.target.value as SuggestMode);
+          }}
+          options={[
+            { label: t('vendor.presetPrice'), value: 'price' },
+            { label: t('vendor.presetRating'), value: 'rating' },
+            { label: t('vendor.presetProximity'), value: 'proximity' },
+            { label: t('vendor.presetBalanced'), value: 'balanced' },
+            { label: t('vendor.presetCustom'), value: 'custom' },
+          ]}
+        />
+
+        {mode === 'custom' ? (
+          <Space size={16} wrap style={{ width: '100%' }}>
+            {(['price', 'rating', 'proximity'] as const).map((key, index) => (
+              <Space key={key} direction="vertical" size={0} style={{ width: 190, maxWidth: '100%' }}>
+                <Typography.Text style={{ fontSize: 12 }}>{t(`vendor.weight_${key}`)}</Typography.Text>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.1}
+                  value={weights[index]}
+                  onChange={(value: number) => {
+                    const next: Weights = [...weights];
+                    next[index] = value;
+                    setWeights(next);
+                  }}
+                />
+              </Space>
+            ))}
+          </Space>
+        ) : (
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-            {t('vendor.weights')}: {weights.map((w) => w.toFixed(1)).join(' / ')}
+            {t('vendor.presetHint')}
           </Typography.Text>
-        </Space>
+        )}
 
-        <Space size={16} wrap style={{ width: '100%' }}>
-          {(['price', 'rating', 'proximity'] as const).map((key, index) => (
-            <Space key={key} direction="vertical" size={0} style={{ width: 190 }}>
-              <Typography.Text style={{ fontSize: 12 }}>{t(`vendor.weight_${key}`)}</Typography.Text>
-              <Slider
-                min={0}
-                max={1}
-                step={0.1}
-                value={weights[index]}
-                onChange={(value: number) => {
-                  const next: [number, number, number] = [...weights];
-                  next[index] = value;
-                  setWeights(next);
-                }}
-              />
-            </Space>
-          ))}
-        </Space>
-
-        {candidates.length === 0 ? (
+        {suggest.isError ? (
+          <Alert
+            type="error"
+            showIcon
+            message={suggest.error instanceof ApiError ? suggest.error.message : t('common.error')}
+          />
+        ) : !suggest.isPending && candidates.length === 0 ? (
           <Alert type="error" showIcon message={t('vendor.noCandidates')} />
         ) : (
-          <DataTable<VendorCandidate>
+          <DataTable<VendorCandidateRow>
             size="small"
             rowKey="vendorId"
+            loading={suggest.isFetching}
             columns={columns}
             dataSource={candidates}
             pagination={false}
             scroll={{ x: 900 }}
-            rowSelection={{ type: 'radio', defaultSelectedRowKeys: [candidates[0]?.vendorId ?? ''] }}
-            rowClassName={(row) =>
-              row.vendorId === order?.vendorId ? 'soc-row-current' : ''
-            }
+            rowSelection={{
+              type: 'radio',
+              selectedRowKeys: chosen ? [chosen] : [],
+              onChange: (keys) => {
+                setSelected(keys[0] === undefined ? null : String(keys[0]));
+              },
+            }}
+            rowClassName={(row) => (row.vendorId === order?.vendorId ? 'soc-row-current' : '')}
           />
         )}
+
+        {canReassign ? (
+          <Input.TextArea
+            rows={2}
+            value={comment}
+            placeholder={t('vendor.reassignComment')}
+            onChange={(event) => {
+              setComment(event.target.value);
+            }}
+          />
+        ) : null}
+
+        {!canAssign && !canReassign && order ? (
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+            {t('vendor.compareOnly')}
+          </Typography.Text>
+        ) : null}
 
         <Notice
           id="vendor.snapshot"
@@ -236,5 +280,3 @@ export function VendorSuggestModal({
     </Modal>
   );
 }
-
-export { STATUS_TOKENS };

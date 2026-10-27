@@ -1,37 +1,23 @@
 import { useState, type JSX } from 'react';
-import {
-  Alert, App, Button, Card, Col, Form, Input, InputNumber, Modal, Row, Space, Tag, Typography,
-  Upload,
-} from 'antd';
+import { App, Button, Card, Input, Space, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
-import { CameraOutlined, PaperClipOutlined } from '@ant-design/icons';
-import type { Dayjs } from 'dayjs';
 import { useTranslation } from 'react-i18next';
 
-import type { AttachmentRef } from '@/api/attachments';
-import { ApiError } from '@/api/client';
 import {
-  uploadOrderDocument,
   useOrderTransition,
   useServiceOrders,
   type ServiceOrderRow,
 } from '@/api/orders';
+import { FinishOrderModal, transitionErrorText } from '@/modules/flights/FinishOrderModal';
 import { useCurrentUser } from '@/shared/auth/session';
 import { useClock } from '@/shared/clock/useClock';
-import { DateTimePicker } from '@/shared/ui/DateTimePicker';
+import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
 import {
   EmptyState, MoneyText, Mono, ServiceStatusTag, UtcTime,
 } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { Notice } from '@/shared/ui/Notice';
-
-interface FinishValues {
-  actualStart: Dayjs;
-  actualEnd: Dayjs;
-  actualQuantity: number;
-  comment?: string;
-}
 
 /**
  * Заявки в портале поставщика `[ТЗ 4.3]`.
@@ -48,12 +34,10 @@ export function VendorOrdersPage(): JSX.Element {
   const { message, modal } = App.useApp();
   const user = useCurrentUser();
   const { nowUtc } = useClock();
+  const localized = useLocalizedName();
 
   const [finishing, setFinishing] = useState<ServiceOrderRow | null>(null);
   const [needsResponseOnly, setNeedsResponseOnly] = useState(false);
-  const [act, setAct] = useState<AttachmentRef | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const [form] = Form.useForm<FinishValues>();
 
   const query = useServiceOrders({
     vendorId: user?.vendorId ?? undefined,
@@ -65,15 +49,7 @@ export function VendorOrdersPage(): JSX.Element {
   const transition = useOrderTransition();
 
   const report = (error: unknown): void => {
-    const unmet =
-      error instanceof ApiError && Array.isArray(error.details['unmetConditions'])
-        ? (error.details['unmetConditions'] as { message: string }[])
-            .map((item) => item.message)
-            .join('; ')
-        : '';
-    void message.error(
-      unmet || (error instanceof ApiError ? error.message : t('service.transitionFailed')),
-    );
+    void message.error(transitionErrorText(error, t('service.transitionFailed')));
   };
 
   const run = (
@@ -114,44 +90,13 @@ export function VendorOrdersPage(): JSX.Element {
     });
   };
 
-  const closeFinish = (): void => {
-    setFinishing(null);
-    setAct(null);
-    form.resetFields();
-  };
-
-  /**
-   * Завершение заявки: фактические время и количество идут в биллинг
-   * (ADR-020), а для услуг с обязательным актом сервер не пропустит
-   * переход без загруженного документа.
-   */
-  const submitFinish = async (): Promise<void> => {
-    if (!finishing) return;
-    const values = await form.validateFields();
-
-    try {
-      await transition.mutateAsync({
-        id: finishing.id,
-        transition: 'finish',
-        actualStartAt: values.actualStart.toISOString(),
-        actualEndAt: values.actualEnd.toISOString(),
-        actualQuantity: values.actualQuantity.toFixed(4),
-        ...(values.comment ? { comment: values.comment } : {}),
-      });
-      void message.success(t('portal.vendor.finished'));
-      closeFinish();
-    } catch (error) {
-      report(error);
-    }
-  };
-
   const countdown = (iso: string | null): string => {
     if (!iso) return '—';
     const diff = new Date(iso).getTime() - nowUtc.getTime();
     if (diff < 0) return t('service.overdue');
     const hours = Math.floor(diff / 3_600_000);
     const minutes = Math.floor((diff % 3_600_000) / 60_000);
-    return `${String(hours)} ч ${String(minutes)} м`;
+    return t('service.countdown', { h: hours, m: minutes });
   };
 
   const columns: DataColumns<ServiceOrderRow> = [
@@ -159,7 +104,7 @@ export function VendorOrdersPage(): JSX.Element {
       title: t('service.name'), key: 'service', width: 220,
       render: (_, row) => (
         <Space direction="vertical" size={0}>
-          <span>{row.service?.name.ru ?? row.serviceId}</span>
+          <span>{row.service ? localized(row.service.name) : row.serviceId}</span>
           <Typography.Text type="secondary" style={{ fontSize: 12 }}>
             <Mono>{row.airportIcao}</Mono> · {t(`serviceLeg.${row.leg}`)}
           </Typography.Text>
@@ -235,7 +180,6 @@ export function VendorOrdersPage(): JSX.Element {
               type="primary"
               onClick={() => {
                 setFinishing(row);
-                setAct(null);
               }}
             >
               {t('serviceTransition.finish')}
@@ -277,116 +221,12 @@ export function VendorOrdersPage(): JSX.Element {
         </QueryState>
       </Card>
 
-      <Modal
-        open={finishing !== null}
-        title={t('portal.vendor.finishTitle')}
-        okText={t('common.confirm')}
-        cancelText={t('common.cancel')}
-        confirmLoading={transition.isPending}
-        okButtonProps={{ disabled: uploading }}
-        onCancel={closeFinish}
-        onOk={() => {
-          void submitFinish();
+      <FinishOrderModal
+        order={finishing}
+        onClose={() => {
+          setFinishing(null);
         }}
-        destroyOnClose
-      >
-        <Space direction="vertical" size={12} style={{ width: '100%' }}>
-          <Alert type="info" showIcon message={t('portal.vendor.finishHint')} />
-          <Form<FinishValues> form={form} layout="vertical" preserve={false}>
-            <Row gutter={12}>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  name="actualStart"
-                  label={t('service.actualStart')}
-                  rules={[{ required: true }]}
-                >
-                  <DateTimePicker style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-              <Col xs={24} md={12}>
-                <Form.Item
-                  name="actualEnd"
-                  label={t('service.actualEnd')}
-                  rules={[
-                    { required: true },
-                    {
-                      validator: (_, value: Dayjs | undefined) => {
-                        const start = form.getFieldValue('actualStart') as Dayjs | undefined;
-                        if (value && start && value.isBefore(start)) {
-                          return Promise.reject(new Error(t('service.endBeforeStart')));
-                        }
-                        return Promise.resolve();
-                      },
-                    },
-                  ]}
-                >
-                  <DateTimePicker style={{ width: '100%' }} />
-                </Form.Item>
-              </Col>
-            </Row>
-
-            <Form.Item
-              name="actualQuantity"
-              label={t('service.actualQuantity')}
-              extra={t('service.actualQuantityHint')}
-              rules={[{ required: true, type: 'number', min: 0 }]}
-              initialValue={Number(finishing?.quantity ?? 1)}
-            >
-              <InputNumber style={{ width: 200 }} precision={4} />
-            </Form.Item>
-
-            <Form.Item
-              label={t('service.uploadAct')}
-              required={finishing?.service?.requiresActToComplete ?? false}
-              extra={
-                finishing?.service?.requiresActToComplete
-                  ? t('service.actRequiredHint')
-                  : undefined
-              }
-            >
-              <Space direction="vertical" size={6} style={{ width: '100%' }}>
-                <Upload
-                  showUploadList={false}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  // Файл идёт прямо в хранилище по подписанной ссылке (ADR-007)
-                  // и сразу привязывается к заявке: акт, загруженный и не
-                  // привязанный, не откроет переход в «Выполнена».
-                  customRequest={({ file, onSuccess, onError }) => {
-                    if (!finishing) return;
-                    setUploading(true);
-                    uploadOrderDocument(finishing.id, file as File, 'act')
-                      .then((ref) => {
-                        setAct(ref);
-                        onSuccess?.(ref);
-                      })
-                      .catch((cause: unknown) => {
-                        report(cause);
-                        onError?.(cause as Error);
-                      })
-                      .finally(() => {
-                        setUploading(false);
-                      });
-                  }}
-                >
-                  <Button icon={<CameraOutlined />} loading={uploading}>
-                    {t('service.attachAct')}
-                  </Button>
-                </Upload>
-                {act ? (
-                  <Space size={6}>
-                    <PaperClipOutlined />
-                    <Typography.Text>{act.fileName}</Typography.Text>
-                  </Space>
-                ) : null}
-              </Space>
-            </Form.Item>
-
-            <Form.Item name="comment" label={t('portal.vendor.comment')}>
-              <Input.TextArea rows={2} />
-            </Form.Item>
-          </Form>
-        </Space>
-      </Modal>
+      />
     </Space>
   );
 }

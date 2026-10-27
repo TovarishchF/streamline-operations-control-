@@ -1,118 +1,107 @@
-import { useMemo, useState, type JSX } from 'react';
-import { Alert, App, Button, Form, Input, Modal, Select, Space, Steps, Tooltip, Typography } from 'antd';
+import { useState, type JSX } from 'react';
+import { Alert, App, Button, Form, Input, Modal, Select, Space, Steps, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
-import type { Flight, FlightTransition } from '@/api/flights';
-import type { ServiceOrderRow } from '@/api/orders';
+import { ApiError } from '@/api/client';
+import { useFlightTransition, type Flight, type FlightTransition } from '@/api/flights';
 import flightMachine from '@shared/state-machines/flight.json';
-import { useSocStore } from '@/mocks/store';
 import { Can } from '@/shared/auth/Can';
+import { FLIGHT_REASON_CODES } from './reasons';
 
 /**
- * Панель статуса рейса `[ТЗ 3.1.2]`.
+ * Панель статуса рейса `[ТЗ 3.1.2]` (`SPEC.md § 4.4`).
  *
- * Переход действительно выполняется: статус меняется, у рейса пересчитываются
- * доступные переходы, отмена каскадно отменяет заявки. Проверка ведётся против
- * определения автомата `shared/state-machines/flight.json` — того же, что
- * будет валидировать сервер (ADR-015).
+ * Доступные и заблокированные переходы приходят с сервера: он проверяет
+ * условия против `shared/state-machines/flight.json` (ADR-015), и клиент
+ * их не повторяет — иначе кнопка оказалась бы активной там, где сервер
+ * ответит отказом. Доступные переходы — кнопки, у заблокированных рядом
+ * список невыполненных условий.
  *
- * Недоступный переход не скрывается молча: рядом виден список невыполненных
- * условий, построенный из `guardDescriptions` того же определения
- * (`SPEC.md § 4.4`). Переходы `cancel` и `aog` требуют кода причины
- * и комментария — оба идут в аудит.
+ * Отмена и AOG требуют причины из справочника и комментария. Завершение
+ * без выставленного счёта — отдельное явное действие с причиной
+ * (`DOMAIN.md § 5.1`).
  */
-
-const GUARD_DESCRIPTIONS = flightMachine.guardDescriptions as Record<string, string>;
 
 /** Основная линия жизненного цикла — для индикатора прогресса. */
 const MAIN_LINE = ['planned', 'in_work', 'ready_for_departure', 'in_flight', 'arrived', 'completed'];
 
-const REASON_CODES: Record<string, string[]> = {
-  cancel: ['client_request', 'weather', 'technical', 'no_permit', 'commercial', 'other'],
-  aog: ['technical', 'crew', 'weather', 'airport', 'other'],
-};
 
-interface ReasonForm {
-  reasonCode: string;
-  comment: string;
+/**
+ * Что сделает переход — из того же определения автомата, что исполняет
+ * сервер. `mark_aircraft_aog` сервер не выполняет (G-56), письма
+ * поставщикам уходят только об отменённых заявках.
+ */
+function effectsOf(transition: FlightTransition): string[] {
+  const definition = flightMachine.transitions.find((item) => item.name === transition);
+  const effects: string[] = definition?.effects ?? [];
+  const cascade = effects.includes('cancel_all_orders');
+  return effects.filter(
+    (effect) =>
+      effect !== 'mark_aircraft_aog' && (effect !== 'notify_vendors' || cascade),
+  );
 }
 
-export function StatusPanel({
-  flight,
-  orders,
-}: {
-  flight: Flight;
-  orders: ServiceOrderRow[];
-}): JSX.Element {
+type Pending = { transition: FlightTransition; withoutInvoice: boolean };
+
+interface ReasonForm {
+  reasonCode?: string;
+  comment?: string;
+}
+
+export function StatusPanel({ flight }: { flight: Flight }): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const transitionFlight = useSocStore((state) => state.transitionFlight);
+  const mutation = useFlightTransition(flight.id);
 
-  const [pending, setPending] = useState<FlightTransition | null>(null);
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [refusal, setRefusal] = useState<string[]>([]);
   const [form] = Form.useForm<ReasonForm>();
 
-  const available = flight.availableTransitions;
   const currentIndex = MAIN_LINE.indexOf(flight.status);
   const offMainLine = currentIndex === -1;
+  const completeBlocked = flight.blockedTransitions.some((item) => item.transition === 'complete');
 
-  const unconfirmed = orders.filter((o) => o.status === 'ordered' || o.status === 'draft').length;
-  const rejected = orders.filter((o) => o.status === 'rejected').length;
+  const needsReason = pending?.transition === 'cancel' || pending?.transition === 'aog';
+  const needsComment = needsReason || pending?.withoutInvoice === true;
 
-  /**
-   * Условия, из-за которых переход не пройдёт. Считаются заранее, чтобы
-   * кнопка была видна, но отключена с объяснением, а не исчезала.
-   */
-  const unmetFor = useMemo(() => {
-    const result = new Map<string, string[]>();
-    for (const transition of available) {
-      const reasons: string[] = [];
-      if (transition === 'start') {
-        if (!flight.aircraftId) reasons.push('aircraft_assigned');
-        if (orders.length === 0) reasons.push('has_at_least_one_service_order');
-      }
-      if (transition === 'ready') {
-        if (rejected > 0) reasons.push('no_rejected_orders');
-        if (!orders.every((o) => o.status === 'confirmed' || o.status === 'completed')) {
-          reasons.push('all_orders_confirmed_or_completed');
-        }
-      }
-      if (transition === 'complete') {
-        if (!orders.every((o) => o.status === 'completed' || o.status === 'cancelled')) {
-          reasons.push('all_orders_completed_or_cancelled');
-        }
-      }
-      if (reasons.length > 0) result.set(transition, reasons);
-    }
-    return result;
-  }, [available, flight.aircraftId, orders, rejected]);
-
-  const needsReason = pending === 'cancel' || pending === 'aog';
-
-  const run = (transition: FlightTransition, reason?: ReasonForm): void => {
-    const error = transitionFlight(
-      flight.id,
-      transition,
-      reason ? { code: reason.reasonCode, comment: reason.comment } : undefined,
-    );
-
-    if (error) {
-      void message.error(
-        `${t('flight.transitionFailed')}: ${GUARD_DESCRIPTIONS[error] ?? t(`errors.${error}`, error)}`,
-      );
-      return;
-    }
-
-    void message.success(t('flight.transitionDone', { transition: t(`flightTransition.${transition}`) }));
+  const close = (): void => {
     setPending(null);
+    setRefusal([]);
     form.resetFields();
   };
 
-  const handleClick = (transition: FlightTransition): void => {
-    if (transition === 'cancel' || transition === 'aog') {
-      setPending(transition);
-      return;
-    }
-    setPending(transition);
+  const run = (values: ReasonForm): void => {
+    if (!pending) return;
+    setRefusal([]);
+    mutation.mutate(
+      {
+        transition: pending.transition,
+        ...(values.reasonCode ? { reasonCode: values.reasonCode } : {}),
+        ...(values.comment ? { comment: values.comment } : {}),
+        ...(pending.withoutInvoice ? { completeWithoutInvoice: true } : {}),
+      },
+      {
+        onSuccess: () => {
+          void message.success(
+            t('flight.transitionDone', { transition: t(`flightTransition.${pending.transition}`) }),
+          );
+          close();
+        },
+        onError: (error) => {
+          // Условия могли измениться между загрузкой карточки и нажатием:
+          // сервер присылает актуальный перечень, он и показывается.
+          const unsatisfied =
+            error instanceof ApiError && Array.isArray(error.details['unsatisfied'])
+              ? error.details['unsatisfied'].map(String)
+              : [];
+          setRefusal(
+            unsatisfied.length > 0
+              ? unsatisfied
+              : [error instanceof ApiError ? error.message : t('flight.transitionFailed')],
+          );
+        },
+      },
+    );
   };
 
   return (
@@ -120,7 +109,7 @@ export function StatusPanel({
       <Space size={16} wrap align="start" style={{ width: '100%' }}>
         {/* Шести шагам нужна ширина: в 620 px «Запланирован» и «Готов
             к вылету» резались многоточием до «Запланирс». */}
-        <div style={{ flex: 1, minWidth: 280, maxWidth: 880 }}>
+        <div style={{ flex: 1, minWidth: 'min(280px, 100%)', maxWidth: 880 }}>
           {offMainLine ? (
             <Alert
               type={flight.status === 'aog' ? 'error' : 'info'}
@@ -138,121 +127,123 @@ export function StatusPanel({
           )}
         </div>
 
-        <Space size={6} wrap>
-          <Can permission="flight.status">
-            {available.map((transition) => {
-              const unmet = unmetFor.get(transition);
-              const button = (
-                <Button
-                  key={transition}
-                  type={transition === 'cancel' || transition === 'aog' ? 'default' : 'primary'}
-                  danger={transition === 'cancel' || transition === 'aog'}
-                  disabled={unmet !== undefined}
-                  onClick={() => {
-                    handleClick(transition);
-                  }}
-                >
-                  {t(`flightTransition.${transition}`)}
-                </Button>
-              );
-
-              if (!unmet) return button;
-
-              return (
-                <Tooltip
-                  key={transition}
-                  title={
-                    <Space direction="vertical" size={2}>
-                      <span>{t('flight.blockedBecause')}</span>
-                      {unmet.map((code) => (
-                        <span key={code}>• {GUARD_DESCRIPTIONS[code] ?? code}</span>
-                      ))}
-                      {unconfirmed > 0 ? (
-                        <span>• {t('flight.unconfirmedCount', { count: unconfirmed })}</span>
-                      ) : null}
-                      {rejected > 0 ? (
-                        <span>• {t('flight.rejectedCount', { count: rejected })}</span>
-                      ) : null}
-                    </Space>
-                  }
-                >
-                  <span>{button}</span>
-                </Tooltip>
-              );
-            })}
-          </Can>
-        </Space>
+        <Can permission="flight.status">
+          <Space size={6} wrap>
+            {flight.availableTransitions.map((transition) => (
+              <Button
+                key={transition}
+                type={transition === 'cancel' || transition === 'aog' ? 'default' : 'primary'}
+                danger={transition === 'cancel' || transition === 'aog'}
+                onClick={() => {
+                  setPending({ transition, withoutInvoice: false });
+                }}
+              >
+                {t(`flightTransition.${transition}`)}
+              </Button>
+            ))}
+            {completeBlocked ? (
+              <Button
+                onClick={() => {
+                  setPending({ transition: 'complete', withoutInvoice: true });
+                }}
+              >
+                {t('flight.completeWithoutInvoice')}
+              </Button>
+            ) : null}
+          </Space>
+        </Can>
       </Space>
 
-      {unmetFor.size > 0 ? (
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-          {t('flight.blockedHint', {
-            transition: t(`flightTransition.${[...unmetFor.keys()][0] ?? ''}`),
-          })}
-        </Typography.Text>
+      {flight.blockedTransitions.length > 0 ? (
+        <Space direction="vertical" size={2}>
+          {flight.blockedTransitions.map((blocked) => (
+            <Typography.Text key={blocked.transition} type="secondary" style={{ fontSize: 12 }}>
+              {t('flight.blockedTransition', {
+                transition: t(`flightTransition.${blocked.transition}`),
+              })}{' '}
+              {blocked.unmetConditions.join('; ')}
+            </Typography.Text>
+          ))}
+        </Space>
       ) : null}
 
       <Modal
         open={pending !== null}
-        title={pending ? t(`flightTransition.${pending}`) : ''}
+        title={
+          pending
+            ? pending.withoutInvoice
+              ? t('flight.completeWithoutInvoice')
+              : t(`flightTransition.${pending.transition}`)
+            : ''
+        }
         okText={t('common.confirm')}
         cancelText={t('common.cancel')}
-        onCancel={() => {
-          setPending(null);
-          form.resetFields();
-        }}
+        confirmLoading={mutation.isPending}
+        onCancel={close}
         onOk={() => {
-          if (!pending) return;
-          if (!needsReason) {
-            run(pending);
-            return;
-          }
-          void form.validateFields().then((values) => {
-            run(pending, values);
-          });
+          void form.validateFields().then(run);
         }}
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
-          <Alert
-            type="info"
-            message={t('flight.transitionEffects')}
-            description={
-              <Space direction="vertical" size={0}>
-                <span>• {t('flight.effectAudit')}</span>
-                <span>• {t('flight.effectOutbox')}</span>
-                <span>• {t('flight.effectMargin')}</span>
-                {pending === 'cancel' ? <span>• {t('flight.effectCascade')}</span> : null}
-                {pending === 'aog' ? <span>• {t('flight.effectAircraft')}</span> : null}
-              </Space>
-            }
-          />
+          {pending ? (
+            <Alert
+              type="info"
+              message={t('flight.transitionEffects')}
+              description={
+                <Space direction="vertical" size={0}>
+                  {effectsOf(pending.transition).map((effect) => (
+                    <span key={effect}>• {t(`flight.effects.${effect}`)}</span>
+                  ))}
+                </Space>
+              }
+            />
+          ) : null}
 
-          {needsReason ? (
-            <Form<ReasonForm> form={form} layout="vertical" requiredMark>
+          {refusal.length > 0 ? (
+            <Alert
+              type="error"
+              showIcon
+              message={t('flight.transitionFailed')}
+              description={
+                <Space direction="vertical" size={0}>
+                  {refusal.map((text) => (
+                    <span key={text}>• {text}</span>
+                  ))}
+                </Space>
+              }
+            />
+          ) : null}
+
+          <Form<ReasonForm> form={form} layout="vertical" requiredMark>
+            {needsReason ? (
               <Form.Item
                 name="reasonCode"
                 label={t('flight.reasonCode')}
                 rules={[{ required: true, message: t('flight.reasonRequired') }]}
               >
                 <Select
-                  options={(REASON_CODES[pending] ?? []).map((code) => ({
+                  options={FLIGHT_REASON_CODES[pending.transition === 'aog' ? 'aog' : 'cancel'].map((code) => ({
                     value: code,
                     label: t(`reasonCode.${code}`),
                   }))}
                 />
               </Form.Item>
-              <Form.Item
-                name="comment"
-                label={t('flight.comment')}
-                rules={[{ required: true, message: t('flight.commentRequired') }]}
-              >
-                <Input.TextArea rows={3} />
-              </Form.Item>
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {t('flight.reasonGoesToAudit')}
-              </Typography.Text>
-            </Form>
-          ) : null}
+            ) : null}
+            {needsComment ? (
+              <>
+                <Form.Item
+                  name="comment"
+                  label={t('flight.comment')}
+                  rules={[{ required: true, whitespace: true, message: t('flight.commentRequired') }]}
+                >
+                  <Input.TextArea rows={3} />
+                </Form.Item>
+                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                  {t('flight.reasonGoesToAudit')}
+                </Typography.Text>
+              </>
+            ) : null}
+          </Form>
         </Space>
       </Modal>
     </Space>
