@@ -8,6 +8,7 @@ import { ApiError } from '@/api/client';
 import { useExportInvoice, useInvoices, useQuotes } from '@/api/documents';
 import type { Flight } from '@/api/flights';
 import type { ServiceOrderRow } from '@/api/orders';
+import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 
 /**
@@ -24,6 +25,7 @@ export function FlightDocumentsTab({
   orders: ServiceOrderRow[];
 }): JSX.Element {
   const { t } = useTranslation();
+  const localized = useLocalizedName();
   const { message } = App.useApp();
 
   const quotes = useQuotes({ flightId: flight.id }).data?.data ?? [];
@@ -159,7 +161,7 @@ export function FlightDocumentsTab({
                         <Tag>{t(`attachmentKind.${doc.kind}`)}</Tag>
                       </Space>
                       <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                        {order.service?.name.ru} · {Math.round(doc.sizeBytes / 1024)} КБ ·{' '}
+                        {localized(order.service?.name)} · {t('common.kilobytesValue', { value: Math.round(doc.sizeBytes / 1024) })} ·{' '}
                         <DateText value={doc.uploadedAt} />
                       </Typography.Text>
                     </Space>

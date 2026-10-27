@@ -13,6 +13,7 @@ import { EmptyState, Mono, GenericStatusTag } from '@/shared/ui/primitives';
 import { QueryState } from '@/shared/ui/QueryState';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 import { Notice } from '@/shared/ui/Notice';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const TOKEN: Record<string, keyof typeof STATUS_TOKENS> = {
   serviceable: 'done', maintenance: 'warning', aog: 'critical',
@@ -51,7 +52,7 @@ export function FleetPage(): JSX.Element {
         const type = row.type;
         return (
           <Space direction="vertical" size={0}>
-            <span>{type?.name.ru}</span>
+            <span>{localizedName(type?.name)}</span>
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               <Mono>{type?.icaoType}</Mono> · {t(`aircraftCategory.${type?.category ?? 'midsize'}`)}
             </Typography.Text>

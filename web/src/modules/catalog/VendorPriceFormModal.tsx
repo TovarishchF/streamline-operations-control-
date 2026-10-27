@@ -17,6 +17,7 @@ import type { CurrencyCode } from '@/api/types';
 import { CURRENCIES } from '@/modules/counterparties/CounterpartyFields';
 import { DateOnlyPicker } from '@/shared/ui/DateTimePicker';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const SURCHARGE_CODES = ['night', 'weekend', 'holiday', 'urgent', 'into_plane'] as const;
 
@@ -144,7 +145,7 @@ export function VendorPriceFormModal({
                 optionFilterProp="label"
                 options={services.map((service) => ({
                   value: service.id,
-                  label: `${service.name.ru} (${service.code})`,
+                  label: `${localizedName(service.name)} (${service.code})`,
                 }))}
               />
             </Form.Item>
@@ -164,7 +165,7 @@ export function VendorPriceFormModal({
                 onSearch={setAirportSearch}
                 options={airports.map((airport) => ({
                   value: airport.icao,
-                  label: `${airport.icao} — ${airport.name.ru}`,
+                  label: `${airport.icao} — ${localizedName(airport.name)}`,
                 }))}
               />
             </Form.Item>

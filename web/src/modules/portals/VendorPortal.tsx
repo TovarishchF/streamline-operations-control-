@@ -1,37 +1,28 @@
 import type { JSX } from 'react';
-import {
-  Card, Col, Descriptions, Progress, Row, Space, Statistic, Tag, Typography,
-} from 'antd';
+import { Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import type { PayableItem } from '@/api/types';
-import { PAYABLES } from '@/mocks/billing';
-import { VENDOR_BY_ID } from '@/mocks/counterparties';
-import { useCurrentUser } from '@/shared/auth/session';
+import type { PayableRow } from '@/api/billing';
+import { useVendorPerformance, useVendorPortalPayables } from '@/api/portals';
+import { QueryState } from '@/shared/ui/QueryState';
 import { DateText, EmptyState, MoneyText, Mono } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
 
-/** Показатели поставщика: те же составляющие, что и во внутреннем рейтинге. */
+const COMPONENTS = [
+  { key: 'onTimeConfirmRate', label: 'vendor.onTimeConfirm' },
+  { key: 'slaComplianceRate', label: 'vendor.slaCompliance' },
+  { key: 'billingAccuracy', label: 'vendor.billingAccuracy' },
+] as const;
+
+/**
+ * Показатели поставщика `[ТЗ 4.3]`: те же составляющие, что и во внутреннем
+ * рейтинге (`GET /portal/vendor/performance`), — расчёт прозрачен.
+ * Составляющая без данных показывается прочерком, а не нулём (G-55).
+ */
 export function VendorPerformancePage(): JSX.Element {
   const { t } = useTranslation();
-  const user = useCurrentUser();
-  const vendor = user?.vendorId ? VENDOR_BY_ID.get(user.vendorId) : undefined;
-  const rating = vendor?.rating;
-
-  if (!rating?.sufficientData) {
-    return (
-      <Card>
-        <EmptyState description={t('vendor.insufficientDataHint', { count: rating?.orderCount ?? 0 })} />
-      </Card>
-    );
-  }
-
-  const items = [
-    { key: 'onTimeConfirmRate', label: t('vendor.onTimeConfirm') },
-    { key: 'slaComplianceRate', label: t('vendor.slaCompliance') },
-    { key: 'billingAccuracy', label: t('vendor.billingAccuracy') },
-  ] as const;
+  const query = useVendorPerformance();
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -39,74 +30,72 @@ export function VendorPerformancePage(): JSX.Element {
         {t('portal.vendor.performance')}
       </Typography.Title>
 
-      <Row gutter={[12, 12]}>
-        <Col xs={24} md={8}>
-          <Card size="small">
-            <Statistic
-              title={t('vendor.rating')}
-              value={Number.parseFloat(rating.rating ?? '0').toFixed(2)}
-              suffix="/ 5"
-            />
-            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-              {t('vendor.basedOn', { count: rating.orderCount })}
-            </Typography.Text>
-          </Card>
-        </Col>
-        <Col xs={24} md={16}>
-          <Card size="small" title={t('vendor.sections.rating')}>
-            <Space direction="vertical" size={10} style={{ width: '100%' }}>
-              {items.map(({ key, label }) => {
-                const value = Number.parseFloat(rating.components?.[key] ?? '0');
-                return (
-                  <div key={key}>
-                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                      <Typography.Text style={{ fontSize: 12 }}>{label}</Typography.Text>
-                      <Mono>{(value * 100).toFixed(0)} %</Mono>
-                    </Space>
-                    <Progress
-                      percent={value * 100} size="small" showInfo={false}
-                      strokeColor={
-                        value >= 0.9 ? STATUS_TOKENS.done.color
-                          : value >= 0.75 ? STATUS_TOKENS.warning.color
-                            : STATUS_TOKENS.critical.color
-                      }
-                    />
-                  </div>
-                );
-              })}
-              <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                {t('portal.vendor.ratingHint')}
-              </Typography.Text>
-            </Space>
-          </Card>
-        </Col>
-      </Row>
-
-      <Card size="small" title={t('vendor.sections.terms')}>
-        <Descriptions size="small" column={{ xs: 1, md: 3 }} bordered>
-          <Descriptions.Item label={t('vendor.currency')}>
-            <Mono>{vendor?.settlementCurrency}</Mono>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('client.paymentTerms')}>
-            {vendor?.paymentTerms?.deferDays ?? 0} {t('common.days')}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('vendor.exchange')}>
-            <Tag>{t(`vendor.exchangeMethod.${vendor?.exchangeMethod ?? 'email'}`)}</Tag>
-          </Descriptions.Item>
-        </Descriptions>
-      </Card>
+      <QueryState query={query}>
+        {(rating) =>
+          !rating.sufficientData ? (
+            <Card>
+              <EmptyState description={t('vendor.insufficientDataHint', { count: rating.orderCount })} />
+            </Card>
+          ) : (
+            <Row gutter={[12, 12]}>
+              <Col xs={24} md={8}>
+                <Card size="small">
+                  <Statistic title={t('vendor.rating')} value={rating.rating ?? '—'} suffix="/ 5" />
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {t('vendor.basedOn', { count: rating.orderCount })}
+                  </Typography.Text>
+                </Card>
+              </Col>
+              <Col xs={24} md={16}>
+                <Card size="small" title={t('vendor.sections.rating')}>
+                  <Space direction="vertical" size={10} style={{ width: '100%' }}>
+                    {COMPONENTS.map(({ key, label }) => {
+                      const raw = rating.components[key];
+                      // Доля — для полосы и подписи; сам показатель считает сервер.
+                      const value = raw === null ? null : Number.parseFloat(raw);
+                      return (
+                        <div key={key}>
+                          <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                            <Typography.Text style={{ fontSize: 12 }}>{t(label)}</Typography.Text>
+                            <Mono>{value === null ? '—' : `${(value * 100).toFixed(0)} %`}</Mono>
+                          </Space>
+                          <Progress
+                            percent={value === null ? 0 : value * 100}
+                            size="small"
+                            showInfo={false}
+                            strokeColor={
+                              value === null
+                                ? STATUS_TOKENS.neutral.color
+                                : value >= 0.9
+                                  ? STATUS_TOKENS.done.color
+                                  : value >= 0.75
+                                    ? STATUS_TOKENS.warning.color
+                                    : STATUS_TOKENS.critical.color
+                            }
+                          />
+                        </div>
+                      );
+                    })}
+                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                      {t('portal.vendor.ratingHint')}
+                    </Typography.Text>
+                  </Space>
+                </Card>
+              </Col>
+            </Row>
+          )
+        }
+      </QueryState>
     </Space>
   );
 }
 
-/** Заявки на оплату поставщика и их статусы. */
+/** Заявки на оплату поставщика и их статусы (`GET /portal/vendor/payables`). */
 export function VendorPayablesPage(): JSX.Element {
   const { t } = useTranslation();
-  const user = useCurrentUser();
+  const query = useVendorPortalPayables();
 
-  const items = PAYABLES.filter((p) => p.vendorId === user?.vendorId);
-
-  const columns: DataColumns<PayableItem> = [
+  const columns: DataColumns<PayableRow> = [
     {
       title: t('finance.number'), dataIndex: 'number', width: 180,
       render: (value: string | null) => <Mono>{value ?? '—'}</Mono>,
@@ -116,7 +105,7 @@ export function VendorPayablesPage(): JSX.Element {
       render: (_, row) => <MoneyText value={row.amount} strong />,
     },
     {
-      title: t('finance.dueDate'), dataIndex: 'dueDate', width: 140,
+      title: t('finance.dueDate'), dataIndex: 'dueDate', width: 160,
       render: (value: string, row) => (
         <Space size={4}>
           <DateText value={value} />
@@ -137,11 +126,15 @@ export function VendorPayablesPage(): JSX.Element {
       </Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<PayableItem>
-          size="small" rowKey="id" columns={columns} dataSource={items}
-          pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 700 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<PayableRow>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 700 }}
+              locale={{ emptyText: <EmptyState /> }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );

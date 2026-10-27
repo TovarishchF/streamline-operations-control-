@@ -31,6 +31,7 @@ import { EmptyState, MoneyText, Mono, PercentText, UtcTime } from '@/shared/ui/p
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
 
 import { SubscriptionFormModal } from './SubscriptionFormModal';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const CATEGORIES: ServiceCategory[] = [
   'fuel',
@@ -55,7 +56,7 @@ export function ReportsPage(): JSX.Element {
 
   const definitions = catalog.data ?? [];
   const nameOf = (code: string): string =>
-    definitions.find((definition) => definition.code === code)?.name.ru ?? code;
+    localizedName(definitions.find((definition) => definition.code === code)?.name) || code;
 
   const unsubscribe = async (id: string): Promise<void> => {
     try {
@@ -80,7 +81,7 @@ export function ReportsPage(): JSX.Element {
             <Col xs={24} md={12} lg={8} key={report.code}>
               <Card
                 size="small"
-                title={report.name.ru}
+                title={localizedName(report.name)}
                 extra={<Link to={`/reports/${report.code}`}>{t('reports.build')}</Link>}
               >
                 <Space direction="vertical" size={6}>
@@ -308,7 +309,7 @@ function TotalsRow({ result }: { result: ReportResult }): JSX.Element | null {
   if (entries.length === 0) return null;
 
   const titleOf = (key: string): string =>
-    result.columns.find((column) => column.key === key)?.title.ru ?? key;
+    localizedName(result.columns.find((column) => column.key === key)?.title) || key;
   const typeOf = (key: string): string =>
     result.columns.find((column) => column.key === key)?.type ?? 'string';
 
@@ -396,7 +397,7 @@ export function ReportViewPage(): JSX.Element {
       <Row align="middle" gutter={[8, 8]}>
         <Col flex="auto">
           <Typography.Title level={4} style={{ margin: 0 }}>
-            {definition.name.ru}
+            {localizedName(definition.name)}
           </Typography.Title>
         </Col>
         <Col>

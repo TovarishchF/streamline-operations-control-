@@ -14,7 +14,7 @@ import {
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-import { useAircraftTypes, useAirports } from '@/api/catalog';
+import { useAircraftTypes } from '@/api/catalog';
 import {
   useExportSchedule,
   useFlights,
@@ -31,6 +31,7 @@ import { useCurrentUser, usePermission } from '@/shared/auth/session';
 import { QueryState } from '@/shared/ui/QueryState';
 import { useClock, formatUtc } from '@/shared/clock/useClock';
 import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
+import { AirportSelect } from '@/shared/ui/AirportSelect';
 import { DateOnlyPicker } from '@/shared/ui/DateTimePicker';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import {
@@ -178,7 +179,6 @@ export function SchedulePage(): JSX.Element {
   const conflictToken: StatusToken = conflicts.some((c) => c.severity === 'blocking')
     ? 'critical'
     : 'warning';
-  const airportsQuery = useAirports({ perPage: 200 });
   const clients = useClients().data?.data ?? [];
   const fleet = useFleet().data?.data ?? [];
   const aircraftTypes = useAircraftTypes().data?.data ?? [];
@@ -397,18 +397,15 @@ export function SchedulePage(): JSX.Element {
         }}
         options={FLIGHT_TYPES.map((type) => ({ value: type, label: t(`flightType.${type}`) }))}
       />
-      <Select
-        allowClear showSearch optionFilterProp="label" style={{ width: 150, maxWidth: '100%' }}
+      <AirportSelect
+        allowClear
+        style={{ width: 170, maxWidth: '100%' }}
         placeholder={t('flight.airport')}
         aria-label={t('flight.airport')}
-        value={filters.airport}
-        onChange={(value: string | undefined) => {
+        value={filters.airport ?? null}
+        onChange={(value) => {
           change({ airport: value });
         }}
-        options={(airportsQuery.data?.data ?? []).map((airport) => ({
-          value: airport.icao,
-          label: `${airport.icao} — ${airport.city}`,
-        }))}
       />
       <Select
         style={{ width: 230, maxWidth: '100%' }}

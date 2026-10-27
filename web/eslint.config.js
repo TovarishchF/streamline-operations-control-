@@ -89,7 +89,7 @@ export default tseslint.config(
   {
     // Модуль часов — единственное место, где Date создаётся напрямую.
     // Ровно так же на сервере исключён core/clock.py.
-    files: ['src/shared/clock/**/*.ts', 'src/mocks/**/*.ts'],
+    files: ['src/shared/clock/**/*.ts'],
     rules: { 'no-restricted-syntax': 'off' },
   },
   {

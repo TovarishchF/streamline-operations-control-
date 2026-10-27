@@ -1059,12 +1059,6 @@ a.soc-code--link,
 }
 
 /* ── Плитка KPI ───────────────────────────────────────────────────── */
-.soc-kpi-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-}
-
 .soc-kpi {
   display: grid;
   gap: 8px;
@@ -1222,12 +1216,51 @@ a.soc-code--link,
   color: var(--status-warning-fg);
 }
 
-/* ── Дашборд диспетчера ───────────────────────────────────────────── */
-.soc-dash-cols {
+/* ── Дашборды ─────────────────────────────────────────────────────── */
+/* Сетка в 12 колонок, ширина и высота виджета — из раскладки пользователя
+   (`--w`, `--h`). `dense` укладывает виджеты по порядку без дыр — так же
+   считает позиции сохранение (`DashboardGrid.pack`). */
+.soc-dash-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
-  align-items: start;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-auto-rows: 80px;
+  grid-auto-flow: row dense;
   gap: 12px;
+}
+
+.soc-dash-widget {
+  grid-column: span var(--w);
+  grid-row: span var(--h);
+  min-width: 0;
+  min-height: 0;
+}
+
+.soc-dash-widget > .ant-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.soc-dash-widget > .ant-card > .ant-card-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.soc-dash-grid.is-editing .soc-dash-widget > .ant-card {
+  border-style: dashed;
+  cursor: grab;
+}
+
+.soc-dash-handle {
+  color: var(--ink-3);
+}
+
+/* Внутри виджета число стоит без своей рамки: рамка — у карточки. */
+.soc-dash-widget .soc-kpi {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 
 .soc-attention {
@@ -1272,19 +1305,34 @@ a.soc-code--link,
 }
 
 /* Планшет: две плитки в ряд и одна колонка карточек; телефон — по одной. */
+/* Планшет: виджеты в две колонки; телефон — по одному, высота по содержимому. */
 @media (max-width: 1199px) {
-  .soc-kpi-grid {
+  .soc-dash-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .soc-dash-cols {
-    grid-template-columns: minmax(0, 1fr);
+  .soc-dash-widget {
+    grid-column: span 1;
+  }
+
+  .soc-dash-widget.is-wide {
+    grid-column: span 2;
   }
 }
 
 @media (max-width: 699px) {
-  .soc-kpi-grid {
+  .soc-dash-grid {
     grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .soc-dash-widget {
+    grid-column: 1 / -1;
+    grid-row: auto;
+  }
+
+  .soc-dash-widget > .ant-card > .ant-card-body {
+    overflow: visible;
   }
 
   .soc-strip {

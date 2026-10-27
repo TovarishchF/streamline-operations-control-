@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState, type JSX } from 'react';
-import { Button, Drawer, Dropdown, Layout, Tooltip } from 'antd';
+import { Suspense, useCallback, useEffect, useState, type JSX } from 'react';
+import { Button, Drawer, Dropdown, Layout, Skeleton, Tooltip } from 'antd';
 import { BellOutlined, MenuOutlined, SearchOutlined } from '@ant-design/icons';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -262,7 +262,10 @@ export function AppLayout(): JSX.Element {
         </Layout.Header>
 
         <Layout.Content className="soc-content">
-          <Outlet />
+          {/* Экран грузится при первом открытии: меню и шапка остаются на месте. */}
+          <Suspense fallback={<Skeleton active paragraph={{ rows: 8 }} />}>
+            <Outlet />
+          </Suspense>
         </Layout.Content>
       </Layout>
 

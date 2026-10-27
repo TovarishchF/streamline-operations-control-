@@ -55,7 +55,8 @@ export function DateTimePicker({ value, onChange, ...props }: UtcPickerProps): J
   return (
     <DatePicker
       showTime={{ format: 'HH:mm', minuteStep: 5 }}
-      format="DD.MM.YYYY HH:mm[Z]"
+      // Показывается с подписью зоны; ввод принимается и без неё.
+      format={['DD.MM.YYYY HH:mm[Z]', 'DD.MM.YYYY HH:mm']}
       showNow={false}
       placeholder={t('common.dateTimeUtcPlaceholder')}
       // Пресет, а не своя кнопка: выбор пресета панель принимает и закрывает

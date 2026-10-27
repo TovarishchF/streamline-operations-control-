@@ -96,7 +96,7 @@ export function UserFormModal({
         ) : null}
 
         <Form.Item name="name" label={t('admin.name')} rules={[{ required: true }]}>
-          <Input autoFocus placeholder="Иван Петров" />
+          <Input autoFocus placeholder={t('admin.namePlaceholder')} />
         </Form.Item>
 
         <Form.Item
@@ -158,8 +158,8 @@ export function UserFormModal({
         >
           <Select
             options={[
-              { value: 'ru', label: 'Русский' },
-              { value: 'en', label: 'English' },
+              { value: 'ru', label: t('common.languageName.ru') },
+              { value: 'en', label: t('common.languageName.en') },
             ]}
           />
         </Form.Item>

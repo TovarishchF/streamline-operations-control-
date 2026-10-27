@@ -11,6 +11,7 @@ import {
   PaymentTermsFields,
 } from '@/modules/counterparties/CounterpartyFields';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const SERVICE_CATEGORIES: ServiceCategory[] = [
   'fuel',
@@ -217,7 +218,7 @@ export function VendorFormModal({
                 onSearch={setAirportSearch}
                 options={airports.map((airport) => ({
                   value: airport.icao,
-                  label: `${airport.icao} — ${airport.name.ru}`,
+                  label: `${airport.icao} — ${localizedName(airport.name)}`,
                 }))}
               />
             </Form.Item>

@@ -1,6 +1,6 @@
-import type { JSX } from 'react';
+import { Suspense, type JSX } from 'react';
 import {
-  Button, ConfigProvider, Dropdown, Layout, Menu, Typography, Select,
+  Button, ConfigProvider, Dropdown, Layout, Menu, Skeleton, Typography, Select,
 } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -130,7 +130,9 @@ export function PortalLayout(): JSX.Element {
       </nav>
 
       <Layout.Content style={{ padding: 24, maxWidth: 1148, width: '100%', margin: '0 auto' }}>
-        <Outlet />
+        <Suspense fallback={<Skeleton active paragraph={{ rows: 8 }} />}>
+          <Outlet />
+        </Suspense>
       </Layout.Content>
       </Layout>
     </ConfigProvider>

@@ -24,22 +24,9 @@ async function pickOption(page: Page, select: Locator, index = 0): Promise<void>
  * клиента и сохранение шаблона с подтверждением.
  */
 
-/**
- * Вход под ролью и чистый набор данных.
- *
- * Вход настоящий, через API (`helpers/session`). Прототипное хранилище
- * рейсов очищается один раз на контекст браузера: `addInitScript`
- * выполняется при КАЖДОЙ навигации, и безусловная очистка стирала бы всё,
- * что тест только что создал.
- */
+/** Вход под ролью — настоящий, через API (`helpers/session`). */
 async function signIn(page: Page, role: string): Promise<void> {
   await signInAs(page, role);
-  await page.addInitScript(() => {
-    if (!window.sessionStorage.getItem('soc.test.cleared')) {
-      window.localStorage.removeItem('soc.prototype');
-      window.sessionStorage.setItem('soc.test.cleared', '1');
-    }
-  });
 }
 
 async function asDispatcher(page: Page): Promise<void> {

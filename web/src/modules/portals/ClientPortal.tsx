@@ -1,20 +1,24 @@
 import { useState, type JSX } from 'react';
 import {
-  Alert, App, Button, Card, Col, Form, Input, InputNumber, Row, Select, Space, Tag,
-  Typography,
+  Alert, App, Button, Card, Col, Form, Input, InputNumber, Row, Space, Tag, Typography,
 } from 'antd';
+import type { Dayjs } from 'dayjs';
 import { DataTable, type DataColumns } from '@/shared/ui/DataTable';
 import { useTranslation } from 'react-i18next';
 
-import { DateTimePicker } from '@/shared/ui/DateTimePicker';
-
 import { ApiError } from '@/api/client';
-import { useInvoices, useQuotes, useQuoteAction } from '@/api/documents';
-import type { ClientPortalDocument, ClientPortalFlight } from '@/api/types';
-import { ordersForFlight } from '@/mocks/flights';
-import { AIRPORTS } from '@/mocks/reference';
-import { useSocStore } from '@/mocks/store';
-import { useCurrentUser } from '@/shared/auth/session';
+import { useExportInvoice, useQuoteAction } from '@/api/documents';
+import {
+  useClientPortalDocuments,
+  useClientPortalFlights,
+  useSubmitFlightRequest,
+  type ClientPortalDocumentRow,
+  type ClientPortalFlightRow,
+} from '@/api/portals';
+import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
+import { AirportSelect } from '@/shared/ui/AirportSelect';
+import { DateTimePicker } from '@/shared/ui/DateTimePicker';
+import { QueryState } from '@/shared/ui/QueryState';
 import {
   DateText, EmptyState, FlightStatusTag, MoneyText, Mono, ServiceStatusTag, UtcTime,
 } from '@/shared/ui/primitives';
@@ -25,7 +29,7 @@ import { Notice } from '@/shared/ui/Notice';
  *
  * Урезанное представление: клиент видит **статусы** своих услуг, но не видит
  * ни закупочных цен, ни данных поставщиков. Это обеспечивается составом ответа
- * сервера (`ClientPortalFlight` в контракте), а не фильтрацией на клиенте.
+ * сервера (`GET /portal/client/flights`), а не фильтрацией на клиенте.
  *
  * Изоляция данных — фильтрация выборки по арендатору на сервере; запрос
  * чужого рейса возвращает **404**, а не 403: факт существования чужого рейса
@@ -33,29 +37,10 @@ import { Notice } from '@/shared/ui/Notice';
  */
 export function ClientFlightsPage(): JSX.Element {
   const { t } = useTranslation();
-  const user = useCurrentUser();
+  const localized = useLocalizedName();
+  const query = useClientPortalFlights();
 
-  const allFlights = useSocStore((state) => state.flights);
-  const flights: ClientPortalFlight[] = allFlights
-    .filter((f) => f.clientId === user?.clientId)
-    .map(
-    (flight) => ({
-      id: flight.id,
-      number: flight.number,
-      depIcao: flight.depIcao,
-      arrIcao: flight.arrIcao,
-      stdUtc: flight.stdUtc,
-      staUtc: flight.staUtc,
-      status: flight.status,
-      services: ordersForFlight(flight.id).map((order) => ({
-        serviceName: order.service?.name ?? { ru: order.serviceId, en: order.serviceId },
-        leg: order.leg,
-        status: order.status,
-      })),
-    }),
-  );
-
-  const columns: DataColumns<ClientPortalFlight> = [
+  const columns: DataColumns<ClientPortalFlightRow> = [
     {
       title: t('flight.number'), dataIndex: 'number', filterable: 'text', width: 110,
       render: (value: string) => <Mono>{value}</Mono>,
@@ -79,20 +64,20 @@ export function ClientFlightsPage(): JSX.Element {
       render: (value: string) => <FlightStatusTag status={value} />,
     },
     {
-      title: t('portal.client.servicesStatus'), key: 'services',
-      render: (_, row) => (
-        <Space size={4} wrap>
-          {(row.services ?? []).map((service, index) => (
-            <Space key={index} size={2}>
-              <Typography.Text style={{ fontSize: 12 }}>{service.serviceName?.ru}</Typography.Text>
-              <ServiceStatusTag status={service.status ?? 'draft'} />
-            </Space>
-          ))}
-          {(row.services ?? []).length === 0 ? (
-            <Typography.Text type="secondary">—</Typography.Text>
-          ) : null}
-        </Space>
-      ),
+      title: t('portal.client.servicesStatus'), key: 'services', sortable: false,
+      render: (_, row) =>
+        row.services.length === 0 ? (
+          <Typography.Text type="secondary">—</Typography.Text>
+        ) : (
+          <Space size={4} wrap>
+            {row.services.map((service, index) => (
+              <Space key={`${service.leg}:${String(index)}`} size={2}>
+                <Typography.Text style={{ fontSize: 12 }}>{localized(service.serviceName)}</Typography.Text>
+                <ServiceStatusTag status={service.status} />
+              </Space>
+            ))}
+          </Space>
+        ),
     },
   ];
 
@@ -103,23 +88,52 @@ export function ClientFlightsPage(): JSX.Element {
       </Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<ClientPortalFlight>
-          size="small" rowKey="id" columns={columns} dataSource={flights}
-          pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 900 }}
-          locale={{ emptyText: <EmptyState description={t('portal.client.noFlights')} /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<ClientPortalFlightRow>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 900 }}
+              locale={{ emptyText: <EmptyState description={t('portal.client.noFlights')} /> }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );
+}
+
+interface RequestValues {
+  dep: string;
+  arr: string;
+  date: Dayjs;
+  pax: number;
+  comment?: string;
 }
 
 /** Заявка клиента на рейс. Становится рейсом только после подтверждения диспетчером. */
 export function ClientRequestPage(): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
-  const user = useCurrentUser();
-  const createRequest = useSocStore((state) => state.createRequest);
+  const [form] = Form.useForm<RequestValues>();
+  const submit = useSubmitFlightRequest();
   const [submitted, setSubmitted] = useState(false);
+
+  const send = async (values: RequestValues): Promise<void> => {
+    try {
+      await submit.mutateAsync({
+        depIcao: values.dep,
+        arrIcao: values.arr,
+        requestedStdUtc: values.date.toISOString(),
+        paxCount: values.pax,
+        comment: values.comment ?? '',
+      });
+      setSubmitted(true);
+      form.resetFields();
+      void message.success(t('portal.client.requestSubmitted'));
+    } catch (error) {
+      void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+    }
+  };
 
   return (
     <Space direction="vertical" size={12} style={{ width: '100%' }}>
@@ -141,26 +155,13 @@ export function ClientRequestPage(): JSX.Element {
         />
       ) : (
         <Card size="small">
-          <Form
+          <Form<RequestValues>
+            form={form}
             layout="vertical"
             style={{ maxWidth: 620 }}
-            onFinish={(values: {
-              dep: string;
-              arr: string;
-              date: { toISOString: () => string };
-              pax: number;
-              comment?: string;
-            }) => {
-              createRequest({
-                clientId: (user?.clientId ?? ''),
-                depIcao: values.dep,
-                arrIcao: values.arr,
-                requestedStdUtc: values.date.toISOString(),
-                paxCount: values.pax,
-                comment: values.comment ?? '',
-              });
-              setSubmitted(true);
-              void message.success(t('portal.client.requestSubmitted'));
+            initialValues={{ pax: 4 }}
+            onFinish={(values) => {
+              void send(values);
             }}
           >
             <Row gutter={12}>
@@ -169,21 +170,23 @@ export function ClientRequestPage(): JSX.Element {
                   label={t('flight.departure')} name="dep"
                   rules={[{ required: true, message: t('common.required') }]}
                 >
-                  <Select
-                    showSearch optionFilterProp="label"
-                    options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
-                  />
+                  <AirportSelect />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
                 <Form.Item
                   label={t('flight.arrival')} name="arr"
-                  rules={[{ required: true, message: t('common.required') }]}
+                  rules={[
+                    { required: true, message: t('common.required') },
+                    {
+                      validator: (_, value: string | undefined) =>
+                        value && value === form.getFieldValue('dep')
+                          ? Promise.reject(new Error(t('flight.sameAirport')))
+                          : Promise.resolve(),
+                    },
+                  ]}
                 >
-                  <Select
-                    showSearch optionFilterProp="label"
-                    options={AIRPORTS.map((a) => ({ value: a.icao, label: `${a.icao} — ${a.city}` }))}
-                  />
+                  <AirportSelect />
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
@@ -195,8 +198,8 @@ export function ClientRequestPage(): JSX.Element {
                 </Form.Item>
               </Col>
               <Col xs={24} md={12}>
-                <Form.Item label={t('flight.pax')} name="pax" initialValue={4}>
-                  <InputNumber min={1} style={{ width: '100%' }} />
+                <Form.Item label={t('flight.pax')} name="pax">
+                  <InputNumber min={0} max={500} precision={0} style={{ width: '100%' }} />
                 </Form.Item>
               </Col>
             </Row>
@@ -205,7 +208,7 @@ export function ClientRequestPage(): JSX.Element {
               <Input.TextArea rows={3} />
             </Form.Item>
 
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" loading={submit.isPending}>
               {t('portal.client.submitRequest')}
             </Button>
           </Form>
@@ -220,20 +223,21 @@ export function ClientRequestPage(): JSX.Element {
  *
  * Выборка ограничена сервером по `client_id` (ADR-003): чужие документы
  * сюда не попадают по построению, а не потому, что их отфильтровали
- * на экране.
- *
- * Черновики клиенту не показываются: документ становится документом
- * в момент выставления, а до него это внутренняя заготовка.
+ * на экране. Черновиков в ответе нет: документ становится документом
+ * в момент выставления.
  */
 export function ClientDocumentsPage(): JSX.Element {
   const { t } = useTranslation();
   const { message } = App.useApp();
-
-  const quotes = useQuotes({}).data?.data ?? [];
-  const invoices = useInvoices({}).data?.data ?? [];
+  const query = useClientPortalDocuments();
 
   const accept = useQuoteAction('accept');
   const decline = useQuoteAction('decline');
+  const exportInvoice = useExportInvoice();
+
+  const report = (error: unknown): void => {
+    void message.error(error instanceof ApiError ? error.message : t('common.saveFailed'));
+  };
 
   const respond = (id: string, accepted: boolean): void => {
     const action = accepted ? accept : decline;
@@ -243,42 +247,22 @@ export function ClientDocumentsPage(): JSX.Element {
         void message.success(
           accepted ? t('portal.client.quoteAccepted') : t('portal.client.quoteDeclined'),
         );
+        void query.refetch();
       })
-      .catch((error: unknown) => {
-        void message.error(
-          error instanceof ApiError ? error.message : t('common.saveFailed'),
-        );
-      });
+      .catch(report);
   };
 
-  const documents: ClientPortalDocument[] = [
-    ...quotes
-      .filter((quote) => quote.number !== null)
-      .map((quote) => ({
-        id: quote.id,
-        kind: 'quote' as const,
-        number: quote.number ?? '',
-        issuedAt: quote.issuedAt,
-        dueDate: null,
-        status: quote.status,
-        total: quote.totals.grandTotal,
-        downloadUrl: '#',
-      })),
-    ...invoices
-      .filter((invoice) => invoice.number !== null)
-      .map((invoice) => ({
-        id: invoice.id,
-        kind: 'invoice' as const,
-        number: invoice.number ?? '',
-        issuedAt: invoice.issuedAt,
-        dueDate: invoice.dueDate,
-        status: invoice.status,
-        total: invoice.totals.grandTotal,
-        downloadUrl: '#',
-      })),
-  ];
+  /** PDF собирает сервер и отдаёт подписанной ссылкой (ADR-007). */
+  const download = (id: string): void => {
+    exportInvoice
+      .mutateAsync({ id, format: 'pdf' })
+      .then((ticket) => {
+        if (ticket.downloadUrl) window.open(ticket.downloadUrl, '_blank', 'noopener');
+      })
+      .catch(report);
+  };
 
-  const columns: DataColumns<ClientPortalDocument> = [
+  const columns: DataColumns<ClientPortalDocumentRow> = [
     {
       title: t('finance.kind'), dataIndex: 'kind', width: 130,
       render: (value: string) => <Tag>{t(`finance.${value}`)}</Tag>,
@@ -307,29 +291,38 @@ export function ClientDocumentsPage(): JSX.Element {
     },
     {
       title: t('common.actions'), key: 'actions', sortable: false, width: 230,
-      render: (_, row) =>
-        row.kind === 'quote' && row.status === 'issued' ? (
-          <Space size={4}>
-            <Button
-              size="small"
-              type="primary"
-              loading={accept.isPending}
-              onClick={() => { respond(row.id, true); }}
-            >
-              {t('finance.acceptQuote')}
+      render: (_, row) => {
+        if (row.kind === 'quote' && row.status === 'issued') {
+          return (
+            <Space size={4}>
+              <Button
+                size="small"
+                type="primary"
+                loading={accept.isPending}
+                onClick={() => { respond(row.id, true); }}
+              >
+                {t('finance.acceptQuote')}
+              </Button>
+              <Button
+                size="small"
+                danger
+                loading={decline.isPending}
+                onClick={() => { respond(row.id, false); }}
+              >
+                {t('finance.declineQuote')}
+              </Button>
+            </Space>
+          );
+        }
+        if (row.kind === 'invoice') {
+          return (
+            <Button size="small" loading={exportInvoice.isPending} onClick={() => { download(row.id); }}>
+              {t('common.download')}
             </Button>
-            <Button
-              size="small"
-              danger
-              loading={decline.isPending}
-              onClick={() => { respond(row.id, false); }}
-            >
-              {t('finance.declineQuote')}
-            </Button>
-          </Space>
-        ) : (
-          <Typography.Text type="secondary">—</Typography.Text>
-        ),
+          );
+        }
+        return <Typography.Text type="secondary">—</Typography.Text>;
+      },
     },
   ];
 
@@ -340,11 +333,15 @@ export function ClientDocumentsPage(): JSX.Element {
       </Typography.Title>
 
       <Card size="small" styles={{ body: { padding: 0 } }}>
-        <DataTable<ClientPortalDocument>
-          size="small" rowKey="id" columns={columns} dataSource={documents}
-          pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 1050 }}
-          locale={{ emptyText: <EmptyState /> }}
-        />
+        <QueryState query={query}>
+          {(paged) => (
+            <DataTable<ClientPortalDocumentRow>
+              size="small" rowKey="id" columns={columns} dataSource={paged.data}
+              pagination={{ pageSize: 15, size: 'small' }} scroll={{ x: 1050 }}
+              locale={{ emptyText: <EmptyState /> }}
+            />
+          )}
+        </QueryState>
       </Card>
     </Space>
   );

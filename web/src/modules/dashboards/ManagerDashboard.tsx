@@ -1,277 +1,317 @@
-import { useMemo, type JSX } from 'react';
-import { Card, Col, Progress, Row, Space, Statistic, Tag, Typography } from 'antd';
+import { useMemo, type JSX, type ReactNode } from 'react';
+import { Alert, Progress, Space, Tabs, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { DataTable } from '@/shared/ui/DataTable';
-
-import type { VendorRating } from '@/api/types';
-import { PAYABLES_BUCKETS, RECEIVABLES_BUCKETS } from '@/mocks/billing';
-import { CLIENTS, VENDORS } from '@/mocks/counterparties';
-import { FLIGHT_LIST, MARGINS, SERVICE_ORDERS } from '@/mocks/flights';
-import { AIRCRAFT } from '@/mocks/reference';
-import { EmptyState, MoneyText, Mono, PercentText } from '@/shared/ui/primitives';
+import { useDashboard, type DashboardData } from '@/api/reports';
+import { EChart, type ChartOption } from '@/shared/ui/EChart';
+import { KpiTile } from '@/shared/ui/KpiTile';
+import { PageHeader } from '@/shared/ui/PageHeader';
+import { QueryState } from '@/shared/ui/QueryState';
+import { EmptyState, MoneyText, Mono, PercentText, UtcTime } from '@/shared/ui/primitives';
 import { STATUS_TOKENS } from '@/shared/ui/status-tokens';
+import { DashboardGrid } from './DashboardGrid';
+import { widgetResult, type WidgetCode, type WidgetData } from './widgets';
+
+type ClientItem = WidgetData<'top_clients'>['byRevenue'][number];
+type VendorItem = WidgetData<'top_vendors'>['items'][number];
+type CategoryItem = WidgetData<'category_margin'>['items'][number];
+type BucketItem = WidgetData<'receivables'>['items'][number];
+
+function weekLabel(iso: string): string {
+  return iso.slice(5, 10).split('-').reverse().join('.');
+}
+
+/** Недельный ряд одной линией: подписи — начало недели (UTC). */
+function seriesOption(labels: string[], values: number[], color: string): ChartOption {
+  return {
+    grid: { left: 40, right: 12, top: 12, bottom: 24 },
+    tooltip: { trigger: 'axis' },
+    xAxis: { type: 'category', data: labels, axisLabel: { fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { fontSize: 10 } },
+    series: [{ type: 'line', data: values, smooth: false, symbolSize: 5, lineStyle: { color }, itemStyle: { color } }],
+  };
+}
 
 /**
  * Дашборд руководителя `[ТЗ 3.6.2]`.
  *
  * Состав — `SPEC.md § 9.2`: количество рейсов и динамика, маржа в абсолюте
- * и процентах, топ клиентов по выручке и по марже, топ поставщиков по обороту,
- * средняя маржа по категориям, доля рейсов с маржой ниже порога, загрузка парка.
- *
- * `CLAUDE.md § 3` п. 16: все величины приходят посчитанными с сервера.
- * Здесь они только агрегируются по готовым значениям для отображения.
+ * и процентах по периодам, топ клиентов по выручке и по марже, топ
+ * поставщиков по обороту, маржа по категориям, доля рейсов с маржой ниже
+ * порога, загрузка парка. Все величины считает сервер по агрегатному пути
+ * маржи (ADR-012); время его обновления показано рядом с заголовком.
  */
-interface ClientRow {
-  id: string;
-  name: string;
-  revenue: number;
-  margin: number;
-  flights: number;
-  percent: string | null;
-}
-
-interface VendorRow {
-  id: string;
-  name: string;
-  rating: VendorRating | null | undefined;
-  turnover: number;
-}
-
 export function ManagerDashboard(): JSX.Element {
   const { t } = useTranslation();
-
-  const stats = useMemo(() => {
-    const margins = FLIGHT_LIST.map((flight) => MARGINS.get(flight.id)).filter(
-      (m): m is NonNullable<typeof m> => m !== undefined,
-    );
-
-    const revenue = margins.reduce((sum, m) => sum + Number.parseFloat(m.revenue.amount), 0);
-    const cost = margins.reduce((sum, m) => sum + Number.parseFloat(m.cost.amount), 0);
-    const belowThreshold = margins.filter((m) => m.isBelowThreshold).length;
-    const negative = margins.filter((m) => Number.parseFloat(m.margin.amount) < 0).length;
-
-    return {
-      revenue, cost, margin: revenue - cost,
-      marginPercent: revenue === 0 ? null : (((revenue - cost) / revenue) * 100).toFixed(4),
-      belowThreshold, negative, total: margins.length,
-    };
-  }, []);
-
-  const topClients: ClientRow[] = useMemo(() => {
-    const byClient = new Map<string, { revenue: number; margin: number; flights: number }>();
-    for (const flight of FLIGHT_LIST) {
-      const margin = MARGINS.get(flight.id);
-      if (!margin) continue;
-      const current = byClient.get(flight.clientId ?? '') ?? { revenue: 0, margin: 0, flights: 0 };
-      current.revenue += Number.parseFloat(margin.revenue.amount);
-      current.margin += Number.parseFloat(margin.margin.amount);
-      current.flights += 1;
-      byClient.set(flight.clientId ?? '', current);
-    }
-    return Array.from(byClient.entries())
-      .map(([id, value]) => ({
-        id,
-        name: CLIENTS.find((c) => c.id === id)?.name ?? id,
-        ...value,
-        percent: value.revenue === 0 ? null : ((value.margin / value.revenue) * 100).toFixed(4),
-      }))
-      .sort((a, b) => b.revenue - a.revenue)
-      .slice(0, 6);
-  }, []);
-
-  const topVendors: VendorRow[] = useMemo(() => {
-    const byVendor = new Map<string, number>();
-    for (const order of SERVICE_ORDERS) {
-      if (!order.vendorId) continue;
-      byVendor.set(
-        order.vendorId,
-        (byVendor.get(order.vendorId) ?? 0) + Number.parseFloat(order.purchaseCost?.amount ?? '0'),
-      );
-    }
-    return Array.from(byVendor.entries())
-      .map(([id, turnover]) => ({
-        id,
-        name: VENDORS.find((v) => v.id === id)?.name ?? id,
-        rating: VENDORS.find((v) => v.id === id)?.rating,
-        turnover,
-      }))
-      .sort((a, b) => b.turnover - a.turnover)
-      .slice(0, 6);
-  }, []);
-
-  const fleetUsage = useMemo(() => {
-    const used = new Set(FLIGHT_LIST.map((f) => f.aircraftId).filter(Boolean));
-    return { used: used.size, total: AIRCRAFT.length };
-  }, []);
-
-  const rub = (amount: number) => ({ amount: amount.toFixed(4), currency: 'RUB' as const });
+  const query = useDashboard('manager');
 
   return (
-    <Space direction="vertical" size={12} style={{ width: '100%' }}>
-      <Typography.Title level={4} style={{ margin: 0 }}>
-        {t('nav.dashboardManager')}
-      </Typography.Title>
+    <>
+      <PageHeader
+        title={t('nav.dashboardManager')}
+        meta={
+          query.data ? (
+            query.data.generatedAt ? (
+              <span>
+                {t('dashboard.refreshedAt')} <UtcTime value={query.data.generatedAt} withDate />
+              </span>
+            ) : (
+              <span>{t('dashboard.notRefreshed')}</span>
+            )
+          ) : null
+        }
+      />
+      <QueryState query={query}>
+        {(dashboard) => (
+          <DashboardGrid
+            role="manager"
+            dashboard={dashboard}
+            render={(code) => <ManagerWidget dashboard={dashboard} code={code} />}
+          />
+        )}
+      </QueryState>
+    </>
+  );
+}
 
-      <Row gutter={[12, 12]}>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <Statistic title={t('dashboard.flightsTotal')} value={stats.total} />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <Statistic
-              title={t('finance.revenue')} value={0}
-              valueRender={() => <MoneyText value={rub(stats.revenue)} strong />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <Statistic
-              title={t('finance.margin')} value={0}
-              valueRender={() => <MoneyText value={rub(stats.margin)} strong colorBySign />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <Statistic
-              title={t('finance.marginPercent')} value={0}
-              valueRender={() => <PercentText value={stats.marginPercent} colorBySign threshold={12} />}
-            />
-          </Card>
-        </Col>
-      </Row>
+function ManagerWidget({ dashboard, code }: { dashboard: DashboardData; code: string }): JSX.Element {
+  const { t } = useTranslation();
 
-      <Row gutter={[12, 12]}>
-        <Col xs={24} md={8}>
-          <Card size="small" title={t('dashboard.marginHealth')}>
-            <Space direction="vertical" size={10} style={{ width: '100%' }}>
-              <div>
-                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <Typography.Text style={{ fontSize: 12 }}>{t('dashboard.belowThreshold')}</Typography.Text>
-                  <Mono>{stats.belowThreshold} / {stats.total}</Mono>
-                </Space>
-                <Progress
-                  percent={(stats.belowThreshold / Math.max(1, stats.total)) * 100}
-                  size="small" showInfo={false}
-                  strokeColor={STATUS_TOKENS.warning.color}
-                />
-              </div>
-              <div>
-                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <Typography.Text style={{ fontSize: 12 }}>{t('dashboard.negativeMargin')}</Typography.Text>
-                  <Mono>{stats.negative} / {stats.total}</Mono>
-                </Space>
-                <Progress
-                  percent={(stats.negative / Math.max(1, stats.total)) * 100}
-                  size="small" showInfo={false}
-                  strokeColor={STATUS_TOKENS.critical.color}
-                />
-              </div>
-              <div>
-                <Space style={{ width: '100%', justifyContent: 'space-between' }}>
-                  <Typography.Text style={{ fontSize: 12 }}>{t('dashboard.fleetUsage')}</Typography.Text>
-                  <Mono>{fleetUsage.used} / {fleetUsage.total}</Mono>
-                </Space>
-                <Progress
-                  percent={(fleetUsage.used / Math.max(1, fleetUsage.total)) * 100}
-                  size="small" showInfo={false}
-                  strokeColor={STATUS_TOKENS.progress.color}
-                />
-              </div>
-            </Space>
-          </Card>
-        </Col>
+  const show = <C extends WidgetCode>(
+    widget: C,
+    draw: (data: WidgetData<C>) => ReactNode,
+  ): JSX.Element => {
+    const result = widgetResult(dashboard, widget);
+    return result.kind === 'ok' ? <>{draw(result.data)}</> : <Alert type="warning" showIcon message={result.message} />;
+  };
 
-        <Col xs={24} md={8}>
-          <Card size="small" title={t('dashboard.receivables')} styles={{ body: { padding: 0 } }}>
-            <DataTable
-              size="small" rowKey="bucket" pagination={false}
-              dataSource={RECEIVABLES_BUCKETS}
-              columns={[
-                { title: t('dashboard.bucket'), dataIndex: 'bucket', render: (v: string) => <Mono>{v}</Mono> },
-                {
-                  title: t('finance.amount'), key: 'amount', align: 'right',
-                  render: (_, row: { amount: { amount: string; currency: string } }) => (
-                    <MoneyText value={row.amount as never} />
-                  ),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
+  switch (code) {
+    case 'flights_count':
+      return show('flights_count', (data) => (
+        <FlightsCount data={data} />
+      ));
+    case 'margin_summary':
+      return show('margin_summary', (data) => <MarginSummary data={data} />);
+    case 'margin_health':
+      return show('margin_health', (data) => (
+        <Space direction="vertical" size={10} style={{ width: '100%' }}>
+          <Share
+            label={t('dashboard.belowThresholdOf', { threshold: data.thresholdPercent })}
+            part={data.belowThreshold}
+            total={data.total}
+            color={STATUS_TOKENS.warning.color}
+          />
+          <Share
+            label={t('dashboard.negativeMargin')}
+            part={data.negative}
+            total={data.total}
+            color={STATUS_TOKENS.critical.color}
+          />
+        </Space>
+      ));
+    case 'fleet_usage':
+      return show('fleet_usage', (data) => (
+        <Share
+          label={t('dashboard.fleetUsage')}
+          part={data.used}
+          total={data.total}
+          color={STATUS_TOKENS.progress.color}
+        />
+      ));
+    case 'category_margin':
+      return show('category_margin', (data) => (
+        <DataTable<CategoryItem>
+          size="small" rowKey="category" pagination={false} dataSource={data.items}
+          locale={{ emptyText: <EmptyState /> }}
+          columns={[
+            {
+              title: t('service.category'), dataIndex: 'category',
+              render: (value: string) => t(`serviceCategory.${value}`),
+            },
+            {
+              title: t('finance.margin'), key: 'margin', align: 'right',
+              render: (_: unknown, row: CategoryItem) => <MoneyText value={row.margin} colorBySign />,
+            },
+            {
+              title: t('finance.marginPercent'), dataIndex: 'marginPercent', width: 100, align: 'right',
+              render: (value: string | null) => <PercentText value={value} colorBySign />,
+            },
+          ]}
+        />
+      ));
+    case 'top_clients':
+      return show('top_clients', (data) => {
+        const columns = [
+          { title: t('flight.client'), dataIndex: 'name', ellipsis: true },
+          { title: t('dashboard.flights'), dataIndex: 'flights', width: 80, align: 'right' as const },
+          {
+            title: t('finance.revenue'), key: 'revenue', width: 150, align: 'right' as const,
+            render: (_: unknown, row: ClientItem) => <MoneyText value={row.revenue} />,
+          },
+          {
+            title: t('finance.margin'), key: 'margin', width: 150, align: 'right' as const,
+            render: (_: unknown, row: ClientItem) => <MoneyText value={row.margin} colorBySign />,
+          },
+          {
+            title: t('finance.marginPercent'), dataIndex: 'marginPercent', width: 100, align: 'right' as const,
+            render: (value: string | null) => <PercentText value={value} colorBySign />,
+          },
+        ];
+        return (
+          <Tabs
+            size="small"
+            items={[
+              {
+                key: 'revenue',
+                label: t('dashboard.byRevenue'),
+                children: (
+                  <DataTable<ClientItem>
+                    size="small" rowKey="clientId" pagination={false} dataSource={data.byRevenue}
+                    columns={columns} scroll={{ x: 560 }} locale={{ emptyText: <EmptyState /> }}
+                  />
+                ),
+              },
+              {
+                key: 'margin',
+                label: t('dashboard.byMargin'),
+                children: (
+                  <DataTable<ClientItem>
+                    size="small" rowKey="clientId" pagination={false} dataSource={data.byMargin}
+                    columns={columns} scroll={{ x: 560 }} locale={{ emptyText: <EmptyState /> }}
+                  />
+                ),
+              },
+            ]}
+          />
+        );
+      });
+    case 'top_vendors':
+      return show('top_vendors', (data) => (
+        <DataTable<VendorItem>
+          size="small" rowKey="vendorId" pagination={false} dataSource={data.items}
+          scroll={{ x: 420 }} locale={{ emptyText: <EmptyState /> }}
+          columns={[
+            { title: t('service.vendor'), dataIndex: 'name', ellipsis: true },
+            {
+              title: t('dashboard.turnover'), key: 'turnover', width: 160, align: 'right',
+              render: (_: unknown, row: VendorItem) => <MoneyText value={row.turnover} />,
+            },
+            {
+              title: t('vendor.rating'), key: 'rating', width: 120,
+              render: (_: unknown, row: VendorItem) =>
+                row.sufficientData && row.rating ? (
+                  <Mono>{row.rating}</Mono>
+                ) : (
+                  <Tag>{t('vendor.insufficientData')}</Tag>
+                ),
+            },
+          ]}
+        />
+      ));
+    case 'receivables':
+    case 'payables':
+      return show(code, (data) => (
+        <Space direction="vertical" size={4} style={{ width: '100%' }}>
+          <DataTable<BucketItem>
+            size="small" rowKey="bucket" pagination={false} dataSource={data.items}
+            columns={[
+              { title: t('dashboard.bucket'), dataIndex: 'bucket', render: (value: string) => <Mono>{value}</Mono> },
+              {
+                title: t('finance.amount'), key: 'amount', align: 'right',
+                render: (_: unknown, row: BucketItem) => <MoneyText value={row.amount} />,
+              },
+            ]}
+          />
+          {data.rateDate ? (
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              {t('dashboard.rateDate', { date: data.rateDate })}
+            </Typography.Text>
+          ) : null}
+        </Space>
+      ));
+    default:
+      return <EmptyState />;
+  }
+}
 
-        <Col xs={24} md={8}>
-          <Card size="small" title={t('dashboard.payables')} styles={{ body: { padding: 0 } }}>
-            <DataTable
-              size="small" rowKey="bucket" pagination={false}
-              dataSource={PAYABLES_BUCKETS}
-              columns={[
-                { title: t('dashboard.bucket'), dataIndex: 'bucket', render: (v: string) => <Mono>{v}</Mono> },
-                {
-                  title: t('finance.amount'), key: 'amount', align: 'right',
-                  render: (_, row: { amount: { amount: string; currency: string } }) => (
-                    <MoneyText value={row.amount as never} />
-                  ),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+function Share({
+  label,
+  part,
+  total,
+  color,
+}: {
+  label: string;
+  part: number;
+  total: number;
+  color: string;
+}): JSX.Element {
+  return (
+    <div>
+      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+        <Typography.Text style={{ fontSize: 12 }}>{label}</Typography.Text>
+        <Mono>
+          {part} / {total}
+        </Mono>
+      </Space>
+      <Progress percent={(part / Math.max(1, total)) * 100} size="small" showInfo={false} strokeColor={color} />
+    </div>
+  );
+}
 
-      <Row gutter={[12, 12]}>
-        <Col xs={24} lg={12}>
-          <Card size="small" title={t('dashboard.topClients')} styles={{ body: { padding: 0 } }}>
-            <DataTable<ClientRow>
-              size="small" rowKey="id" pagination={false} dataSource={topClients}
-              locale={{ emptyText: <EmptyState /> }}
-              columns={[
-                { title: t('flight.client'), dataIndex: 'name', ellipsis: true },
-                { title: t('dashboard.flights'), dataIndex: 'flights', width: 80, align: 'right' },
-                {
-                  title: t('finance.revenue'), key: 'revenue', width: 150, align: 'right',
-                  render: (_: unknown, row: ClientRow) => <MoneyText value={rub(row.revenue)} />,
-                },
-                {
-                  title: t('finance.marginPercent'), key: 'percent', width: 110, align: 'right',
-                  render: (_: unknown, row: ClientRow) => (
-                    <PercentText value={row.percent} colorBySign threshold={12} />
-                  ),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
+function FlightsCount({ data }: { data: WidgetData<'flights_count'> }): JSX.Element {
+  const { t } = useTranslation();
+  const option = useMemo(
+    () =>
+      seriesOption(
+        data.series.map((point) => weekLabel(point.weekStart)),
+        data.series.map((point) => point.count),
+        STATUS_TOKENS.progress.color,
+      ),
+    [data],
+  );
+  return (
+    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+      <KpiTile value={data.total} footnote={t('dashboard.last30Days')} />
+      <EChart option={option} height={110} label={t('dashboard.flightsTrend')} />
+    </Space>
+  );
+}
 
-        <Col xs={24} lg={12}>
-          <Card size="small" title={t('dashboard.topVendors')} styles={{ body: { padding: 0 } }}>
-            <DataTable<VendorRow>
-              size="small" rowKey="id" pagination={false} dataSource={topVendors}
-              locale={{ emptyText: <EmptyState /> }}
-              columns={[
-                { title: t('service.vendor'), dataIndex: 'name', ellipsis: true },
-                {
-                  title: t('dashboard.turnover'), key: 'turnover', width: 160, align: 'right',
-                  render: (_: unknown, row: VendorRow) => <MoneyText value={rub(row.turnover)} />,
-                },
-                {
-                  title: t('vendor.rating'), key: 'rating', width: 120,
-                  render: (_: unknown, row: VendorRow) =>
-                    row.rating?.sufficientData ? (
-                      <Mono>{Number.parseFloat(row.rating.rating ?? '0').toFixed(2)}</Mono>
-                    ) : (
-                      <Tag>{t('vendor.insufficientData')}</Tag>
-                    ),
-                },
-              ]}
-            />
-          </Card>
-        </Col>
-      </Row>
+function MarginSummary({ data }: { data: WidgetData<'margin_summary'> }): JSX.Element {
+  const { t } = useTranslation();
+  const option = useMemo(
+    () =>
+      seriesOption(
+        data.series.map((point) => weekLabel(point.weekStart)),
+        // Для линии графика — число; суммы на экране выводятся строкой из ответа.
+        data.series.map((point) => Number.parseFloat(point.margin.amount)),
+        STATUS_TOKENS.done.color,
+      ),
+    [data],
+  );
+  return (
+    <Space direction="vertical" size={8} style={{ width: '100%' }}>
+      <Space size={24} wrap>
+        <div>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('finance.revenue')}</Typography.Text>
+          <div><MoneyText value={data.revenue} strong /></div>
+        </div>
+        <div>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('finance.cost')}</Typography.Text>
+          <div><MoneyText value={data.cost} strong /></div>
+        </div>
+        <div>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('finance.margin')}</Typography.Text>
+          <div><MoneyText value={data.margin} strong colorBySign /></div>
+        </div>
+        <div>
+          <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('finance.marginPercent')}</Typography.Text>
+          <div><PercentText value={data.marginPercent} colorBySign /></div>
+        </div>
+      </Space>
+      <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t('dashboard.marginByWeek')}</Typography.Text>
+      <EChart option={option} height={120} label={t('dashboard.marginByWeek')} />
     </Space>
   );
 }

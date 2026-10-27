@@ -62,7 +62,7 @@ test.describe('Слоты', () => {
     expect(body.data.length, 'на стенде нет слотов').toBeGreaterThan(0);
     await expect(page.locator('.ant-table-row').first()).toBeVisible();
     // Экран прямо говорит, что подключения нет
-    await expect(page.getByText('Публичного интерфейса слот-координации')).toBeVisible();
+    await expect(page.getByText('публичного подключения к слот-координации не существует')).toBeVisible();
   });
 
   test('кнопка «Сформировать SCR» приносит черновик и номер сообщения', async ({ page }) => {

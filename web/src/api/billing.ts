@@ -9,6 +9,7 @@ import { z } from 'zod';
 
 import { currencyCodeSchema, moneySchema, pagedSchema, type Paged } from './catalog';
 import { download, newIdempotencyKey, request } from './client';
+import { timed } from '@/shared/perf/measure';
 
 export const fxSnapshotSchema = z.object({
   date: z.string(),
@@ -331,8 +332,11 @@ export function useFlightMargin(
 ): UseQueryResult<MarginResultRow> {
   return useQuery({
     queryKey: ['flight-margin', flightId, mode],
+    // Норматив ТЗ 4.4 на расчёт маржи: время ответа, замеренное клиентом.
     queryFn: ({ signal }) =>
-      request(`/flights/${flightId ?? ''}/margin?mode=${mode}`, marginResultSchema, { signal }),
+      timed('margin_calc', () =>
+        request(`/flights/${flightId ?? ''}/margin?mode=${mode}`, marginResultSchema, { signal }),
+      ),
     enabled: Boolean(flightId) && enabled,
   });
 }

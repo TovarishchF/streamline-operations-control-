@@ -23,9 +23,6 @@ interface ClockState {
   shifted: boolean;
   scale: number;
   sync: (serverNowUtc: string, shifted: boolean, scale: number) => void;
-  /** Сдвиг модельного времени до появления сервера (панель часов). */
-  shiftBy: (milliseconds: number) => void;
-  setScale: (scale: number) => void;
   tick: () => void;
 }
 
@@ -39,17 +36,6 @@ export const useClockStore = create<ClockState>((set, get) => ({
 
   sync: (serverNowUtc, shifted, scale) => {
     set({ nowUtc: new Date(serverNowUtc), synced: true, shifted, scale });
-  },
-
-  shiftBy: (milliseconds) => {
-    set((state) => ({
-      nowUtc: new Date(state.nowUtc.getTime() + milliseconds),
-      shifted: true,
-    }));
-  },
-
-  setScale: (scale) => {
-    set({ scale, shifted: scale !== 1 });
   },
 
   tick: () => {

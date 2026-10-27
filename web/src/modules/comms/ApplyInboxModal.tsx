@@ -6,6 +6,7 @@ import { useApplyInbox, type InboxMessageRow } from '@/api/comms';
 import { useServiceOrders } from '@/api/orders';
 import { applyApiError } from '@/shared/ui/form-errors';
 import { Mono } from '@/shared/ui/primitives';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 /** Переходы заявки, которые может принести письмо поставщика. */
 const TRANSITIONS = ['confirm', 'reject'] as const;
@@ -106,7 +107,7 @@ export function ApplyInboxModal({
                 loading={orders.isLoading}
                 options={(orders.data?.data ?? []).map((order) => ({
                   value: order.id,
-                  label: `${order.service?.name.ru ?? order.serviceId} · ${order.airportIcao}${
+                  label: `${localizedName(order.service?.name) || order.serviceId} · ${order.airportIcao}${
                     order.vendorName ? ` · ${order.vendorName}` : ''
                   }`,
                 }))}

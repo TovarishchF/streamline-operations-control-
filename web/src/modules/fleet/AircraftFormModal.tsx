@@ -12,6 +12,7 @@ import { useCreateAircraft, type CreateAircraftInput } from '@/api/fleet';
 import type { AircraftStatus } from '@/api/types';
 import { DateOnlyPicker } from '@/shared/ui/DateTimePicker';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 const STATUSES: AircraftStatus[] = ['serviceable', 'maintenance', 'aog'];
 const APPROVAL_KINDS = ['ETOPS', 'RVSM', 'MNPS', 'CAT_II', 'CAT_III', 'RNP', 'other'] as const;
@@ -127,7 +128,7 @@ export function AircraftFormModal({
                 optionFilterProp="label"
                 options={types.map((type) => ({
                   value: type.id,
-                  label: `${type.name.ru} (${type.icaoType})`,
+                  label: `${localizedName(type.name)} (${type.icaoType})`,
                 }))}
               />
             </Form.Item>
@@ -147,7 +148,7 @@ export function AircraftFormModal({
                 onSearch={setAirportSearch}
                 options={airports.map((airport) => ({
                   value: airport.icao,
-                  label: `${airport.icao} — ${airport.name.ru}`,
+                  label: `${airport.icao} — ${localizedName(airport.name)}`,
                 }))}
               />
             </Form.Item>

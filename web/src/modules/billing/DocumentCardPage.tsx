@@ -23,6 +23,7 @@ import { Can } from '@/shared/auth/Can';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 import { NotFoundPage } from '@/modules/misc/NotFoundPage';
 import { Notice } from '@/shared/ui/Notice';
+import { InvoicePayments } from './InvoicePayments';
 
 /**
  * Котировка и счёт `[ТЗ 3.4.1]`.
@@ -314,6 +315,8 @@ export function DocumentCardPage({ kind }: { kind: 'quote' | 'invoice' }): JSX.E
           </Space>
         </Col>
       </Row>
+
+      {invoice ? <InvoicePayments invoice={invoice} /> : null}
 
       {/* Сопоставление «план ↔ факт»: видно, за счёт чего счёт отличается */}
       {comparison.length > 0 ? (

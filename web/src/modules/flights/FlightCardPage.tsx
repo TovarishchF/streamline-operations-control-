@@ -18,6 +18,7 @@ import { Can } from '@/shared/auth/Can';
 import { usePermission } from '@/shared/auth/session';
 import { formatUtcOffset, utcOffsetHours } from '@/shared/format/timezone';
 import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
+import { useScreenTiming } from '@/shared/perf/measure';
 import { QueryState } from '@/shared/ui/QueryState';
 import {
   DateText, EmptyState, Field, FlightStatusTag, MoneyText, Mono, PercentText, UtcTime,
@@ -79,6 +80,8 @@ export function FlightCardPage(): JSX.Element {
   const conflictsQuery = useScheduleConflicts(conflictWindow);
   const slots = useSlots({ flightId: id }).data?.data ?? [];
   const unread = useNotifications(true).data?.data ?? [];
+  // Норматив ТЗ 4.4 — до отрисовки карточки с данными рейса (ADR-017).
+  useScreenTiming('flight_card', Boolean(flight));
 
   if (flightQuery.isError) return <NotFoundPage />;
   if (!flight) return <QueryState query={flightQuery}>{() => null}</QueryState>;

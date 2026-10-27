@@ -7,6 +7,7 @@ import { useAircraftTypes, useServices } from '@/api/catalog';
 import { useClients } from '@/api/counterparties';
 import { useCreateTemplate } from '@/api/flights';
 import { applyApiError } from '@/shared/ui/form-errors';
+import { localizedName } from '@/shared/i18n/useLocalizedName';
 
 /** Дни недели по ISO: 1 — понедельник, 7 — воскресенье. */
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7] as const;
@@ -106,7 +107,7 @@ export function TemplateFormModal({
         ) : null}
 
         <Form.Item name="name" label={t('template.name')} rules={[{ required: true }]}>
-          <Input autoFocus placeholder="Москва — Петербург, будни" />
+          <Input autoFocus placeholder={t('template.namePlaceholder')} />
         </Form.Item>
 
         <Row gutter={12}>
@@ -135,7 +136,7 @@ export function TemplateFormModal({
                 loading={types.isLoading}
                 options={(types.data?.data ?? []).map((type) => ({
                   value: type.id,
-                  label: `${type.icaoType} · ${type.name.ru}`,
+                  label: `${type.icaoType} · ${localizedName(type.name)}`,
                 }))}
               />
             </Form.Item>
@@ -202,7 +203,7 @@ export function TemplateFormModal({
             loading={services.isLoading}
             options={(services.data?.data ?? []).map((service) => ({
               value: service.id,
-              label: `${service.code} · ${service.name.ru}`,
+              label: `${service.code} · ${localizedName(service.name)}`,
             }))}
           />
         </Form.Item>
