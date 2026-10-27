@@ -426,13 +426,13 @@ export function ReportViewPage(): JSX.Element {
         <Form<FilterValues> form={form} layout="inline">
           {parameterKeys.has('from') ? (
             <Form.Item name="period" label={t('reports.period')}>
-              <DatePicker.RangePicker />
+              <DatePicker.RangePicker format="DD.MM.YYYY" />
             </Form.Item>
           ) : null}
 
           {parameterKeys.has('asOf') ? (
             <Form.Item name="asOf" label={t('reports.asOf')}>
-              <DatePicker />
+              <DatePicker format="DD.MM.YYYY" />
             </Form.Item>
           ) : null}
 

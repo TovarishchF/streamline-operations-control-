@@ -176,6 +176,7 @@ export function FlightTemplatesPage(): JSX.Element {
           <Form layout="vertical">
             <Form.Item label={t('template.period')} required>
               <DatePicker.RangePicker
+                format="DD.MM.YYYY"
                 style={{ width: '100%' }}
                 value={period}
                 onChange={(value) => {
