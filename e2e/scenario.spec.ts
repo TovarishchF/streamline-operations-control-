@@ -350,11 +350,24 @@ test('финансист выставляет счёт по факту, дисп
 test('заявки на оплату сформированы по выполненным услугам', async ({ browser }) => {
   const page = await pageAs(browser, { role: 'usr_fin' });
   await page.goto('/billing/payables');
+  // Реестр общий и постраничный: обязательства ищутся отбором по поставщику,
+  // а строки проверяются по ответу сервера на этот отбор.
+  const payablesOf = async (vendor: ScenarioVendor): Promise<Locator> => {
+    const listed = page.waitForResponse(
+      (response) => response.url().includes('/payables?') && response.url().includes(vendor.vendorId),
+    );
+    await page.locator('.ant-select-show-search').first().click();
+    await page.keyboard.type(vendor.name);
+    await page.locator('.ant-select-dropdown:not(.ant-select-dropdown-hidden)').last()
+      .locator('.ant-select-item-option', { hasText: vendor.name }).click();
+    await listed;
+    return page.locator('.ant-table-row', { hasText: vendor.name });
+  };
   for (const vendor of [state.replacement, state.catering, state.transport]) {
-    await expect(page.locator('.ant-table-row', { hasText: vendor.name }).first()).toBeVisible();
+    await expect((await payablesOf(vendor)).first()).toBeVisible();
   }
   // У отказавшего поставщика обязательства нет: он ничего не оказал
-  await expect(page.locator('.ant-table-row', { hasText: state.rejecting.name })).toHaveCount(0);
+  await expect(await payablesOf(state.rejecting)).toHaveCount(0);
 });
 
 test('счёт поставщика с расхождением загружается и разбирается', async ({ browser }) => {
