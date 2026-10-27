@@ -133,6 +133,47 @@ def test_margin_below_threshold(
     assert Decimal(body["data"][0]["marginPercent"]) == Decimal("5.00")
 
 
+def test_ordering_by_unconfirmed_services(
+    as_role: Callable[..., APIClient], three_flights: list[Flight]
+) -> None:
+    body = as_role(Role.DISPATCHER).get(URL, {"ordering": "-unconfirmedServicesCount"}).json()
+    assert numbers(body)[0] == three_flights[1].number
+    assert body["data"][0]["unconfirmedServicesCount"] == 1
+
+
+def test_ordering_by_margin_keeps_unknown_last(
+    as_role: Callable[..., APIClient],
+    three_flights: list[Flight],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from billing.services import margin
+
+    percents = {
+        three_flights[0].pk: "5.00",
+        three_flights[1].pk: "20.00",
+        three_flights[2].pk: None,
+    }
+    monkeypatch.setattr(
+        margin,
+        "percents_for",
+        lambda flights: {flight.pk: percents[flight.pk] for flight in flights},
+    )
+    api = as_role(Role.DISPATCHER)
+
+    ascending = numbers(api.get(URL, {"ordering": "marginPercent"}).json())
+    descending = numbers(api.get(URL, {"ordering": "-marginPercent"}).json())
+
+    assert ascending == [three_flights[0].number, three_flights[1].number, three_flights[2].number]
+    assert descending == [three_flights[1].number, three_flights[0].number, three_flights[2].number]
+
+
+def test_margin_ordering_is_closed_to_the_client(
+    as_role: Callable[..., APIClient], three_flights: list[Flight], client_alpha: Client
+) -> None:
+    response = as_role(Role.CLIENT, client=client_alpha).get(URL, {"ordering": "marginPercent"})
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
 def test_margin_filter_is_closed_to_the_client(
     as_role: Callable[..., APIClient], three_flights: list[Flight], client_alpha: Client
 ) -> None:

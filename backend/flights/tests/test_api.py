@@ -186,6 +186,8 @@ class TestTransitionEndpoint:
 
         actions = {item["action"] for item in response.data["data"]}
         assert {"created", "status_changed"} <= actions
+        # Форма `PagedResponse` из контракта.
+        assert response.data["meta"]["total"] == len(response.data["data"])
 
 
 @pytest.mark.django_db

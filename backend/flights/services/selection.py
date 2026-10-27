@@ -11,7 +11,7 @@ from __future__ import annotations
 from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING
 
-from django.db.models import Exists, OuterRef, Q
+from django.db.models import Case, Count, Exists, IntegerField, OuterRef, Q, Value, When
 from rest_framework.exceptions import ValidationError
 
 from orders.models import ServiceOrder, ServiceOrderStatus
@@ -88,7 +88,15 @@ def apply(queryset: QuerySet[Flight], params: QueryDict) -> QuerySet[Flight]:
             | Q(client__name__icontains=needle)
             | Q(aircraft__registration__icontains=needle)
         )
-    return queryset.order_by(*_ordering(_param(params, "ordering")))
+    raw = _param(params, "ordering")
+    if raw.lstrip("-") == "unconfirmedServicesCount":
+        # Счётчик колонки — те же неулаженные заявки, что в строке плана.
+        queryset = queryset.annotate(
+            unsettled_count=Count("service_orders", filter=Q(service_orders__status__in=UNSETTLED))
+        )
+        field = "-unsettled_count" if raw.startswith("-") else "unsettled_count"
+        return queryset.order_by(field, "std_utc", "number")
+    return queryset.order_by(*_ordering(raw))
 
 
 def _ordering(raw: str) -> tuple[str, ...]:
@@ -97,6 +105,39 @@ def _ordering(raw: str) -> tuple[str, ...]:
     if field is None:
         return ("std_utc", "number")
     return (f"-{field}" if descending else field, "number")
+
+
+def by_margin(queryset: QuerySet[Flight], *, descending: bool) -> QuerySet[Flight]:
+    """Сортировка по марже (`mixed`) — колонке, которая вычисляется, а не хранится.
+
+    Маржа считается пачкой на весь отбор, а порядок задаётся выражением
+    по позиции, чтобы разбивка на страницы шла по тому же порядку.
+    Рейсы без маржи — в конце при любом направлении: «не известно»
+    не меньше и не больше любого числа.
+    """
+    from billing.services import margin
+
+    candidates = list(queryset)
+    percents = margin.percents_for(candidates)
+    known = [flight for flight in candidates if percents.get(flight.pk) is not None]
+    unknown = [flight for flight in candidates if percents.get(flight.pk) is None]
+    known.sort(key=lambda flight: Decimal(str(percents[flight.pk])), reverse=descending)
+    order = [flight.pk for flight in [*known, *unknown]]
+    if not order:
+        return queryset
+    position = Case(
+        *[When(pk=pk, then=Value(index)) for index, pk in enumerate(order)],
+        output_field=IntegerField(),
+    )
+    return queryset.filter(pk__in=order).order_by(position)
+
+
+def wants_margin_order(params: QueryDict) -> bool | None:
+    """`True`/`False` — сортировать по марже по убыванию/возрастанию, `None` — нет."""
+    raw = _param(params, "ordering")
+    if raw.lstrip("-") != "marginPercent":
+        return None
+    return raw.startswith("-")
 
 
 def margin_threshold(params: QueryDict) -> Decimal | None:

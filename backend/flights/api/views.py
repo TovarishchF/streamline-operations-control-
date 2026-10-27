@@ -182,6 +182,13 @@ class FlightViewSet(
                 raise PermissionDenied
             queryset = selection.below_margin(queryset, threshold)
 
+        descending = selection.wants_margin_order(request.query_params)
+        if descending is not None:
+            # Сортировка по марже — та же граница, что у отбора по ней.
+            if not sees_margin:
+                raise PermissionDenied
+            queryset = selection.by_margin(queryset, descending=descending)
+
         page = self.paginate_queryset(queryset)
         flights = list(page) if page is not None else list(queryset)
 
@@ -329,7 +336,12 @@ class FlightViewSet(
             | Q(entity_type=AuditEntityType.INVOICE, entity_id__in=invoices)
         )
         entries = AuditEntry.objects.filter(related).order_by("ts", "id")
-        return Response({"data": AuditEntrySerializer(entries, many=True).data})
+        # Постранично, как в контракте (`PagedResponse`): у рейса,
+        # который жил долго, журнал набирается в сотни записей.
+        page = self.paginate_queryset(entries)
+        if page is None:
+            return Response({"data": AuditEntrySerializer(entries, many=True).data})
+        return self.get_paginated_response(AuditEntrySerializer(page, many=True).data)
 
 
 class ScheduleExportView(IdempotencyMixin, APIView):
@@ -398,6 +410,12 @@ class ScheduleExportView(IdempotencyMixin, APIView):
                 ),
                 threshold,
             )
+        descending = selection.wants_margin_order(request.query_params)
+        if descending is not None:
+            role = str(getattr(request.user, "role", ""))
+            if not has_permission(role, Permission.BILLING_MARGIN_VIEW):
+                raise PermissionDenied
+            queryset = selection.by_margin(queryset, descending=descending)
         return queryset
 
 
