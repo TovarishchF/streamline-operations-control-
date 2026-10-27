@@ -3095,6 +3095,35 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/PerformanceReport' }
 
+  /performance/samples:
+    post:
+      tags: [admin]
+      summary: Клиентские замеры производительности `[ТЗ 4.4]`
+      description: |
+        Веб-клиент присылает измеренное Performance API время от навигации до
+        отрисовки экрана (ADR-017): при первой загрузке — `largest-contentful-paint`,
+        при переходе внутри приложения — от начала перехода до отрисовки данных.
+        Принимаются только известные метрики; замеры пачкой, не больше 50 за раз.
+        Повтор пачки — лишние замеры, а не порча данных, поэтому ключ
+        идемпотентности не обязателен.
+      x-idempotency: optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PerformanceSampleBatch' }
+      responses:
+        '202':
+          description: Замеры приняты
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [accepted]
+                properties:
+                  accepted: { type: integer }
+        '400': { $ref: '#/components/responses/BadRequest' }
+
   # ─────────────────────────────────── СИСТЕМА ──────────────────────────────────
 
   /health:
@@ -5515,7 +5544,34 @@ components:
               p99Ms: { type: integer }
               sampleCount: { type: integer }
               thresholdMs: { type: integer }
-              withinThreshold: { type: boolean }
+              withinThreshold:
+                type: [boolean, 'null']
+                description: '`null`, если замеров за период нет: норматив не выполнен и не нарушен'
+
+    PerformanceSampleBatch:
+      type: object
+      required: [samples]
+      properties:
+        samples:
+          type: array
+          minItems: 1
+          maxItems: 50
+          items:
+            type: object
+            required: [name, durationMs]
+            properties:
+              name:
+                type: string
+                enum: [flight_card, margin_calc]
+                description: Метрика — экран или расчёт, для которого ТЗ 4.4 задаёт норматив
+              durationMs: { type: integer, minimum: 0, maximum: 600000 }
+              route:
+                type: string
+                description: Маршрут экрана, на котором сделан замер
+              kind:
+                type: string
+                enum: [initial_load, navigation]
+                description: Первая загрузка (LCP) или переход внутри приложения
 
     HealthResponse:
       type: object
