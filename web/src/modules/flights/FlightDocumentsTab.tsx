@@ -1,4 +1,4 @@
-import type { JSX } from 'react';
+import { useState, type JSX } from 'react';
 import { App, Button, Card, Col, Empty, List, Row, Space, Tag, Typography } from 'antd';
 import { FilePdfOutlined } from '@ant-design/icons';
 import { Link } from 'react-router-dom';
@@ -8,6 +8,8 @@ import { ApiError } from '@/api/client';
 import { useExportInvoice, useInvoices, useQuotes } from '@/api/documents';
 import type { Flight } from '@/api/flights';
 import type { ServiceOrderRow } from '@/api/orders';
+import { DocumentFormModal } from '@/modules/billing/DocumentFormModal';
+import { Can } from '@/shared/auth/Can';
 import { useLocalizedName } from '@/shared/i18n/useLocalizedName';
 import { DateText, MoneyText, Mono } from '@/shared/ui/primitives';
 
@@ -27,6 +29,7 @@ export function FlightDocumentsTab({
   const { t } = useTranslation();
   const localized = useLocalizedName();
   const { message } = App.useApp();
+  const [creating, setCreating] = useState<'quote' | 'invoice' | null>(null);
 
   const quotes = useQuotes({ flightId: flight.id }).data?.data ?? [];
   const invoices = useInvoices({ flightId: flight.id }).data?.data ?? [];
@@ -54,7 +57,17 @@ export function FlightDocumentsTab({
     <Row gutter={[12, 12]}>
       <Col xs={24} lg={12}>
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
-          <Card size="small" title={t('finance.quotes')}>
+          <Card
+            size="small"
+            title={t('finance.quotes')}
+            extra={
+              <Can permission="billing.documents.edit">
+                <Button size="small" onClick={() => { setCreating('quote'); }}>
+                  {t('finance.createQuote')}
+                </Button>
+              </Can>
+            }
+          >
             {quotes.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('finance.noQuote')} />
             ) : (
@@ -88,7 +101,17 @@ export function FlightDocumentsTab({
             )}
           </Card>
 
-          <Card size="small" title={t('finance.invoices')}>
+          <Card
+            size="small"
+            title={t('finance.invoices')}
+            extra={
+              <Can permission="billing.documents.edit">
+                <Button size="small" onClick={() => { setCreating('invoice'); }}>
+                  {t('finance.createInvoice')}
+                </Button>
+              </Can>
+            }
+          >
             {invoices.length === 0 ? (
               <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description={t('finance.noInvoice')} />
             ) : (
@@ -172,6 +195,15 @@ export function FlightDocumentsTab({
           </Space>
         </Card>
       </Col>
+
+      {creating ? (
+        <DocumentFormModal
+          kind={creating}
+          open
+          flightId={flight.id}
+          onClose={() => { setCreating(null); }}
+        />
+      ) : null}
     </Row>
   );
 }

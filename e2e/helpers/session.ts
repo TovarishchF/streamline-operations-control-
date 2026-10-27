@@ -1,7 +1,7 @@
 import { createHmac } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Page } from '@playwright/test';
+import type { APIRequestContext, Page } from '@playwright/test';
 
 /**
  * Вход в сквозных испытаниях `[ТЗ 4.3]`.
@@ -17,7 +17,7 @@ import type { Page } from '@playwright/test';
  * аутентификатором.
  */
 
-const API = process.env['SOC_API_URL'] ?? 'http://localhost:8000/api/v1';
+export const API = process.env['SOC_API_URL'] ?? 'http://localhost:8000/api/v1';
 /** Общий пароль пользователей генератора данных (`seed_sample`). */
 export const PASSWORD = 'soc-vhod-2026-parol';
 
@@ -86,8 +86,17 @@ export function totp(secret: string, at: number = Date.now()): string {
 }
 
 async function obtainTokens(page: Page, username: string): Promise<TokenPair> {
-  const response = await page.request.post(`${API}/auth/login`, {
-    data: { username, password: PASSWORD },
+  return tokensFor(page.request, username);
+}
+
+/** Пара токенов пользователя — для подготовки данных через API. */
+export async function tokensFor(
+  request: APIRequestContext,
+  username: string,
+  password: string = PASSWORD,
+): Promise<TokenPair> {
+  const response = await request.post(`${API}/auth/login`, {
+    data: { username, password },
   });
   if (!response.ok()) {
     throw new Error(
@@ -114,7 +123,7 @@ async function obtainTokens(page: Page, username: string): Promise<TokenPair> {
     );
   }
 
-  const confirmed = await page.request.post(`${API}/auth/2fa`, {
+  const confirmed = await request.post(`${API}/auth/2fa`, {
     data: { twoFactorToken: body.twoFactorToken, code: totp(secret) },
   });
   if (!confirmed.ok()) {
@@ -137,8 +146,12 @@ async function obtainTokens(page: Page, username: string): Promise<TokenPair> {
 export async function signInAs(page: Page, roleKey: string): Promise<void> {
   const username = ACCOUNTS[roleKey] ?? ACCOUNTS['usr_disp1'];
   if (!username) throw new Error(`неизвестная роль ${roleKey}`);
+  await signInWith(page, username);
+}
 
-  const tokens = await obtainTokens(page, username);
+/** Вход под конкретной учётной записью — например, заведённой самим испытанием. */
+export async function signInWith(page: Page, username: string, password = PASSWORD): Promise<void> {
+  const tokens = await tokensFor(page.request, username, password);
   await page.addInitScript((value: string) => {
     if (window.sessionStorage.getItem('soc.e2e.signed-in')) return;
     window.localStorage.setItem('soc.session', value);
