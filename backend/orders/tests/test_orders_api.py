@@ -91,6 +91,43 @@ def test_order_is_created_with_price_snapshot(
     assert body["tariffRuleId"] is None
 
 
+def test_required_attributes_are_checked(
+    as_role: Callable[..., APIClient],
+    flight: Flight,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+    contract: VendorContract,
+    fuel_price: VendorPrice,
+) -> None:
+    """Обязательные атрибуты заказа (`SPEC.md § 5.1`): без объёма топливо не заказать."""
+    fuel_service.required_attributes = [
+        {"key": "volumeL", "type": "number", "required": True},
+        {"key": "grade", "type": "enum", "options": ["JetA1", "Avgas"], "required": True},
+    ]
+    fuel_service.save(update_fields=["required_attributes"])
+    api = as_role(Role.DISPATCHER)
+
+    refused = api.post(
+        services_url(flight),
+        payload(fuel_service, vendor_alpha, attributes={"grade": "Diesel"}),
+        format="json",
+        headers=idempotent("order-attr-000001"),
+    )
+    assert refused.status_code == status.HTTP_400_BAD_REQUEST, refused.data
+    problems = refused.json()["error"]["details"]["attributes"]
+    assert set(problems) == {"volumeL", "grade"}
+    assert not ServiceOrder.objects.exists()
+
+    accepted = api.post(
+        services_url(flight),
+        payload(fuel_service, vendor_alpha, attributes={"volumeL": "1000", "grade": "JetA1"}),
+        format="json",
+        headers=idempotent("order-attr-000002"),
+    )
+    assert accepted.status_code == status.HTTP_201_CREATED, accepted.data
+    assert accepted.json()["attributes"] == {"volumeL": "1000", "grade": "JetA1"}
+
+
 def test_price_change_does_not_rewrite_placed_order(
     as_role: Callable[..., APIClient],
     flight: Flight,

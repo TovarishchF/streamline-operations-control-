@@ -9,7 +9,7 @@
 
 from __future__ import annotations
 
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import TYPE_CHECKING, Any
 
 from django.db import transaction
@@ -22,7 +22,7 @@ from billing.services import tariffs as tariff_service
 from catalog import services as catalog_services
 from comms.services import events as comms_events
 from core import clock
-from core.exceptions import ServiceCheckFailed
+from core.exceptions import DomainError, ServiceCheckFailed
 from flights.models import ServiceLeg
 from orders.models import ServiceOrder, ServiceOrderStatus
 from orders.services import checks, sla, transitions
@@ -71,6 +71,45 @@ def _apply_price_snapshot(
     tariff_service.snapshot_sale(order)
 
 
+class OrderAttributesInvalid(DomainError):
+    """Не заполнены обязательные атрибуты заказа (`SPEC.md § 5.1`)."""
+
+    code = "VALIDATION_ERROR"
+
+
+def validate_attributes(service: Service, attributes: dict[str, Any]) -> dict[str, Any]:
+    """Обязательные атрибуты услуги заданы и подходят по типу.
+
+    Для топлива это марка и объём: без них поставщик не может выполнить
+    заявку, а принятая без них заявка вернулась бы уточнением по почте.
+    """
+    problems: dict[str, str] = {}
+    for spec in service.required_attributes or []:
+        key = str(spec.get("key", ""))
+        value = attributes.get(key)
+        if value is None or value == "":
+            if spec.get("required"):
+                problems[key] = _("Обязательный атрибут не заполнен")
+            continue
+        kind = spec.get("type")
+        if kind == "number":
+            try:
+                if Decimal(str(value)) < 0:
+                    problems[key] = _("Значение не может быть отрицательным")
+            except InvalidOperation:
+                problems[key] = _("Ожидается число")
+        elif kind == "enum" and value not in (spec.get("options") or []):
+            problems[key] = _("Значение не из списка")
+        elif kind == "boolean" and not isinstance(value, bool):
+            problems[key] = _("Ожидается да или нет")
+    if problems:
+        raise OrderAttributesInvalid(
+            _("Не заполнены атрибуты заказа: %(keys)s") % {"keys": ", ".join(sorted(problems))},
+            {"attributes": problems},
+        )
+    return attributes
+
+
 def _check_failure(context: checks.OrderContext) -> ServiceCheckFailed:
     """Отказ с перечнем непройденных проверок (`BACKEND.md § 9`)."""
     failures = context.blocking_failures
@@ -115,6 +154,7 @@ def create_order(
     """
     airport = airport_for_leg(flight, leg)
     moment = service_moment(flight, leg)
+    validate_attributes(service, attributes)
 
     order = ServiceOrder(
         flight=flight,
