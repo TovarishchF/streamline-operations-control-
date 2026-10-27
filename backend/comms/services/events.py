@@ -201,6 +201,34 @@ def flight_rescheduled(flight: Flight, *, previous_std: datetime, reason: str) -
     )
 
 
+# Письма клиенту по переходам рейса — шаблоны из набора заказчика
+# (`shared/reference/message-templates.json`). Для вылета, завершения
+# и AOG шаблонов в наборе нет: письма не выдумываются, вопрос в G-56.
+FLIGHT_LETTERS = {"ready": "flight_confirmed", "cancel": "flight_cancelled"}
+
+
+def flight_transitioned(flight: Flight, *, transition: str, reason: str) -> None:
+    """Письмо клиенту о переходе рейса `[ТЗ 3.5.2]`."""
+    code = FLIGHT_LETTERS.get(transition)
+    if code is None:
+        return
+    to = _recipients(flight.client)
+    if not to:
+        logger.info("у клиента рейса %s нет контактов для переписки", flight.pk)
+        return
+    _enqueue(
+        code,
+        to=to,
+        data={
+            "flight": context.flight_data(flight),
+            "client": {"name": flight.client.name},
+            "change": {"reason": reason or "—"},
+            "operator": context.operator_data(),
+        },
+        related=("flight", flight.pk),
+    )
+
+
 def flight_status_changed(flight: Any, *, previous: str, actor: User | None) -> None:
     """Смена статуса рейса `[ТЗ 3.5.1]`."""
     notifications.notify_many(

@@ -163,6 +163,8 @@ def apply_transition(
         is_generated=flight.is_generated,
     )
 
+    _apply_effects(flight, name, definition, actor=actor, comment=comment, source=source)
+
     # Оповещение диспетчеров `[ТЗ 3.5.1]`. Автомат отвечает за состояние,
     # кому об этом сообщить — решают коммуникации.
     #
@@ -175,3 +177,58 @@ def apply_transition(
 
         comms_events.flight_status_changed(flight, previous=previous_status, actor=actor)
     return flight
+
+
+# Заявки, которые снимает отмена рейса. Из остальных состояний автомат
+# заявки отмены не знает (`shared/state-machines/service-order.json`):
+# оказанную услугу отменить нельзя.
+CANCELLABLE_ORDER_STATUSES = ("draft", "ordered", "confirmed")
+
+
+def _apply_effects(
+    flight: Flight,
+    name: str,
+    definition: dict[str, Any],
+    *,
+    actor: User | None,
+    comment: str,
+    source: AuditSource | None,
+) -> None:
+    """Побочные эффекты перехода из определения автомата (`DOMAIN.md § 5.1`).
+
+    Выполняются в той же транзакции; письма уходят после её фиксации
+    (`CLAUDE.md § 3` п. 13). Эффект `mark_aircraft_aog` не выполняется:
+    состояние борта — отдельный факт (ADR-009 п. 2), см. `GAPS.md` G-56.
+    """
+    effects = definition.get("effects", [])
+    reason = comment or flight.status_reason_code
+
+    if "cancel_all_orders" in effects:
+        # Каждая заявка отменяется своим переходом: письмо поставщику
+        # об отмене и запись аудита ставит автомат заявки, а не этот код.
+        from orders.models import ServiceOrder
+        from orders.services import transitions as order_transitions
+
+        open_orders = (
+            ServiceOrder.objects.filter(flight=flight, status__in=CANCELLABLE_ORDER_STATUSES)
+            .select_related("flight", "service", "vendor")
+            .order_by("pk")
+        )
+        for order in open_orders:
+            order_transitions.apply_transition(
+                order,
+                "cancel",
+                actor=actor,
+                comment=f"Отмена рейса {flight.number}: {reason}",
+                source=source,
+            )
+
+    if "notify_client" in effects and source != AuditSource.SEED:
+        from comms.services import events as comms_events
+
+        comms_events.flight_transitioned(flight, transition=name, reason=reason)
+
+    if "recalculate_margin" in effects or "cancel_all_orders" in effects:
+        from billing.services import margin
+
+        margin.flight_changed(flight.pk)

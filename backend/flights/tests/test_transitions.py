@@ -9,7 +9,7 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pytest
 
@@ -24,8 +24,8 @@ from flights.services.guards import GUARDS
 from orders.models import ServiceOrder, ServiceOrderStatus
 
 if TYPE_CHECKING:
-
     from accounts.models import User
+    from counterparties.models import Vendor
 
 
 def _order(flight: Flight, code: str = "HND_BASIC", **extra: object) -> ServiceOrder:
@@ -319,3 +319,101 @@ def test_reason_is_not_an_unmet_condition_of_the_card(flight: Flight) -> None:
     """Причину вводят в диалоге перехода: отмена не показывается заблокированной."""
     assert transitions.unmet_conditions(flight, "cancel") == []
     assert transitions.check_guards(flight, "cancel") == ["Не указана причина"]
+
+
+@pytest.fixture
+def flight_templates(db: None) -> None:
+    from comms.models import MessageChannel, MessageTemplate
+
+    for code in ("flight_cancelled", "flight_confirmed", "order_cancelled"):
+        MessageTemplate.objects.create(
+            code=code,
+            channel=MessageChannel.EMAIL,
+            subject_ru=f"{code} {{{{flight.number}}}}",
+            subject_en=f"{code} {{{{flight.number}}}}",
+            body_ru="Причина: {{change.reason}}",
+            body_en="Reason: {{change.reason}}",
+        )
+
+
+@pytest.mark.django_db
+class TestEffects:
+    """Побочные эффекты переходов (`DOMAIN.md § 5.1`, G-56)."""
+
+    def test_cancel_cascades_to_open_orders(
+        self,
+        flight: Flight,
+        dispatcher: User,
+        vendor_alpha: Vendor,
+        flight_templates: None,
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        from comms.models import OutboxMessage
+        from counterparties.models import Contact
+
+        Contact.objects.create(client=flight.client, name="Мария Орлова", email="ops@client.test")
+        Contact.objects.create(vendor=vendor_alpha, name="Иван Петров", email="ops@vendor.test")
+        draft = _order(flight, "HND_A")
+        ordered = _order(flight, "FUEL_A", vendor=vendor_alpha)
+        done = _order(flight, "CAT_A", vendor=vendor_alpha)
+        ServiceOrder.objects.filter(pk=ordered.pk).update(status=ServiceOrderStatus.ORDERED)
+        ServiceOrder.objects.filter(pk=done.pk).update(status=ServiceOrderStatus.COMPLETED)
+
+        with django_capture_on_commit_callbacks(execute=True):
+            transitions.apply_transition(
+                flight,
+                "cancel",
+                actor=dispatcher,
+                reason_code="client_request",
+                comment="Клиент перенёс поездку",
+            )
+
+        statuses = dict(flight.service_orders.values_list("pk", "status"))
+        assert statuses[draft.pk] == ServiceOrderStatus.CANCELLED
+        assert statuses[ordered.pk] == ServiceOrderStatus.CANCELLED
+        # Оказанную услугу автомат заявки отменить не даёт.
+        assert statuses[done.pk] == ServiceOrderStatus.COMPLETED
+        letters = sorted(OutboxMessage.objects.values_list("template_code", flat=True))
+        # Черновик поставщику не уходил — и об отмене ему не пишут.
+        assert letters == ["flight_cancelled", "order_cancelled"]
+
+    def test_ready_confirms_the_flight_to_the_client(
+        self,
+        flight_in_work: Flight,
+        dispatcher: User,
+        flight_templates: None,
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        from comms.models import OutboxMessage
+        from counterparties.models import Contact
+
+        Contact.objects.create(
+            client=flight_in_work.client, name="Мария Орлова", email="ops@client.test"
+        )
+        flight_in_work.service_orders.update(status=ServiceOrderStatus.CONFIRMED)
+
+        with django_capture_on_commit_callbacks(execute=True):
+            transitions.apply_transition(flight_in_work, "ready", actor=dispatcher)
+
+        assert list(OutboxMessage.objects.values_list("template_code", flat=True)) == [
+            "flight_confirmed"
+        ]
+
+    def test_generator_does_not_write_letters(
+        self,
+        flight: Flight,
+        flight_templates: None,
+        django_capture_on_commit_callbacks: Any,
+    ) -> None:
+        from audit.models import AuditSource
+        from comms.models import OutboxMessage
+        from counterparties.models import Contact
+
+        Contact.objects.create(client=flight.client, name="Мария Орлова", email="ops@client.test")
+
+        with django_capture_on_commit_callbacks(execute=True):
+            transitions.apply_transition(
+                flight, "cancel", reason_code="client_request", source=AuditSource.SEED
+            )
+
+        assert not OutboxMessage.objects.exists()
