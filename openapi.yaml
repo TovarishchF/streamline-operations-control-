@@ -5210,7 +5210,12 @@ components:
 
     DashboardData:
       type: object
-      required: [widgets]
+      required: [widgets, layout]
+      description: |
+        `widgets` — все виджеты роли, в том числе убранные пользователем: из них
+        он добавляет виджет обратно. `layout` — раскладка пользователя, а если он
+        её не настраивал — раскладка по умолчанию. Виджет, который не удалось
+        посчитать, несёт в `data.error` код и объяснение вместо данных.
       properties:
         widgets:
           type: array
@@ -5222,7 +5227,13 @@ components:
               data:
                 type: object
                 additionalProperties: true
-        generatedAt: { type: string, format: date-time }
+        generatedAt:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            Когда посчитаны данные. У дашборда руководителя — время последнего
+            обновления агрегатов маржи (ADR-012), а не время запроса.
+        layout: { $ref: '#/components/schemas/DashboardLayout' }
 
     DashboardLayout:
       type: object
