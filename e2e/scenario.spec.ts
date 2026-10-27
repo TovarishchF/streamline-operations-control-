@@ -326,8 +326,20 @@ test('финансист выставляет счёт по факту, дисп
   await expect(finance).toHaveURL(/\/billing\/invoices\/inv_/);
   // Строки счёта — по фактически оказанному: три выполненные услуги
   await expect(finance.locator('.ant-table-row')).toHaveCount(3);
+  const issued = finance.waitForResponse(
+    (response) => response.url().endsWith('/issue') && response.request().method() === 'POST',
+  );
   await finance.getByRole('button', { name: 'Выставить' }).click();
   await expect(finance.getByText(/Документ выставлен под номером/)).toBeVisible();
+
+  // Итог на экране — тот же, что в API, до копейки. Сервер округляет итог
+  // один раз до двух знаков (ADR-002), поэтому знаки после второго — нули,
+  // а PDF и XLSX сверяются с тем же итогом в `billing/tests/test_export.py`.
+  const invoice = (await (await issued).json()) as { totals: { grandTotal: { amount: string } } };
+  const [whole = '', fraction = ''] = invoice.totals.grandTotal.amount.split('.');
+  expect(fraction.slice(2)).toMatch(/^0*$/);
+  const onScreen = `${whole.replace(/\B(?=(\d{3})+(?!\d))/g, '\u00a0')},${fraction.slice(0, 2).padEnd(2, '0')}`;
+  await expect(finance.locator('.ant-descriptions-item', { hasText: 'Всего к оплате' })).toContainText(onScreen);
 
   const page = await pageAs(browser, { role: 'usr_disp1' });
   await page.goto(`/flights/${state.flightId}`);
