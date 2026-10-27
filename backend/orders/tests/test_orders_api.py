@@ -580,3 +580,33 @@ def test_client_does_not_reach_service_orders_at_all(
     """
     api = as_role(Role.CLIENT, client=client_alpha)
     assert api.get(ORDERS_URL).status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_finance_reads_flight_orders_but_cannot_place_them(
+    as_role: Callable[..., APIClient],
+    placed_order: ServiceOrder,
+    fuel_service: Service,
+    vendor_alpha: Vendor,
+) -> None:
+    """Финансист видит заявки рейса — по ним он выставляет счёт, — но не заказывает."""
+    api = as_role(Role.FINANCE)
+    url = services_url(placed_order.flight)
+
+    listed = api.get(url)
+    assert listed.status_code == status.HTTP_200_OK
+    assert [item["id"] for item in listed.json()["data"]] == [placed_order.pk]
+
+    placed = api.post(
+        url, payload(fuel_service, vendor_alpha), format="json", headers=idempotent("fin-0000001")
+    )
+    assert placed.status_code == status.HTTP_403_FORBIDDEN
+
+
+def test_portals_do_not_read_flight_orders(
+    as_role: Callable[..., APIClient], placed_order: ServiceOrder, client_alpha: Client
+) -> None:
+    api = as_role(Role.CLIENT, client=client_alpha)
+    assert api.get(services_url(placed_order.flight)).status_code in (
+        status.HTTP_403_FORBIDDEN,
+        status.HTTP_404_NOT_FOUND,
+    )

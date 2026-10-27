@@ -126,6 +126,10 @@ class FlightViewSet(
         "status": Permission.FLIGHT_STATUS,
         "history": Permission.SCHEDULE_VIEW,
         "services": Permission.SERVICE_ORDER,
+        # Заявки рейса смотрят и те, кто их не заказывает: финансист
+        # выставляет по ним счёт, руководитель разбирает маржу. Порталам
+        # этот путь закрыт — у них свои ответы без закупочных цен.
+        "services:GET": (Permission.SERVICE_ORDER, Permission.BILLING_MARGIN_VIEW),
     }
 
     def create(self, request: Request, *args: Any, **kwargs: Any) -> Response:
