@@ -153,6 +153,24 @@ test.describe('Суточный план', () => {
     }
   });
 
+  test('планшет не пересобирается под тиком часов', async ({ page }) => {
+    await page.goto('/schedule', { waitUntil: 'networkidle' });
+    await expect(page.locator('.vis-item.soc-bar').first()).toBeVisible();
+
+    const typeRow = page.locator('.vis-label.vis-nesting-group').first();
+    await typeRow.click();
+    await expect(typeRow).toHaveClass(/collapsed/);
+    const selected = page.locator('.vis-item.soc-bar.vis-selected');
+    await page.locator('.vis-item.soc-bar').first().click();
+    await expect(selected).toHaveCount(1);
+
+    // Часы перерисовывают экран каждую секунду. Без новых данных планшет
+    // не пересобирается: свёрнутая строка и выделение остаются как были.
+    await page.waitForTimeout(3_000);
+    await expect(typeRow).toHaveClass(/collapsed/);
+    await expect(selected).toHaveCount(1);
+  });
+
   test('массовые действия недоступны без выбора', async ({ page }) => {
     await openTable(page);
 

@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import i18n from './index';
@@ -19,7 +20,11 @@ function pick(name: Localized, english: boolean): string {
 export function useLocalizedName(): (name: Localized) => string {
   const { i18n: instance } = useTranslation();
   const english = instance.language.startsWith('en');
-  return (name) => pick(name, english);
+  // Ссылка меняется только со сменой языка: функция стоит в зависимостях
+  // хуков, а часы перерисовывают экран каждую секунду. Новая функция
+  // на каждом тике пересобирала планшет суточного плана и сбрасывала
+  // свёрнутые строки, выделение и прокрутку.
+  return useCallback((name: Localized) => pick(name, english), [english]);
 }
 
 /**
