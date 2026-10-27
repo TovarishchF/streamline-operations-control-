@@ -8,13 +8,15 @@
 
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
 from django.test import override_settings
+from freezegun import freeze_time
 
 from billing.models import FxRate
 from billing.services import fx
@@ -150,6 +152,39 @@ class TestSnapshot:
         snapshot = fx.snapshot(PUBLISHED + timedelta(days=fx.MAX_STALE_DAYS + 1))
 
         assert snapshot["rates"] == {"RUB": "1.0000"}
+
+    def test_future_date_takes_the_latest_known_rate(self) -> None:
+        """Курса на дату через три недели ещё нет — берётся последний известный
+        с отметкой давности, а не пустой снимок, на котором падает пересчёт."""
+        fx.sync_rates(PUBLISHED)
+
+        with freeze_time(datetime.combine(PUBLISHED + timedelta(days=1), time(9), tzinfo=UTC)):
+            snapshot = fx.snapshot(PUBLISHED + timedelta(days=fx.MAX_STALE_DAYS + 7))
+
+        assert snapshot["rates"]["USD"]
+        assert snapshot["staleSince"] == PUBLISHED.isoformat()
+
+    def test_flight_snapshot_without_rates_is_taken_again(self) -> None:
+        """В снимке всегда есть рубль: рейс, заведённый, когда курсов не было,
+        выглядел бы обеспеченным курсами и не получал их никогда."""
+        fx.sync_rates(PUBLISHED)
+        flight = SimpleNamespace(
+            fx_snapshot={"base": "RUB", "rates": {"RUB": "1.0000"}},
+            std_utc=datetime.combine(PUBLISHED, time(12), tzinfo=UTC),
+        )
+
+        assert fx.rates_for(flight)["USD"]
+        assert fx.snapshot_for(flight)["date"] == PUBLISHED.isoformat()
+
+    def test_flight_snapshot_with_rates_is_kept(self) -> None:
+        """Снимок, а не ссылка: загруженные позже курсы его не переписывают."""
+        fx.sync_rates(PUBLISHED)
+        stored = {"base": "RUB", "rates": {"RUB": "1.0000", "USD": "90.0000"}}
+        flight = SimpleNamespace(
+            fx_snapshot=stored, std_utc=datetime.combine(PUBLISHED, time(12), tzinfo=UTC)
+        )
+
+        assert fx.snapshot_for(flight) == stored
 
     def test_base_currency_needs_no_lookup(self) -> None:
         assert fx.rate_for("RUB", date(2026, 3, 10)) == Decimal(1)

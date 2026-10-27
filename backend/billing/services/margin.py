@@ -276,9 +276,7 @@ def margin_for(flight: Flight, mode: str = "mixed") -> Margin:
 
 def fx_of(flight: Flight) -> dict[str, Any]:
     """Снимок курсов рейса в форме `FxSnapshot`: курс показывается рядом с маржой."""
-    if (flight.fx_snapshot or {}).get("rates"):
-        return dict(flight.fx_snapshot)
-    return fx.snapshot(flight.std_utc.date())
+    return fx.snapshot_for(flight)
 
 
 def to_contract(result: Margin, flight: Flight) -> dict[str, Any]:

@@ -98,9 +98,13 @@ def snapshot(on_date: date | None = None) -> dict[str, Any]:
     stale_since: date | None = None
 
     if not exact:
+        # Давность считается от сегодняшнего дня, если дата впереди: курса
+        # на будущую дату ещё нет, и вчерашний — последний известный.
+        # От самой даты рейс через три недели не получал бы курса вовсе.
+        horizon = min(target, clock.now().date())
         fallback = (
             FxRate.objects.filter(
-                on_date__lt=target, on_date__gte=target - timedelta(days=MAX_STALE_DAYS)
+                on_date__lt=target, on_date__gte=horizon - timedelta(days=MAX_STALE_DAYS)
             )
             .order_by("-on_date")
             .first()
@@ -164,14 +168,20 @@ def convert(value: Money, to_currency: str, rates: Mapping[str, Decimal | str]) 
     return money_convert(value, to_currency, rates)
 
 
-def rates_for(flight: Any) -> dict[str, Any]:
-    """Курсы рейса: снимок на дату рейса, зафиксированный при его создании.
+def snapshot_for(flight: Any) -> dict[str, Any]:
+    """Снимок курсов рейса, зафиксированный при его создании.
 
     Суммы рейса приводятся к его валюте по этому снимку (`SPEC.md § 7.4`),
     а не по сегодняшнему курсу. Рейс, созданный, когда курсов ещё не было,
-    получает снимок на дату рейса сейчас.
+    получает снимок на дату рейса сейчас. Базовая валюта в снимке есть
+    всегда, поэтому «курсов не было» — это снимок без единой другой валюты.
     """
-    rates = (flight.fx_snapshot or {}).get("rates")
-    if rates:
-        return dict(rates)
-    return dict(snapshot(flight.std_utc.date())["rates"])
+    stored = dict(flight.fx_snapshot or {})
+    if set(stored.get("rates") or {}) - {str(settings.FX_BASE_CURRENCY)}:
+        return stored
+    return snapshot(flight.std_utc.date())
+
+
+def rates_for(flight: Any) -> dict[str, Any]:
+    """Курсы из снимка рейса (`snapshot_for`)."""
+    return dict(snapshot_for(flight)["rates"])
