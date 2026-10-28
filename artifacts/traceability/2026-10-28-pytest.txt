@@ -1,0 +1,2115 @@
+# pytest — сверка TRACEABILITY.md
+# дата: 2026-10-28T07:23:58Z
+# коммит: 2a9e44f (feat/m11-sample-install)
+# команда: cd backend && python -m pytest -v -n 4 -p no:cacheprovider
+# окружение: Python 3.12.3, PostgreSQL 16 (локально), без Docker
+
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-8.3.4, pluggy-1.7.0 -- /home/user/streamline-operations-control-/backend/.venv/bin/python
+hypothesis profile 'default'
+django: version: 5.1.6, settings: config.settings.test (from ini)
+rootdir: /home/user/streamline-operations-control-/backend
+configfile: pyproject.toml
+plugins: schemathesis-3.39.1, subtests-0.13.1, cov-6.0.0, xdist-3.6.1, hypothesis-6.170.12, django-4.9.0, Faker-40.43.0, anyio-4.15.1
+created: 4/4 workers
+4 workers [1047 items]
+
+scheduling tests via LoadScheduling
+
+billing/tests/test_reconciliation.py::test_line_without_our_order_is_missing_on_our_side 
+accounts/tests/test_accounts_list.py::test_accounts_are_listed_on_the_stand 
+billing/tests/test_documents.py::test_issued_invoice_cannot_lose_number_in_database 
+comms/tests/test_events.py::test_actor_is_not_notified_about_their_own_action 
+[gw1] [  0%] PASSED billing/tests/test_documents.py::test_issued_invoice_cannot_lose_number_in_database 
+billing/tests/test_documents.py::test_voiding_requires_reason_and_writes_it_to_audit 
+[gw2] [  0%] PASSED comms/tests/test_events.py::test_actor_is_not_notified_about_their_own_action 
+comms/tests/test_events.py::test_late_confirmation_raises_an_sla_notification 
+[gw2] [  0%] PASSED comms/tests/test_events.py::test_late_confirmation_raises_an_sla_notification 
+comms/tests/test_events.py::test_issued_invoice_goes_to_the_client 
+[gw1] [  0%] PASSED billing/tests/test_documents.py::test_voiding_requires_reason_and_writes_it_to_audit 
+billing/tests/test_documents.py::test_numbering_has_no_gaps_under_concurrency 
+[gw2] [  0%] PASSED comms/tests/test_events.py::test_issued_invoice_goes_to_the_client 
+comms/tests/test_events.py::test_draft_invoice_sends_nothing 
+[gw2] [  0%] PASSED comms/tests/test_events.py::test_draft_invoice_sends_nothing 
+comms/tests/test_events.py::test_flight_status_change_notifies_dispatchers 
+[gw0] [  0%] PASSED accounts/tests/test_accounts_list.py::test_accounts_are_listed_on_the_stand 
+accounts/tests/test_accounts_list.py::test_the_list_never_carries_a_password 
+[gw2] [  0%] PASSED comms/tests/test_events.py::test_flight_status_change_notifies_dispatchers 
+comms/tests/test_events.py::test_notification_in_sample_data_mode_is_marked 
+[gw0] [  0%] PASSED accounts/tests/test_accounts_list.py::test_the_list_never_carries_a_password 
+accounts/tests/test_accounts_list.py::test_outside_the_stand_the_list_is_empty 
+[gw0] [  0%] PASSED accounts/tests/test_accounts_list.py::test_outside_the_stand_the_list_is_empty 
+accounts/tests/test_accounts_list.py::test_the_list_is_open_without_a_token 
+[gw0] [  1%] PASSED accounts/tests/test_accounts_list.py::test_the_list_is_open_without_a_token 
+accounts/tests/test_accounts_list.py::test_deactivated_account_is_not_offered 
+[gw2] [  1%] PASSED comms/tests/test_events.py::test_notification_in_sample_data_mode_is_marked 
+[gw0] [  1%] PASSED accounts/tests/test_accounts_list.py::test_deactivated_account_is_not_offered 
+comms/tests/test_inbox.py::test_confirmation_is_recognized_and_linked_to_the_order 
+accounts/tests/test_auth.py::TestLogin::test_successful_login_returns_tokens 
+[gw2] [  1%] PASSED comms/tests/test_inbox.py::test_confirmation_is_recognized_and_linked_to_the_order 
+comms/tests/test_inbox.py::test_rejection_is_recognized 
+[gw2] [  1%] PASSED comms/tests/test_inbox.py::test_rejection_is_recognized 
+[gw0] [  1%] PASSED accounts/tests/test_auth.py::TestLogin::test_successful_login_returns_tokens 
+comms/tests/test_inbox.py::test_refusal_to_confirm_is_not_read_as_confirmation 
+accounts/tests/test_auth.py::TestLogin::test_wrong_password_is_refused 
+[gw0] [  1%] PASSED accounts/tests/test_auth.py::TestLogin::test_wrong_password_is_refused 
+accounts/tests/test_auth.py::TestLogin::test_unknown_user_is_indistinguishable_from_wrong_password 
+[gw0] [  1%] PASSED accounts/tests/test_auth.py::TestLogin::test_unknown_user_is_indistinguishable_from_wrong_password 
+accounts/tests/test_auth.py::TestLogin::test_login_is_recorded_in_audit 
+[gw2] [  1%] PASSED comms/tests/test_inbox.py::test_refusal_to_confirm_is_not_read_as_confirmation 
+comms/tests/test_inbox.py::test_letter_without_order_number_goes_to_manual_queue 
+[gw2] [  1%] PASSED comms/tests/test_inbox.py::test_letter_without_order_number_goes_to_manual_queue 
+comms/tests/test_inbox.py::test_letter_about_order_without_intent_is_not_recognized 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestLogin::test_login_is_recorded_in_audit 
+accounts/tests/test_auth.py::TestLockout::test_account_locks_after_five_failures 
+[gw2] [  2%] PASSED comms/tests/test_inbox.py::test_letter_about_order_without_intent_is_not_recognized 
+comms/tests/test_inbox.py::test_same_letter_is_not_ingested_twice 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestLockout::test_account_locks_after_five_failures 
+accounts/tests/test_auth.py::TestLockout::test_lock_is_recorded_in_audit_as_a_system_event 
+[gw2] [  2%] PASSED comms/tests/test_inbox.py::test_same_letter_is_not_ingested_twice 
+comms/tests/test_inbox.py::test_letter_from_the_mailbox_is_marked_live 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestLockout::test_lock_is_recorded_in_audit_as_a_system_event 
+accounts/tests/test_auth.py::TestLockout::test_lock_expires 
+[gw2] [  2%] PASSED comms/tests/test_inbox.py::test_letter_from_the_mailbox_is_marked_live 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestLockout::test_lock_expires 
+comms/tests/test_inbox.py::test_poll_does_nothing_while_the_mailbox_is_not_connected 
+accounts/tests/test_auth.py::TestLockout::test_successful_login_clears_the_counter 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestLockout::test_successful_login_clears_the_counter 
+[gw2] [  2%] PASSED comms/tests/test_inbox.py::test_poll_does_nothing_while_the_mailbox_is_not_connected 
+accounts/tests/test_auth.py::TestTwoFactor::test_second_step_appears_once_the_application_is_bound 
+comms/tests/test_inbox.py::test_apply_moves_the_order_and_records_the_human 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_second_step_appears_once_the_application_is_bound 
+accounts/tests/test_auth.py::TestTwoFactor::test_first_login_without_a_bound_application_is_allowed 
+[gw0] [  2%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_first_login_without_a_bound_application_is_allowed 
+accounts/tests/test_auth.py::TestTwoFactor::test_profile_reports_that_binding_is_required 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_profile_reports_that_binding_is_required 
+accounts/tests/test_auth.py::TestTwoFactor::test_binding_removes_the_requirement 
+[gw3] [  3%] PASSED billing/tests/test_reconciliation.py::test_line_without_our_order_is_missing_on_our_side 
+billing/tests/test_reconciliation.py::test_our_order_without_their_line_is_missing_on_their_side 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_binding_removes_the_requirement 
+accounts/tests/test_auth.py::TestTwoFactor::test_dispatcher_is_not_forced_to_bind 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_dispatcher_is_not_forced_to_bind 
+accounts/tests/test_auth.py::TestTwoFactor::test_code_from_an_authenticator_application_works 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_code_from_an_authenticator_application_works 
+accounts/tests/test_auth.py::TestTwoFactor::test_wrong_code_is_refused 
+[gw1] [  3%] PASSED billing/tests/test_documents.py::test_numbering_has_no_gaps_under_concurrency 
+billing/tests/test_documents.py::test_client_sees_only_own_invoices 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_wrong_code_is_refused 
+accounts/tests/test_auth.py::TestTwoFactor::test_backup_code_works_once 
+[gw3] [  3%] PASSED billing/tests/test_reconciliation.py::test_our_order_without_their_line_is_missing_on_their_side 
+billing/tests/test_reconciliation.py::test_date_window_of_one_day_still_matches 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_backup_code_works_once 
+accounts/tests/test_auth.py::TestTwoFactor::test_ten_backup_codes_are_issued_and_stored_hashed 
+[gw0] [  3%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_ten_backup_codes_are_issued_and_stored_hashed 
+accounts/tests/test_auth.py::TestTwoFactor::test_expired_two_factor_token_is_refused 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestTwoFactor::test_expired_two_factor_token_is_refused 
+accounts/tests/test_auth.py::TestMe::test_profile_carries_the_permission_map 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestMe::test_profile_carries_the_permission_map 
+accounts/tests/test_auth.py::TestMe::test_sample_data_flag_reflects_the_setting 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestMe::test_sample_data_flag_reflects_the_setting 
+accounts/tests/test_auth.py::TestPasswordPolicy::test_short_password_is_refused 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestPasswordPolicy::test_short_password_is_refused 
+accounts/tests/test_auth.py::TestPasswordPolicy::test_password_changes_and_is_recorded 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestPasswordPolicy::test_password_changes_and_is_recorded 
+accounts/tests/test_auth.py::TestPasswordPolicy::test_wrong_current_password_is_refused 
+[gw0] [  4%] PASSED accounts/tests/test_auth.py::TestPasswordPolicy::test_wrong_current_password_is_refused 
+[gw3] [  4%] PASSED billing/tests/test_reconciliation.py::test_date_window_of_one_day_still_matches 
+accounts/tests/test_password_policy.py::test_registration_applies_the_policy 
+billing/tests/test_reconciliation.py::test_date_beyond_the_window_does_not_match 
+[gw0] [  4%] PASSED accounts/tests/test_password_policy.py::test_registration_applies_the_policy 
+accounts/tests/test_password_policy.py::test_password_change_applies_the_policy 
+[gw0] [  4%] PASSED accounts/tests/test_password_policy.py::test_password_change_applies_the_policy 
+accounts/tests/test_registration.py::test_registration_is_open_without_a_token 
+[gw0] [  4%] PASSED accounts/tests/test_registration.py::test_registration_is_open_without_a_token 
+accounts/tests/test_registration.py::test_no_account_before_the_email_is_confirmed 
+[gw0] [  4%] PASSED accounts/tests/test_registration.py::test_no_account_before_the_email_is_confirmed 
+accounts/tests/test_registration.py::test_password_is_stored_hashed 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_password_is_stored_hashed 
+accounts/tests/test_registration.py::test_response_does_not_reveal_a_taken_address 
+[gw3] [  5%] PASSED billing/tests/test_reconciliation.py::test_date_beyond_the_window_does_not_match 
+billing/tests/test_reconciliation.py::test_exact_match_wins_over_mismatch 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_response_does_not_reveal_a_taken_address 
+accounts/tests/test_registration.py::test_weak_password_is_refused 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_weak_password_is_refused 
+accounts/tests/test_registration.py::test_vendor_without_categories_is_refused 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_vendor_without_categories_is_refused 
+accounts/tests/test_registration.py::test_second_submission_creates_no_duplicate 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_second_submission_creates_no_duplicate 
+accounts/tests/test_registration.py::test_client_gets_access_right_after_confirming 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_client_gets_access_right_after_confirming 
+accounts/tests/test_registration.py::test_vendor_waits_for_a_decision 
+[gw2] [  5%] PASSED comms/tests/test_inbox.py::test_apply_moves_the_order_and_records_the_human 
+comms/tests/test_inbox.py::test_unrecognized_letter_can_be_processed_manually 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_vendor_waits_for_a_decision 
+accounts/tests/test_registration.py::test_wrong_token_confirms_nothing 
+[gw0] [  5%] PASSED accounts/tests/test_registration.py::test_wrong_token_confirms_nothing 
+[gw1] [  6%] PASSED billing/tests/test_documents.py::test_client_sees_only_own_invoices 
+[gw3] [  6%] PASSED billing/tests/test_reconciliation.py::test_exact_match_wins_over_mismatch 
+accounts/tests/test_registration.py::test_the_link_works_once 
+billing/tests/test_reconciliation.py::test_unknown_vendor_code_goes_to_the_mapping_queue 
+billing/tests/test_documents.py::test_dispatcher_cannot_issue_invoice 
+[gw0] [  6%] PASSED accounts/tests/test_registration.py::test_the_link_works_once 
+accounts/tests/test_registration.py::test_opening_the_link_twice_is_not_an_error 
+[gw0] [  6%] PASSED accounts/tests/test_registration.py::test_opening_the_link_twice_is_not_an_error 
+accounts/tests/test_registration.py::test_queue_holds_only_vendors 
+[gw2] [  6%] PASSED comms/tests/test_inbox.py::test_unrecognized_letter_can_be_processed_manually 
+comms/tests/test_inbox.py::test_unrecognized_letter_without_instructions_is_refused 
+[gw2] [  6%] PASSED comms/tests/test_inbox.py::test_unrecognized_letter_without_instructions_is_refused 
+comms/tests/test_inbox.py::test_applying_twice_is_refused 
+[gw3] [  6%] PASSED billing/tests/test_reconciliation.py::test_unknown_vendor_code_goes_to_the_mapping_queue 
+[gw0] [  6%] PASSED accounts/tests/test_registration.py::test_queue_holds_only_vendors 
+billing/tests/test_reconciliation.py::test_mapping_makes_the_code_match 
+accounts/tests/test_registration.py::test_approval_creates_the_vendor_and_the_account 
+[gw0] [  6%] PASSED accounts/tests/test_registration.py::test_approval_creates_the_vendor_and_the_account 
+accounts/tests/test_registration.py::test_rejection_creates_nothing 
+[gw2] [  6%] PASSED comms/tests/test_inbox.py::test_applying_twice_is_refused 
+[gw3] [  6%] PASSED billing/tests/test_reconciliation.py::test_mapping_makes_the_code_match 
+comms/tests/test_inbox.py::test_apply_to_missing_order_is_not_found 
+billing/tests/test_reconciliation.py::test_mapping_can_be_added_through_the_api 
+[gw3] [  7%] PASSED billing/tests/test_reconciliation.py::test_mapping_can_be_added_through_the_api 
+[gw2] [  7%] PASSED comms/tests/test_inbox.py::test_apply_to_missing_order_is_not_found 
+billing/tests/test_reconciliation.py::test_same_code_cannot_be_mapped_twice 
+comms/tests/test_inbox.py::test_unrecognized_filter 
+[gw0] [  7%] PASSED accounts/tests/test_registration.py::test_rejection_creates_nothing 
+accounts/tests/test_registration.py::test_second_decision_is_refused 
+[gw3] [  7%] PASSED billing/tests/test_reconciliation.py::test_same_code_cannot_be_mapped_twice 
+billing/tests/test_reconciliation.py::test_resolution_is_recorded_and_audited 
+[gw2] [  7%] PASSED comms/tests/test_inbox.py::test_unrecognized_filter 
+comms/tests/test_inbox.py::test_sender_is_exposed_under_the_contract_name 
+[gw0] [  7%] PASSED accounts/tests/test_registration.py::test_second_decision_is_refused 
+accounts/tests/test_registration.py::test_dispatcher_cannot_decide 
+[gw2] [  7%] PASSED comms/tests/test_inbox.py::test_sender_is_exposed_under_the_contract_name 
+comms/tests/test_inbox.py::test_portal_role_has_no_access_to_the_inbox 
+[gw2] [  7%] PASSED comms/tests/test_inbox.py::test_portal_role_has_no_access_to_the_inbox 
+comms/tests/test_inbox.py::test_expired_order_confirmation_still_reaches_the_machine 
+[gw0] [  7%] PASSED accounts/tests/test_registration.py::test_dispatcher_cannot_decide 
+accounts/tests/test_registration.py::test_queue_is_closed_to_the_vendor_portal 
+[gw3] [  7%] PASSED billing/tests/test_reconciliation.py::test_resolution_is_recorded_and_audited 
+billing/tests/test_reconciliation.py::test_keeping_our_amount_marks_the_payable_disputed 
+[gw0] [  8%] PASSED accounts/tests/test_registration.py::test_queue_is_closed_to_the_vendor_portal 
+accounts/tests/test_registration.py::test_queue_never_carries_a_password 
+[gw1] [  8%] PASSED billing/tests/test_documents.py::test_dispatcher_cannot_issue_invoice 
+billing/tests/test_documents.py::test_quote_accepted_by_client 
+[gw0] [  8%] PASSED accounts/tests/test_registration.py::test_queue_never_carries_a_password 
+accounts/tests/test_registration.py::test_repeat_with_the_same_key_creates_one_vendor 
+[gw2] [  8%] PASSED comms/tests/test_inbox.py::test_expired_order_confirmation_still_reaches_the_machine 
+comms/tests/test_notifications.py::test_bell_shows_only_own_notifications 
+[gw2] [  8%] PASSED comms/tests/test_notifications.py::test_bell_shows_only_own_notifications 
+comms/tests/test_notifications.py::test_portal_roles_see_their_notifications[client] 
+[gw2] [  8%] PASSED comms/tests/test_notifications.py::test_portal_roles_see_their_notifications[client] 
+comms/tests/test_notifications.py::test_portal_roles_see_their_notifications[vendor] 
+[gw3] [  8%] PASSED billing/tests/test_reconciliation.py::test_keeping_our_amount_marks_the_payable_disputed 
+billing/tests/test_reconciliation.py::test_accepting_their_amount_creates_no_dispute 
+[gw2] [  8%] PASSED comms/tests/test_notifications.py::test_portal_roles_see_their_notifications[vendor] 
+comms/tests/test_notifications.py::test_anonymous_gets_nothing 
+[gw2] [  8%] PASSED comms/tests/test_notifications.py::test_anonymous_gets_nothing 
+comms/tests/test_notifications.py::test_unread_filter 
+[gw2] [  8%] PASSED comms/tests/test_notifications.py::test_unread_filter 
+comms/tests/test_notifications.py::test_kind_filter 
+[gw0] [  8%] PASSED accounts/tests/test_registration.py::test_repeat_with_the_same_key_creates_one_vendor 
+audit/tests/test_audit.py::TestRecord::test_keeps_only_changed_fields 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestRecord::test_keeps_only_changed_fields 
+audit/tests/test_audit.py::TestRecord::test_returns_nothing_when_value_did_not_change 
+[gw2] [  9%] PASSED comms/tests/test_notifications.py::test_kind_filter 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestRecord::test_returns_nothing_when_value_did_not_change 
+audit/tests/test_audit.py::TestRecord::test_creation_stores_whole_snapshot 
+comms/tests/test_notifications.py::test_marking_read_is_idempotent 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestRecord::test_creation_stores_whole_snapshot 
+audit/tests/test_audit.py::TestRecord::test_actor_details_are_snapshotted 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestRecord::test_actor_details_are_snapshotted 
+audit/tests/test_audit.py::TestRecord::test_generator_does_not_impersonate_a_person 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestRecord::test_generator_does_not_impersonate_a_person 
+audit/tests/test_audit.py::TestSnapshot::test_decimal_becomes_string 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestSnapshot::test_decimal_becomes_string 
+audit/tests/test_audit.py::TestSnapshot::test_noise_fields_are_dropped 
+[gw0] [  9%] PASSED audit/tests/test_audit.py::TestSnapshot::test_noise_fields_are_dropped 
+[gw2] [  9%] PASSED comms/tests/test_notifications.py::test_marking_read_is_idempotent 
+billing/tests/test_documents.py::test_invoice_is_built_from_actual_quantity 
+comms/tests/test_notifications.py::test_cannot_mark_someone_elses_notification 
+[gw3] [  9%] PASSED billing/tests/test_reconciliation.py::test_accepting_their_amount_creates_no_dispute 
+billing/tests/test_reconciliation.py::test_reconciliation_closes_when_all_are_resolved 
+[gw2] [ 10%] PASSED comms/tests/test_notifications.py::test_cannot_mark_someone_elses_notification 
+comms/tests/test_notifications.py::test_read_all_marks_only_own_unread 
+[gw2] [ 10%] PASSED comms/tests/test_notifications.py::test_read_all_marks_only_own_unread 
+comms/tests/test_notifications.py::test_read_all_keeps_earlier_read_time 
+[gw2] [ 10%] PASSED comms/tests/test_notifications.py::test_read_all_keeps_earlier_read_time 
+comms/tests/test_notifications.py::test_severity_comes_from_the_event_kind 
+[gw2] [ 10%] PASSED comms/tests/test_notifications.py::test_severity_comes_from_the_event_kind 
+comms/tests/test_outbox.py::test_enqueued_message_waits_in_the_queue 
+[gw2] [ 10%] PASSED comms/tests/test_outbox.py::test_enqueued_message_waits_in_the_queue 
+comms/tests/test_outbox.py::test_sample_data_mode_marks_the_record_not_the_subject 
+[gw2] [ 10%] PASSED comms/tests/test_outbox.py::test_sample_data_mode_marks_the_record_not_the_subject 
+comms/tests/test_outbox.py::test_template_is_rendered_into_the_message 
+[gw3] [ 10%] PASSED billing/tests/test_reconciliation.py::test_reconciliation_closes_when_all_are_resolved 
+billing/tests/test_reconciliation.py::test_closed_reconciliation_is_not_reopened 
+[gw1] [ 10%] PASSED billing/tests/test_documents.py::test_quote_accepted_by_client 
+billing/tests/test_documents.py::test_generator_purge_removes_documents_of_its_flights 
+[gw2] [ 10%] PASSED comms/tests/test_outbox.py::test_template_is_rendered_into_the_message 
+comms/tests/test_outbox.py::test_english_recipient_gets_the_english_text 
+[gw0] [ 10%] PASSED billing/tests/test_documents.py::test_invoice_is_built_from_actual_quantity 
+[gw2] [ 10%] PASSED comms/tests/test_outbox.py::test_english_recipient_gets_the_english_text 
+billing/tests/test_documents.py::test_invoice_totals_are_sum_of_rounded_lines 
+comms/tests/test_outbox.py::test_accepted_letter_is_sent_but_not_delivered 
+[gw3] [ 11%] PASSED billing/tests/test_reconciliation.py::test_closed_reconciliation_is_not_reopened 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_accepted_letter_is_sent_but_not_delivered 
+comms/tests/test_outbox.py::test_sent_email_keeps_a_copy_of_the_letter 
+billing/tests/test_reconciliation.py::test_unknown_discrepancy_index_is_not_found 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_sent_email_keeps_a_copy_of_the_letter 
+comms/tests/test_outbox.py::test_disconnected_channel_fails_at_once 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_disconnected_channel_fails_at_once 
+comms/tests/test_outbox.py::test_channel_failure_postpones_instead_of_losing 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_channel_failure_postpones_instead_of_losing 
+comms/tests/test_outbox.py::test_attempts_run_out_and_the_message_waits_for_a_human 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_attempts_run_out_and_the_message_waits_for_a_human 
+comms/tests/test_outbox.py::test_due_selection_skips_postponed_messages 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_due_selection_skips_postponed_messages 
+comms/tests/test_outbox.py::test_portal_message_needs_no_external_channel 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_portal_message_needs_no_external_channel 
+comms/tests/test_outbox.py::test_retry_endpoint_sends_a_failed_message 
+[gw3] [ 11%] PASSED billing/tests/test_reconciliation.py::test_unknown_discrepancy_index_is_not_found 
+billing/tests/test_reconciliation.py::test_imported_invoice_is_listed 
+[gw2] [ 11%] PASSED comms/tests/test_outbox.py::test_retry_endpoint_sends_a_failed_message 
+comms/tests/test_outbox.py::test_sent_message_cannot_be_retried 
+[gw2] [ 12%] PASSED comms/tests/test_outbox.py::test_sent_message_cannot_be_retried 
+comms/tests/test_outbox.py::test_retry_requires_idempotency_key 
+[gw2] [ 12%] PASSED comms/tests/test_outbox.py::test_retry_requires_idempotency_key 
+comms/tests/test_outbox.py::test_list_shows_the_eml_link 
+[gw0] [ 12%] PASSED billing/tests/test_documents.py::test_invoice_totals_are_sum_of_rounded_lines 
+billing/tests/test_documents.py::test_invoice_without_completed_services_is_refused 
+[gw2] [ 12%] PASSED comms/tests/test_outbox.py::test_list_shows_the_eml_link 
+[gw0] [ 12%] PASSED billing/tests/test_documents.py::test_invoice_without_completed_services_is_refused 
+comms/tests/test_outbox.py::test_list_can_be_filtered_by_status 
+billing/tests/test_documents.py::test_quote_includes_planned_services 
+[gw2] [ 12%] PASSED comms/tests/test_outbox.py::test_list_can_be_filtered_by_status 
+comms/tests/test_outbox.py::test_portal_role_has_no_access_to_the_queue 
+[gw2] [ 12%] PASSED comms/tests/test_outbox.py::test_portal_role_has_no_access_to_the_queue 
+comms/tests/test_templates.py::test_placeholder_is_replaced 
+[gw2] [ 12%] PASSED comms/tests/test_templates.py::test_placeholder_is_replaced 
+comms/tests/test_templates.py::test_missing_variable_stays_visible 
+[gw2] [ 12%] PASSED comms/tests/test_templates.py::test_missing_variable_stays_visible 
+[gw3] [ 12%] PASSED billing/tests/test_reconciliation.py::test_imported_invoice_is_listed 
+comms/tests/test_templates.py::test_money_keeps_its_precision 
+[gw2] [ 12%] PASSED comms/tests/test_templates.py::test_money_keeps_its_precision 
+comms/tests/test_templates.py::test_template_language_is_not_a_template_language 
+billing/tests/test_reconciliation.py::test_list_is_filtered_by_vendor 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_template_language_is_not_a_template_language 
+comms/tests/test_templates.py::test_unknown_path_does_not_walk_into_objects 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_unknown_path_does_not_walk_into_objects 
+comms/tests/test_templates.py::test_variables_are_collected_from_both_languages 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_variables_are_collected_from_both_languages 
+comms/tests/test_templates.py::test_catalog_lists_templates 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_catalog_lists_templates 
+comms/tests/test_templates.py::test_template_can_be_edited_by_admin 
+[gw0] [ 13%] PASSED billing/tests/test_documents.py::test_quote_includes_planned_services 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_template_can_be_edited_by_admin 
+comms/tests/test_templates.py::test_dispatcher_cannot_edit_templates 
+billing/tests/test_documents.py::test_plan_fact_comparison_explains_the_difference 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_dispatcher_cannot_edit_templates 
+comms/tests/test_templates.py::test_edit_is_written_to_the_audit 
+[gw2] [ 13%] PASSED comms/tests/test_templates.py::test_edit_is_written_to_the_audit 
+comms/tests/test_templates.py::test_preview_renders_on_a_real_flight 
+[gw1] [ 13%] PASSED billing/tests/test_documents.py::test_generator_purge_removes_documents_of_its_flights 
+billing/tests/test_export.py::test_totals_equal_sum_of_lines 
+[gw3] [ 13%] PASSED billing/tests/test_reconciliation.py::test_list_is_filtered_by_vendor 
+billing/tests/test_reconciliation.py::test_vendor_portal_does_not_see_reconciliation 
+[gw2] [ 14%] PASSED comms/tests/test_templates.py::test_preview_renders_on_a_real_flight 
+comms/tests/test_templates.py::test_preview_reports_variables_without_data 
+[gw2] [ 14%] PASSED comms/tests/test_templates.py::test_preview_reports_variables_without_data 
+comms/tests/test_templates.py::test_preview_in_english 
+[gw3] [ 14%] PASSED billing/tests/test_reconciliation.py::test_vendor_portal_does_not_see_reconciliation 
+billing/tests/test_reconciliation.py::test_same_invoice_is_not_imported_twice 
+[gw2] [ 14%] PASSED comms/tests/test_templates.py::test_preview_in_english 
+comms/tests/test_templates.py::test_preview_on_missing_flight_is_not_found 
+[gw0] [ 14%] PASSED billing/tests/test_documents.py::test_plan_fact_comparison_explains_the_difference 
+billing/tests/test_documents.py::test_issuing_assigns_number_and_due_date 
+[gw2] [ 14%] PASSED comms/tests/test_templates.py::test_preview_on_missing_flight_is_not_found 
+counterparties/tests/test_counterparties_api.py::test_contract_expiring_within_30_days_shows_warning_status 
+[gw2] [ 14%] PASSED counterparties/tests/test_counterparties_api.py::test_contract_expiring_within_30_days_shows_warning_status 
+counterparties/tests/test_counterparties_api.py::test_expired_contract_is_reported_as_expired 
+[gw2] [ 14%] PASSED counterparties/tests/test_counterparties_api.py::test_expired_contract_is_reported_as_expired 
+counterparties/tests/test_counterparties_api.py::test_duplicate_contract_number_per_vendor_is_rejected 
+[gw3] [ 14%] PASSED billing/tests/test_reconciliation.py::test_same_invoice_is_not_imported_twice 
+billing/tests/test_reconciliation.py::test_import_of_a_missing_vendor_is_not_found 
+[gw2] [ 14%] PASSED counterparties/tests/test_counterparties_api.py::test_duplicate_contract_number_per_vendor_is_rejected 
+counterparties/tests/test_counterparties_api.py::test_contract_end_before_start_is_rejected 
+[gw3] [ 14%] PASSED billing/tests/test_reconciliation.py::test_import_of_a_missing_vendor_is_not_found 
+[gw2] [ 15%] PASSED counterparties/tests/test_counterparties_api.py::test_contract_end_before_start_is_rejected 
+billing/tests/test_reconciliation.py::test_empty_invoice_is_refused 
+counterparties/tests/test_counterparties_api.py::test_dispatcher_reads_contracts_but_cannot_create 
+[gw2] [ 15%] PASSED counterparties/tests/test_counterparties_api.py::test_dispatcher_reads_contracts_but_cannot_create 
+[gw3] [ 15%] PASSED billing/tests/test_reconciliation.py::test_empty_invoice_is_refused 
+billing/tests/test_reconciliation.py::test_dispatcher_cannot_import 
+counterparties/tests/test_expiry.py::test_contracts_beyond_the_first_threshold_are_quiet 
+[gw2] [ 15%] PASSED counterparties/tests/test_expiry.py::test_contracts_beyond_the_first_threshold_are_quiet 
+counterparties/tests/test_expiry.py::test_shift_by_25_days_gives_one_reminder_per_threshold 
+[gw1] [ 15%] PASSED billing/tests/test_export.py::test_totals_equal_sum_of_lines 
+billing/tests/test_export.py::test_xlsx_carries_the_same_grand_total 
+[gw3] [ 15%] PASSED billing/tests/test_reconciliation.py::test_dispatcher_cannot_import 
+billing/tests/test_reconciliation.py::test_result_is_a_snapshot_not_a_recomputation 
+[gw2] [ 15%] PASSED counterparties/tests/test_expiry.py::test_shift_by_25_days_gives_one_reminder_per_threshold 
+counterparties/tests/test_expiry.py::test_next_threshold_fires_later_and_only_once 
+[gw0] [ 15%] PASSED billing/tests/test_documents.py::test_issuing_assigns_number_and_due_date 
+billing/tests/test_documents.py::test_issued_invoice_cannot_be_issued_twice 
+[gw1] [ 15%] PASSED billing/tests/test_export.py::test_xlsx_carries_the_same_grand_total 
+billing/tests/test_export.py::test_export_endpoint_returns_download_link 
+[gw3] [ 15%] PASSED billing/tests/test_reconciliation.py::test_result_is_a_snapshot_not_a_recomputation 
+billing/tests/test_reconciliation.py::test_template_is_downloaded_in_both_formats 
+[gw3] [ 16%] PASSED billing/tests/test_reconciliation.py::test_template_is_downloaded_in_both_formats 
+billing/tests/test_reconciliation.py::test_dispatcher_cannot_download_the_template 
+[gw3] [ 16%] PASSED billing/tests/test_reconciliation.py::test_dispatcher_cannot_download_the_template 
+billing/tests/test_reconciliation.py::test_filled_template_is_imported_and_reconciled 
+[gw2] [ 16%] PASSED counterparties/tests/test_expiry.py::test_next_threshold_fires_later_and_only_once 
+counterparties/tests/test_expiry.py::test_terminated_and_expired_contracts_are_skipped 
+[gw3] [ 16%] PASSED billing/tests/test_reconciliation.py::test_filled_template_is_imported_and_reconciled 
+billing/tests/test_reconciliation.py::test_file_errors_come_back_with_row_numbers 
+[gw3] [ 16%] PASSED billing/tests/test_reconciliation.py::test_file_errors_come_back_with_row_numbers 
+billing/tests/test_tariffs.py::test_finance_adds_a_rule_and_it_is_listed 
+[gw2] [ 16%] PASSED counterparties/tests/test_expiry.py::test_terminated_and_expired_contracts_are_skipped 
+counterparties/tests/test_rating.py::test_stats_count_what_the_vendor_answered_for 
+[gw3] [ 16%] PASSED billing/tests/test_tariffs.py::test_finance_adds_a_rule_and_it_is_listed 
+billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing0-extra0] 
+[gw3] [ 16%] PASSED billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing0-extra0] 
+billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing1-extra1] 
+[gw1] [ 16%] PASSED billing/tests/test_export.py::test_export_endpoint_returns_download_link 
+[gw3] [ 16%] PASSED billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing1-extra1] 
+billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing2-extra2] 
+billing/tests/test_export.py::test_unsupported_format_is_refused 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_inconsistent_rule_is_refused[pricing2-extra2] 
+billing/tests/test_tariffs.py::test_period_backwards_is_refused 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_period_backwards_is_refused 
+billing/tests/test_tariffs.py::test_manager_reads_but_cannot_add 
+[gw2] [ 17%] PASSED counterparties/tests/test_rating.py::test_stats_count_what_the_vendor_answered_for 
+counterparties/tests/test_rating.py::test_stats_take_completion_breaches_and_reconciliation 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_manager_reads_but_cannot_add 
+billing/tests/test_tariffs.py::test_dispatcher_has_no_access_to_tariffs 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_dispatcher_has_no_access_to_tariffs 
+billing/tests/test_tariffs.py::test_adding_requires_idempotency_key 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_adding_requires_idempotency_key 
+billing/tests/test_tariffs.py::test_same_service_costs_differently_for_two_clients 
+[gw0] [ 17%] PASSED billing/tests/test_documents.py::test_issued_invoice_cannot_be_issued_twice 
+billing/tests/test_documents.py::test_invoice_has_no_edit_endpoint 
+[gw2] [ 17%] PASSED counterparties/tests/test_rating.py::test_stats_take_completion_breaches_and_reconciliation 
+counterparties/tests/test_rating.py::test_rating_endpoint_explains_the_number 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_same_service_costs_differently_for_two_clients 
+billing/tests/test_tariffs.py::test_most_specific_rule_wins_and_the_reason_is_shown 
+[gw3] [ 17%] PASSED billing/tests/test_tariffs.py::test_most_specific_rule_wins_and_the_reason_is_shown 
+billing/tests/test_tariffs.py::test_equal_priority_prefers_the_later_rule 
+[gw2] [ 17%] PASSED counterparties/tests/test_rating.py::test_rating_endpoint_explains_the_number 
+counterparties/tests/test_rating.py::test_rating_of_a_new_vendor_is_not_invented 
+[gw3] [ 18%] PASSED billing/tests/test_tariffs.py::test_equal_priority_prefers_the_later_rule 
+billing/tests/test_tariffs.py::test_given_purchase_price_is_used_and_discount_is_explained 
+[gw2] [ 18%] PASSED counterparties/tests/test_rating.py::test_rating_of_a_new_vendor_is_not_invented 
+counterparties/tests/test_rating.py::test_rating_of_unknown_vendor_is_not_found 
+[gw2] [ 18%] PASSED counterparties/tests/test_rating.py::test_rating_of_unknown_vendor_is_not_found 
+[gw3] [ 18%] PASSED billing/tests/test_tariffs.py::test_given_purchase_price_is_used_and_discount_is_explained 
+counterparties/tests/test_rating.py::test_portal_vendor_cannot_read_ratings 
+billing/tests/test_tariffs.py::test_without_any_purchase_price_the_sandbox_says_so 
+[gw2] [ 18%] PASSED counterparties/tests/test_rating.py::test_portal_vendor_cannot_read_ratings 
+[gw3] [ 18%] PASSED billing/tests/test_tariffs.py::test_without_any_purchase_price_the_sandbox_says_so 
+counterparties/tests/test_suggest.py::test_price_mode_puts_the_cheapest_first 
+billing/tests/test_tariffs.py::test_no_rule_falls_back_to_default_markup 
+[gw3] [ 18%] PASSED billing/tests/test_tariffs.py::test_no_rule_falls_back_to_default_markup 
+catalog/tests/test_prices_api.py::test_price_is_created_and_listed 
+[gw2] [ 18%] PASSED counterparties/tests/test_suggest.py::test_price_mode_puts_the_cheapest_first 
+counterparties/tests/test_suggest.py::test_proximity_mode_prefers_a_base_at_the_airport 
+[gw1] [ 18%] PASSED billing/tests/test_export.py::test_unsupported_format_is_refused 
+[gw3] [ 18%] PASSED catalog/tests/test_prices_api.py::test_price_is_created_and_listed 
+catalog/tests/test_prices_api.py::test_overlapping_period_for_same_triple_is_rejected 
+billing/tests/test_export.py::test_export_carries_no_marking_in_sample_data_mode 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_overlapping_period_for_same_triple_is_rejected 
+catalog/tests/test_prices_api.py::test_adjacent_period_is_allowed 
+[gw2] [ 19%] PASSED counterparties/tests/test_suggest.py::test_proximity_mode_prefers_a_base_at_the_airport 
+counterparties/tests/test_suggest.py::test_rating_mode_follows_the_rating 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_adjacent_period_is_allowed 
+catalog/tests/test_prices_api.py::test_effective_price_is_taken_for_service_date_not_today 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_effective_price_is_taken_for_service_date_not_today 
+catalog/tests/test_prices_api.py::test_min_charge_in_other_currency_is_rejected 
+[gw2] [ 19%] PASSED counterparties/tests/test_suggest.py::test_rating_mode_follows_the_rating 
+counterparties/tests/test_suggest.py::test_balanced_mode_uses_weights_from_settings 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_min_charge_in_other_currency_is_rejected 
+catalog/tests/test_prices_api.py::test_client_portal_cannot_read_purchase_prices 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_client_portal_cannot_read_purchase_prices 
+catalog/tests/test_prices_api.py::test_purchase_cost_applies_percent_surcharge_to_base 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_purchase_cost_applies_percent_surcharge_to_base 
+catalog/tests/test_prices_api.py::test_purchase_cost_respects_min_charge 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_purchase_cost_respects_min_charge 
+catalog/tests/test_prices_api.py::test_purchase_cost_rounds_once_on_total 
+[gw3] [ 19%] PASSED catalog/tests/test_prices_api.py::test_purchase_cost_rounds_once_on_total 
+catalog/tests/test_prices_api.py::test_airport_is_added_and_codes_normalised 
+[gw0] [ 19%] PASSED billing/tests/test_documents.py::test_invoice_has_no_edit_endpoint 
+[gw3] [ 20%] PASSED catalog/tests/test_prices_api.py::test_airport_is_added_and_codes_normalised 
+catalog/tests/test_prices_api.py::test_unknown_timezone_is_rejected 
+[gw2] [ 20%] PASSED counterparties/tests/test_suggest.py::test_balanced_mode_uses_weights_from_settings 
+counterparties/tests/test_suggest.py::test_custom_weights_are_applied 
+comms/tests/test_templates.py::test_reference_carries_every_required_template 
+[gw0] [ 20%] PASSED comms/tests/test_templates.py::test_reference_carries_every_required_template 
+[gw3] [ 20%] PASSED catalog/tests/test_prices_api.py::test_unknown_timezone_is_rejected 
+comms/tests/test_templates.py::test_every_reference_template_has_both_languages 
+catalog/tests/test_prices_api.py::test_duplicate_icao_is_rejected 
+[gw0] [ 20%] PASSED comms/tests/test_templates.py::test_every_reference_template_has_both_languages 
+core/tests/test_attachments.py::test_reserve_returns_upload_url_and_pending_attachment 
+[gw3] [ 20%] PASSED catalog/tests/test_prices_api.py::test_duplicate_icao_is_rejected 
+catalog/tests/test_prices_api.py::test_dispatcher_cannot_add_airport 
+[gw0] [ 20%] PASSED core/tests/test_attachments.py::test_reserve_returns_upload_url_and_pending_attachment 
+[gw3] [ 20%] PASSED catalog/tests/test_prices_api.py::test_dispatcher_cannot_add_airport 
+catalog/tests/test_reference.py::TestSeedReference::test_loads_all_datasets 
+core/tests/test_attachments.py::test_disallowed_mime_type_is_rejected_before_upload 
+[gw1] [ 20%] PASSED billing/tests/test_export.py::test_export_carries_no_marking_in_sample_data_mode 
+billing/tests/test_export.py::test_client_can_export_own_invoice_but_not_someone_elses 
+[gw0] [ 20%] PASSED core/tests/test_attachments.py::test_disallowed_mime_type_is_rejected_before_upload 
+core/tests/test_attachments.py::test_oversized_file_is_rejected_before_upload 
+[gw2] [ 21%] PASSED counterparties/tests/test_suggest.py::test_custom_weights_are_applied 
+counterparties/tests/test_suggest.py::test_only_vendors_passing_the_order_checks_are_candidates 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_oversized_file_is_rejected_before_upload 
+core/tests/test_attachments.py::test_confirm_without_uploaded_file_fails 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_confirm_without_uploaded_file_fails 
+core/tests/test_attachments.py::test_confirm_takes_actual_size_from_storage 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_confirm_takes_actual_size_from_storage 
+core/tests/test_attachments.py::test_cannot_confirm_someone_elses_attachment 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_cannot_confirm_someone_elses_attachment 
+core/tests/test_attachments.py::test_contract_carries_confirmed_attachment 
+[gw2] [ 21%] PASSED counterparties/tests/test_suggest.py::test_only_vendors_passing_the_order_checks_are_candidates 
+counterparties/tests/test_suggest.py::test_margin_impact_follows_the_clients_tariff 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_contract_carries_confirmed_attachment 
+core/tests/test_attachments.py::test_unconfirmed_attachment_is_not_linked_to_contract 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_unconfirmed_attachment_is_not_linked_to_contract 
+core/tests/test_attachments.py::test_cyrillic_file_name_becomes_safe_storage_key 
+[gw0] [ 21%] PASSED core/tests/test_attachments.py::test_cyrillic_file_name_becomes_safe_storage_key 
+core/tests/test_performance.py::test_flight_card_and_margin_are_measured_on_the_server 
+[gw2] [ 21%] PASSED counterparties/tests/test_suggest.py::test_margin_impact_follows_the_clients_tariff 
+[gw1] [ 21%] PASSED billing/tests/test_export.py::test_client_can_export_own_invoice_but_not_someone_elses 
+counterparties/tests/test_suggest.py::test_margin_impact_is_relative_to_the_current_order 
+billing/tests/test_export.py::test_pdf_is_a_real_pdf_with_the_same_total 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_flight_card_and_margin_are_measured_on_the_server 
+[gw2] [ 22%] PASSED counterparties/tests/test_suggest.py::test_margin_impact_is_relative_to_the_current_order 
+counterparties/tests/test_suggest.py::test_without_flight_impact_is_not_computed 
+core/tests/test_performance.py::test_client_samples_are_accepted 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_client_samples_are_accepted 
+core/tests/test_performance.py::test_impossible_samples_are_refused[body0] 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_impossible_samples_are_refused[body0] 
+core/tests/test_performance.py::test_impossible_samples_are_refused[body1] 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_impossible_samples_are_refused[body1] 
+core/tests/test_performance.py::test_impossible_samples_are_refused[body2] 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_impossible_samples_are_refused[body2] 
+[gw2] [ 22%] PASSED counterparties/tests/test_suggest.py::test_without_flight_impact_is_not_computed 
+counterparties/tests/test_suggest.py::test_suggest_endpoint_returns_the_comparison_table 
+core/tests/test_performance.py::test_impossible_samples_are_refused[body3] 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_impossible_samples_are_refused[body3] 
+core/tests/test_performance.py::test_anonymous_cannot_send_samples 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_anonymous_cannot_send_samples 
+core/tests/test_performance.py::test_report_shows_measured_percentiles 
+[gw0] [ 22%] PASSED core/tests/test_performance.py::test_report_shows_measured_percentiles 
+core/tests/test_performance.py::test_report_is_for_the_administrator 
+[gw0] [ 23%] PASSED core/tests/test_performance.py::test_report_is_for_the_administrator 
+core/tests/test_settings.py::test_admin_reads_the_settings 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_admin_reads_the_settings 
+core/tests/test_settings.py::test_dispatcher_has_no_settings 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_dispatcher_has_no_settings 
+core/tests/test_settings.py::test_threshold_change_is_audited_and_stored_as_decimal 
+[gw2] [ 23%] PASSED counterparties/tests/test_suggest.py::test_suggest_endpoint_returns_the_comparison_table 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_threshold_change_is_audited_and_stored_as_decimal 
+counterparties/tests/test_suggest.py::test_custom_mode_without_weights_is_refused 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes0] 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes0] 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes1] 
+[gw2] [ 23%] PASSED counterparties/tests/test_suggest.py::test_custom_mode_without_weights_is_refused 
+counterparties/tests/test_suggest.py::test_portal_roles_cannot_suggest 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes1] 
+[gw2] [ 23%] PASSED counterparties/tests/test_suggest.py::test_portal_roles_cannot_suggest 
+fleet/tests/test_fleet_create.py::test_aircraft_is_added_with_approvals 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes2] 
+[gw0] [ 23%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes2] 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes3] 
+[gw2] [ 23%] PASSED fleet/tests/test_fleet_create.py::test_aircraft_is_added_with_approvals 
+fleet/tests/test_fleet_create.py::test_registration_case_does_not_create_second_aircraft 
+[gw0] [ 24%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes3] 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes4] 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_registration_case_does_not_create_second_aircraft 
+fleet/tests/test_fleet_create.py::test_unknown_home_base_is_rejected 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_unknown_home_base_is_rejected 
+fleet/tests/test_fleet_create.py::test_approval_with_end_before_start_is_rejected 
+[gw0] [ 24%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes4] 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes5] 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_approval_with_end_before_start_is_rejected 
+fleet/tests/test_fleet_create.py::test_aircraft_creation_is_written_to_audit 
+[gw0] [ 24%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes5] 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes6] 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_aircraft_creation_is_written_to_audit 
+fleet/tests/test_fleet_create.py::test_client_portal_cannot_add_aircraft 
+[gw0] [ 24%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes6] 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_client_portal_cannot_add_aircraft 
+fleet/tests/test_fleet_create.py::test_client_sees_only_own_aircraft 
+core/tests/test_settings.py::test_impossible_values_are_refused[changes7] 
+[gw2] [ 24%] PASSED fleet/tests/test_fleet_create.py::test_client_sees_only_own_aircraft 
+flights/tests/test_api.py::TestPermissions::test_finance_cannot_create_a_flight 
+[gw0] [ 25%] PASSED core/tests/test_settings.py::test_impossible_values_are_refused[changes7] 
+core/tests/test_settings.py::test_model_time_is_closed_without_the_generator 
+[gw0] [ 25%] PASSED core/tests/test_settings.py::test_model_time_is_closed_without_the_generator 
+core/tests/test_settings.py::test_rewind_moves_the_server_clock 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestPermissions::test_finance_cannot_create_a_flight 
+flights/tests/test_api.py::TestPermissions::test_dispatcher_creates_a_flight 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestPermissions::test_dispatcher_creates_a_flight 
+flights/tests/test_api.py::TestPermissions::test_finance_may_read_the_schedule 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestPermissions::test_finance_may_read_the_schedule 
+flights/tests/test_api.py::TestClientIsolation::test_client_does_not_see_another_clients_flight 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestClientIsolation::test_client_does_not_see_another_clients_flight 
+flights/tests/test_api.py::TestClientIsolation::test_dispatcher_sees_every_flight 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestClientIsolation::test_dispatcher_sees_every_flight 
+flights/tests/test_api.py::TestTransitionEndpoint::test_blocked_transition_answers_409_with_conditions 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestTransitionEndpoint::test_blocked_transition_answers_409_with_conditions 
+flights/tests/test_api.py::TestTransitionEndpoint::test_allowed_transition_changes_the_status 
+[gw0] [ 25%] PASSED core/tests/test_settings.py::test_rewind_moves_the_server_clock 
+core/tests/test_settings.py::test_acceleration_makes_an_hour_pass_in_a_minute 
+[gw2] [ 25%] PASSED flights/tests/test_api.py::TestTransitionEndpoint::test_allowed_transition_changes_the_status 
+flights/tests/test_api.py::TestTransitionEndpoint::test_card_lists_blocked_transitions_with_reasons 
+[gw0] [ 25%] PASSED core/tests/test_settings.py::test_acceleration_makes_an_hour_pass_in_a_minute 
+core/tests/test_settings.py::test_reset_returns_real_time 
+[gw3] [ 26%] PASSED catalog/tests/test_reference.py::TestSeedReference::test_loads_all_datasets 
+catalog/tests/test_reference.py::TestSeedReference::test_repeated_run_changes_nothing 
+[gw0] [ 26%] PASSED core/tests/test_settings.py::test_reset_returns_real_time 
+core/tests/test_settings.py::test_unknown_scale_is_refused 
+[gw0] [ 26%] PASSED core/tests/test_settings.py::test_unknown_scale_is_refused 
+core/tests/test_settings.py::test_threshold_change_resets_cached_margins 
+[gw2] [ 26%] PASSED flights/tests/test_api.py::TestTransitionEndpoint::test_card_lists_blocked_transitions_with_reasons 
+flights/tests/test_api.py::TestTransitionEndpoint::test_history_returns_the_audit_trail 
+[gw3] [ 26%] PASSED catalog/tests/test_reference.py::TestSeedReference::test_repeated_run_changes_nothing 
+catalog/tests/test_reference.py::TestSeedReference::test_reference_data_is_imported_not_synthetic 
+[gw3] [ 26%] PASSED catalog/tests/test_reference.py::TestSeedReference::test_reference_data_is_imported_not_synthetic 
+catalog/tests/test_reference.py::TestSeedReference::test_service_categories_are_exactly_those_in_the_specification 
+[gw3] [ 26%] PASSED catalog/tests/test_reference.py::TestSeedReference::test_service_categories_are_exactly_those_in_the_specification 
+catalog/tests/test_reference.py::TestSeedReference::test_vat_percent_is_decimal_not_float 
+[gw3] [ 26%] PASSED catalog/tests/test_reference.py::TestSeedReference::test_vat_percent_is_decimal_not_float 
+comms/tests/test_events.py::test_placing_an_order_puts_a_letter_in_the_outbox 
+[gw2] [ 26%] PASSED flights/tests/test_api.py::TestTransitionEndpoint::test_history_returns_the_audit_trail 
+flights/tests/test_api.py::TestConflictsEndpoint::test_conflicts_are_listed_with_reason_and_severity 
+[gw2] [ 26%] PASSED flights/tests/test_api.py::TestConflictsEndpoint::test_conflicts_are_listed_with_reason_and_severity 
+flights/tests/test_api.py::TestFlightRequests::test_approval_creates_a_flight 
+[gw2] [ 27%] PASSED flights/tests/test_api.py::TestFlightRequests::test_approval_creates_a_flight 
+flights/tests/test_api.py::TestFlightRequests::test_rejection_requires_a_reason 
+[gw3] [ 27%] PASSED comms/tests/test_events.py::test_placing_an_order_puts_a_letter_in_the_outbox 
+comms/tests/test_events.py::test_order_without_vendor_contacts_is_still_created 
+[gw2] [ 27%] PASSED flights/tests/test_api.py::TestFlightRequests::test_rejection_requires_a_reason 
+flights/tests/test_api.py::TestFlightRequests::test_client_sees_only_own_requests 
+[gw0] [ 27%] PASSED core/tests/test_settings.py::test_threshold_change_resets_cached_margins 
+[gw2] [ 27%] PASSED flights/tests/test_api.py::TestFlightRequests::test_client_sees_only_own_requests 
+counterparties/tests/test_counterparties_api.py::test_finance_creates_client_and_sees_it_in_registry 
+flights/tests/test_api.py::TestIdempotency::test_repeat_with_the_same_key_does_not_create_a_second_flight 
+[gw3] [ 27%] PASSED comms/tests/test_events.py::test_order_without_vendor_contacts_is_still_created 
+comms/tests/test_events.py::test_missing_template_does_not_break_the_order 
+[gw0] [ 27%] PASSED counterparties/tests/test_counterparties_api.py::test_finance_creates_client_and_sees_it_in_registry 
+counterparties/tests/test_counterparties_api.py::test_client_creation_is_written_to_audit 
+[gw0] [ 27%] PASSED counterparties/tests/test_counterparties_api.py::test_client_creation_is_written_to_audit 
+counterparties/tests/test_counterparties_api.py::test_dispatcher_cannot_create_client 
+[gw2] [ 27%] PASSED flights/tests/test_api.py::TestIdempotency::test_repeat_with_the_same_key_does_not_create_a_second_flight 
+flights/tests/test_api.py::TestIdempotency::test_creation_without_a_key_is_refused 
+[gw0] [ 27%] PASSED counterparties/tests/test_counterparties_api.py::test_dispatcher_cannot_create_client 
+counterparties/tests/test_counterparties_api.py::test_client_without_idempotency_key_is_rejected 
+[gw0] [ 27%] PASSED counterparties/tests/test_counterparties_api.py::test_client_without_idempotency_key_is_rejected 
+counterparties/tests/test_counterparties_api.py::test_repeated_key_returns_first_result_without_duplicate 
+[gw3] [ 28%] PASSED comms/tests/test_events.py::test_missing_template_does_not_break_the_order 
+[gw2] [ 28%] PASSED flights/tests/test_api.py::TestIdempotency::test_creation_without_a_key_is_refused 
+comms/tests/test_events.py::test_letter_language_follows_the_contact 
+flights/tests/test_api.py::test_history_includes_the_flight_orders 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_repeated_key_returns_first_result_without_duplicate 
+counterparties/tests/test_counterparties_api.py::test_duplicate_client_name_is_rejected 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_duplicate_client_name_is_rejected 
+counterparties/tests/test_counterparties_api.py::test_deferred_terms_without_days_are_rejected 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_deferred_terms_without_days_are_rejected 
+counterparties/tests/test_counterparties_api.py::test_credit_limit_round_trips_as_decimal_string 
+[gw3] [ 28%] PASSED comms/tests/test_events.py::test_letter_language_follows_the_contact 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_credit_limit_round_trips_as_decimal_string 
+comms/tests/test_events.py::test_confirmation_notifies_the_dispatchers 
+counterparties/tests/test_counterparties_api.py::test_unsupported_currency_is_rejected 
+[gw2] [ 28%] PASSED flights/tests/test_api.py::test_history_includes_the_flight_orders 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_unsupported_currency_is_rejected 
+counterparties/tests/test_counterparties_api.py::test_vendor_is_created_with_coverage_normalised 
+flights/tests/test_conflicts.py::TestAircraftState::test_aog_aircraft_is_a_conflict 
+[gw0] [ 28%] PASSED counterparties/tests/test_counterparties_api.py::test_vendor_is_created_with_coverage_normalised 
+counterparties/tests/test_counterparties_api.py::test_vendors_filter_by_airport_coverage 
+[gw3] [ 29%] PASSED comms/tests/test_events.py::test_confirmation_notifies_the_dispatchers 
+[gw2] [ 29%] PASSED flights/tests/test_conflicts.py::TestAircraftState::test_aog_aircraft_is_a_conflict 
+flights/tests/test_conflicts.py::TestAircraftState::test_maintenance_is_a_conflict 
+comms/tests/test_events.py::test_rejection_carries_the_reason 
+[gw0] [ 29%] PASSED counterparties/tests/test_counterparties_api.py::test_vendors_filter_by_airport_coverage 
+counterparties/tests/test_counterparties_api.py::test_finance_cannot_create_vendor 
+[gw0] [ 29%] PASSED counterparties/tests/test_counterparties_api.py::test_finance_cannot_create_vendor 
+counterparties/tests/test_counterparties_api.py::test_contract_is_created_and_listed 
+[gw2] [ 29%] PASSED flights/tests/test_conflicts.py::TestAircraftState::test_maintenance_is_a_conflict 
+flights/tests/test_conflicts.py::TestAircraftState::test_serviceable_aircraft_is_clean 
+[gw0] [ 29%] PASSED counterparties/tests/test_counterparties_api.py::test_contract_is_created_and_listed 
+flights/tests/test_templates.py::test_template_belongs_to_the_operator_not_the_author 
+[gw2] [ 29%] PASSED flights/tests/test_conflicts.py::TestAircraftState::test_serviceable_aircraft_is_clean 
+flights/tests/test_conflicts.py::TestOverlap::test_flights_of_one_aircraft_must_not_intersect 
+[gw0] [ 29%] PASSED flights/tests/test_templates.py::test_template_belongs_to_the_operator_not_the_author 
+flights/tests/test_templates.py::test_default_services_are_created_with_the_template 
+[gw0] [ 29%] PASSED flights/tests/test_templates.py::test_default_services_are_created_with_the_template 
+flights/tests/test_templates.py::test_weekdays_are_deduplicated_and_ordered 
+[gw2] [ 29%] PASSED flights/tests/test_conflicts.py::TestOverlap::test_flights_of_one_aircraft_must_not_intersect 
+flights/tests/test_conflicts.py::TestOverlap::test_cancelled_flight_does_not_occupy_the_aircraft 
+[gw0] [ 29%] PASSED flights/tests/test_templates.py::test_weekdays_are_deduplicated_and_ordered 
+flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value0] 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value0] 
+flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value1] 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value1] 
+flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value2] 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_impossible_template_is_refused[weekdays-value2] 
+flights/tests/test_templates.py::test_impossible_template_is_refused[depIcao-UU] 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_impossible_template_is_refused[depIcao-UU] 
+[gw2] [ 30%] PASSED flights/tests/test_conflicts.py::TestOverlap::test_cancelled_flight_does_not_occupy_the_aircraft 
+flights/tests/test_templates.py::test_impossible_template_is_refused[depTimeLocal-25:00] 
+flights/tests/test_conflicts.py::TestOverlap::test_different_aircraft_do_not_conflict 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_impossible_template_is_refused[depTimeLocal-25:00] 
+flights/tests/test_templates.py::test_creation_requires_idempotency_key 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_creation_requires_idempotency_key 
+flights/tests/test_templates.py::test_creation_is_written_to_the_audit 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_creation_is_written_to_the_audit 
+flights/tests/test_templates.py::test_local_time_is_stored_as_local 
+[gw2] [ 30%] PASSED flights/tests/test_conflicts.py::TestOverlap::test_different_aircraft_do_not_conflict 
+flights/tests/test_conflicts.py::TestTurnaround::test_too_short_gap_is_a_conflict 
+[gw0] [ 30%] PASSED flights/tests/test_templates.py::test_local_time_is_stored_as_local 
+flights/tests/test_templates.py::test_portal_role_cannot_create_a_template 
+[gw0] [ 31%] PASSED flights/tests/test_templates.py::test_portal_role_cannot_create_a_template 
+flights/tests/test_transitions.py::TestProtectedField::test_direct_assignment_is_impossible 
+[gw0] [ 31%] PASSED flights/tests/test_transitions.py::TestProtectedField::test_direct_assignment_is_impossible 
+flights/tests/test_transitions.py::TestProtectedField::test_queryset_update_does_not_go_through_the_machine 
+[gw2] [ 31%] PASSED flights/tests/test_conflicts.py::TestTurnaround::test_too_short_gap_is_a_conflict 
+flights/tests/test_conflicts.py::TestTurnaround::test_sufficient_gap_is_clean 
+[gw3] [ 31%] PASSED comms/tests/test_events.py::test_rejection_carries_the_reason 
+[gw0] [ 31%] PASSED flights/tests/test_transitions.py::TestProtectedField::test_queryset_update_does_not_go_through_the_machine 
+flights/tests/test_transitions.py::TestStart::test_refuses_without_aircraft_and_orders 
+flights/tests/test_selection.py::test_filter_by_unconfirmed_services 
+[gw0] [ 31%] PASSED flights/tests/test_transitions.py::TestStart::test_refuses_without_aircraft_and_orders 
+flights/tests/test_transitions.py::TestStart::test_passes_when_conditions_are_met 
+[gw2] [ 31%] PASSED flights/tests/test_conflicts.py::TestTurnaround::test_sufficient_gap_is_clean 
+flights/tests/test_conflicts.py::TestApprovals::test_approval_expiring_before_the_flight_is_a_conflict 
+[gw1] [ 31%] PASSED billing/tests/test_export.py::test_pdf_is_a_real_pdf_with_the_same_total 
+billing/tests/test_margin.py::test_plan_takes_everything_but_cancelled_and_rejected 
+[gw1] [ 31%] PASSED billing/tests/test_margin.py::test_plan_takes_everything_but_cancelled_and_rejected 
+[gw2] [ 31%] PASSED flights/tests/test_conflicts.py::TestApprovals::test_approval_expiring_before_the_flight_is_a_conflict 
+flights/tests/test_conflicts.py::TestApprovals::test_valid_approval_is_clean 
+billing/tests/test_margin.py::test_fact_takes_only_completed_by_their_actuals 
+[gw0] [ 31%] PASSED flights/tests/test_transitions.py::TestStart::test_passes_when_conditions_are_met 
+flights/tests/test_transitions.py::TestStart::test_transition_is_recorded_in_audit 
+[gw1] [ 32%] PASSED billing/tests/test_margin.py::test_fact_takes_only_completed_by_their_actuals 
+billing/tests/test_margin.py::test_mixed_names_the_planned_share 
+[gw1] [ 32%] PASSED billing/tests/test_margin.py::test_mixed_names_the_planned_share 
+billing/tests/test_margin.py::test_negative_margin_is_shown_not_zeroed 
+[gw1] [ 32%] PASSED billing/tests/test_margin.py::test_negative_margin_is_shown_not_zeroed 
+[gw2] [ 32%] PASSED flights/tests/test_conflicts.py::TestApprovals::test_valid_approval_is_clean 
+flights/tests/test_conflicts.py::TestAuditRecord::test_conflict_reason_reaches_the_audit 
+billing/tests/test_margin.py::test_zero_revenue_gives_no_percent 
+[gw1] [ 32%] PASSED billing/tests/test_margin.py::test_zero_revenue_gives_no_percent 
+billing/tests/test_margin.py::test_unpriced_draft_is_not_counted_as_zero 
+[gw1] [ 32%] PASSED billing/tests/test_margin.py::test_unpriced_draft_is_not_counted_as_zero 
+[gw3] [ 32%] PASSED flights/tests/test_selection.py::test_filter_by_unconfirmed_services 
+flights/tests/test_selection.py::test_ordering_by_column 
+billing/tests/test_margin.py::test_flight_in_another_currency_than_the_vendor 
+[gw0] [ 32%] PASSED flights/tests/test_transitions.py::TestStart::test_transition_is_recorded_in_audit 
+[gw2] [ 32%] PASSED flights/tests/test_conflicts.py::TestAuditRecord::test_conflict_reason_reaches_the_audit 
+flights/tests/test_transitions.py::TestReady::test_unconfirmed_order_blocks_with_a_list_of_reasons 
+flights/tests/test_conflicts.py::TestAuditRecord::test_clean_flight_writes_no_conflict_entry 
+[gw2] [ 32%] PASSED flights/tests/test_conflicts.py::TestAuditRecord::test_clean_flight_writes_no_conflict_entry 
+flights/tests/test_conflicts.py::TestClosedFlights::test_completed_flight_has_no_conflicts 
+[gw0] [ 33%] PASSED flights/tests/test_transitions.py::TestReady::test_unconfirmed_order_blocks_with_a_list_of_reasons 
+flights/tests/test_transitions.py::TestReady::test_rejected_order_is_named_separately 
+[gw3] [ 33%] PASSED flights/tests/test_selection.py::test_ordering_by_column 
+flights/tests/test_selection.py::test_unknown_ordering_falls_back_to_departure 
+[gw2] [ 33%] PASSED flights/tests/test_conflicts.py::TestClosedFlights::test_completed_flight_has_no_conflicts 
+flights/tests/test_generation.py::TestOccurrences::test_only_weekdays_are_taken 
+[gw1] [ 33%] PASSED billing/tests/test_margin.py::test_flight_in_another_currency_than_the_vendor 
+billing/tests/test_margin.py::test_fact_uses_the_actual_quantity_and_the_invoice 
+[gw2] [ 33%] PASSED flights/tests/test_generation.py::TestOccurrences::test_only_weekdays_are_taken 
+flights/tests/test_generation.py::TestOccurrences::test_moscow_local_time_becomes_utc 
+[gw2] [ 33%] PASSED flights/tests/test_generation.py::TestOccurrences::test_moscow_local_time_becomes_utc 
+flights/tests/test_generation.py::TestOccurrences::test_novosibirsk_offset_differs_from_moscow 
+[gw0] [ 33%] PASSED flights/tests/test_transitions.py::TestReady::test_rejected_order_is_named_separately 
+flights/tests/test_transitions.py::TestReady::test_passes_when_every_order_is_confirmed 
+[gw2] [ 33%] PASSED flights/tests/test_generation.py::TestOccurrences::test_novosibirsk_offset_differs_from_moscow 
+flights/tests/test_generation.py::TestOccurrences::test_daylight_saving_shifts_utc_within_one_series 
+[gw2] [ 33%] PASSED flights/tests/test_generation.py::TestOccurrences::test_daylight_saving_shifts_utc_within_one_series 
+flights/tests/test_generation.py::TestOccurrences::test_too_long_period_is_refused 
+[gw3] [ 33%] PASSED flights/tests/test_selection.py::test_unknown_ordering_falls_back_to_departure 
+flights/tests/test_selection.py::test_several_statuses_by_repeated_parameter 
+[gw2] [ 34%] PASSED flights/tests/test_generation.py::TestOccurrences::test_too_long_period_is_refused 
+flights/tests/test_generation.py::TestGenerate::test_creates_the_expected_number_of_flights 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestReady::test_passes_when_every_order_is_confirmed 
+flights/tests/test_transitions.py::TestImpossibleTransitions::test_transition_from_a_wrong_state_is_refused 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestImpossibleTransitions::test_transition_from_a_wrong_state_is_refused 
+flights/tests/test_transitions.py::TestImpossibleTransitions::test_unknown_transition_is_refused 
+[gw2] [ 34%] PASSED flights/tests/test_generation.py::TestGenerate::test_creates_the_expected_number_of_flights 
+flights/tests/test_generation.py::TestGenerate::test_repeated_generation_does_not_duplicate 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestImpossibleTransitions::test_unknown_transition_is_refused 
+flights/tests/test_transitions.py::TestImpossibleTransitions::test_available_transitions_reflect_the_state 
+[gw3] [ 34%] PASSED flights/tests/test_selection.py::test_several_statuses_by_repeated_parameter 
+flights/tests/test_selection.py::test_margin_below_threshold 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestImpossibleTransitions::test_available_transitions_reflect_the_state 
+flights/tests/test_transitions.py::TestCancel::test_reason_is_mandatory 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestCancel::test_reason_is_mandatory 
+flights/tests/test_transitions.py::TestCancel::test_reason_is_stored_and_audited 
+[gw3] [ 34%] PASSED flights/tests/test_selection.py::test_margin_below_threshold 
+flights/tests/test_selection.py::test_ordering_by_unconfirmed_services 
+[gw2] [ 34%] PASSED flights/tests/test_generation.py::TestGenerate::test_repeated_generation_does_not_duplicate 
+flights/tests/test_generation.py::TestGenerate::test_generated_flights_carry_the_route 
+[gw0] [ 34%] PASSED flights/tests/test_transitions.py::TestCancel::test_reason_is_stored_and_audited 
+flights/tests/test_transitions.py::TestDeparture::test_departure_stamps_the_actual_time 
+[gw2] [ 35%] PASSED flights/tests/test_generation.py::TestGenerate::test_generated_flights_carry_the_route 
+flights/tests/test_generation.py::test_series_of_a_generated_client_belongs_to_the_generated_set 
+[gw2] [ 35%] PASSED flights/tests/test_generation.py::test_series_of_a_generated_client_belongs_to_the_generated_set 
+flights/tests/test_reschedule.py::test_moving_the_bar_keeps_its_length 
+[gw3] [ 35%] PASSED flights/tests/test_selection.py::test_ordering_by_unconfirmed_services 
+flights/tests/test_selection.py::test_ordering_by_margin_keeps_unknown_last 
+[gw0] [ 35%] PASSED flights/tests/test_transitions.py::TestDeparture::test_departure_stamps_the_actual_time 
+flights/tests/test_transitions.py::TestDeparture::test_arrival_stamps_the_actual_time 
+[gw1] [ 35%] PASSED billing/tests/test_margin.py::test_fact_uses_the_actual_quantity_and_the_invoice 
+billing/tests/test_margin.py::test_cache_is_reset_when_orders_change 
+[gw2] [ 35%] PASSED flights/tests/test_reschedule.py::test_moving_the_bar_keeps_its_length 
+flights/tests/test_reschedule.py::test_stretching_the_bar_sets_the_arrival 
+[gw3] [ 35%] PASSED flights/tests/test_selection.py::test_ordering_by_margin_keeps_unknown_last 
+flights/tests/test_selection.py::test_margin_ordering_is_closed_to_the_client 
+[gw0] [ 35%] PASSED flights/tests/test_transitions.py::TestDeparture::test_arrival_stamps_the_actual_time 
+flights/tests/test_transitions.py::TestDeparture::test_manual_departure_before_schedule_is_allowed 
+[gw3] [ 35%] PASSED flights/tests/test_selection.py::test_margin_ordering_is_closed_to_the_client 
+[gw2] [ 35%] PASSED flights/tests/test_reschedule.py::test_stretching_the_bar_sets_the_arrival 
+flights/tests/test_reschedule.py::test_arrival_before_departure_is_refused 
+flights/tests/test_selection.py::test_margin_filter_is_closed_to_the_client 
+[gw1] [ 36%] PASSED billing/tests/test_margin.py::test_cache_is_reset_when_orders_change 
+billing/tests/test_margin.py::test_unknown_mode_is_refused 
+[gw1] [ 36%] PASSED billing/tests/test_margin.py::test_unknown_mode_is_refused 
+billing/tests/test_margin.py::test_portal_roles_do_not_see_margin 
+[gw2] [ 36%] PASSED flights/tests/test_reschedule.py::test_arrival_before_departure_is_refused 
+[gw1] [ 36%] PASSED billing/tests/test_margin.py::test_portal_roles_do_not_see_margin 
+flights/tests/test_reschedule.py::test_new_conflict_needs_a_reason 
+billing/tests/test_margin.py::test_schedule_shows_margin_to_staff_but_not_to_the_client 
+[gw0] [ 36%] PASSED flights/tests/test_transitions.py::TestDeparture::test_manual_departure_before_schedule_is_allowed 
+flights/tests/test_transitions.py::TestComplete::test_refused_without_an_invoice 
+[gw3] [ 36%] PASSED flights/tests/test_selection.py::test_margin_filter_is_closed_to_the_client 
+flights/tests/test_selection.py::test_conflicts_are_asked_for_one_flight 
+[gw0] [ 36%] PASSED flights/tests/test_transitions.py::TestComplete::test_refused_without_an_invoice 
+flights/tests/test_transitions.py::TestComplete::test_draft_invoice_is_not_enough 
+[gw3] [ 36%] PASSED flights/tests/test_selection.py::test_conflicts_are_asked_for_one_flight 
+[gw1] [ 36%] PASSED billing/tests/test_margin.py::test_schedule_shows_margin_to_staff_but_not_to_the_client 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment0-W25] 
+[gw3] [ 36%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment0-W25] 
+billing/tests/test_margin.py::test_low_margin_notifies_once 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment1-W25] 
+[gw3] [ 36%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment1-W25] 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment2-S26] 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment2-S26] 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment3-S26] 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment3-S26] 
+[gw2] [ 37%] PASSED flights/tests/test_reschedule.py::test_new_conflict_needs_a_reason 
+flights/tests/test_reschedule.py::test_unrelated_edit_does_not_ask_about_an_old_conflict 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment4-S26] 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment4-S26] 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment5-W26] 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment5-W26] 
+flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment6-W26] 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_season_code_follows_the_iata_calendar[moment6-W26] 
+flights/tests/test_slots.py::test_date_is_formatted_as_ssim_expects 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_date_is_formatted_as_ssim_expects 
+flights/tests/test_slots.py::test_scr_carries_the_slot_details 
+[gw0] [ 37%] PASSED flights/tests/test_transitions.py::TestComplete::test_draft_invoice_is_not_enough 
+[gw3] [ 37%] PASSED flights/tests/test_slots.py::test_scr_carries_the_slot_details 
+flights/tests/test_transitions.py::TestComplete::test_passes_with_an_issued_invoice 
+flights/tests/test_slots.py::test_scr_falls_back_to_icao_when_there_is_no_iata_code 
+[gw1] [ 37%] PASSED billing/tests/test_margin.py::test_low_margin_notifies_once 
+billing/tests/test_margin.py::test_margin_of_thirty_services_is_within_the_norm 
+[gw3] [ 38%] PASSED flights/tests/test_slots.py::test_scr_falls_back_to_icao_when_there_is_no_iata_code 
+flights/tests/test_slots.py::test_endpoint_assigns_a_message_number 
+[gw2] [ 38%] PASSED flights/tests/test_reschedule.py::test_unrelated_edit_does_not_ask_about_an_old_conflict 
+flights/tests/test_reschedule.py::test_rescheduling_writes_to_the_client_and_the_vendor 
+[gw3] [ 38%] PASSED flights/tests/test_slots.py::test_endpoint_assigns_a_message_number 
+[gw0] [ 38%] PASSED flights/tests/test_transitions.py::TestComplete::test_passes_with_an_issued_invoice 
+flights/tests/test_transitions.py::TestComplete::test_waiver_needs_a_reason 
+flights/tests/test_slots.py::test_message_number_is_assigned_once 
+[gw3] [ 38%] PASSED flights/tests/test_slots.py::test_message_number_is_assigned_once 
+flights/tests/test_slots.py::test_prepared_message_is_referenced_in_the_draft 
+[gw2] [ 38%] PASSED flights/tests/test_reschedule.py::test_rescheduling_writes_to_the_client_and_the_vendor 
+[gw0] [ 38%] PASSED flights/tests/test_transitions.py::TestComplete::test_waiver_needs_a_reason 
+flights/tests/test_reschedule.py::test_client_cannot_move_flights 
+flights/tests/test_transitions.py::TestComplete::test_waiver_with_a_reason_is_audited 
+[gw2] [ 38%] PASSED flights/tests/test_reschedule.py::test_client_cannot_move_flights 
+flights/tests/test_reschedule.py::test_completed_flight_is_not_rescheduled 
+[gw3] [ 38%] PASSED flights/tests/test_slots.py::test_prepared_message_is_referenced_in_the_draft 
+flights/tests/test_slots.py::test_confirmation_with_a_time_is_understood 
+[gw3] [ 38%] PASSED flights/tests/test_slots.py::test_confirmation_with_a_time_is_understood 
+[gw0] [ 38%] PASSED flights/tests/test_transitions.py::TestComplete::test_waiver_with_a_reason_is_audited 
+flights/tests/test_slots.py::test_refusal_to_confirm_is_read_as_refusal 
+flights/tests/test_transitions.py::TestComplete::test_waiver_belongs_to_completion_only 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_refusal_to_confirm_is_read_as_refusal 
+[gw0] [ 39%] PASSED flights/tests/test_transitions.py::TestComplete::test_waiver_belongs_to_completion_only 
+flights/tests/test_transitions.py::test_reason_is_not_an_unmet_condition_of_the_card 
+flights/tests/test_slots.py::test_unclear_answer_stays_unclear 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_unclear_answer_stays_unclear 
+flights/tests/test_slots.py::test_confirmation_without_a_time_keeps_the_requested_one 
+[gw0] [ 39%] PASSED flights/tests/test_transitions.py::test_reason_is_not_an_unmet_condition_of_the_card 
+flights/tests/test_transitions.py::TestEffects::test_cancel_cascades_to_open_orders 
+[gw2] [ 39%] PASSED flights/tests/test_reschedule.py::test_completed_flight_is_not_rescheduled 
+flights/tests/test_reschedule.py::test_departed_flight_keeps_its_schedule_but_takes_remarks 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_confirmation_without_a_time_keeps_the_requested_one 
+flights/tests/test_slots.py::test_applying_an_answer_moves_the_slot 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_applying_an_answer_moves_the_slot 
+flights/tests/test_slots.py::test_unclear_answer_is_refused_and_explains_itself 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_unclear_answer_is_refused_and_explains_itself 
+flights/tests/test_slots.py::test_dispatcher_can_decide_manually 
+[gw3] [ 39%] PASSED flights/tests/test_slots.py::test_dispatcher_can_decide_manually 
+[gw2] [ 39%] PASSED flights/tests/test_reschedule.py::test_departed_flight_keeps_its_schedule_but_takes_remarks 
+flights/tests/test_slots.py::test_answered_slot_is_not_answered_twice 
+flights/tests/test_schedule_export.py::test_export_returns_a_download_link 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_answered_slot_is_not_answered_twice 
+flights/tests/test_slots.py::test_rejection_clears_the_confirmed_time 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_rejection_clears_the_confirmed_time 
+flights/tests/test_slots.py::test_application_is_written_to_the_audit 
+[gw2] [ 40%] PASSED flights/tests/test_schedule_export.py::test_export_returns_a_download_link 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_application_is_written_to_the_audit 
+flights/tests/test_schedule_export.py::test_file_holds_every_flight_of_the_selection 
+flights/tests/test_slots.py::test_new_slot_request_is_created 
+[gw0] [ 40%] PASSED flights/tests/test_transitions.py::TestEffects::test_cancel_cascades_to_open_orders 
+flights/tests/test_transitions.py::TestEffects::test_ready_confirms_the_flight_to_the_client 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_new_slot_request_is_created 
+flights/tests/test_slots.py::test_request_for_a_missing_flight_is_not_found 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_request_for_a_missing_flight_is_not_found 
+flights/tests/test_slots.py::test_second_slot_for_the_same_leg_is_refused 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_second_slot_for_the_same_leg_is_refused 
+flights/tests/test_slots.py::test_portal_role_cannot_touch_slots[scr] 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_portal_role_cannot_touch_slots[scr] 
+flights/tests/test_slots.py::test_portal_role_cannot_touch_slots[apply] 
+[gw2] [ 40%] PASSED flights/tests/test_schedule_export.py::test_file_holds_every_flight_of_the_selection 
+[gw3] [ 40%] PASSED flights/tests/test_slots.py::test_portal_role_cannot_touch_slots[apply] 
+flights/tests/test_schedule_export.py::test_filter_reaches_the_file 
+flights/tests/test_slots.py::test_slot_list_shows_the_registry 
+[gw3] [ 41%] PASSED flights/tests/test_slots.py::test_slot_list_shows_the_registry 
+flights/tests/test_slots.py::test_clock_is_not_frozen_in_the_draft 
+[gw0] [ 41%] PASSED flights/tests/test_transitions.py::TestEffects::test_ready_confirms_the_flight_to_the_client 
+flights/tests/test_transitions.py::TestEffects::test_generator_does_not_write_letters 
+[gw3] [ 41%] PASSED flights/tests/test_slots.py::test_clock_is_not_frozen_in_the_draft 
+flights/tests/test_templates.py::test_template_is_created 
+[gw2] [ 41%] PASSED flights/tests/test_schedule_export.py::test_filter_reaches_the_file 
+[gw0] [ 41%] PASSED flights/tests/test_transitions.py::TestEffects::test_generator_does_not_write_letters 
+flights/tests/test_transitions.py::TestReassignedRejection::test_replaced_rejection_does_not_block_readiness 
+flights/tests/test_schedule_export.py::test_search_filter_reaches_the_file 
+[gw3] [ 41%] PASSED flights/tests/test_templates.py::test_template_is_created 
+portals/tests/test_portals.py::test_foreign_template_is_refused 
+[gw3] [ 41%] PASSED portals/tests/test_portals.py::test_foreign_template_is_refused 
+portals/tests/test_portals.py::test_request_requires_idempotency_key 
+[gw3] [ 41%] PASSED portals/tests/test_portals.py::test_request_requires_idempotency_key 
+[gw2] [ 41%] PASSED flights/tests/test_schedule_export.py::test_search_filter_reaches_the_file 
+flights/tests/test_schedule_export.py::test_totals_are_the_sum_of_the_rows 
+portals/tests/test_portals.py::test_dispatcher_cannot_submit_client_requests 
+[gw3] [ 41%] PASSED portals/tests/test_portals.py::test_dispatcher_cannot_submit_client_requests 
+[gw0] [ 42%] PASSED flights/tests/test_transitions.py::TestReassignedRejection::test_replaced_rejection_does_not_block_readiness 
+flights/tests/test_transitions.py::TestReassignedRejection::test_unreplaced_rejection_still_blocks 
+portals/tests/test_portals.py::test_vendor_sees_own_sent_orders_without_the_sale_price 
+[gw2] [ 42%] PASSED flights/tests/test_schedule_export.py::test_totals_are_the_sum_of_the_rows 
+flights/tests/test_schedule_export.py::test_file_starts_with_the_header_in_any_mode 
+[gw1] [ 42%] PASSED billing/tests/test_margin.py::test_margin_of_thirty_services_is_within_the_norm 
+billing/tests/test_payables.py::test_payable_appears_when_the_service_is_completed 
+[gw2] [ 42%] PASSED flights/tests/test_schedule_export.py::test_file_starts_with_the_header_in_any_mode 
+flights/tests/test_schedule_export.py::test_columns_match_the_screen 
+[gw0] [ 42%] PASSED flights/tests/test_transitions.py::TestReassignedRejection::test_unreplaced_rejection_still_blocks 
+integrations/tests/test_fx.py::TestSync::test_rates_are_stored_as_live_data 
+[gw2] [ 42%] PASSED flights/tests/test_schedule_export.py::test_columns_match_the_screen 
+flights/tests/test_schedule_export.py::test_portal_roles_cannot_export_the_schedule[client] 
+[gw2] [ 42%] PASSED flights/tests/test_schedule_export.py::test_portal_roles_cannot_export_the_schedule[client] 
+flights/tests/test_schedule_export.py::test_portal_roles_cannot_export_the_schedule[vendor] 
+[gw0] [ 42%] PASSED integrations/tests/test_fx.py::TestSync::test_rates_are_stored_as_live_data 
+[gw2] [ 42%] PASSED flights/tests/test_schedule_export.py::test_portal_roles_cannot_export_the_schedule[vendor] 
+[gw3] [ 42%] PASSED portals/tests/test_portals.py::test_vendor_sees_own_sent_orders_without_the_sale_price 
+portals/tests/test_portals.py::test_needs_response_filter 
+flights/tests/test_selection.py::test_filter_by_aircraft_type 
+integrations/tests/test_fx.py::TestSync::test_every_call_is_logged 
+[gw1] [ 42%] PASSED billing/tests/test_payables.py::test_payable_appears_when_the_service_is_completed 
+billing/tests/test_payables.py::test_payable_amount_follows_the_actual_quantity 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSync::test_every_call_is_logged 
+integrations/tests/test_fx.py::TestSync::test_repeated_sync_does_not_duplicate 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSync::test_repeated_sync_does_not_duplicate 
+integrations/tests/test_fx.py::test_disabled_connection_gives_no_rates_at_all 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::test_disabled_connection_gives_no_rates_at_all 
+integrations/tests/test_fx.py::TestSnapshot::test_reports_that_the_rate_is_stale 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_reports_that_the_rate_is_stale 
+[gw2] [ 43%] PASSED flights/tests/test_selection.py::test_filter_by_aircraft_type 
+orders/tests/test_orders_api.py::test_finish_without_actual_data_is_refused 
+[gw1] [ 43%] PASSED billing/tests/test_payables.py::test_payable_amount_follows_the_actual_quantity 
+integrations/tests/test_fx.py::TestSnapshot::test_exact_date_is_not_marked_stale 
+billing/tests/test_payables.py::test_due_date_uses_the_snapshot_not_the_current_contract 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_exact_date_is_not_marked_stale 
+integrations/tests/test_fx.py::TestSnapshot::test_rates_are_decimal_strings 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_rates_are_decimal_strings 
+integrations/tests/test_fx.py::TestSnapshot::test_too_old_rate_is_not_substituted_silently 
+[gw0] [ 43%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_too_old_rate_is_not_substituted_silently 
+integrations/tests/test_fx.py::TestSnapshot::test_future_date_takes_the_latest_known_rate 
+[gw1] [ 43%] PASSED billing/tests/test_payables.py::test_due_date_uses_the_snapshot_not_the_current_contract 
+billing/tests/test_payables.py::test_payable_is_created_once 
+[gw0] [ 44%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_future_date_takes_the_latest_known_rate 
+[gw3] [ 44%] PASSED portals/tests/test_portals.py::test_needs_response_filter 
+integrations/tests/test_fx.py::TestSnapshot::test_flight_snapshot_without_rates_is_taken_again 
+portals/tests/test_portals.py::test_vendor_does_not_see_another_vendors_orders 
+[gw0] [ 44%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_flight_snapshot_without_rates_is_taken_again 
+integrations/tests/test_fx.py::TestSnapshot::test_flight_snapshot_with_rates_is_kept 
+[gw2] [ 44%] PASSED orders/tests/test_orders_api.py::test_finish_without_actual_data_is_refused 
+orders/tests/test_orders_api.py::test_finish_with_actual_data_completes_order 
+[gw0] [ 44%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_flight_snapshot_with_rates_is_kept 
+integrations/tests/test_fx.py::TestSnapshot::test_base_currency_needs_no_lookup 
+[gw0] [ 44%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_base_currency_needs_no_lookup 
+integrations/tests/test_fx.py::TestSnapshot::test_missing_rate_is_an_error_not_a_guess 
+[gw1] [ 44%] PASSED billing/tests/test_payables.py::test_payable_is_created_once 
+billing/tests/test_payables.py::test_due_date_comes_from_the_contract_snapshot 
+[gw0] [ 44%] PASSED integrations/tests/test_fx.py::TestSnapshot::test_missing_rate_is_an_error_not_a_guess 
+integrations/tests/test_integrations_api.py::test_only_working_connections_are_listed 
+[gw0] [ 44%] PASSED integrations/tests/test_integrations_api.py::test_only_working_connections_are_listed 
+integrations/tests/test_integrations_api.py::test_health_follows_the_last_real_exchange 
+[gw0] [ 44%] PASSED integrations/tests/test_integrations_api.py::test_health_follows_the_last_real_exchange 
+integrations/tests/test_integrations_api.py::test_check_calls_the_real_system_and_logs_it 
+[gw0] [ 44%] PASSED integrations/tests/test_integrations_api.py::test_check_calls_the_real_system_and_logs_it 
+integrations/tests/test_integrations_api.py::test_failed_check_is_a_result_not_an_error 
+[gw3] [ 45%] PASSED portals/tests/test_portals.py::test_vendor_does_not_see_another_vendors_orders 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_failed_check_is_a_result_not_an_error 
+integrations/tests/test_integrations_api.py::test_connection_without_adapter_cannot_be_checked 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_connection_without_adapter_cannot_be_checked 
+integrations/tests/test_integrations_api.py::test_log_shows_only_real_exchanges 
+[gw1] [ 45%] PASSED billing/tests/test_payables.py::test_due_date_comes_from_the_contract_snapshot 
+portals/tests/test_portals.py::test_vendor_payables_and_performance_are_own 
+billing/tests/test_payables.py::test_changing_the_contract_does_not_move_the_due_date 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_log_shows_only_real_exchanges 
+integrations/tests/test_integrations_api.py::test_log_can_be_filtered_by_connection 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_log_can_be_filtered_by_connection 
+integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[dispatcher] 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[dispatcher] 
+integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[finance] 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[finance] 
+integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[manager] 
+[gw0] [ 45%] PASSED integrations/tests/test_integrations_api.py::test_connections_are_for_the_administrator_only[manager] 
+orders/tests/test_orders_api.py::test_order_is_created_with_price_snapshot 
+[gw1] [ 45%] PASSED billing/tests/test_payables.py::test_changing_the_contract_does_not_move_the_due_date 
+billing/tests/test_payables.py::test_order_without_vendor_creates_nothing 
+[gw2] [ 46%] PASSED orders/tests/test_orders_api.py::test_finish_with_actual_data_completes_order 
+orders/tests/test_orders_api.py::test_finish_without_act_is_refused_when_act_required 
+[gw1] [ 46%] PASSED billing/tests/test_payables.py::test_order_without_vendor_creates_nothing 
+billing/tests/test_payables.py::test_creation_is_written_to_the_audit 
+[gw0] [ 46%] PASSED orders/tests/test_orders_api.py::test_order_is_created_with_price_snapshot 
+orders/tests/test_orders_api.py::test_required_attributes_are_checked 
+[gw1] [ 46%] PASSED billing/tests/test_payables.py::test_creation_is_written_to_the_audit 
+billing/tests/test_payables.py::test_approve_moves_the_payable 
+[gw3] [ 46%] PASSED portals/tests/test_portals.py::test_vendor_payables_and_performance_are_own 
+portals/tests/test_portals.py::test_client_has_no_vendor_portal 
+[gw3] [ 46%] PASSED portals/tests/test_portals.py::test_client_has_no_vendor_portal 
+reports/tests/test_dashboards.py::test_aggregate_path_matches_the_canonical_margin_to_the_kopeck 
+[gw0] [ 46%] PASSED orders/tests/test_orders_api.py::test_required_attributes_are_checked 
+orders/tests/test_orders_api.py::test_price_change_does_not_rewrite_placed_order 
+[gw1] [ 46%] PASSED billing/tests/test_payables.py::test_approve_moves_the_payable 
+billing/tests/test_payables.py::test_approving_twice_is_refused 
+[gw0] [ 46%] PASSED orders/tests/test_orders_api.py::test_price_change_does_not_rewrite_placed_order 
+orders/tests/test_orders_api.py::test_order_in_airport_without_vendors_is_blocked 
+[gw2] [ 46%] PASSED orders/tests/test_orders_api.py::test_finish_without_act_is_refused_when_act_required 
+orders/tests/test_orders_api.py::test_reassignment_creates_new_order_linked_to_rejected_one 
+[gw0] [ 46%] PASSED orders/tests/test_orders_api.py::test_order_in_airport_without_vendors_is_blocked 
+orders/tests/test_orders_api.py::test_order_with_expired_contract_is_blocked 
+[gw1] [ 47%] PASSED billing/tests/test_payables.py::test_approving_twice_is_refused 
+billing/tests/test_payables.py::test_approval_is_written_to_the_audit 
+[gw0] [ 47%] PASSED orders/tests/test_orders_api.py::test_order_with_expired_contract_is_blocked 
+orders/tests/test_orders_api.py::test_order_with_price_expiring_before_service_date_is_blocked 
+[gw0] [ 47%] PASSED orders/tests/test_orders_api.py::test_order_with_price_expiring_before_service_date_is_blocked 
+orders/tests/test_orders_api.py::test_lead_time_violation_requires_reason 
+[gw1] [ 47%] PASSED billing/tests/test_payables.py::test_approval_is_written_to_the_audit 
+billing/tests/test_payables.py::test_dispatcher_cannot_approve 
+[gw2] [ 47%] PASSED orders/tests/test_orders_api.py::test_reassignment_creates_new_order_linked_to_rejected_one 
+orders/tests/test_orders_api.py::test_vendor_sees_only_own_orders 
+[gw3] [ 47%] PASSED reports/tests/test_dashboards.py::test_aggregate_path_matches_the_canonical_margin_to_the_kopeck 
+reports/tests/test_dashboards.py::test_views_hold_only_numeric_money_columns 
+[gw0] [ 47%] PASSED orders/tests/test_orders_api.py::test_lead_time_violation_requires_reason 
+[gw1] [ 47%] PASSED billing/tests/test_payables.py::test_dispatcher_cannot_approve 
+[gw3] [ 47%] PASSED reports/tests/test_dashboards.py::test_views_hold_only_numeric_money_columns 
+billing/tests/test_payables.py::test_approval_requires_idempotency_key 
+reports/tests/test_dashboards.py::test_dispatcher_dashboard_shows_the_current_situation 
+orders/tests/test_orders_api.py::test_lead_time_override_reason_goes_to_audit 
+[gw3] [ 47%] PASSED reports/tests/test_dashboards.py::test_dispatcher_dashboard_shows_the_current_situation 
+reports/tests/test_dashboards.py::test_finance_has_no_dispatcher_dashboard 
+[gw0] [ 48%] PASSED orders/tests/test_orders_api.py::test_lead_time_override_reason_goes_to_audit 
+[gw3] [ 48%] PASSED reports/tests/test_dashboards.py::test_finance_has_no_dispatcher_dashboard 
+orders/tests/test_orders_api.py::test_order_without_vendor_stays_draft 
+[gw2] [ 48%] PASSED orders/tests/test_orders_api.py::test_vendor_sees_only_own_orders 
+reports/tests/test_dashboards.py::test_dispatcher_has_no_manager_dashboard 
+orders/tests/test_orders_api.py::test_client_does_not_reach_service_orders_at_all 
+[gw3] [ 48%] PASSED reports/tests/test_dashboards.py::test_dispatcher_has_no_manager_dashboard 
+[gw1] [ 48%] PASSED billing/tests/test_payables.py::test_approval_requires_idempotency_key 
+reports/tests/test_dashboards.py::test_unknown_dashboard_is_not_found 
+billing/tests/test_payables.py::test_overdue_is_computed_by_the_server 
+[gw3] [ 48%] PASSED reports/tests/test_dashboards.py::test_unknown_dashboard_is_not_found 
+reports/tests/test_dashboards.py::test_manager_dashboard_reads_the_refreshed_aggregates 
+[gw0] [ 48%] PASSED orders/tests/test_orders_api.py::test_order_without_vendor_stays_draft 
+orders/tests/test_orders_api.py::test_vendor_confirms_own_order 
+[gw2] [ 48%] PASSED orders/tests/test_orders_api.py::test_client_does_not_reach_service_orders_at_all 
+orders/tests/test_orders_api.py::test_finance_reads_flight_orders_but_cannot_place_them 
+[gw1] [ 48%] PASSED billing/tests/test_payables.py::test_overdue_is_computed_by_the_server 
+billing/tests/test_payables.py::test_paid_payable_is_never_overdue 
+[gw1] [ 48%] PASSED billing/tests/test_payables.py::test_paid_payable_is_never_overdue 
+billing/tests/test_payables.py::test_paid_payable_cannot_skip_approval 
+[gw0] [ 48%] PASSED orders/tests/test_orders_api.py::test_vendor_confirms_own_order 
+[gw2] [ 49%] PASSED orders/tests/test_orders_api.py::test_finance_reads_flight_orders_but_cannot_place_them 
+orders/tests/test_orders_api.py::test_confirmation_after_deadline_is_marked_as_sla_breach 
+orders/tests/test_orders_api.py::test_portals_do_not_read_flight_orders 
+[gw1] [ 49%] PASSED billing/tests/test_payables.py::test_paid_payable_cannot_skip_approval 
+billing/tests/test_payables.py::test_overdue_filter 
+[gw2] [ 49%] PASSED orders/tests/test_orders_api.py::test_portals_do_not_read_flight_orders 
+orders/tests/test_sla.py::test_default_rules_from_g39_are_loaded 
+[gw2] [ 49%] PASSED orders/tests/test_sla.py::test_default_rules_from_g39_are_loaded 
+orders/tests/test_sla.py::test_fuel_order_gets_the_fuel_deadline 
+[gw1] [ 49%] PASSED billing/tests/test_payables.py::test_overdue_filter 
+[gw0] [ 49%] PASSED orders/tests/test_orders_api.py::test_confirmation_after_deadline_is_marked_as_sla_breach 
+orders/tests/test_orders_api.py::test_rejection_without_reason_is_refused 
+billing/tests/test_payables.py::test_vendor_sees_only_own_payables 
+[gw2] [ 49%] PASSED orders/tests/test_sla.py::test_fuel_order_gets_the_fuel_deadline 
+orders/tests/test_sla.py::test_vendor_rule_beats_category_rule 
+[gw3] [ 49%] PASSED reports/tests/test_dashboards.py::test_manager_dashboard_reads_the_refreshed_aggregates 
+reports/tests/test_dashboards.py::test_layout_is_saved_per_user 
+[gw2] [ 49%] PASSED orders/tests/test_sla.py::test_vendor_rule_beats_category_rule 
+orders/tests/test_sla.py::test_vendor_and_category_rule_is_the_most_specific 
+[gw3] [ 49%] PASSED reports/tests/test_dashboards.py::test_layout_is_saved_per_user 
+reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets0] 
+[gw2] [ 50%] PASSED orders/tests/test_sla.py::test_vendor_and_category_rule_is_the_most_specific 
+orders/tests/test_sla.py::test_new_rule_supersedes_and_keeps_history 
+[gw3] [ 50%] PASSED reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets0] 
+reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets1] 
+[gw3] [ 50%] PASSED reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets1] 
+reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets2] 
+[gw3] [ 50%] PASSED reports/tests/test_dashboards.py::test_impossible_layout_is_refused[widgets2] 
+reports/tests/test_export.py::test_csv_opens_in_excel_with_cyrillic 
+[gw0] [ 50%] PASSED orders/tests/test_orders_api.py::test_rejection_without_reason_is_refused 
+reports/tests/test_reports.py::test_finance_can_build_operational_report 
+[gw1] [ 50%] PASSED billing/tests/test_payables.py::test_vendor_sees_only_own_payables 
+billing/tests/test_payables.py::test_client_portal_has_no_payables 
+[gw2] [ 50%] PASSED orders/tests/test_sla.py::test_new_rule_supersedes_and_keeps_history 
+orders/tests/test_sla.py::test_overdue_order_is_marked_once 
+[gw0] [ 50%] PASSED reports/tests/test_reports.py::test_finance_can_build_operational_report 
+reports/tests/test_reports.py::test_portal_roles_have_no_reports[client] 
+[gw0] [ 50%] PASSED reports/tests/test_reports.py::test_portal_roles_have_no_reports[client] 
+reports/tests/test_reports.py::test_portal_roles_have_no_reports[vendor] 
+[gw0] [ 50%] PASSED reports/tests/test_reports.py::test_portal_roles_have_no_reports[vendor] 
+reports/tests/test_reports.py::test_unknown_report_code_is_not_found 
+[gw0] [ 51%] PASSED reports/tests/test_reports.py::test_unknown_report_code_is_not_found 
+reports/tests/test_reports.py::test_report_result_has_no_mode_flag 
+[gw2] [ 51%] PASSED orders/tests/test_sla.py::test_overdue_order_is_marked_once 
+[gw0] [ 51%] PASSED reports/tests/test_reports.py::test_report_result_has_no_mode_flag 
+reports/tests/test_scheduled_reports.py::test_subscription_produces_a_letter_with_the_report_attached 
+orders/tests/test_sla.py::test_order_within_deadline_is_not_marked 
+[gw1] [ 51%] PASSED billing/tests/test_payables.py::test_client_portal_has_no_payables 
+billing/tests/test_payments.py::test_full_payment_makes_the_invoice_paid 
+[gw0] [ 51%] PASSED reports/tests/test_scheduled_reports.py::test_subscription_produces_a_letter_with_the_report_attached 
+reports/tests/test_scheduled_reports.py::test_report_name_and_period_reach_the_letter 
+[gw3] [ 51%] PASSED reports/tests/test_export.py::test_csv_opens_in_excel_with_cyrillic 
+reports/tests/test_export.py::test_csv_carries_the_same_numbers_as_the_report 
+[gw0] [ 51%] PASSED reports/tests/test_scheduled_reports.py::test_report_name_and_period_reach_the_letter 
+reports/tests/test_scheduled_reports.py::test_second_run_in_the_same_period_sends_nothing 
+[gw2] [ 51%] PASSED orders/tests/test_sla.py::test_order_within_deadline_is_not_marked 
+orders/tests/test_sla.py::test_confirmation_after_task_does_not_notify_again 
+[gw0] [ 51%] PASSED reports/tests/test_scheduled_reports.py::test_second_run_in_the_same_period_sends_nothing 
+reports/tests/test_scheduled_reports.py::test_subscription_outside_its_hour_is_skipped 
+[gw0] [ 51%] PASSED reports/tests/test_scheduled_reports.py::test_subscription_outside_its_hour_is_skipped 
+reports/tests/test_scheduled_reports.py::test_deactivated_subscription_is_not_sent 
+[gw0] [ 51%] PASSED reports/tests/test_scheduled_reports.py::test_deactivated_subscription_is_not_sent 
+reports/tests/test_scheduled_reports.py::test_every_recipient_gets_their_own_letter 
+[gw0] [ 52%] PASSED reports/tests/test_scheduled_reports.py::test_every_recipient_gets_their_own_letter 
+reports/tests/test_subscriptions.py::test_subscription_is_created_and_listed 
+[gw0] [ 52%] PASSED reports/tests/test_subscriptions.py::test_subscription_is_created_and_listed 
+reports/tests/test_subscriptions.py::test_creation_is_written_to_the_audit 
+[gw2] [ 52%] PASSED orders/tests/test_sla.py::test_confirmation_after_task_does_not_notify_again 
+orders/tests/test_sla.py::test_draft_ordered_by_transition_gets_deadline 
+[gw0] [ 52%] PASSED reports/tests/test_subscriptions.py::test_creation_is_written_to_the_audit 
+reports/tests/test_subscriptions.py::test_subscription_to_unknown_report_is_refused 
+[gw3] [ 52%] PASSED reports/tests/test_export.py::test_csv_carries_the_same_numbers_as_the_report 
+reports/tests/test_export.py::test_csv_leaves_missing_value_empty_not_zero 
+[gw3] [ 52%] PASSED reports/tests/test_export.py::test_csv_leaves_missing_value_empty_not_zero 
+[gw0] [ 52%] PASSED reports/tests/test_subscriptions.py::test_subscription_to_unknown_report_is_refused 
+reports/tests/test_export.py::test_xlsx_money_cells_are_numbers 
+reports/tests/test_subscriptions.py::test_impossible_time_is_refused[25:00] 
+[gw0] [ 52%] PASSED reports/tests/test_subscriptions.py::test_impossible_time_is_refused[25:00] 
+reports/tests/test_subscriptions.py::test_impossible_time_is_refused[6:30] 
+[gw2] [ 52%] PASSED orders/tests/test_sla.py::test_draft_ordered_by_transition_gets_deadline 
+orders/tests/test_sla.py::test_late_completion_is_a_completion_breach 
+[gw0] [ 52%] PASSED reports/tests/test_subscriptions.py::test_impossible_time_is_refused[6:30] 
+reports/tests/test_subscriptions.py::test_impossible_time_is_refused[06:70] 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_impossible_time_is_refused[06:70] 
+reports/tests/test_subscriptions.py::test_impossible_time_is_refused[\u0443\u0442\u0440\u043e\u043c] 
+[gw1] [ 53%] PASSED billing/tests/test_payments.py::test_full_payment_makes_the_invoice_paid 
+billing/tests/test_payments.py::test_partial_payment_makes_it_partially_paid 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_impossible_time_is_refused[\u0443\u0442\u0440\u043e\u043c] 
+reports/tests/test_subscriptions.py::test_subscription_without_recipients_is_refused 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_subscription_without_recipients_is_refused 
+reports/tests/test_subscriptions.py::test_subscription_can_be_changed 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_subscription_can_be_changed 
+reports/tests/test_subscriptions.py::test_change_is_written_to_the_audit_with_diff 
+[gw2] [ 53%] PASSED orders/tests/test_sla.py::test_late_completion_is_a_completion_breach 
+orders/tests/test_sla.py::test_rules_are_listed 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_change_is_written_to_the_audit_with_diff 
+reports/tests/test_subscriptions.py::test_unsubscribe_deactivates_but_keeps_the_record 
+[gw2] [ 53%] PASSED orders/tests/test_sla.py::test_rules_are_listed 
+orders/tests/test_sla.py::test_admin_adds_a_rule_and_it_supersedes 
+[gw3] [ 53%] PASSED reports/tests/test_export.py::test_xlsx_money_cells_are_numbers 
+reports/tests/test_export.py::test_xlsx_totals_match_the_report 
+[gw0] [ 53%] PASSED reports/tests/test_subscriptions.py::test_unsubscribe_deactivates_but_keeps_the_record 
+reports/tests/test_subscriptions.py::test_deactivated_subscription_cannot_be_changed 
+[gw2] [ 53%] PASSED orders/tests/test_sla.py::test_admin_adds_a_rule_and_it_supersedes 
+orders/tests/test_sla.py::test_penalty_without_size_is_refused 
+[gw2] [ 54%] PASSED orders/tests/test_sla.py::test_penalty_without_size_is_refused 
+[gw0] [ 54%] PASSED reports/tests/test_subscriptions.py::test_deactivated_subscription_cannot_be_changed 
+reports/tests/test_subscriptions.py::test_creation_requires_idempotency_key 
+orders/tests/test_sla.py::test_dispatcher_reads_but_cannot_add 
+[gw0] [ 54%] PASSED reports/tests/test_subscriptions.py::test_creation_requires_idempotency_key 
+reports/tests/test_subscriptions.py::test_portal_role_cannot_subscribe 
+[gw2] [ 54%] PASSED orders/tests/test_sla.py::test_dispatcher_reads_but_cannot_add 
+orders/tests/test_sla.py::test_adding_requires_idempotency_key 
+[gw0] [ 54%] PASSED reports/tests/test_subscriptions.py::test_portal_role_cannot_subscribe 
+[gw2] [ 54%] PASSED orders/tests/test_sla.py::test_adding_requires_idempotency_key 
+sampledata/tests/test_full_set.py::test_full_set 
+orders/tests/test_sla.py::test_portal_roles_have_no_access 
+[gw2] [ 54%] PASSED orders/tests/test_sla.py::test_portal_roles_have_no_access 
+portals/tests/test_portals.py::test_client_sees_only_own_flights 
+[gw2] [ 54%] PASSED portals/tests/test_portals.py::test_client_sees_only_own_flights 
+portals/tests/test_portals.py::test_client_portal_carries_no_purchase_prices_or_vendors 
+[gw1] [ 54%] PASSED billing/tests/test_payments.py::test_partial_payment_makes_it_partially_paid 
+billing/tests/test_payments.py::test_overpayment_of_an_invoice_is_refused 
+[gw3] [ 54%] PASSED reports/tests/test_export.py::test_xlsx_totals_match_the_report 
+reports/tests/test_export.py::test_xml_validates_against_soc_report_xsd 
+[gw2] [ 55%] PASSED portals/tests/test_portals.py::test_client_portal_carries_no_purchase_prices_or_vendors 
+portals/tests/test_portals.py::test_rejected_order_is_not_shown_to_the_client 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_xml_validates_against_soc_report_xsd 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[financial] 
+[gw1] [ 55%] PASSED billing/tests/test_payments.py::test_overpayment_of_an_invoice_is_refused 
+billing/tests/test_payments.py::test_allocation_beyond_the_payment_is_refused 
+[gw2] [ 55%] PASSED portals/tests/test_portals.py::test_rejected_order_is_not_shown_to_the_client 
+portals/tests/test_portals.py::test_documents_show_issued_not_drafts_and_only_own 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[financial] 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[flight_audit] 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[flight_audit] 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[flights_period] 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[flights_period] 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[receivables_payables] 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[receivables_payables] 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[services_rendered] 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[services_rendered] 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[sla_breaches] 
+[gw3] [ 55%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[sla_breaches] 
+[gw2] [ 55%] PASSED portals/tests/test_portals.py::test_documents_show_issued_not_drafts_and_only_own 
+reports/tests/test_export.py::test_every_report_validates_against_the_schema[vendors] 
+portals/tests/test_portals.py::test_staff_without_a_client_has_no_client_portal 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_staff_without_a_client_has_no_client_portal 
+portals/tests/test_portals.py::test_vendor_cannot_open_the_client_portal 
+[gw3] [ 56%] PASSED reports/tests/test_export.py::test_every_report_validates_against_the_schema[vendors] 
+reports/tests/test_export.py::test_xml_money_carries_its_currency 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_vendor_cannot_open_the_client_portal 
+portals/tests/test_portals.py::test_request_becomes_a_flight_only_after_the_dispatcher 
+[gw1] [ 56%] PASSED billing/tests/test_payments.py::test_allocation_beyond_the_payment_is_refused 
+billing/tests/test_payments.py::test_invoice_of_another_client_is_refused 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_request_becomes_a_flight_only_after_the_dispatcher 
+portals/tests/test_portals.py::test_impossible_request_is_refused[same-airport-overrides0] 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_impossible_request_is_refused[same-airport-overrides0] 
+portals/tests/test_portals.py::test_impossible_request_is_refused[in-the-past-overrides1] 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_impossible_request_is_refused[in-the-past-overrides1] 
+portals/tests/test_portals.py::test_impossible_request_is_refused[unknown-airport-overrides2] 
+[gw2] [ 56%] PASSED portals/tests/test_portals.py::test_impossible_request_is_refused[unknown-airport-overrides2] 
+tests/test_permissions.py::TestEndpointPermissions::test_dispatcher_cannot_add_a_service 
+[gw2] [ 56%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_dispatcher_cannot_add_a_service 
+tests/test_permissions.py::TestEndpointPermissions::test_finance_can_add_a_service 
+[gw3] [ 56%] PASSED reports/tests/test_export.py::test_xml_money_carries_its_currency 
+[gw2] [ 57%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_finance_can_add_a_service 
+tests/test_permissions.py::TestEndpointPermissions::test_finance_cannot_manage_users 
+reports/tests/test_export.py::test_xml_records_the_parameters_it_was_built_with 
+[gw2] [ 57%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_finance_cannot_manage_users 
+tests/test_permissions.py::TestEndpointPermissions::test_dispatcher_cannot_read_audit 
+[gw2] [ 57%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_dispatcher_cannot_read_audit 
+tests/test_permissions.py::TestEndpointPermissions::test_manager_reads_audit 
+[gw2] [ 57%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_manager_reads_audit 
+tests/test_permissions.py::TestEndpointPermissions::test_anonymous_is_refused 
+[gw2] [ 57%] PASSED tests/test_permissions.py::TestEndpointPermissions::test_anonymous_is_refused 
+tests/test_tenant_isolation.py::TestClientPortalIsolation::test_list_hides_other_clients_aircraft 
+[gw1] [ 57%] PASSED billing/tests/test_payments.py::test_invoice_of_another_client_is_refused 
+billing/tests/test_payments.py::test_allocation_in_another_currency_is_refused 
+[gw2] [ 57%] PASSED tests/test_tenant_isolation.py::TestClientPortalIsolation::test_list_hides_other_clients_aircraft 
+tests/test_tenant_isolation.py::TestClientPortalIsolation::test_foreign_record_answers_404_not_403 
+[gw2] [ 57%] PASSED tests/test_tenant_isolation.py::TestClientPortalIsolation::test_foreign_record_answers_404_not_403 
+tests/test_tenant_isolation.py::TestClientPortalIsolation::test_own_record_is_available 
+[gw2] [ 57%] PASSED tests/test_tenant_isolation.py::TestClientPortalIsolation::test_own_record_is_available 
+tests/test_tenant_isolation.py::TestClientPortalIsolation::test_total_in_meta_counts_only_own_records 
+[gw2] [ 57%] PASSED tests/test_tenant_isolation.py::TestClientPortalIsolation::test_total_in_meta_counts_only_own_records 
+tests/test_tenant_isolation.py::TestVendorPortalIsolation::test_vendor_has_no_access_to_the_fleet_at_all 
+[gw3] [ 57%] PASSED reports/tests/test_export.py::test_xml_records_the_parameters_it_was_built_with 
+reports/tests/test_export.py::test_pdf_is_produced 
+[gw2] [ 58%] PASSED tests/test_tenant_isolation.py::TestVendorPortalIsolation::test_vendor_has_no_access_to_the_fleet_at_all 
+tests/test_tenant_isolation.py::TestDefaultDenyScope::test_queryset_is_empty_when_the_tenant_field_is_not_declared 
+[gw2] [ 58%] PASSED tests/test_tenant_isolation.py::TestDefaultDenyScope::test_queryset_is_empty_when_the_tenant_field_is_not_declared 
+tests/test_tenant_isolation.py::TestStaffRolesAreNotScoped::test_dispatcher_sees_every_aircraft 
+[gw2] [ 58%] PASSED tests/test_tenant_isolation.py::TestStaffRolesAreNotScoped::test_dispatcher_sees_every_aircraft 
+tests/test_tenant_isolation.py::TestPortalUserIntegrity::test_client_user_without_client_is_rejected_by_the_database 
+[gw2] [ 58%] PASSED tests/test_tenant_isolation.py::TestPortalUserIntegrity::test_client_user_without_client_is_rejected_by_the_database 
+audit/tests/test_audit.py::TestImmutability::test_orm_refuses_to_save_again 
+[gw2] [ 58%] PASSED audit/tests/test_audit.py::TestImmutability::test_orm_refuses_to_save_again 
+[gw1] [ 58%] PASSED billing/tests/test_payments.py::test_allocation_in_another_currency_is_refused 
+billing/tests/test_payments.py::test_same_external_payment_is_not_registered_twice 
+[gw1] [ 58%] PASSED billing/tests/test_payments.py::test_same_external_payment_is_not_registered_twice 
+billing/tests/test_payments.py::test_payment_requires_idempotency_key 
+[gw1] [ 58%] PASSED billing/tests/test_payments.py::test_payment_requires_idempotency_key 
+billing/tests/test_payments.py::test_dispatcher_cannot_register_payments 
+[gw1] [ 58%] PASSED billing/tests/test_payments.py::test_dispatcher_cannot_register_payments 
+billing/tests/test_payments.py::test_client_sees_only_own_payments 
+[gw1] [ 58%] PASSED billing/tests/test_payments.py::test_client_sees_only_own_payments 
+billing/tests/test_payments.py::test_list_is_filtered_by_invoice 
+audit/tests/test_audit.py::TestImmutability::test_orm_refuses_to_delete 
+[gw2] [ 59%] PASSED audit/tests/test_audit.py::TestImmutability::test_orm_refuses_to_delete 
+[gw1] [ 59%] PASSED billing/tests/test_payments.py::test_list_is_filtered_by_invoice 
+billing/tests/test_payments.py::test_overdue_invoice_and_payable_notify_once 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_pdf_is_produced 
+reports/tests/test_export.py::test_exports_carry_no_marking 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_exports_carry_no_marking 
+reports/tests/test_export.py::test_export_endpoint_returns_download_link[csv] 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_export_endpoint_returns_download_link[csv] 
+reports/tests/test_export.py::test_export_endpoint_returns_download_link[xlsx] 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_export_endpoint_returns_download_link[xlsx] 
+reports/tests/test_export.py::test_export_endpoint_returns_download_link[xml] 
+[gw1] [ 59%] PASSED billing/tests/test_payments.py::test_overdue_invoice_and_payable_notify_once 
+billing/tests/test_payments.py::test_payment_after_overdue_settles_the_invoice 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_export_endpoint_returns_download_link[xml] 
+reports/tests/test_export.py::test_export_of_unknown_report_is_not_found 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_export_of_unknown_report_is_not_found 
+reports/tests/test_export.py::test_unsupported_format_is_refused 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_unsupported_format_is_refused 
+reports/tests/test_export.py::test_export_requires_idempotency_key 
+[gw3] [ 59%] PASSED reports/tests/test_export.py::test_export_requires_idempotency_key 
+reports/tests/test_export.py::test_dispatcher_cannot_export_financial_report 
+[gw3] [ 60%] PASSED reports/tests/test_export.py::test_dispatcher_cannot_export_financial_report 
+reports/tests/test_reports.py::test_catalog_lists_every_report_from_the_statement 
+[gw3] [ 60%] PASSED reports/tests/test_reports.py::test_catalog_lists_every_report_from_the_statement 
+reports/tests/test_reports.py::test_catalog_declares_parameters_of_each_report 
+[gw3] [ 60%] PASSED reports/tests/test_reports.py::test_catalog_declares_parameters_of_each_report 
+reports/tests/test_reports.py::test_flights_period_counts_services_of_the_flight 
+[gw1] [ 60%] PASSED billing/tests/test_payments.py::test_payment_after_overdue_settles_the_invoice 
+billing/tests/test_reconciliation.py::test_exact_match_gives_no_discrepancy 
+audit/tests/test_audit.py::TestImmutability::test_raw_update_is_refused_by_the_database 
+[gw3] [ 60%] PASSED reports/tests/test_reports.py::test_flights_period_counts_services_of_the_flight 
+[gw2] [ 60%] PASSED audit/tests/test_audit.py::TestImmutability::test_raw_update_is_refused_by_the_database 
+reports/tests/test_reports.py::test_flight_outside_the_period_is_not_shown 
+[gw3] [ 60%] PASSED reports/tests/test_reports.py::test_flight_outside_the_period_is_not_shown 
+reports/tests/test_reports.py::test_services_rendered_shows_actual_quantity_and_purchase_cost 
+[gw1] [ 60%] PASSED billing/tests/test_reconciliation.py::test_exact_match_gives_no_discrepancy 
+billing/tests/test_reconciliation.py::test_invoice_for_the_actual_quantity_matches 
+[gw3] [ 60%] PASSED reports/tests/test_reports.py::test_services_rendered_shows_actual_quantity_and_purchase_cost 
+reports/tests/test_reports.py::test_only_completed_orders_are_counted_as_rendered 
+[gw1] [ 60%] PASSED billing/tests/test_reconciliation.py::test_invoice_for_the_actual_quantity_matches 
+billing/tests/test_reconciliation.py::test_rounding_difference_is_not_a_discrepancy 
+[gw3] [ 61%] PASSED reports/tests/test_reports.py::test_only_completed_orders_are_counted_as_rendered 
+reports/tests/test_reports.py::test_financial_margin_is_revenue_minus_cost 
+[gw1] [ 61%] PASSED billing/tests/test_reconciliation.py::test_rounding_difference_is_not_a_discrepancy 
+billing/tests/test_reconciliation.py::test_price_difference_is_a_discrepancy 
+[gw3] [ 61%] PASSED reports/tests/test_reports.py::test_financial_margin_is_revenue_minus_cost 
+reports/tests/test_reports.py::test_financial_totals_equal_sum_of_rows 
+[gw1] [ 61%] PASSED billing/tests/test_reconciliation.py::test_price_difference_is_a_discrepancy 
+billing/tests/test_reconciliation.py::test_quantity_difference_is_named_by_quantity 
+[gw1] [ 61%] PASSED billing/tests/test_reconciliation.py::test_quantity_difference_is_named_by_quantity 
+sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/purge] 
+[gw3] [ 61%] PASSED reports/tests/test_reports.py::test_financial_totals_equal_sum_of_rows 
+[gw1] [ 61%] PASSED sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/purge] 
+reports/tests/test_reports.py::test_draft_invoice_is_not_revenue 
+sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/generate] 
+[gw1] [ 61%] PASSED sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/generate] 
+sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/reset] 
+[gw1] [ 61%] PASSED sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/reset] 
+sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/purge] 
+[gw1] [ 61%] PASSED sampledata/tests/test_sample_data_api.py::test_only_administrator_may_manage_the_set[/api/v1/sample-data/purge] 
+sampledata/tests/test_sample_data_api.py::test_idempotency_key_is_required 
+[gw1] [ 61%] PASSED sampledata/tests/test_sample_data_api.py::test_idempotency_key_is_required 
+sampledata/tests/test_sample_data_api.py::test_generation_reports_what_it_created 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_draft_invoice_is_not_revenue 
+reports/tests/test_reports.py::test_financial_report_matches_the_flight_card 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_financial_report_matches_the_flight_card 
+reports/tests/test_reports.py::test_unknown_presentation_currency_is_refused 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_unknown_presentation_currency_is_refused 
+reports/tests/test_reports.py::test_percent_of_nothing_is_not_zero 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_percent_of_nothing_is_not_zero 
+reports/tests/test_reports.py::test_vendors_report_counts_orders_and_sla_breaches 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_vendors_report_counts_orders_and_sla_breaches 
+reports/tests/test_reports.py::test_vendors_report_agrees_with_the_vendor_rating 
+audit/tests/test_audit.py::TestImmutability::test_raw_delete_is_refused_by_the_database 
+[gw2] [ 62%] PASSED audit/tests/test_audit.py::TestImmutability::test_raw_delete_is_refused_by_the_database 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_vendors_report_agrees_with_the_vendor_rating 
+reports/tests/test_reports.py::test_receivables_show_issued_unpaid_invoice_with_bucket 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_receivables_show_issued_unpaid_invoice_with_bucket 
+reports/tests/test_reports.py::test_sla_register_lists_only_breached_orders 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_sla_register_lists_only_breached_orders 
+reports/tests/test_reports.py::test_flight_audit_shows_status_changes 
+[gw3] [ 62%] PASSED reports/tests/test_reports.py::test_flight_audit_shows_status_changes 
+reports/tests/test_reports.py::test_dispatcher_cannot_build_financial_report 
+[gw3] [ 63%] PASSED reports/tests/test_reports.py::test_dispatcher_cannot_build_financial_report 
+reports/tests/test_reports.py::test_dispatcher_cannot_build_vendor_volume_report 
+[gw3] [ 63%] PASSED reports/tests/test_reports.py::test_dispatcher_cannot_build_vendor_volume_report 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py3] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py2] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py2] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py4] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py3] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py1] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py5] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py4] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py2] 
+[gw3] [ 63%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py0] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py6] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py3] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[channels.py] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[channels.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py5] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py3] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[factories.py] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[factories.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_permission_map.py] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_permission_map.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py7] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py7] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_permissions.py] 
+[gw3] [ 64%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_permissions.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_tenant_isolation.py] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_tenant_isolation.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py8] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py8] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[machine.py] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[machine.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py6] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py4] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py9] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py9] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[definitions.py] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[definitions.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py7] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py7] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py5] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py10] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py10] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py8] 
+[gw3] [ 65%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py8] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py6] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[registration.py] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[registration.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[password_policy.py] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[password_policy.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py11] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py11] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py4] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[permissions.py0] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[permissions.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py9] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py9] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py12] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py12] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py5] 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py10] 
+audit/tests/test_audit.py::TestImmutability::test_queryset_update_is_refused_by_the_database 
+[gw3] [ 66%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py10] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py13] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py13] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[apps.py0] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[apps.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[reference.py] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[reference.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[geo.py] 
+[gw2] [ 67%] PASSED audit/tests/test_audit.py::TestImmutability::test_queryset_update_is_refused_by_the_database 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[geo.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py14] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py14] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[middleware.py] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[middleware.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[money.py] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[money.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[exceptions.py0] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[exceptions.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sample_data.py] 
+[gw3] [ 67%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sample_data.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py11] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py11] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[apps.py1] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[apps.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py15] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py15] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py0] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py16] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py16] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py0] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_prices_api.py] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_prices_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py17] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py17] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reference.py] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reference.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py18] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py18] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[seed_reference.py] 
+[gw3] [ 68%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[seed_reference.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py19] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py19] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py20] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py20] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py1] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_seed_sample.py] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_seed_sample.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py21] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py21] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_sample_data_api.py] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_sample_data_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_full_set.py] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_full_set.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py22] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py22] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[seed_sample.py] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[seed_sample.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[costs.py] 
+[gw3] [ 69%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[costs.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py23] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py23] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[transitions.py0] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[transitions.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[orders.py] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[orders.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sla.py0] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sla.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[checks.py] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[checks.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py1] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py24] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py24] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py2] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sla.py1] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sla.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py25] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py25] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_sla.py] 
+[gw3] [ 70%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_sla.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py1] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_orders_api.py] 
+[gw1] [ 71%] PASSED sampledata/tests/test_sample_data_api.py::test_generation_reports_what_it_created 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_orders_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py26] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py26] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py3] 
+sampledata/tests/test_sample_data_api.py::test_generated_records_are_marked 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_audit.py] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_audit.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py27] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py27] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_entity_types_contract.py] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_entity_types_contract.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[rating.py] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[rating.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py28] 
+[gw3] [ 71%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py28] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[expiry.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[expiry.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[suggest.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[suggest.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py2] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py29] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py29] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py4] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_suggest.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_suggest.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_expiry.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_expiry.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py30] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py30] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_counterparties_api.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_counterparties_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_rating.py] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_rating.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py2] 
+[gw3] [ 72%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[documents.py0] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[documents.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py31] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py31] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py0] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[fx.py] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[fx.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payments.py0] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payments.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[invoice_file.py] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[invoice_file.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payables.py0] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payables.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[reconciliation.py] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[reconciliation.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tariffs.py] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tariffs.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[numbering.py] 
+[gw3] [ 73%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[numbering.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[margin.py] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[margin.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py32] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py32] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py3] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[documents.py1] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[documents.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py33] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py33] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payments.py1] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payments.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payables.py1] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[payables.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py5] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reconciliation.py] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reconciliation.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_margin.py] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_margin.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py34] 
+[gw3] [ 74%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py34] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_tariffs.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_tariffs.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_payables.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_payables.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_invoice_file.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_invoice_file.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_payments.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_payments.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py3] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py3] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_export.py0] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_export.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_documents.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_documents.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py35] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py35] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sync_fx.py] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[sync_fx.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py36] 
+[gw3] [ 75%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py36] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[live.py0] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[live.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py1] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py37] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py37] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py38] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py38] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py6] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py2] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[base.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py39] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py39] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[live.py1] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[live.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py40] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py40] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_integrations_api.py] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_integrations_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_fx.py] 
+[gw3] [ 76%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_fx.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[slots.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[slots.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[generation.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[generation.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py41] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py41] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[guards.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[guards.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py1] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conflicts.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conflicts.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[selection.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[selection.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[transitions.py1] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[transitions.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[planning.py] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[planning.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py4] 
+[gw3] [ 77%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py42] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py42] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py7] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py7] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_slots.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_slots.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py43] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py43] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_schedule_export.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_schedule_export.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_conflicts.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_conflicts.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_api.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_api.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_templates.py0] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_templates.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_selection.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_selection.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_transitions.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_transitions.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reschedule.py] 
+[gw3] [ 78%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reschedule.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py4] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py4] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_generation.py] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_generation.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py44] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py44] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[report_extras.py] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[report_extras.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py45] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py45] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[dashboards.py0] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[dashboards.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py2] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[export.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[builders.py] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[builders.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py46] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py46] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[dashboards.py1] 
+[gw3] [ 79%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[dashboards.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py8] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py8] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_dashboards.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_dashboards.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py47] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py47] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reports.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_reports.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_subscriptions.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_subscriptions.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py5] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_scheduled_reports.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_scheduled_reports.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_export.py1] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_export.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py48] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py48] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[inbox.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[inbox.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[eml.py] 
+[gw3] [ 80%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[eml.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[context.py] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[context.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[events.py] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[events.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[templates.py] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[templates.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[outbox.py] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[outbox.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[notifications.py] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[notifications.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py5] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py5] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py49] 
+accounts/tests/test_password_policy.py::test_a_good_password_passes 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py49] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py9] 
+[gw2] [ 81%] PASSED accounts/tests/test_password_policy.py::test_a_good_password_passes 
+accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[1234567890-12-\u0431\u0443\u043a\u0432\u044b] 
+[gw3] [ 81%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py9] 
+[gw2] [ 81%] PASSED accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[1234567890-12-\u0431\u0443\u043a\u0432\u044b] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_outbox.py] 
+accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[ParolBezTsifr--\u0446\u0438\u0444\u0440\u044b] 
+[gw2] [ 82%] PASSED accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[ParolBezTsifr--\u0446\u0438\u0444\u0440\u044b] 
+accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[ParolBezZnaka2026-\u0437\u043d\u0430\u043a \u043f\u0440\u0435\u043f\u0438\u043d\u0430\u043d\u0438\u044f] 
+[gw2] [ 82%] PASSED accounts/tests/test_password_policy.py::test_incomplete_password_is_refused[ParolBezZnaka2026-\u0437\u043d\u0430\u043a \u043f\u0440\u0435\u043f\u0438\u043d\u0430\u043d\u0438\u044f] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused["] 
+[gw2] [ 82%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused["] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused['] 
+[gw2] [ 82%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused['] 
+[gw3] [ 82%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_outbox.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py50] 
+[gw3] [ 82%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py50] 
+billing/tests/test_invoice_file.py::test_broken_xlsx_is_refused_with_a_message 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_inbox.py] 
+[gw2] [ 82%] PASSED billing/tests/test_invoice_file.py::test_broken_xlsx_is_refused_with_a_message 
+catalog/tests/test_reference.py::TestAirportsFile::test_file_is_not_empty 
+[gw3] [ 82%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_inbox.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_templates.py1] 
+[gw2] [ 82%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_file_is_not_empty 
+catalog/tests/test_reference.py::TestAirportsFile::test_icao_codes_are_unique_and_well_formed 
+[gw3] [ 82%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_templates.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_notifications.py] 
+[gw2] [ 82%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_icao_codes_are_unique_and_well_formed 
+catalog/tests/test_reference.py::TestAirportsFile::test_every_timezone_exists_in_tzdb 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_notifications.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py6] 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_events.py] 
+[gw2] [ 83%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_every_timezone_exists_in_tzdb 
+catalog/tests/test_reference.py::TestAirportsFile::test_timezone_offset_agrees_with_longitude 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_events.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py6] 
+[gw2] [ 83%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_timezone_offset_agrees_with_longitude 
+catalog/tests/test_reference.py::TestAirportsFile::test_verified_airports_keep_their_timezone 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py6] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py51] 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py51] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py10] 
+[gw2] [ 83%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_verified_airports_keep_their_timezone 
+catalog/tests/test_reference.py::TestAirportsFile::test_verified_airports_have_russian_names 
+[gw3] [ 83%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py10] 
+[gw2] [ 83%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_verified_airports_have_russian_names 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_auth.py] 
+catalog/tests/test_reference.py::TestAirportsFile::test_moscow_airports_are_coordinated 
+[gw3] [ 84%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_auth.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py52] 
+[gw3] [ 84%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py52] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_password_policy.py] 
+[gw3] [ 84%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_password_policy.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_accounts_list.py] 
+[gw3] [ 84%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_accounts_list.py] 
+[gw2] [ 84%] PASSED catalog/tests/test_reference.py::TestAirportsFile::test_moscow_airports_are_coordinated 
+core/tests/test_clock.py::test_now_is_timezone_aware_and_utc 
+[gw2] [ 84%] PASSED core/tests/test_clock.py::test_now_is_timezone_aware_and_utc 
+core/tests/test_clock.py::test_real_now_is_utc 
+[gw2] [ 84%] PASSED core/tests/test_clock.py::test_real_now_is_utc 
+core/tests/test_clock.py::test_no_shift_without_sample_data_mode 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_registration.py] 
+[gw2] [ 84%] PASSED core/tests/test_clock.py::test_no_shift_without_sample_data_mode 
+core/tests/test_clock.py::test_today_is_midnight_utc 
+[gw3] [ 84%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_registration.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py7] 
+[gw2] [ 84%] PASSED core/tests/test_clock.py::test_today_is_midnight_utc 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[manage.py] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py7] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py53] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py53] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py11] 
+[gw2] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[manage.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py0] 
+[gw2] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py0] 
+[gw2] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py0] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py11] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_fleet_create.py] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_fleet_create.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py54] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py54] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py55] 
+[gw2] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py0] 
+[gw2] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py1] 
+[gw3] [ 85%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py55] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py12] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py12] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py56] 
+[gw2] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py1] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py56] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_portals.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py1] 
+[gw2] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[services.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py2] 
+[gw2] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py2] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py1] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_portals.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py7] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[conftest.py7] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[storage.py] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[storage.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py57] 
+[gw3] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py57] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[settings.py0] 
+[gw2] [ 86%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[models.py1] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[settings.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[attachments.py0] 
+[gw2] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[tasks.py0] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[attachments.py0] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py58] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py58] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py8] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[pagination.py] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[serializers.py8] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[exceptions.py1] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[exceptions.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[fields.py] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[fields.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[permissions.py1] 
+[gw2] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[pagination.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py59] 
+[gw2] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py59] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[idempotency.py] 
+[gw3] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[permissions.py1] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py13] 
+[gw2] [ 87%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[idempotency.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[settings.py1] 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[views.py13] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[performance.py] 
+[gw2] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[settings.py1] 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[performance.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_attachments.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[attachments.py1] 
+[gw2] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[attachments.py1] 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_attachments.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py60] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[viewsets.py] 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py60] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_money.py] 
+[gw2] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[viewsets.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[setup_periodic_tasks.py] 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_money.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_contract_consistency.py] 
+[gw2] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[setup_periodic_tasks.py] 
+core/tests/test_contract_consistency.py::test_flight_status_enum_matches_state_machine 
+[gw3] [ 88%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_contract_consistency.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_performance.py] 
+[gw3] [ 89%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_performance.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_settings.py] 
+[gw3] [ 89%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[test_settings.py] 
+core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py61] 
+[gw3] [ 89%] PASSED core/tests/test_clock.py::test_domain_code_does_not_call_system_clock[__init__.py61] 
+core/tests/test_contract_consistency.py::test_transitions_reference_existing_states[flight.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_transitions_reference_existing_states[flight.json] 
+core/tests/test_contract_consistency.py::test_transitions_reference_existing_states[service-order.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_transitions_reference_existing_states[service-order.json] 
+core/tests/test_contract_consistency.py::test_initial_state_exists[flight.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_initial_state_exists[flight.json] 
+core/tests/test_contract_consistency.py::test_initial_state_exists[service-order.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_initial_state_exists[service-order.json] 
+core/tests/test_contract_consistency.py::test_every_guard_is_documented[flight.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_every_guard_is_documented[flight.json] 
+core/tests/test_contract_consistency.py::test_every_guard_is_documented[service-order.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_every_guard_is_documented[service-order.json] 
+core/tests/test_contract_consistency.py::test_every_state_is_reachable[flight.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_every_state_is_reachable[flight.json] 
+core/tests/test_contract_consistency.py::test_every_state_is_reachable[service-order.json] 
+[gw3] [ 89%] PASSED core/tests/test_contract_consistency.py::test_every_state_is_reachable[service-order.json] 
+core/tests/test_contract_consistency.py::test_every_state_has_bilingual_name[flight.json] 
+[gw3] [ 90%] PASSED core/tests/test_contract_consistency.py::test_every_state_has_bilingual_name[flight.json] 
+core/tests/test_contract_consistency.py::test_every_state_has_bilingual_name[service-order.json] 
+[gw3] [ 90%] PASSED core/tests/test_contract_consistency.py::test_every_state_has_bilingual_name[service-order.json] 
+core/tests/test_contract_consistency.py::test_reason_requiring_transitions_declare_guard[flight.json] 
+[gw3] [ 90%] PASSED core/tests/test_contract_consistency.py::test_reason_requiring_transitions_declare_guard[flight.json] 
+core/tests/test_contract_consistency.py::test_reason_requiring_transitions_declare_guard[service-order.json] 
+[gw3] [ 90%] PASSED core/tests/test_contract_consistency.py::test_reason_requiring_transitions_declare_guard[service-order.json] 
+core/tests/test_contract_consistency.py::test_contract_is_openapi_31 
+[gw1] [ 90%] PASSED sampledata/tests/test_sample_data_api.py::test_generated_records_are_marked 
+sampledata/tests/test_sample_data_api.py::test_generation_without_reference_data_explains_itself 
+[gw1] [ 90%] PASSED sampledata/tests/test_sample_data_api.py::test_generation_without_reference_data_explains_itself 
+sampledata/tests/test_sample_data_api.py::test_same_seed_gives_the_same_set 
+[gw2] [ 90%] PASSED core/tests/test_contract_consistency.py::test_flight_status_enum_matches_state_machine 
+core/tests/test_contract_consistency.py::test_flight_transitions_match_state_machine 
+[gw2] [ 90%] PASSED core/tests/test_contract_consistency.py::test_flight_transitions_match_state_machine 
+core/tests/test_contract_consistency.py::test_service_order_status_enum_matches_state_machine 
+[gw2] [ 90%] PASSED core/tests/test_contract_consistency.py::test_service_order_status_enum_matches_state_machine 
+core/tests/test_contract_consistency.py::test_service_order_transitions_match_state_machine 
+[gw2] [ 90%] PASSED core/tests/test_contract_consistency.py::test_service_order_transitions_match_state_machine 
+core/tests/test_money.py::test_unsupported_currency_rejected 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_unsupported_currency_rejected 
+core/tests/test_money.py::test_addition_of_different_currencies_raises 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_addition_of_different_currencies_raises 
+core/tests/test_money.py::test_subtraction_of_different_currencies_raises 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_subtraction_of_different_currencies_raises 
+core/tests/test_money.py::test_comparison_of_different_currencies_raises 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_comparison_of_different_currencies_raises 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.005-0.01] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.005-0.01] 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.015-0.02] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.015-0.02] 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[2.675-2.68] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[2.675-2.68] 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.004-0.00] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[0.004-0.00] 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[-0.005--0.01] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[-0.005--0.01] 
+core/tests/test_money.py::test_half_up_rounding_on_boundaries[1.0050-1.01] 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_half_up_rounding_on_boundaries[1.0050-1.01] 
+core/tests/test_money.py::test_float_would_have_been_wrong_for_2_675 
+[gw2] [ 91%] PASSED core/tests/test_money.py::test_float_would_have_been_wrong_for_2_675 
+core/tests/test_money.py::test_sum_of_1000_items_does_not_drift 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_sum_of_1000_items_does_not_drift 
+core/tests/test_money.py::test_sum_of_empty_list_is_zero_not_error 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_sum_of_empty_list_is_zero_not_error 
+core/tests/test_money.py::test_intermediate_values_keep_four_places 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_intermediate_values_keep_four_places 
+core/tests/test_money.py::test_convert_to_same_currency_is_identity 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_to_same_currency_is_identity 
+core/tests/test_money.py::test_convert_usd_to_rub_uses_base_rate 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_usd_to_rub_uses_base_rate 
+core/tests/test_money.py::test_convert_cross_currency_goes_through_base 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_cross_currency_goes_through_base 
+core/tests/test_money.py::test_convert_round_trip_loses_no_more_than_tolerance 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_round_trip_loses_no_more_than_tolerance 
+core/tests/test_money.py::test_convert_with_missing_rate_reports_which_currency 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_with_missing_rate_reports_which_currency 
+core/tests/test_money.py::test_convert_with_zero_rate_does_not_divide_by_zero 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_convert_with_zero_rate_does_not_divide_by_zero 
+core/tests/test_money.py::test_negative_margin_is_not_zeroed 
+[gw2] [ 92%] PASSED core/tests/test_money.py::test_negative_margin_is_not_zeroed 
+core/tests/test_money.py::test_money_is_immutable 
+[gw2] [ 93%] PASSED core/tests/test_money.py::test_money_is_immutable 
+core/tests/test_money.py::test_arithmetic_returns_new_object 
+[gw2] [ 93%] PASSED core/tests/test_money.py::test_arithmetic_returns_new_object 
+core/tests/test_money.py::test_json_representation_is_string_not_number 
+[gw2] [ 93%] PASSED core/tests/test_money.py::test_json_representation_is_string_not_number 
+counterparties/tests/test_rating.py::test_fewer_than_five_orders_gives_no_rating 
+[gw2] [ 93%] PASSED counterparties/tests/test_rating.py::test_fewer_than_five_orders_gives_no_rating 
+counterparties/tests/test_rating.py::test_rating_follows_the_formula 
+[gw2] [ 93%] PASSED counterparties/tests/test_rating.py::test_rating_follows_the_formula 
+counterparties/tests/test_rating.py::test_component_without_data_shares_its_weight 
+[gw2] [ 93%] PASSED counterparties/tests/test_rating.py::test_component_without_data_shares_its_weight 
+counterparties/tests/test_rating.py::test_perfect_vendor_gets_five 
+[gw2] [ 93%] PASSED counterparties/tests/test_rating.py::test_perfect_vendor_gets_five 
+flights/tests/test_transitions.py::TestMachineDefinition::test_every_guard_is_implemented_on_the_server 
+[gw2] [ 93%] PASSED flights/tests/test_transitions.py::TestMachineDefinition::test_every_guard_is_implemented_on_the_server 
+flights/tests/test_transitions.py::TestMachineDefinition::test_no_unused_guards 
+[gw2] [ 93%] PASSED flights/tests/test_transitions.py::TestMachineDefinition::test_no_unused_guards 
+flights/tests/test_transitions.py::TestMachineDefinition::test_states_match_the_model 
+[gw2] [ 93%] PASSED flights/tests/test_transitions.py::TestMachineDefinition::test_states_match_the_model 
+[gw3] [ 93%] PASSED core/tests/test_contract_consistency.py::test_contract_is_openapi_31 
+integrations/tests/test_fx.py::TestLiveParser::test_comma_is_a_decimal_separator 
+core/tests/test_contract_consistency.py::test_money_amount_is_string_not_number 
+[gw3] [ 94%] PASSED core/tests/test_contract_consistency.py::test_money_amount_is_string_not_number 
+core/tests/test_contract_consistency.py::test_mutating_endpoints_declare_idempotency 
+[gw3] [ 94%] PASSED core/tests/test_contract_consistency.py::test_mutating_endpoints_declare_idempotency 
+core/tests/test_contract_consistency.py::test_required_idempotency_endpoints_declare_header 
+[gw2] [ 94%] PASSED integrations/tests/test_fx.py::TestLiveParser::test_comma_is_a_decimal_separator 
+[gw3] [ 94%] PASSED core/tests/test_contract_consistency.py::test_required_idempotency_endpoints_declare_header 
+integrations/tests/test_fx.py::TestLiveParser::test_nominal_is_normalised_to_one_unit 
+[gw2] [ 94%] PASSED integrations/tests/test_fx.py::TestLiveParser::test_nominal_is_normalised_to_one_unit 
+core/tests/test_money.py::test_float_rejected_on_construction 
+integrations/tests/test_fx.py::TestLiveParser::test_base_currency_is_one 
+[gw3] [ 94%] PASSED core/tests/test_money.py::test_float_rejected_on_construction 
+[gw2] [ 94%] PASSED integrations/tests/test_fx.py::TestLiveParser::test_base_currency_is_one 
+integrations/tests/test_fx.py::TestLiveParser::test_published_date_is_taken_from_the_answer 
+core/tests/test_money.py::test_float_rejected_in_multiply 
+[gw3] [ 94%] PASSED core/tests/test_money.py::test_float_rejected_in_multiply 
+[gw2] [ 94%] PASSED integrations/tests/test_fx.py::TestLiveParser::test_published_date_is_taken_from_the_answer 
+integrations/tests/test_fx.py::TestLiveParser::test_unparsable_answer_yields_nothing 
+tests/test_permission_map.py::TestPermissionNamesMatch::test_no_permission_exists_only_on_the_server 
+[gw2] [ 94%] PASSED integrations/tests/test_fx.py::TestLiveParser::test_unparsable_answer_yields_nothing 
+[gw3] [ 95%] PASSED tests/test_permission_map.py::TestPermissionNamesMatch::test_no_permission_exists_only_on_the_server 
+tests/test_permission_map.py::TestPermissionNamesMatch::test_client_list_has_no_duplicates 
+tests/test_permission_map.py::TestPermissionNamesMatch::test_no_permission_exists_only_in_the_client 
+[gw3] [ 95%] PASSED tests/test_permission_map.py::TestPermissionNamesMatch::test_client_list_has_no_duplicates 
+tests/test_permissions.py::TestPermissionMap::test_dispatcher_cannot_change_prices 
+[gw2] [ 95%] PASSED tests/test_permission_map.py::TestPermissionNamesMatch::test_no_permission_exists_only_in_the_client 
+[gw3] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_dispatcher_cannot_change_prices 
+tests/test_permissions.py::TestPermissionMap::test_only_admin_and_manager_read_audit 
+[gw3] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_only_admin_and_manager_read_audit 
+tests/test_permissions.py::TestPermissionMap::test_finance_cannot_create_flights 
+[gw2] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_finance_cannot_create_flights 
+tests/test_permissions.py::TestPermissionMap::test_map_lists_every_permission 
+[gw3] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_map_lists_every_permission 
+tests/test_permissions.py::TestPermissionMap::test_client_does_not_create_flights_directly 
+[gw2] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_client_does_not_create_flights_directly 
+tests/test_permissions.py::TestPermissionMap::test_administrator_has_everything 
+[gw3] [ 95%] PASSED tests/test_permissions.py::TestPermissionMap::test_administrator_has_everything 
+[gw1] [ 95%] PASSED sampledata/tests/test_sample_data_api.py::test_same_seed_gives_the_same_set 
+sampledata/tests/test_sample_data_api.py::test_purge_removes_only_generated_records 
+[gw1] [ 95%] PASSED sampledata/tests/test_sample_data_api.py::test_purge_removes_only_generated_records 
+sampledata/tests/test_sample_data_api.py::test_purge_says_the_audit_stays 
+[gw1] [ 96%] PASSED sampledata/tests/test_sample_data_api.py::test_purge_says_the_audit_stays 
+sampledata/tests/test_sample_data_api.py::test_audit_entries_survive_the_purge 
+[gw1] [ 96%] PASSED sampledata/tests/test_sample_data_api.py::test_audit_entries_survive_the_purge 
+sampledata/tests/test_sample_data_api.py::test_reset_replaces_the_set 
+[gw1] [ 96%] PASSED sampledata/tests/test_sample_data_api.py::test_reset_replaces_the_set 
+sampledata/tests/test_sample_data_api.py::test_repeating_the_same_key_does_not_generate_twice 
+[gw1] [ 96%] PASSED sampledata/tests/test_sample_data_api.py::test_repeating_the_same_key_does_not_generate_twice 
+sampledata/tests/test_seed_sample.py::test_command_refuses_when_generator_is_off 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::test_command_refuses_when_generator_is_off 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_every_record_is_marked_as_generated 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_every_record_is_marked_as_generated 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_origin_is_synthetic_not_live 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_origin_is_synthetic_not_live 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_generator_actions_are_not_passed_off_as_human 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_generator_actions_are_not_passed_off_as_human 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_users_live_in_the_generator_domain 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_users_live_in_the_generator_domain 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_reference_data_is_not_invented 
+[gw1] [ 96%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_reference_data_is_not_invented 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_set_contains_an_unserviceable_aircraft 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_set_contains_an_unserviceable_aircraft 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_repeated_run_does_not_duplicate 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_repeated_run_does_not_duplicate 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_removes_generated_records 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_removes_generated_records 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_keeps_people 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_keeps_people 
+sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_keeps_the_audit_trail 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::TestGeneratedSet::test_purge_keeps_the_audit_trail 
+sampledata/tests/test_seed_sample.py::test_generator_is_deterministic 
+[gw1] [ 97%] PASSED sampledata/tests/test_seed_sample.py::test_generator_is_deterministic 
+[gw0] [ 97%] PASSED sampledata/tests/test_full_set.py::test_full_set 
+sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/generate] 
+[gw0] [ 97%] PASSED sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/generate] 
+sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/reset] 
+[gw0] [ 97%] PASSED sampledata/tests/test_sample_data_api.py::test_refused_when_generator_is_off[/api/v1/sample-data/reset] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[\\] 
+[gw0] [ 97%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[\\] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[/] 
+[gw0] [ 97%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[/] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[<] 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[<] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[>] 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[>] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[|] 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[|] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[`] 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[`] 
+accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[ ] 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_characters_that_get_lost_in_transit_are_refused[ ] 
+accounts/tests/test_password_policy.py::test_cyrillic_is_refused 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_cyrillic_is_refused 
+accounts/tests/test_password_policy.py::test_every_allowed_special_is_accepted 
+[gw0] [ 98%] PASSED accounts/tests/test_password_policy.py::test_every_allowed_special_is_accepted 
+audit/tests/test_entity_types_contract.py::test_contract_lists_every_entity_type_the_server_writes 
+[gw0] [ 98%] PASSED audit/tests/test_entity_types_contract.py::test_contract_lists_every_entity_type_the_server_writes 
+billing/tests/test_invoice_file.py::test_xlsx_template_reads_back_as_its_own_columns 
+[gw0] [ 98%] PASSED billing/tests/test_invoice_file.py::test_xlsx_template_reads_back_as_its_own_columns 
+billing/tests/test_invoice_file.py::test_xlsx_template_carries_an_instruction_sheet 
+[gw0] [ 98%] PASSED billing/tests/test_invoice_file.py::test_xlsx_template_carries_an_instruction_sheet 
+billing/tests/test_invoice_file.py::test_csv_template_opens_in_excel_by_columns 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_csv_template_opens_in_excel_by_columns 
+billing/tests/test_invoice_file.py::test_filled_xlsx_becomes_an_import_payload 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_filled_xlsx_becomes_an_import_payload 
+billing/tests/test_invoice_file.py::test_csv_from_russian_excel_is_read 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_csv_from_russian_excel_is_read 
+billing/tests/test_invoice_file.py::test_csv_with_api_field_names_is_read 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_csv_with_api_field_names_is_read 
+billing/tests/test_invoice_file.py::test_missing_columns_are_named 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_missing_columns_are_named 
+billing/tests/test_invoice_file.py::test_errors_are_collected_with_row_numbers 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_errors_are_collected_with_row_numbers 
+billing/tests/test_invoice_file.py::test_header_is_required_in_the_first_row_only 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_header_is_required_in_the_first_row_only 
+billing/tests/test_invoice_file.py::test_two_invoices_in_one_file_are_refused 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_two_invoices_in_one_file_are_refused 
+billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice.pdf] 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice.pdf] 
+billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice.xls] 
+[gw0] [ 99%] PASSED billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice.xls] 
+billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice] 
+[gw0] [100%] PASSED billing/tests/test_invoice_file.py::test_other_formats_are_refused[invoice] 
+
+================ 1047 passed, 4 warnings in 1063.94s (0:17:43) =================
+# код выхода: 0
