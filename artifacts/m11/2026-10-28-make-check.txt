@@ -1,0 +1,62 @@
+# make check — рабочее дерево поверх 3eb984c: очистка набора (ADR-041), НДС 22 % (ADR-042)
+# дата: 2026-10-28; PYTEST_ADDOPTS='-n 3', PostgreSQL 16 и Redis 7 локально, без Docker
+
+cd backend && ../backend/.venv/bin/python -m ruff check .
+All checks passed!
+cd web && npm run lint
+
+> soc-web@1.0.0 lint
+> node --max-old-space-size=6144 ./node_modules/eslint/bin/eslint.js . --max-warnings 0
+
+cd backend && ../backend/.venv/bin/python -m mypy .
+Success: no issues found in 267 source files
+cd web && npm run typecheck
+
+> soc-web@1.0.0 typecheck
+> tsc --noEmit
+
+cd backend && ../backend/.venv/bin/python -m pytest -q
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 20%]
+........................................................................ [ 27%]
+........................................................................ [ 33%]
+........................................................................ [ 40%]
+........................................................................ [ 47%]
+........................................................................ [ 54%]
+........................................................................ [ 61%]
+........................................................................ [ 67%]
+........................................................................ [ 74%]
+........................................................................ [ 81%]
+........................................................................ [ 88%]
+........................................................................ [ 95%]
+...................................................                      [100%]
+1059 passed, 3 warnings in 1231.33s (0:20:31)
+cd web && npm run test -- --run
+
+> soc-web@1.0.0 test
+> vitest --run
+
+
+ RUN  v2.1.9 /home/user/streamline-operations-control-/web
+
+ ✓ src/shared/i18n/i18n.test.ts (4 tests) 17ms
+ ✓ src/domain/fx.test.ts (7 tests) 7ms
+ ✓ src/shared/i18n/no-hardcoded-text.test.ts (3 tests) 38ms
+ ✓ src/app/layout/navigation.test.ts (6 tests) 11ms
+ ✓ src/domain/machines.test.ts (5 tests) 12ms
+ ✓ src/domain/money.test.ts (5 tests) 8ms
+ ✓ src/domain/route.test.ts (3 tests) 3ms
+ ✓ src/shared/format/timezone.test.ts (3 tests) 35ms
+ ✓ src/shared/ui/status-tokens.test.ts (8 tests) 6ms
+
+ Test Files  9 passed (9)
+      Tests  44 passed (44)
+   Start at  12:23:08
+   Duration  5.33s (transform 1.41s, setup 843ms, collect 6.18s, tests 138ms, environment 4.47s, prepare 746ms)
+
+Проверки пройдены.
+MAKE_CHECK_EXIT=0
