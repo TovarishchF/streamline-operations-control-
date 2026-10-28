@@ -44,6 +44,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.db import transaction
+from django.db.models import Model, Q, QuerySet
 
 from accounts import services as accounts
 from accounts.models import Organization, Role, TimezoneMode, User
@@ -91,6 +92,7 @@ from orders.services import orders as order_services
 from orders.services import sla as sla_services
 from orders.services import transitions as order_transitions
 from reports.services import dashboards
+from sampledata.purge import GENERATED_EMAIL_DOMAIN, Outcome, describe_kept, find_kept
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -173,9 +175,8 @@ FOREIGN_VENDORS = (
 FOREIGN_SPECIALIZATIONS = ("fuel", "handling", "catering", "transport")
 
 # Пользователи генератора: логин — фамилия латиницей, адрес — в зоне
-# `soc.local`. По зоне их находит очистка: у пользователя нет признака
-# `is_generated`, а логин без суффикса ничем не отличается от настоящего.
-GENERATED_EMAIL_DOMAIN = "soc.local"
+# `soc.local` (`GENERATED_EMAIL_DOMAIN`). По зоне их находит очистка: у пользователя
+# нет признака `is_generated`, а логин без суффикса ничем не отличается от настоящего.
 
 # Общий пароль пользователей генератора. Заведомо известен: набор нужен,
 # чтобы систему смотрели и пробовали, а не чтобы его охраняли.
@@ -407,6 +408,44 @@ class Crew:
     finance: User
 
 
+# Порядок очистки. Пользователи генератора уходят до всего остального.
+PURGE_ORDER: tuple[tuple[str, type[Model]], ...] = (
+    # Коммуникации уходят первыми: входящее ссылается на заявку,
+    # уведомление — на пользователя.
+    ("уведомления", Notification),
+    ("входящие", InboxMessage),
+    ("исходящие", OutboxMessage),
+    ("вложения", Attachment),
+    ("контакты", Contact),
+    ("заявки клиентов", FlightRequest),
+    # Шаблон держит клиента и тип ВС связями PROTECT, поэтому
+    # уходит раньше них.
+    ("шаблоны рейсов", FlightTemplate),
+    # Документы по рейсам генератора — тоже записи генератора
+    # (признак наследуется от рейса). Строка держит заявку на услугу
+    # связью PROTECT, поэтому документы уходят раньше заявок.
+    # Платёж держит счёт связью PROTECT через распределение.
+    ("платежи", Payment),
+    ("строки документов", DocumentLine),
+    ("счета клиентам", Invoice),
+    ("котировки", Quote),
+    ("заявки на оплату", Payable),
+    ("счета поставщиков", VendorInvoice),
+    ("заявки на услуги", ServiceOrder),
+    ("слоты", Slot),
+    ("рейсы", Flight),
+    ("борта", Aircraft),
+    # Договор держат заявки, поставщика — договор и цена: порядок
+    # «заявки → договоры и цены → поставщики» обязателен.
+    ("договоры", VendorContract),
+    ("цены поставщиков", VendorPrice),
+    ("тарифы клиентов", TariffRule),
+    ("правила SLA", SlaRule),
+    ("клиенты", Client),
+    ("поставщики", Vendor),
+)
+
+
 class Command(BaseCommand):
     help = "Набор данных генератора (только при SAMPLE_DATA=true)"
 
@@ -421,9 +460,8 @@ class Command(BaseCommand):
                 "придуманные контрагенты недопустимы (ADR-008)"
             )
 
-        counts = (
-            self.purge() if options["purge"] else self.generate(int(options["seed"]))
-        )
+        result = self.purge() if options["purge"] else None
+        counts = result.counts if result else self.generate(int(options["seed"]))
         # Дашборд руководителя читает агрегаты маржи, которые фоновая задача
         # обновляет раз в пять минут. Без обновления здесь сразу после
         # генерации там были бы нули. Вне транзакции генерации: обновление
@@ -431,70 +469,61 @@ class Command(BaseCommand):
         dashboards.refresh_views()
         for name, count in counts.items():
             self.stdout.write(f"{name}: {count}")
-        if options["purge"]:
+        if result:
             self.stdout.write(
                 "Записи журнала не удаляются: таблица аудита только пополняется "
                 "(BACKEND.md § 3.9)."
             )
+            if result.kept:
+                self.stdout.write(
+                    f"Оставлено записей набора: {len(result.kept)} — на них ссылаются "
+                    "записи, введённые людьми (ADR-041):"
+                )
+            for item in result.kept:
+                self.stdout.write(f"  {item.entity} «{item.title}» ({item.id}): {item.reason}")
 
     # ─────────────────────────── очистка ───────────────────────────
 
     @transaction.atomic
-    def purge(self) -> dict[str, int]:
-        """Удаляет только записи генератора.
+    def purge(self, *, keep_users: bool = False) -> Outcome:
+        """Удаляет записи генератора, не трогая введённое людьми (ADR-016, ADR-041).
 
         Порядок обратен порядку создания: связи защищены `PROTECT`, поэтому
         сначала уходят пользователи порталов и документы, затем рейсы
         и борта и только потом контрагенты, на которых те ссылаются.
+        Записи набора, на которые ссылаются записи людей, остаются
+        (`sampledata.purge`) и перечисляются в отчёте. `keep_users` — для
+        пересоздания: сотрудников генератора заведёт и следующая генерация,
+        а удалённый администратор потерял бы сеанс посреди действия.
         """
-        counts = {
-            "пользователи": User.objects.filter(
-                email__endswith=f"@{GENERATED_EMAIL_DOMAIN}"
-            ).delete()[0],
-            # Коммуникации уходят первыми: входящее ссылается на заявку,
-            # уведомление — на пользователя.
-            "уведомления": Notification.objects.filter(is_generated=True).delete()[0],
-            "входящие": InboxMessage.objects.filter(is_generated=True).delete()[0],
-            "исходящие": OutboxMessage.objects.filter(is_generated=True).delete()[0],
-            "вложения": self._purge_attachments(),
-            "контакты": Contact.objects.filter(is_generated=True).delete()[0],
-            "заявки клиентов": FlightRequest.objects.filter(is_generated=True).delete()[0],
-            # Шаблон держит клиента и тип ВС связями PROTECT, поэтому
-            # уходит раньше них.
-            "шаблоны рейсов": FlightTemplate.objects.filter(is_generated=True).delete()[0],
-            # Документы по рейсам генератора — тоже записи генератора
-            # (признак наследуется от рейса). Строка держит заявку на услугу
-            # связью PROTECT, поэтому документы уходят раньше заявок.
-            # Платёж держит счёт связью PROTECT через распределение.
-            "платежи": Payment.objects.filter(is_generated=True).delete()[0],
-            "строки документов": DocumentLine.objects.filter(is_generated=True).delete()[0],
-            "счета клиентам": Invoice.objects.filter(is_generated=True).delete()[0],
-            "котировки": Quote.objects.filter(is_generated=True).delete()[0],
-            "заявки на оплату": Payable.objects.filter(is_generated=True).delete()[0],
-            "счета поставщиков": VendorInvoice.objects.filter(is_generated=True).delete()[0],
-            "заявки на услуги": ServiceOrder.objects.filter(is_generated=True).delete()[0],
-            "слоты": Slot.objects.filter(is_generated=True).delete()[0],
-            "рейсы": Flight.objects.filter(is_generated=True).delete()[0],
-            "борта": Aircraft.objects.filter(is_generated=True).delete()[0],
-            # Договор держат заявки, поставщика — договор и цена: порядок
-            # «заявки → договоры и цены → поставщики» обязателен.
-            "договоры": VendorContract.objects.filter(is_generated=True).delete()[0],
-            "цены поставщиков": VendorPrice.objects.filter(is_generated=True).delete()[0],
-            "тарифы клиентов": TariffRule.objects.filter(is_generated=True).delete()[0],
-            "правила SLA": SlaRule.objects.filter(is_generated=True).delete()[0],
-            "клиенты": Client.objects.filter(is_generated=True).delete()[0],
-            "поставщики": Vendor.objects.filter(is_generated=True).delete()[0],
-            # Журнал неизменяем на уровне базы, и это правильно: удалять
-            # записи аудита нельзя даже генератору. Записи генератора
-            # отличимы по source='seed' и живут до пересоздания базы.
-            "записи журнала": AuditEntry.objects.filter(is_generated=True).count(),
-        }
-        return counts
+        kept = find_kept([model for _, model in PURGE_ORDER])
+
+        def generated(model: type[Model]) -> QuerySet[Model]:
+            return model._default_manager.filter(is_generated=True).exclude(
+                pk__in=list(kept.get(model, {}))
+            )
+
+        users = User.objects.filter(email__endswith=f"@{GENERATED_EMAIL_DOMAIN}")
+        if keep_users:
+            # Пользователи порталов держат клиента и поставщика набора связью
+            # PROTECT и уходят вместе с ними; нажать кнопку они всё равно не могут.
+            users = users.filter(Q(client__isnull=False) | Q(vendor__isnull=False))
+        counts = {"пользователи": users.delete()[0]}
+        for name, model in PURGE_ORDER:
+            counts[name] = (
+                self._purge_attachments(generated(model))
+                if model is Attachment
+                else generated(model).delete()[0]
+            )
+        # Журнал неизменяем на уровне базы, и это правильно: удалять
+        # записи аудита нельзя даже генератору. Записи генератора
+        # отличимы по source='seed' и живут до пересоздания базы.
+        counts["записи журнала"] = AuditEntry.objects.filter(is_generated=True).count()
+        return Outcome(counts=counts, kept=describe_kept(kept))
 
     @staticmethod
-    def _purge_attachments() -> int:
+    def _purge_attachments(attachments: QuerySet[Model]) -> int:
         """Акты генератора удаляются вместе с файлами в хранилище."""
-        attachments = Attachment.objects.filter(is_generated=True)
         for key in attachments.values_list("storage_key", flat=True):
             storage.delete_object(key)
         return int(attachments.delete()[0])
@@ -582,9 +611,12 @@ class Command(BaseCommand):
         owners: list[Client | Vendor] = [*clients, *vendors]
         for owner in owners:
             rnd = self._rnd(seed, f"contact:{owner.name}")
+            # Только свои записи: контрагент мог остаться после очистки вместе
+            # с записями людей (ADR-041), и они не заменяют записи набора.
             if Contact.objects.filter(
                 client=owner if isinstance(owner, Client) else None,
                 vendor=owner if isinstance(owner, Vendor) else None,
+                is_generated=True,
             ).exists():
                 continue
             first, last = rnd.choice(CONTACT_NAMES)
@@ -920,7 +952,7 @@ class Command(BaseCommand):
         today = clock.today()
         created = 0
         for index, vendor in enumerate(vendors):
-            if VendorContract.objects.filter(vendor=vendor).exists():
+            if VendorContract.objects.filter(vendor=vendor, is_generated=True).exists():
                 continue
             rnd = self._rnd(seed, f"contract:{vendor.name}")
             valid_from = today - timedelta(days=rnd.randint(150, 500))
@@ -971,7 +1003,7 @@ class Command(BaseCommand):
 
         created = 0
         for vendor in vendors:
-            if VendorPrice.objects.filter(vendor=vendor).exists():
+            if VendorPrice.objects.filter(vendor=vendor, is_generated=True).exists():
                 continue
             rnd = self._rnd(seed, f"prices:{vendor.name}")
             vendor_factor = Decimal(str(round(rnd.uniform(0.88, 1.15), 3)))
@@ -994,6 +1026,17 @@ class Command(BaseCommand):
                         else:
                             periods = [(today - timedelta(days=420), *periods[0][1:])]
                         for start, end, value in periods:
+                            # Цена, заведённая человеком у оставленного очисткой
+                            # поставщика (ADR-041), не получает соседа на тот же
+                            # период: две цены сделали бы выбор произвольным.
+                            if catalog_services.find_overlap(
+                                vendor_id=vendor.pk,
+                                service_id=service.pk,
+                                airport_icao=icao,
+                                valid_from=start,
+                                valid_to=end,
+                            ):
+                                continue
                             VendorPrice.objects.create(
                                 vendor=vendor,
                                 service=service,
@@ -1034,7 +1077,7 @@ class Command(BaseCommand):
             created += 1
 
         for client in clients:
-            if TariffRule.objects.filter(client=client).exists():
+            if TariffRule.objects.filter(client=client, is_generated=True).exists():
                 continue
             rnd = self._rnd(seed, f"tariff:{client.name}")
             for category in ServiceCategory.values:

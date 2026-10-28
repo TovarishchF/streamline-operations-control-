@@ -171,6 +171,8 @@ def test_purge_removes_only_generated_records(
     assert response.status_code == status.HTTP_200_OK, response.data
     assert Client.objects.filter(pk=real.pk).exists()
     assert not Client.objects.filter(is_generated=True).exists()
+    # Записи людей не ссылаются на набор — оставлять нечего (ADR-041).
+    assert response.json()["kept"] == []
 
 
 @override_settings(SAMPLE_DATA=True)
