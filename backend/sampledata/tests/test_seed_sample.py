@@ -208,6 +208,26 @@ class TestGeneratedSet:
 
         assert set(accounts.values_list("pk", flat=True)) == before
 
+    def test_interrupted_reset_leaves_the_set_as_it_was(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Оборванная генерация не оставляет систему без набора.
+
+        Запрос «Пересоздать» обрывается по таймауту сервера раньше, чем
+        генерация заканчивается; очистка откатывается вместе с ней.
+        """
+        before = Aircraft.objects.filter(is_generated=True).count()
+        assert before
+
+        def interrupted(seed: int) -> dict[str, int]:
+            raise RuntimeError("генерация прервана")
+
+        monkeypatch.setattr(sample, "generate", interrupted)
+        with pytest.raises(RuntimeError):
+            sample.reset(seed=20260913)
+
+        assert Aircraft.objects.filter(is_generated=True).count() == before
+
     def test_nothing_is_kept_when_people_refer_to_nothing(self) -> None:
         assert sample.purge().kept == []
 

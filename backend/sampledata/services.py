@@ -13,6 +13,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.db import transaction
+
 from core import sample_data
 from core.exceptions import SampleDataDisabled
 from sampledata.purge import Outcome
@@ -60,6 +62,7 @@ def purge() -> Outcome:
     return _command().purge()
 
 
+@transaction.atomic
 def reset(seed: int = DEFAULT_SEED) -> Outcome:
     """Пересоздаёт набор: очистка и генерация заново.
 
@@ -70,6 +73,10 @@ def reset(seed: int = DEFAULT_SEED) -> Outcome:
     Сотрудники генератора не удаляются: генерация всё равно заведёт их
     заново, а администратор, нажавший «Пересоздать» под учётной записью
     набора, иначе потерял бы сеанс и не увидел результата.
+
+    Очистка и генерация — одна транзакция: генерация, прерванная на полпути
+    (таймаут запроса «Пересоздать», сбой), откатывает и очистку, и набор
+    остаётся прежним, а не пропадает.
     """
     _require_sample_data()
     kept = _command().purge(keep_users=True).kept
