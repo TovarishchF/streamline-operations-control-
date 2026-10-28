@@ -88,9 +88,9 @@ export function UsersPage(): JSX.Element {
  * Генератор данных `[ТЗ этап 2]`.
  *
  * `CLAUDE.md § 4`: `seed_sample` доступна только при `SAMPLE_DATA=true`.
- * ADR-016: `--purge` удаляет только записи генератора, и это возможно
- * потому, что ссылки «введённая запись → запись генератора» запрещены на
- * уровне БД. Экран выводится в меню только в режиме генератора.
+ * ADR-016, ADR-041: очистка удаляет только записи генератора; записи набора,
+ * на которые ссылаются введённые людьми, остаются, и сервер их перечисляет.
+ * Экран выводится в меню только в режиме генератора.
  */
 export function SampleDataPage(): JSX.Element {
   const { t } = useTranslation();
@@ -124,10 +124,11 @@ export function SampleDataPage(): JSX.Element {
     action: ReturnType<typeof useSampleDataAction>,
     title: string,
     label: string,
+    hint: string,
   ): void => {
     modal.confirm({
       title,
-      content: t('sampleData.confirmHint'),
+      content: hint,
       okText: t('common.confirm'),
       cancelText: t('common.cancel'),
       okButtonProps: { danger: true },
@@ -165,7 +166,12 @@ export function SampleDataPage(): JSX.Element {
               loading={reset.isPending}
               disabled={busy && !reset.isPending}
               onClick={() => {
-                confirmAnd(reset, t('sampleData.resetConfirm'), t('sampleData.wasReset'));
+                confirmAnd(
+                  reset,
+                  t('sampleData.resetConfirm'),
+                  t('sampleData.wasReset'),
+                  t('sampleData.confirmHint'),
+                );
               }}
             >
               {t('sampleData.reset')}
@@ -175,7 +181,14 @@ export function SampleDataPage(): JSX.Element {
               loading={purge.isPending}
               disabled={busy && !purge.isPending}
               onClick={() => {
-                confirmAnd(purge, t('sampleData.purgeConfirm'), t('sampleData.purged'));
+                // Учётные записи набора очистка удаляет, в том числе ту, под которой
+                // нажата кнопка: сеанс завершится раньше, чем придёт ответ.
+                confirmAnd(
+                  purge,
+                  t('sampleData.purgeConfirm'),
+                  t('sampleData.purged'),
+                  t('sampleData.purgeHint'),
+                );
               }}
             >
               {t('sampleData.purge')}
@@ -202,6 +215,26 @@ export function SampleDataPage(): JSX.Element {
                       {result.message}
                     </Typography.Text>
                   ) : null}
+                </Space>
+              }
+            />
+          ) : null}
+
+          {result && result.kept.length > 0 ? (
+            <Alert
+              type="warning"
+              showIcon
+              message={t('sampleData.keptTitle', { count: result.kept.length })}
+              description={
+                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                  <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                    {t('sampleData.keptHint')}
+                  </Typography.Text>
+                  {result.kept.map((item) => (
+                    <Typography.Text key={item.id} style={{ fontSize: 12 }}>
+                      {item.entity} «{item.title}» <Mono>{item.id}</Mono> — {item.reason}
+                    </Typography.Text>
+                  ))}
                 </Space>
               }
             />
