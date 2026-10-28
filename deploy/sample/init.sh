@@ -30,6 +30,6 @@ fi
 if python manage.py shell -c "from flights.models import Flight; raise SystemExit(0 if Flight.objects.filter(is_generated=True).exists() else 1)"; then
     echo "набор генератора уже создан"
 else
-    echo "набор генератора: несколько минут"
+    echo "набор генератора: на сервере с 4 ядрами — около 40 минут"
     python manage.py seed_sample --seed 20260912
 fi
