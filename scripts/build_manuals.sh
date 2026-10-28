@@ -24,15 +24,17 @@ cp -r "$src/img" "$src/manual.css" "$out/"
 cp web/public/fonts/GolosText-Variable.woff2 web/public/fonts/Geologica-Variable.woff2 \
    web/public/fonts/JetBrainsMono-Variable.woff2 "$out/"
 
+# $1 — исходник, $2 — имя PDF, $3 — класс вёрстки (compact — главы без разрыва страницы).
 build() {
     pandoc "$src/$1.md" --standalone --toc --toc-depth=2 --number-sections \
         --metadata toc-title="Содержание" --css manual.css -o "$out/$1.html"
+    sed -i "s|<body>|<body class=\"${3:-}\">|" "$out/$1.html"
     docker compose exec -T api python -c \
         "from weasyprint import HTML; HTML('/artifacts/manuals/$1.html').write_pdf('/artifacts/manuals/$1.pdf')"
     mv "$out/$1.pdf" "$out/$2.pdf"
 }
 
 build user-guide "Руководство пользователя"
-build install-guide "Инструкция по установке"
+build install-guide "Инструкция по установке" compact
 
 ls -la "$out"/*.pdf

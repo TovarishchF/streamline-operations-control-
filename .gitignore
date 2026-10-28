@@ -60,3 +60,4 @@ artifacts/e2e/report/
 
 # Поставка (make release) — собирается заново, в репозиторий не попадает
 release/
+artifacts/manuals/
