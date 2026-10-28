@@ -20,6 +20,13 @@ else
 fi
 python manage.py sync_fx --days 45 || echo "ЦБ РФ недоступен: документы считаются по курсам из поставки"
 
+# Установка без данных генератора (SAMPLE_DATA=false): генератор в ней
+# запрещён (ADR-008), и его отказ не должен останавливать запуск служб.
+if ! python manage.py shell -c "from django.conf import settings; raise SystemExit(0 if settings.SAMPLE_DATA else 1)"; then
+    echo "SAMPLE_DATA=false: набор генератора не создаётся"
+    exit 0
+fi
+
 if python manage.py shell -c "from flights.models import Flight; raise SystemExit(0 if Flight.objects.filter(is_generated=True).exists() else 1)"; then
     echo "набор генератора уже создан"
 else
