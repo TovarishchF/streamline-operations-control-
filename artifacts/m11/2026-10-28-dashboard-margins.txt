@@ -1,0 +1,64 @@
+# Дашборд руководителя на стенде после пересоздания набора (seed_sample --purge; seed_sample --seed 20260912)
+# дата: 2026-10-28; рабочее дерево поверх d4b2d30: набор на восемь недель, наценки 18–30 %
+# вывод: manage.py shell < measure.py (функции reports.services.dashboards, те же, что отдаёт API); данные генератора, вымышленные
+
+## seed_sample --seed 20260912 (счётчики созданного; строки журнала INFO опущены)
+клиенты: 12
+поставщики: 26
+договоры: 29
+цены поставщиков: 1328
+тарифные правила: 75
+борта: 26
+сотрудники: 6
+рейсы: 422
+заявки на услуги: 2656
+счета клиентам: 306
+платежи: 169
+заявки на оплату: 2000
+счета поставщиков: 12
+заявки клиентов: 6
+шаблоны рейсов: 3
+сообщения и уведомления: 34
+END=14:19:11
+EXIT=0
+
+## measure.py
+    # Замер виджетов дашборда руководителя теми же функциями, что отдаёт API.
+    from accounts.models import User
+    from core import clock
+    from reports.services import dashboards as d
+    
+    user = User.objects.get(email="sokolov@soc.local") if User.objects.filter(email="sokolov@soc.local").exists() else User.objects.filter(email__endswith="@soc.local").first()
+    print("модельное время:", clock.now().isoformat())
+    s = d.margin_summary(user)
+    print("margin_summary за 30 дней: доход", s["revenue"]["amount"], "расход", s["cost"]["amount"], "маржа", s["margin"]["amount"], "маржа %", s["marginPercent"])
+    print("по неделям (weekStart, доход, маржа, %):")
+    for w in s["series"]:
+        print(" ", w["weekStart"][:10], w["revenue"]["amount"], w["margin"]["amount"], w["marginPercent"])
+    print("margin_health:", d.margin_health(user))
+    print("flights_count:", d.flights_count(user)["total"], [w["count"] for w in d.flights_count(user)["series"]])
+    print("category_margin (категория, доход, маржа, %):")
+    for i in d.category_margin(user)["items"]:
+        print(" ", i["category"], i["revenue"]["amount"], i["margin"]["amount"], i["marginPercent"])
+
+## вывод
+модельное время: 2026-10-28T14:22:14.566370+00:00
+margin_summary за 30 дней: доход 348406765.8900 расход 285522371.6400 маржа 62884394.2500 маржа % 18.05
+по неделям (weekStart, доход, маржа, %):
+  2026-09-02 81471835.3800 14829950.7300 18.20
+  2026-09-09 100498453.4300 18584387.0900 18.49
+  2026-09-16 110850880.5100 21050168.4400 18.99
+  2026-09-23 74220631.0500 14241296.2700 19.19
+  2026-09-30 79000931.6100 15369367.2200 19.45
+  2026-10-07 115724321.5600 21870012.5000 18.90
+  2026-10-14 66273220.2000 11493479.3100 17.34
+  2026-10-21 61726721.1100 9128910.9800 14.79
+margin_health: {'total': 167, 'belowThreshold': 18, 'negative': 7, 'thresholdPercent': '12.0000'}
+flights_count: 179 [42, 41, 42, 43, 41, 43, 42, 41]
+category_margin (категория, доход, маржа, %):
+  catering 61207455.5700 12350723.2400 20.18
+  deicing 7056483.3300 1412322.1500 20.01
+  fuel 241852591.6900 41845480.0700 17.30
+  handling 21296191.7600 3939955.0400 18.50
+  permits 7629566.5600 1479513.2800 19.39
+  transport 9364476.9900 1856401.9200 19.82

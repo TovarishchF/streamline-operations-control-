@@ -1,0 +1,6 @@
+# sampledata/tests/test_full_set.py — рабочее дерево поверх d4b2d30: набор на восемь недель, наценки 18–30 %
+# дата: 2026-10-28; pytest -q -p no:cacheprovider, PostgreSQL 16 и Redis 7 локально, без Docker
+
+.                                                                        [100%]
+1 passed, 1 warning in 2228.43s (0:37:08)
+EXIT=0

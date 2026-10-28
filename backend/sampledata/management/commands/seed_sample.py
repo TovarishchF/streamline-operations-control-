@@ -205,8 +205,10 @@ AIRCRAFT_COUNT = 26
 CARGO_EVERY = 6
 
 # Рейсы генерируются относительно текущей даты (CLAUDE.md § 4), а не
-# «историей за год»: система должна выглядеть работающей сегодня.
-FLIGHTS_BACK_DAYS = 30
+# «историей за год»: система должна выглядеть работающей сегодня. Восемь
+# недель назад — окно недельных графиков руководителя (`SERIES_WEEKS`):
+# с меньшей историей первые недели графиков пустые.
+FLIGHTS_BACK_DAYS = 56
 FLIGHTS_FORWARD_DAYS = 14
 FLIGHTS_PER_DAY = 6
 CANCELLED_SHARE = 0.08
@@ -308,11 +310,15 @@ EXPIRING_CONTRACTS = {2: 6, 7: 13, 11: 21, 15: 27}
 EXPIRED_CONTRACTS = {5: 12, 17: 45}
 RENEWED_CONTRACTS = (0, 9, 20)
 
-# Клиент с фиксированной ценой топлива, закреплённой договором до роста
-# цен: на его рейсах маржа отрицательная, и система должна это показать.
+# Клиент, которому последние две недели продают топливо по фиксированной
+# цене ниже закупочной (разовое соглашение): на этих рейсах маржа
+# отрицательная, и система должна это показать.
 NEGATIVE_MARGIN_CLIENT = "Гранит Эйрлайнс"
 NEGATIVE_MARGIN_FUEL_PRICE = Decimal("61.50")
-PASS_THROUGH_FUEL_CLIENTS = ("Каспий Эйр", "Уральский Экспресс")
+NEGATIVE_MARGIN_DAYS = 14
+# Топливо без наценки (`pass_through`) — у одного клиента: режим показан,
+# а маржа остальных рейсов им не размывается.
+PASS_THROUGH_FUEL_CLIENTS = ("Каспий Эйр",)
 FIXED_HANDLING_CLIENT = "Авиалинии Северного Ветра"
 FIXED_HANDLING_PRICE = Decimal(52000)
 DISCOUNT_CLIENT = "Верхневолжские Авиалинии"
@@ -1070,7 +1076,7 @@ class Command(BaseCommand):
                 fixed_price=scope.get("fixed"),
                 discount_kind=scope.get("discount_kind", ""),
                 discount_value=scope.get("discount_value"),
-                valid_from=valid_from,
+                valid_from=scope.get("valid_from", valid_from),
                 valid_to=valid_to,
                 actor=crew.finance,
             )
@@ -1089,7 +1095,7 @@ class Command(BaseCommand):
                     client,
                     category=category,
                     mode=TariffMode.COST_PLUS,
-                    markup=Decimal(rnd.randint(12, 25)),
+                    markup=Decimal(rnd.randint(18, 30)),
                     discount_kind="percent" if discount else "",
                     discount_value=Decimal(5) if discount else None,
                 )
@@ -1115,6 +1121,7 @@ class Command(BaseCommand):
                     service=services["FUEL_JETA1"],
                     mode=TariffMode.FIXED,
                     fixed=Money.of(NEGATIVE_MARGIN_FUEL_PRICE, "RUB"),
+                    valid_from=today - timedelta(days=NEGATIVE_MARGIN_DAYS),
                 )
         return created
 
