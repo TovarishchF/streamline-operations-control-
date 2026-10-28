@@ -109,17 +109,17 @@ class TestSnapshot:
     def test_decimal_becomes_string(self) -> None:
         """Деньги и проценты не проходят через float ни на одном уровне."""
         rate = VatRate(
-            code="VAT20",
-            name_ru="НДС 20 %",
-            name_en="VAT 20%",
-            percent=Decimal("20.0000"),
+            code="VAT22",
+            name_ru="НДС 22 %",
+            name_en="VAT 22%",
+            percent=Decimal("22.0000"),
             applicability="domestic",
             data_source=DataSource.IMPORTED,
         )
 
         data = services.snapshot(rate)
 
-        assert data["percent"] == "20.0000"
+        assert data["percent"] == "22.0000"
         assert not isinstance(data["percent"], float)
 
     def test_noise_fields_are_dropped(self) -> None:
