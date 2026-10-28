@@ -94,9 +94,15 @@ test('диспетчер', async ({ page, request }) => {
 
 test('финансист', async ({ page, request }) => {
   const access = await token(request, 'gordeeva');
-  const partly = await api<Paged<{ id: string }>>(request, access, '/invoices?status=partially_paid');
-  const paid = await api<Paged<{ id: string }>>(request, access, '/invoices?status=paid');
-  const invoice = partly.data[0]?.id ?? paid.data[0]?.id;
+  type InvoiceRow = { id: string; totals: { vatTotal: { amount: string } } };
+  const partly = await api<Paged<InvoiceRow>>(request, access, '/invoices?status=partially_paid&perPage=100');
+  const paid = await api<Paged<InvoiceRow>>(request, access, '/invoices?status=paid&perPage=100');
+  // Счёт по внутреннему рейсу: в карточке видна базовая ставка НДС, а не нулевая
+  // ставка международной перевозки.
+  const withVat = (rows: InvoiceRow[]): string | undefined =>
+    rows.find((row) => !/^0(\.0+)?$/.test(row.totals.vatTotal.amount))?.id;
+  const invoice =
+    withVat(partly.data) ?? withVat(paid.data) ?? partly.data[0]?.id ?? paid.data[0]?.id;
   expect(invoice, 'счёт с оплатой').toBeTruthy();
 
   type Reconciliation = { id: string; reconciliation: { discrepancies: { kind: string }[] } };
