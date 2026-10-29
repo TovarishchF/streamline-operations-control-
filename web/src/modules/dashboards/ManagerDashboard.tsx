@@ -103,7 +103,7 @@ function ManagerWidget({ dashboard, code }: { dashboard: DashboardData; code: st
       return show('margin_health', (data) => (
         <Space direction="vertical" size={10} style={{ width: '100%' }}>
           <Share
-            label={t('dashboard.belowThresholdOf', { threshold: data.thresholdPercent })}
+            label={t('dashboard.belowThresholdOf', { threshold: Number.parseFloat(data.thresholdPercent) })}
             part={data.belowThreshold}
             total={data.total}
             color={STATUS_TOKENS.warning.color}

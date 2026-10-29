@@ -338,7 +338,7 @@ export function FlightCardPage(): JSX.Element {
           showIcon
           message={t('finance.lowMarginTitle', {
             value: margin.marginPercent ?? '—',
-            threshold: margin.thresholdPercent,
+            threshold,
           })}
           description={t('finance.lowMarginHint')}
           action={

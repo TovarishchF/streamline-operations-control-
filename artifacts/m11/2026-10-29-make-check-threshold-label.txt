@@ -1,0 +1,11 @@
+# make check — рабочее дерево поверх a108692: порог маржи без нулей хранения на дашборде руководителя и в карточке рейса
+# дата: 2026-10-29; PYTEST_ADDOPTS='-n 3', Windows, PostgreSQL 16 и Redis 7 в Docker (TEST_DATABASE_URL)
+
+cd backend && ../backend/.venv/Scripts/python.exe -m ruff check .
+All checks passed!
+cd web && npm run lint
+
+> soc-web@1.0.0 lint
+> node --max-old-space-size=6144 ./node_modules/eslint/bin/eslint.js . --max-warnings 0
+
+cd backend && ../backend/.venv/Scripts/python.exe -m mypy .
