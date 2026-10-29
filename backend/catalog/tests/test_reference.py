@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import csv
+from decimal import Decimal
 from pathlib import Path
 from zoneinfo import ZoneInfo, available_timezones
 
@@ -147,5 +148,12 @@ class TestSeedReference:
 
     def test_vat_percent_is_decimal_not_float(self) -> None:
         call_command("seed_reference", only="vat-rates")
-        rate = VatRate.objects.get(code="VAT20")
-        assert str(rate.percent) == "20.0000"
+        rate = VatRate.objects.get(code="VAT22")
+        assert str(rate.percent) == "22.0000"
+
+    def test_base_vat_rate_is_22_percent(self) -> None:
+        """С 01.01.2026 базовая ставка — 22 % (Федеральный закон № 425-ФЗ), 20 % нет."""
+        call_command("seed_reference", only="vat-rates")
+        domestic = VatRate.objects.filter(applicability="domestic").order_by("-percent")
+        assert domestic.first() == VatRate.objects.get(code="VAT22")
+        assert not VatRate.objects.filter(percent=Decimal("20")).exists()

@@ -1,0 +1,135 @@
+# Установка для показа (INFRA.md § 2): боевая сборка с SAMPLE_DATA=true.
+#
+# Запускается скриптом deploy/sample/install.sh, который создаёт .env.
+# Отличие от рабочей установки — только в переменных окружения: тот же
+# сервер, та же база, gunicorn и nginx, без исходников в томах.
+#
+# Наружу открыт один порт — веб-клиента (HTTP_PORT). API и файлы идут
+# через него же; база, Redis и хранилище наружу не публикуются.
+
+name: soc-sample
+
+x-backend: &backend
+  build:
+    context: ./backend
+  image: soc-backend:sample
+  env_file: [.env]
+  environment:
+    DJANGO_SETTINGS_MODULE: config.settings.prod
+  volumes:
+    # Автоматы состояний и справочники общие с веб-клиентом (CLAUDE.md § 6).
+    - ./shared:/shared:ro
+  depends_on:
+    db: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    minio: { condition: service_healthy }
+  restart: unless-stopped
+
+services:
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-soc}
+      POSTGRES_USER: ${POSTGRES_USER:-soc}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?заполните .env через deploy/sample/install.sh}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-soc}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  minio:
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${S3_ACCESS_KEY:?заполните .env}
+      MINIO_ROOT_PASSWORD: ${S3_SECRET_KEY:?заполните .env}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+
+  # Исходящая почта уходит по-настоящему, но остаётся на сервере: адреса
+  # контрагентов набора вымышлены (зона .test), наружу писать некому.
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports: ["127.0.0.1:${MAIL_UI_PORT:-8025}:8025"]
+    restart: unless-stopped
+
+  # Первый запуск: схема базы, справочники, курсы ЦБ РФ, набор генератора.
+  # Повторный запуск ничего не дублирует.
+  init:
+    <<: *backend
+    command: ["sh", "/deploy/init.sh"]
+    volumes:
+      - ./shared:/shared:ro
+      - ./deploy/sample:/deploy:ro
+    # Проверка образа обращается к HTTP, которого у разовой службы нет.
+    healthcheck:
+      disable: true
+    restart: "no"
+
+  api:
+    <<: *backend
+    command: >
+      gunicorn config.wsgi:application --bind 0.0.0.0:8000
+      --workers 3 --timeout 120 --access-logfile -
+    depends_on:
+      init: { condition: service_completed_successfully }
+
+  worker:
+    <<: *backend
+    command: celery -A config worker -l info
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A config inspect ping -d celery@$$HOSTNAME || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 30s
+      retries: 3
+    depends_on:
+      init: { condition: service_completed_successfully }
+
+  beat:
+    <<: *backend
+    command: celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    healthcheck:
+      disable: true
+    depends_on:
+      init: { condition: service_completed_successfully }
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      target: prod
+    image: soc-web:sample
+    volumes:
+      - ./deploy/sample/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    ports: ["${HTTP_PORT:-80}:80"]
+    depends_on: [api]
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  redis-data:
+  minio-data:

@@ -13,8 +13,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from django.db import transaction
+
 from core import sample_data
 from core.exceptions import SampleDataDisabled
+from sampledata.purge import Outcome
 
 if TYPE_CHECKING:
     from sampledata.management.commands.seed_sample import Command
@@ -52,17 +55,29 @@ def generate(seed: int = DEFAULT_SEED) -> dict[str, int]:
     return _command().generate(seed)
 
 
-def purge() -> dict[str, int]:
-    """Удаляет только записи с `is_generated` (ADR-016)."""
+def purge() -> Outcome:
+    """Удаляет записи с `is_generated`, кроме тех, на которые ссылаются записи
+    людей (ADR-016, ADR-041)."""
     _require_sample_data()
     return _command().purge()
 
 
-def reset(seed: int = DEFAULT_SEED) -> dict[str, int]:
+@transaction.atomic
+def reset(seed: int = DEFAULT_SEED) -> Outcome:
     """Пересоздаёт набор: очистка и генерация заново.
 
     Числа возвращаются от генерации: администратора интересует, что теперь
-    в системе, а не сколько записей исчезло по дороге.
+    в системе, а не сколько записей исчезло по дороге. Оставленные очисткой
+    записи — от очистки: генерация их не меняет, а берёт как есть.
+
+    Сотрудники генератора не удаляются: генерация всё равно заведёт их
+    заново, а администратор, нажавший «Пересоздать» под учётной записью
+    набора, иначе потерял бы сеанс и не увидел результата.
+
+    Очистка и генерация — одна транзакция: генерация, прерванная на полпути
+    (таймаут запроса «Пересоздать», сбой), откатывает и очистку, и набор
+    остаётся прежним, а не пропадает.
     """
-    purge()
-    return generate(seed)
+    _require_sample_data()
+    kept = _command().purge(keep_users=True).kept
+    return Outcome(counts=generate(seed), kept=kept)

@@ -1,0 +1,62 @@
+# make check — рабочее дерево поверх 562ca43: пересоздание набора одной транзакцией, время построения набора в руководствах
+# дата: 2026-10-28; PYTEST_ADDOPTS='-n 3', PostgreSQL 16 и Redis 7 локально, без Docker
+
+cd backend && ../backend/.venv/bin/python -m ruff check .
+All checks passed!
+cd web && npm run lint
+
+> soc-web@1.0.0 lint
+> node --max-old-space-size=6144 ./node_modules/eslint/bin/eslint.js . --max-warnings 0
+
+cd backend && ../backend/.venv/bin/python -m mypy .
+Success: no issues found in 267 source files
+cd web && npm run typecheck
+
+> soc-web@1.0.0 typecheck
+> tsc --noEmit
+
+cd backend && ../backend/.venv/bin/python -m pytest -q
+bringing up nodes...
+bringing up nodes...
+
+........................................................................ [  6%]
+........................................................................ [ 13%]
+........................................................................ [ 20%]
+........................................................................ [ 27%]
+........................................................................ [ 33%]
+........................................................................ [ 40%]
+........................................................................ [ 47%]
+........................................................................ [ 54%]
+........................................................................ [ 61%]
+........................................................................ [ 67%]
+........................................................................ [ 74%]
+........................................................................ [ 81%]
+........................................................................ [ 88%]
+........................................................................ [ 95%]
+....................................................                     [100%]
+1060 passed, 3 warnings in 2326.89s (0:38:46)
+cd web && npm run test -- --run
+
+> soc-web@1.0.0 test
+> vitest --run
+
+
+ RUN  v2.1.9 /home/user/streamline-operations-control-/web
+
+ ✓ src/shared/i18n/i18n.test.ts (4 tests) 22ms
+ ✓ src/domain/fx.test.ts (7 tests) 9ms
+ ✓ src/shared/i18n/no-hardcoded-text.test.ts (3 tests) 40ms
+ ✓ src/app/layout/navigation.test.ts (6 tests) 7ms
+ ✓ src/domain/machines.test.ts (5 tests) 16ms
+ ✓ src/shared/ui/status-tokens.test.ts (8 tests) 8ms
+ ✓ src/domain/money.test.ts (5 tests) 8ms
+ ✓ src/domain/route.test.ts (3 tests) 4ms
+ ✓ src/shared/format/timezone.test.ts (3 tests) 22ms
+
+ Test Files  9 passed (9)
+      Tests  44 passed (44)
+   Start at  17:14:44
+   Duration  4.25s (transform 1.38s, setup 682ms, collect 4.48s, tests 136ms, environment 4.05s, prepare 663ms)
+
+Проверки пройдены.
+MAKE_CHECK_EXIT=0

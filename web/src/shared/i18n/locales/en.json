@@ -731,7 +731,7 @@
     "code": "Code",
     "direction": "Direction",
     "duration": "Duration",
-    "empty": "No connection is enabled. How to connect — docs/CONNECTING.md.",
+    "empty": "No connection is enabled. Connections are enabled once access to the external systems is granted.",
     "endpoint": "Endpoint",
     "health": "Health",
     "healthy": "Available",
@@ -743,7 +743,7 @@
     "outbound": "Outbound",
     "purpose": "Purpose",
     "result": "Result",
-    "subtitle": "Working connections to external systems. How to connect the others — docs/CONNECTING.md.",
+    "subtitle": "Working connections to external systems. The others are enabled once access to the customer's systems is granted.",
     "tabLog": "Exchange log",
     "tabStatus": "Status",
     "test": "Test",
@@ -889,7 +889,7 @@
     "periodDay": "Day",
     "periodWeek": "Week",
     "periodMonth": "30 days",
-    "methodHint": "Server metrics are API response times. Client metrics are time to render in users' browsers: up to largest-contentful-paint on first load, up to data render on in-app navigation (ADR-017)."
+    "methodHint": "Server metrics are API response times. Client metrics are time to render in users' browsers: up to largest-contentful-paint on first load, up to data render on in-app navigation."
   },
   "planFactKind": {
     "added": "Added",
@@ -1176,15 +1176,18 @@
     "vendor": "Vendor"
   },
   "sampleData": {
-    "confirmHint": "The action affects only generator records. Entered data and the action log stay.",
+    "confirmHint": "The action affects only generator records. Entered data, the data set records it refers to, and the action log stay.",
     "done_generate": "Created",
     "done_purge": "Removed",
     "done_reset": "Rebuilt",
     "generate": "Generate",
     "generated": "Data set generated",
     "generation": "Data set generation",
+    "keptHint": "Records entered by people refer to them. Once those references are gone, the next purge removes them too.",
+    "keptTitle": "Data set records kept: {{count}}",
     "purge": "Purge generator records",
     "purgeConfirm": "Remove all generator records?",
+    "purgeHint": "Generator records are removed together with its accounts: if you are signed in with a data set account, your session ends, and the seed_sample --purge command lists what was kept. Entered data, the data set records it refers to, and the action log stay.",
     "purged": "Generator records removed",
     "reset": "Regenerate",
     "resetConfirm": "Rebuild the data set?",

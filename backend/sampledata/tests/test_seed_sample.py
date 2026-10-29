@@ -7,6 +7,8 @@
 
 from __future__ import annotations
 
+from datetime import timedelta
+from decimal import Decimal
 from typing import TYPE_CHECKING
 
 import pytest
@@ -14,12 +16,14 @@ from django.core.management import call_command
 
 from accounts.models import Role, User
 from audit.models import AuditEntry, AuditSource
-from catalog.models import AircraftType, Airport
+from catalog.models import AircraftType, Airport, Service, ServiceCategory, ServiceUnit, VendorPrice
+from core.clock import now
 from core.exceptions import SampleDataDisabled
 from core.models import DataSource
-from counterparties.models import Client, Vendor
+from counterparties.models import Client, Contact, Vendor
 from fleet.models import Aircraft, AircraftStatus
-from sampledata.management.commands.seed_sample import GENERATED_EMAIL_DOMAIN
+from sampledata import services as sample
+from sampledata.purge import GENERATED_EMAIL_DOMAIN
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -124,6 +128,109 @@ class TestGeneratedSet:
 
         assert User.objects.filter(pk=person.pk).exists()
 
+    def test_price_added_by_a_person_survives_with_its_vendor(self) -> None:
+        """ADR-041: цена человека у поставщика набора не уходит вместе с ним.
+
+        Раньше связь `CASCADE` уносила её молча. Теперь поставщик остаётся,
+        и очистка называет его и причину.
+        """
+        vendor = Vendor.objects.filter(is_generated=True).order_by("name").first()
+        assert vendor is not None
+        price = _price_by_a_person(vendor)
+
+        outcome = sample.purge()
+
+        assert VendorPrice.objects.filter(pk=price.pk).exists()
+        assert list(Vendor.objects.filter(is_generated=True)) == [vendor]
+        kept = {item.id: item for item in outcome.kept}
+        assert "Цена поставщика" in kept[vendor.pk].reason
+        assert not Client.objects.filter(is_generated=True).exists()
+
+    def test_portal_user_of_a_generated_client_does_not_break_the_purge(
+        self, make_user: Callable[..., User]
+    ) -> None:
+        """ADR-041: связь `PROTECT` пользователя на клиента набора обрывала всю очистку."""
+        client = Client.objects.filter(is_generated=True).order_by("name").first()
+        assert client is not None
+        person = make_user(Role.CLIENT, suffix="portal", client=client)
+
+        outcome = sample.purge()
+
+        assert User.objects.filter(pk=person.pk, client=client).exists()
+        assert [item.id for item in outcome.kept] == [client.pk]
+        # Рейсы, борта и документы клиента — записи набора, на них люди не ссылаются.
+        assert not Aircraft.objects.filter(is_generated=True).exists()
+
+    def test_reset_takes_what_the_purge_kept(self) -> None:
+        """Пересоздание после очистки берёт оставленного поставщика как есть.
+
+        Второго экземпляра нет, записи набора у него созданы заново — цена
+        человека их не заменяет, но и соседа на свой период не получает.
+        """
+        vendor = (
+            Vendor.objects.filter(
+                is_generated=True,
+                specializations__contains=["transport"],
+                coverage_airports__contains=["UUWW"],
+            )
+            .order_by("name")
+            .first()
+        )
+        assert vendor is not None
+        price = _price_by_a_person(vendor, code="TRN_CREW", category=ServiceCategory.TRANSPORT)
+        other = _imported_service("TRN_VIP", ServiceCategory.TRANSPORT)
+
+        outcome = sample.reset(seed=20260913)
+
+        assert Vendor.objects.filter(name=vendor.name).count() == 1
+        assert VendorPrice.objects.filter(pk=price.pk).exists()
+        assert [item.id for item in outcome.kept] == [vendor.pk]
+        assert Contact.objects.filter(vendor=vendor, is_generated=True).exists()
+        assert VendorPrice.objects.filter(vendor=vendor, service=other, is_generated=True).exists()
+        overlapping = VendorPrice.objects.filter(
+            vendor=vendor,
+            service=price.service,
+            airport_icao=price.airport_icao,
+            valid_from__lt=price.valid_to,
+            valid_to__gt=price.valid_from,
+        )
+        assert list(overlapping) == [price]
+
+    def test_reset_keeps_the_generator_staff_accounts(self) -> None:
+        """Администратор набора, нажавший «Пересоздать», не теряет сеанс."""
+        accounts = User.objects.filter(
+            email__endswith=f"@{GENERATED_EMAIL_DOMAIN}", client=None, vendor=None
+        )
+        before = set(accounts.values_list("pk", flat=True))
+        assert accounts.filter(role=Role.ADMIN).exists()
+
+        sample.reset(seed=20260913)
+
+        assert set(accounts.values_list("pk", flat=True)) == before
+
+    def test_interrupted_reset_leaves_the_set_as_it_was(
+        self, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Оборванная генерация не оставляет систему без набора.
+
+        Запрос «Пересоздать» обрывается по таймауту сервера раньше, чем
+        генерация заканчивается; очистка откатывается вместе с ней.
+        """
+        before = Aircraft.objects.filter(is_generated=True).count()
+        assert before
+
+        def interrupted(seed: int) -> dict[str, int]:
+            raise RuntimeError("генерация прервана")
+
+        monkeypatch.setattr(sample, "generate", interrupted)
+        with pytest.raises(RuntimeError):
+            sample.reset(seed=20260913)
+
+        assert Aircraft.objects.filter(is_generated=True).count() == before
+
+    def test_nothing_is_kept_when_people_refer_to_nothing(self) -> None:
+        assert sample.purge().kept == []
+
     def test_purge_keeps_the_audit_trail(self) -> None:
         """Журнал только пополняется — удалять из него нельзя и генератору."""
         before = AuditEntry.objects.count()
@@ -146,3 +253,30 @@ def test_generator_is_deterministic(reference: None, settings: object) -> None:
     second = sorted(Aircraft.objects.values_list("registration", flat=True))
 
     assert first == second
+
+
+def _imported_service(code: str, category: str) -> Service:
+    """Позиция каталога, как её загружает `seed_reference`."""
+    return Service.objects.create(
+        code=code,
+        category=category,
+        name_ru=code,
+        name_en=code,
+        unit=ServiceUnit.FLIGHT,
+        data_source=DataSource.IMPORTED,
+    )
+
+
+def _price_by_a_person(
+    vendor: Vendor, *, code: str = "HND_BASIC", category: str = ServiceCategory.HANDLING
+) -> VendorPrice:
+    """Цена, которую человек добавил поставщику из набора."""
+    return VendorPrice.objects.create(
+        vendor=vendor,
+        service=_imported_service(code, category),
+        airport_icao="UUWW",
+        amount=Decimal("45000.0000"),
+        currency="RUB",
+        valid_from=now() - timedelta(days=1),
+        valid_to=now() + timedelta(days=30),
+    )

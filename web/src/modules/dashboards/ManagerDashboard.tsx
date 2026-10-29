@@ -22,13 +22,19 @@ function weekLabel(iso: string): string {
   return iso.slice(5, 10).split('-').reverse().join('.');
 }
 
-/** Недельный ряд одной линией: подписи — начало недели (UTC). */
-function seriesOption(labels: string[], values: number[], color: string): ChartOption {
+/**
+ * Недельный ряд одной линией: подписи — начало недели (UTC).
+ *
+ * Шкала значений — в сокращённой записи языка интерфейса («21 млн»):
+ * суммы маржи в миллионах не помещаются в подпись оси целиком.
+ */
+function seriesOption(labels: string[], values: number[], color: string, locale: string): ChartOption {
+  const compact = new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 });
   return {
-    grid: { left: 40, right: 12, top: 12, bottom: 24 },
+    grid: { left: 8, right: 12, top: 12, bottom: 24, containLabel: true },
     tooltip: { trigger: 'axis' },
     xAxis: { type: 'category', data: labels, axisLabel: { fontSize: 10 } },
-    yAxis: { type: 'value', axisLabel: { fontSize: 10 } },
+    yAxis: { type: 'value', axisLabel: { fontSize: 10, formatter: (value: number) => compact.format(value) } },
     series: [{ type: 'line', data: values, smooth: false, symbolSize: 5, lineStyle: { color }, itemStyle: { color } }],
   };
 }
@@ -97,7 +103,7 @@ function ManagerWidget({ dashboard, code }: { dashboard: DashboardData; code: st
       return show('margin_health', (data) => (
         <Space direction="vertical" size={10} style={{ width: '100%' }}>
           <Share
-            label={t('dashboard.belowThresholdOf', { threshold: data.thresholdPercent })}
+            label={t('dashboard.belowThresholdOf', { threshold: Number.parseFloat(data.thresholdPercent) })}
             part={data.belowThreshold}
             total={data.total}
             color={STATUS_TOKENS.warning.color}
@@ -260,15 +266,16 @@ function Share({
 }
 
 function FlightsCount({ data }: { data: WidgetData<'flights_count'> }): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const option = useMemo(
     () =>
       seriesOption(
         data.series.map((point) => weekLabel(point.weekStart)),
         data.series.map((point) => point.count),
         STATUS_TOKENS.progress.color,
+        i18n.language,
       ),
-    [data],
+    [data, i18n.language],
   );
   return (
     <Space direction="vertical" size={4} style={{ width: '100%' }}>
@@ -279,7 +286,7 @@ function FlightsCount({ data }: { data: WidgetData<'flights_count'> }): JSX.Elem
 }
 
 function MarginSummary({ data }: { data: WidgetData<'margin_summary'> }): JSX.Element {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const option = useMemo(
     () =>
       seriesOption(
@@ -287,8 +294,9 @@ function MarginSummary({ data }: { data: WidgetData<'margin_summary'> }): JSX.El
         // Для линии графика — число; суммы на экране выводятся строкой из ответа.
         data.series.map((point) => Number.parseFloat(point.margin.amount)),
         STATUS_TOKENS.done.color,
+        i18n.language,
       ),
-    [data],
+    [data, i18n.language],
   );
   return (
     <Space direction="vertical" size={8} style={{ width: '100%' }}>

@@ -1,0 +1,59 @@
+# vitest — сверка TRACEABILITY.md
+# дата: 2026-10-28T07:33:29Z
+# коммит: 2a9e44f
+# команда: cd web && npm run test -- --run
+
+
+ RUN  v2.1.9 /home/user/streamline-operations-control-/web
+
+ ✓ src/shared/i18n/i18n.test.ts > локализация > английский покрывает все русские ключи
+ ✓ src/shared/i18n/i18n.test.ts > локализация > русский покрывает все английские ключи
+ ✓ src/shared/i18n/i18n.test.ts > локализация > нет пустых значений
+ ✓ src/shared/i18n/i18n.test.ts > локализация > коды ошибок контракта имеют перевод в обоих языках
+ ✓ src/shared/i18n/no-hardcoded-text.test.ts > строки интерфейса > находит исходники
+ ✓ src/shared/i18n/no-hardcoded-text.test.ts > строки интерфейса > отличает строку от комментария
+ ✓ src/shared/i18n/no-hardcoded-text.test.ts > строки интерфейса > в компонентах нет русского текста вне t()
+ ✓ src/domain/fx.test.ts > change > считает разницу и процент на Decimal с округлением половины вверх
+ ✓ src/domain/fx.test.ts > change > не делит на ноль
+ ✓ src/domain/fx.test.ts > dailyCandles > открывает день закрытием предыдущего
+ ✓ src/domain/fx.test.ts > weeklyCandles > группирует по неделям с понедельника
+ ✓ src/domain/fx.test.ts > weeklyCandles > открывает неделю закрытием прошлой, крайние курсы — по всем дням
+ ✓ src/domain/fx.test.ts > periodStats > сводит период
+ ✓ src/domain/fx.test.ts > periodStats > пустой ряд — нет сводки
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > три группы
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > девять пунктов
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > у каждого пункта есть значок и адрес
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > пункт ведёт на первый экран своего раздела
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > ключи пунктов не повторяются
+ ✓ src/app/layout/navigation.test.ts > рельс навигации > адреса вкладок попадают в перечень путей
+ ✓ src/domain/machines.test.ts > автомат «рейс» > каждый переход из определения ведёт в объявленное состояние
+ ✓ src/domain/machines.test.ts > автомат «рейс» > необъявленный переход недоступен
+ ✓ src/domain/machines.test.ts > автомат «заявка» > каждый переход из определения ведёт в объявленное состояние
+ ✓ src/domain/machines.test.ts > автомат «заявка» > необъявленный переход недоступен
+ ✓ src/domain/machines.test.ts > автомат рейса > из завершённого и отменённого переходов нет
+ ✓ src/domain/money.test.ts > moneyDifference > считает без потери копеек
+ ✓ src/domain/money.test.ts > moneyDifference > сохраняет знак: поставщик просит меньше
+ ✓ src/domain/money.test.ts > formatAmount > округляет половину копейки вверх, как PDF и XLSX
+ ✓ src/domain/money.test.ts > formatAmount > разбивает разряды неразрывным пробелом
+ ✓ src/domain/money.test.ts > formatAmount > отдаёт знак отдельно и не показывает «минус ноль»
+ ✓ src/shared/ui/status-tokens.test.ts > статусные токены > каждое состояние рейса имеет цвет
+ ✓ src/shared/ui/status-tokens.test.ts > статусные токены > каждое состояние заявки имеет цвет
+ ✓ src/shared/ui/status-tokens.test.ts > статусные токены > токен из автомата совпадает с токеном в карте цветов
+ ✓ src/shared/ui/status-tokens.test.ts > статусные токены > все используемые токены объявлены
+ ✓ src/shared/ui/status-tokens.test.ts > статусные токены > неизвестный статус не роняет интерфейс, а красится нейтрально
+ ✓ src/shared/ui/status-tokens.test.ts > контраст статусной пары > подпись читается на своей заливке не хуже 4.5:1
+ ✓ src/shared/ui/status-tokens.test.ts > контраст статусной пары > подпись читается на поверхности не хуже 4.5:1
+ ✓ src/shared/ui/status-tokens.test.ts > контраст статусной пары > рамка отличима от заливки
+ ✓ src/domain/route.test.ts > оценка маршрута > совпадает с расчётом сервера без борта
+ ✓ src/domain/route.test.ts > оценка маршрута > берёт скорость и расход назначенного борта
+ ✓ src/domain/route.test.ts > оценка маршрута > нулевая скорость не даёт деления на ноль
+ ✓ src/shared/format/timezone.test.ts > zoneAbbreviation > подписывает Москву как MSK+0
+ ✓ src/shared/format/timezone.test.ts > zoneAbbreviation > подписывает зоны России смещением от Москвы
+ ✓ src/shared/format/timezone.test.ts > zoneAbbreviation > прочие зоны подписывает смещением от UTC
+
+ Test Files  9 passed (9)
+      Tests  44 passed (44)
+   Start at  07:33:30
+   Duration  6.64s (transform 1.63s, setup 1.26s, collect 6.67s, tests 188ms, environment 6.88s, prepare 1.27s)
+
+# код выхода: 0

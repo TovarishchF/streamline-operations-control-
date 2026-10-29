@@ -1,0 +1,7 @@
+# POST /api/v1/sample-data/reset через nginx стенда (proxy_read_timeout 120s; gunicorn --timeout 120), учётная запись volkova
+# дата: 2026-10-28T17:07:40Z; рабочее дерево поверх 562ca43 с правкой sampledata.services.reset (@transaction.atomic)
+до (рейсы, заявки, счета клиентам, поставщики набора): 422|2656|307|26
+ответ: HTTP 504 за 120.101081 с
+после: 422|2656|307|26
+журнал gunicorn:
+[2026-10-28 17:09:41 +0000] [17574] [CRITICAL] WORKER TIMEOUT (pid:17575)

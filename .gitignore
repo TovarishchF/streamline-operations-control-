@@ -57,3 +57,7 @@ artifacts/openapi.generated.yaml
 # Результаты прогонов Playwright: отчёт и трассировки пересоздаются
 e2e/test-results/
 artifacts/e2e/report/
+
+# Поставка (make release) — собирается заново, в репозиторий не попадает
+release/
+artifacts/manuals/

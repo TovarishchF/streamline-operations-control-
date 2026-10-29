@@ -1,0 +1,207 @@
+# Стенд без Docker-образа сервера: шаги deploy/sample/init.sh (migrate, seed_reference, setup_periodic_tasks, loaddata fx-rates-cbr.json, sync_fx, seed_sample --seed 20260912)
+# дата: 2026-10-28, коммит: 2a9e44f; база — PostgreSQL 16 локально, пустая; настройки config.settings.prod, SAMPLE_DATA=true
+# www.cbr.ru из среды недоступен (403 прокси) — курсы из снимка поставки
+
+START=07:26:20
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+Operations to perform:
+  Apply all migrations: accounts, admin, audit, auth, billing, catalog, comms, contenttypes, core, counterparties, django_celery_beat, fleet, flights, integrations, orders, reports, sessions, token_blacklist
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0001_initial... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying accounts.0001_initial... OK
+  Applying counterparties.0001_initial... OK
+  Applying accounts.0002_two_factor_and_tenant_links... OK
+  Applying counterparties.0002_contact_vendorcertificate_vendorcontract_and_more... OK
+  Applying counterparties.0003_vendor_exchange_method_and_more... OK
+  Applying catalog.0001_initial... OK
+  Applying catalog.0002_vendorprice... OK
+  Applying counterparties.0004_vendorservicemapping... OK
+  Applying accounts.0003_registrationrequest... OK
+  Applying accounts.0004_is_generated_add... OK
+  Applying accounts.0005_is_generated_drop_previous... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying audit.0001_initial... OK
+  Applying audit.0002_append_only... OK
+  Applying audit.0003_rename_is_generated... OK
+  Applying audit.0004_choices_labels... OK
+  Applying counterparties.0005_is_generated_add... OK
+  Applying counterparties.0006_is_generated_drop_previous... OK
+  Applying fleet.0001_initial... OK
+  Applying flights.0001_initial... OK
+  Applying orders.0001_initial... OK
+  Applying orders.0002_serviceorder_actual_end_at_and_more... OK
+  Applying billing.0001_initial... OK
+  Applying billing.0002_documentcounter_quote_invoice_tariffrule_and_more... OK
+  Applying billing.0003_vendorinvoice_payable_vendorinvoiceline_and_more... OK
+  Applying billing.0004_remove_payable_payable_approved_has_date_and_more... OK
+  Applying billing.0005_is_generated_add... OK
+  Applying billing.0006_is_generated_drop_previous... OK
+  Applying billing.0007_payments... OK
+  Applying catalog.0003_is_generated_add... OK
+  Applying catalog.0004_is_generated_drop_previous... OK
+  Applying comms.0001_initial... OK
+  Applying comms.0002_is_generated_add... OK
+  Applying comms.0003_is_generated_drop_previous... OK
+  Applying comms.0004_dedupe_key... OK
+  Applying core.0001_initial... OK
+  Applying core.0002_attachment... OK
+  Applying core.0003_settings_slot_message_mask... OK
+  Applying core.0004_is_generated_add... OK
+  Applying core.0005_is_generated_drop_previous... OK
+  Applying core.0006_rating_and_suggest_weights... OK
+  Applying core.0007_contract_expiry_reminders_default... OK
+  Applying core.0008_clock_anchor_and_performance... OK
+  Applying django_celery_beat.0001_initial... OK
+  Applying django_celery_beat.0002_auto_20161118_0346... OK
+  Applying django_celery_beat.0003_auto_20161209_0049... OK
+  Applying django_celery_beat.0004_auto_20170221_0000... OK
+  Applying django_celery_beat.0005_add_solarschedule_events_choices... OK
+  Applying django_celery_beat.0006_auto_20180322_0932... OK
+  Applying django_celery_beat.0007_auto_20180521_0826... OK
+  Applying django_celery_beat.0008_auto_20180914_1922... OK
+  Applying django_celery_beat.0006_auto_20180210_1226... OK
+  Applying django_celery_beat.0006_periodictask_priority... OK
+  Applying django_celery_beat.0009_periodictask_headers... OK
+  Applying django_celery_beat.0010_auto_20190429_0326... OK
+  Applying django_celery_beat.0011_auto_20190508_0153... OK
+  Applying django_celery_beat.0012_periodictask_expire_seconds... OK
+  Applying django_celery_beat.0013_auto_20200609_0727... OK
+  Applying django_celery_beat.0014_remove_clockedschedule_enabled... OK
+  Applying django_celery_beat.0015_edit_solarschedule_events_choices... OK
+  Applying django_celery_beat.0016_alter_crontabschedule_timezone... OK
+  Applying django_celery_beat.0017_alter_crontabschedule_month_of_year... OK
+  Applying django_celery_beat.0018_improve_crontab_helptext... OK
+  Applying django_celery_beat.0019_alter_periodictasks_options... OK
+  Applying fleet.0002_is_generated_add... OK
+  Applying fleet.0003_is_generated_drop_previous... OK
+  Applying flights.0002_slot_comment... OK
+  Applying flights.0003_is_generated_add... OK
+  Applying flights.0004_is_generated_drop_previous... OK
+  Applying integrations.0001_initial... OK
+  Applying integrations.0002_is_generated_add... OK
+  Applying integrations.0003_is_generated_drop_previous... OK
+  Applying orders.0003_is_generated_add... OK
+  Applying orders.0004_is_generated_drop_previous... OK
+  Applying orders.0005_sla_rules... OK
+  Applying orders.0006_sla_default_rules... OK
+  Applying orders.0007_sale_and_actual_snapshots... OK
+  Applying reports.0001_initial... OK
+  Applying reports.0002_is_generated_add... OK
+  Applying reports.0003_is_generated_drop_previous... OK
+  Applying reports.0004_dashboard_layout... OK
+  Applying reports.0005_margin_views... OK
+  Applying sessions.0001_initial... OK
+  Applying token_blacklist.0001_initial... OK
+  Applying token_blacklist.0002_outstandingtoken_jti_hex... OK
+  Applying token_blacklist.0003_auto_20171017_2007... OK
+  Applying token_blacklist.0004_auto_20171017_2013... OK
+  Applying token_blacklist.0005_remove_outstandingtoken_jti... OK
+  Applying token_blacklist.0006_auto_20171017_2113... OK
+  Applying token_blacklist.0007_auto_20171017_2214... OK
+  Applying token_blacklist.0008_migrate_to_bigautofield... OK
+  Applying token_blacklist.0010_fix_migrate_to_bigautofield... OK
+  Applying token_blacklist.0011_linearizes_history... OK
+  Applying token_blacklist.0012_alter_outstandingtoken_user... OK
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+airports: добавлено 1351, обновлено 0
+aircraft-types: добавлено 46, обновлено 0
+vat-rates: добавлено 7, обновлено 0
+services: добавлено 24, обновлено 0
+message-templates: добавлено 13, обновлено 0
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+задач в расписании: 10
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+Installed 258 object(s) from 1 fixture(s)
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+28.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+27.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+26.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+25.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+24.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+23.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+22.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+21.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+20.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+19.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+18.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+17.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+16.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+15.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+14.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+13.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+12.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+11.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+10.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+09.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+08.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+07.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+06.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+05.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+04.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+03.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+02.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+01.10.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+30.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+29.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+28.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+27.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+26.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+25.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+24.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+23.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+22.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+21.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+20.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+19.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+18.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+17.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+16.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+15.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+14.09.2026: <urlopen error Tunnel connection failed: 403 Forbidden>
+записей курсов: 0, дней с ошибкой: 45
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+набор генератора: несколько минут
+ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны генератор данных и управление модельным временем.
+ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные передаются открытым текстом.
+{"asctime": "2026-10-28 07:41:13,430", "levelname": "INFO", "name": "orders.services.sla", "message": "\u043e\u0442\u043c\u0435\u0447\u0435\u043d\u043e \u043d\u0430\u0440\u0443\u0448\u0435\u043d\u0438\u0439 SLA: 6"}
+клиенты: 12
+поставщики: 26
+договоры: 29
+цены поставщиков: 1328
+тарифные правила: 75
+борта: 26
+сотрудники: 6
+рейсы: 266
+заявки на услуги: 1619
+счета клиентам: 163
+платежи: 80
+заявки на оплату: 1084
+счета поставщиков: 12
+заявки клиентов: 6
+шаблоны рейсов: 3
+сообщения и уведомления: 35
+EXIT=0
+END=07:41:19

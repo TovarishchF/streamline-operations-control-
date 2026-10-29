@@ -34,6 +34,8 @@ const REPORT = process.env['SOC_E2E_REPORT'] ?? '../artifacts/e2e/registries.jso
 
 export default defineConfig({
   testDir: '.',
+  // Снимки для руководства снимаются с установки для показа: manuals.config.ts.
+  testIgnore: /manuals\.spec\.ts/,
   timeout: 90_000,
   fullyParallel: false,
   workers: 1,

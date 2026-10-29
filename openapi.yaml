@@ -40,8 +40,6 @@ info:
     `ErrorCode`. Сообщение пишется так, чтобы по нему было понятно, что делать
     (`BACKEND § 9`).
 
-  contact:
-    name: ИП Третьяк Артем Александрович
   license:
     name: Проприетарная, передаётся заказчику по договору
 
@@ -3370,7 +3368,7 @@ components:
 
     SampleDataResult:
       type: object
-      required: [action, counts]
+      required: [action, counts, kept]
       properties:
         action:
           type: string
@@ -3379,7 +3377,22 @@ components:
           type: object
           description: Что создано либо удалено, по видам записей
           additionalProperties: { type: integer }
+        kept:
+          type: array
+          description: >
+            Записи набора, которые очистка оставила, потому что на них ссылаются
+            записи, введённые людьми (ADR-041). Для генерации — пустой список.
+          items: { $ref: '#/components/schemas/SampleDataKept' }
         message: { type: string }
+
+    SampleDataKept:
+      type: object
+      required: [entity, id, title, reason]
+      properties:
+        entity: { type: string, description: Вид записи }
+        id: { type: string }
+        title: { type: string, description: Как запись показывается в интерфейсе }
+        reason: { type: string, description: Какая запись человека её держит }
 
     ErrorCode:
       type: string

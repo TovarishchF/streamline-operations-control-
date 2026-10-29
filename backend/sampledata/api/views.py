@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from typing import Any, ClassVar
 
 from drf_spectacular.utils import extend_schema
@@ -24,6 +25,7 @@ from core.api.idempotency import IdempotencyMixin
 from core.api.permissions import HasRolePermission
 from core.api.serializers import ErrorResponseSerializer
 from sampledata import services as sample
+from sampledata.purge import KeptRecord
 
 
 class SampleDataRequestSerializer(serializers.Serializer):  # type: ignore[type-arg]
@@ -32,11 +34,21 @@ class SampleDataRequestSerializer(serializers.Serializer):  # type: ignore[type-
     seed = serializers.IntegerField(required=False, default=sample.DEFAULT_SEED)
 
 
+class SampleDataKeptSerializer(serializers.Serializer):  # type: ignore[type-arg]
+    """`SampleDataKept` из контракта: запись набора, оставленная очисткой."""
+
+    entity = serializers.CharField()
+    id = serializers.CharField()
+    title = serializers.CharField()
+    reason = serializers.CharField()
+
+
 class SampleDataResultSerializer(serializers.Serializer):  # type: ignore[type-arg]
     """`SampleDataResult` из контракта."""
 
     action = serializers.ChoiceField(choices=[sample.GENERATE, sample.RESET, sample.PURGE])
     counts = serializers.DictField(child=serializers.IntegerField())
+    kept = SampleDataKeptSerializer(many=True)
     message = serializers.CharField(allow_blank=True)
 
 
@@ -56,9 +68,18 @@ class SampleDataActionView(IdempotencyMixin, APIView):
         payload.is_valid(raise_exception=True)
         return int(payload.validated_data["seed"])
 
-    def _result(self, counts: dict[str, int], message: str = "") -> Response:
+    def _result(
+        self, counts: dict[str, int], message: str = "", kept: list[KeptRecord] | None = None
+    ) -> Response:
         return Response(
-            {"action": self.action_name, "counts": counts, "message": message},
+            {
+                "action": self.action_name,
+                "counts": counts,
+                # Записи набора, на которые ссылаются записи людей, очистка
+                # оставляет (ADR-041): администратор должен видеть, какие и почему.
+                "kept": [asdict(item) for item in kept or []],
+                "message": message,
+            },
             status=status.HTTP_200_OK,
         )
 
@@ -92,7 +113,12 @@ class SampleDataResetView(SampleDataActionView):
     )
     def post(self, request: Request) -> Response:
         seed = self._seed(request)
-        return self.idempotent(request, lambda: self._result(sample.reset(seed)))
+
+        def produce() -> Response:
+            outcome = sample.reset(seed)
+            return self._result(outcome.counts, kept=outcome.kept)
+
+        return self.idempotent(request, produce)
 
 
 class SampleDataPurgeView(SampleDataActionView):
@@ -108,13 +134,15 @@ class SampleDataPurgeView(SampleDataActionView):
     )
     def post(self, request: Request) -> Response:
         def produce() -> Response:
+            outcome = sample.purge()
             return self._result(
-                sample.purge(),
+                outcome.counts,
                 # Про журнал сказано в ответе, а не только в документации:
                 # администратор нажимает «Очистить» и вправе знать, что
                 # именно не удалилось (`BACKEND.md § 3.9`).
                 "Записи журнала действий не удаляются: таблица аудита "
                 "только пополняется.",
+                kept=outcome.kept,
             )
 
         return self.idempotent(request, produce)

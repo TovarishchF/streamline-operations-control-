@@ -14,16 +14,18 @@ from __future__ import annotations
 
 import threading
 from datetime import timedelta
-from decimal import Decimal
+from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any
 
 import pytest
+from django.core.management import call_command
 from django.db import connections, transaction
 from rest_framework import status
 
 from accounts.models import Role
 from billing.models import DocumentCounter, Invoice, InvoiceStatus, Quote, QuoteStatus
 from billing.services import numbering
+from catalog.models import VatRate
 from core.clock import now
 from orders.models import ServiceOrder
 
@@ -113,6 +115,26 @@ def test_invoice_is_built_from_actual_quantity(
     assert body["lines"][0]["quantity"] == "1200.0000"
     # Курс зафиксирован в самом документе (`SPEC.md § 7.2`)
     assert body["fx"]["base"] == "RUB"
+
+
+def test_domestic_invoice_takes_the_base_vat_rate_of_22_percent(
+    as_role: Callable[..., APIClient], flight: Flight, completed_order: ServiceOrder
+) -> None:
+    """С 01.01.2026 базовая ставка НДС — 22 % (Федеральный закон № 425-ФЗ).
+
+    Рейс UUWW → ULLI внутренний: строке достаётся базовая ставка справочника.
+    """
+    call_command("seed_reference", only="vat-rates")
+
+    body = as_role(Role.FINANCE).post(
+        INVOICES_URL, {"flightId": flight.pk}, format="json", headers=idempotent()
+    ).json()
+
+    line = body["lines"][0]
+    assert line["vatRateId"] == VatRate.objects.get(code="VAT22").pk
+    amount = Decimal(line["amount"]["amount"])
+    expected = (amount * Decimal("0.22")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+    assert Decimal(line["vatAmount"]["amount"]) == expected
 
 
 def test_invoice_totals_are_sum_of_rounded_lines(

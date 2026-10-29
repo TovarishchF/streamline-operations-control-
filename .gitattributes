@@ -13,3 +13,15 @@
 # Сгенерированные файлы не участвуют в статистике языков и в ревью diff-ов
 shared/api-types.ts linguist-generated=true
 web/package-lock.json linguist-generated=true
+
+# Поставка (make release) собирается git archive: рабочие документы,
+# протоколы испытаний и служебное в неё не попадают. Руководства идут
+# в поставку отдельными PDF.
+docs/ export-ignore
+CLAUDE.md export-ignore
+README.md export-ignore
+artifacts/ export-ignore
+e2e/ export-ignore
+.github/ export-ignore
+scripts/build_release.sh export-ignore
+scripts/build_manuals.sh export-ignore

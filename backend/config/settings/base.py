@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import logging
 from datetime import timedelta
 from pathlib import Path
 from typing import Any
@@ -317,6 +318,16 @@ FX_BASE_CURRENCY = "RUB"
 
 # ─────────────────────────── Логирование ───────────────────────────
 
+
+def _not_font_chatter(record: logging.LogRecord) -> bool:
+    """Сборка PDF (печатные формы, акты) пишет десятки строк о шрифтах на документ.
+
+    Уровня логгера мало: WeasyPrint на время сборки сам понижает уровень
+    fontTools, поэтому отсев стоит на обработчике.
+    """
+    return not (record.name.startswith("fontTools") and record.levelno < logging.WARNING)
+
+
 LOGGING: dict[str, Any] = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -326,8 +337,18 @@ LOGGING: dict[str, Any] = {
             "format": "%(asctime)s %(levelname)s %(name)s %(message)s",
         },
     },
+    "filters": {
+        "not_font_chatter": {
+            "()": "django.utils.log.CallbackFilter",
+            "callback": _not_font_chatter,
+        },
+    },
     "handlers": {
-        "console": {"class": "logging.StreamHandler", "formatter": "json"},
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+            "filters": ["not_font_chatter"],
+        },
     },
     "root": {"handlers": ["console"], "level": env("LOG_LEVEL", default="INFO")},
     "loggers": {

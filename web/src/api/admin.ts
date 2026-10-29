@@ -120,6 +120,10 @@ export function useCreateUser() {
 const sampleDataResultSchema = z.object({
   action: z.enum(['generate', 'reset', 'purge']),
   counts: z.record(z.number().int()),
+  // Записи набора, которые очистка оставила: на них ссылаются записи людей (ADR-041).
+  kept: z.array(
+    z.object({ entity: z.string(), id: z.string(), title: z.string(), reason: z.string() }),
+  ),
   // Поле обязательное: сервер возвращает его всегда, в том числе пустым.
   message: z.string(),
 });

@@ -19,6 +19,7 @@ from django.db import transaction
 
 from comms.services import context, notifications, outbox
 from comms.services.templates import TemplateNotFound
+from core import sample_data
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -53,6 +54,9 @@ def _enqueue(code: str, **kwargs: Any) -> None:
     `CLAUDE.md § 3` п. 13: письмо о заявке, которой не случилось из-за
     отката, отозвать нельзя.
     """
+    if sample_data.is_generating():
+        # О прошедших событиях набора не пишут (`core.sample_data.generating`).
+        return
 
     def send() -> None:
         try:
@@ -63,6 +67,13 @@ def _enqueue(code: str, **kwargs: Any) -> None:
             logger.warning("шаблон %s не заведён, письмо не отправлено", code)
 
     transaction.on_commit(send)
+
+
+def _notify(**kwargs: Any) -> None:
+    """Уведомление в колокольчик — кроме событий, проведённых генератором."""
+    if sample_data.is_generating():
+        return
+    notifications.notify_many(**kwargs)
 
 
 # ─────────────────────────── Заявки на услуги ───────────────────────────
@@ -107,7 +118,7 @@ def order_cancelled(order: ServiceOrder, *, reason: str) -> None:
 
 def order_answered(order: ServiceOrder, *, confirmed: bool, actor: User | None) -> None:
     """Поставщик ответил `[ТЗ 3.5.1]`."""
-    notifications.notify_many(
+    _notify(
         users=_dispatchers(order.flight.organization_id, exclude=actor),
         kind="service_confirmed" if confirmed else "service_rejected",
         title=(
@@ -121,7 +132,7 @@ def order_answered(order: ServiceOrder, *, confirmed: bool, actor: User | None) 
 
 
 def order_sla_breached(order: ServiceOrder) -> None:
-    notifications.notify_many(
+    _notify(
         users=_dispatchers(order.flight.organization_id, exclude=None),
         kind="sla_breach",
         title=f"Просрочено подтверждение: {order.service.name_ru}, рейс {order.flight.number}",
@@ -231,7 +242,7 @@ def flight_transitioned(flight: Flight, *, transition: str, reason: str) -> None
 
 def flight_status_changed(flight: Any, *, previous: str, actor: User | None) -> None:
     """Смена статуса рейса `[ТЗ 3.5.1]`."""
-    notifications.notify_many(
+    _notify(
         users=_dispatchers(flight.organization_id, exclude=actor),
         kind="flight_status",
         title=f"Рейс {flight.number}: {flight.get_status_display()}",

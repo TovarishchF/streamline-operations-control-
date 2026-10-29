@@ -18,7 +18,7 @@ from django.db import models
 
 from accounts.models import Role, User
 from audit.models import AuditEntityType, AuditEntry, AuditSource
-from core import clock
+from core import clock, sample_data
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -104,6 +104,11 @@ def record(
     before_changed, after_changed = diff(before, after)
     if before_changed is None and after_changed is None and before is not None:
         return None
+
+    if sample_data.is_generating():
+        # Сервис мог получить пользователя, но действие совершил генератор
+        # (`CLAUDE.md § 4`): за действие человека оно не выдаётся.
+        actor, source, is_generated = None, AuditSource.SEED, True
 
     if actor is not None:
         actor_id = actor.pk

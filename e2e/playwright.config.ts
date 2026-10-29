@@ -10,6 +10,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: '.',
+  // Снимки для руководства снимаются с установки для показа: manuals.config.ts.
+  testIgnore: /manuals\.spec\.ts/,
   timeout: 60_000,
   fullyParallel: false,
   workers: 1,
@@ -34,7 +36,7 @@ export default defineConfig({
       // в настольном профиле: поведение кнопок от ширины экрана не зависит,
       // а прогон вдвое дольше.
       name: 'mobile',
-      testIgnore: /(operations|scenario|perf)\.spec\.ts/,
+      testIgnore: /(operations|scenario|perf|manuals)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], viewport: { width: 360, height: 800 } },
     },
   ],

@@ -1,0 +1,24 @@
+# Playwright — e2e/scenario.spec.ts (сквозной сценарий SPEC.md § 12), профиль desktop
+# дата: 2026-10-28T07:45:24Z, коммит: 2a9e44f
+# стенд: сервер gunicorn (config.settings.prod, SAMPLE_DATA=true) на наборе seed_sample --seed 20260912, веб — npm run preview, почта — Mailpit; без Docker-образа сервера
+# браузер: предустановленный Chromium (/opt/pw-browsers/chromium), конфигурация playwright.config.ts без изменений, кроме executablePath
+
+
+Running 11 tests using 1 worker
+
+  ✓  1 [desktop] › scenario.spec.ts:150:1 › диспетчер создаёт рейс (3.2s)
+  ✓  2 [desktop] › scenario.spec.ts:177:1 › диспетчер заказывает три услуги у разных поставщиков (6.8s)
+  ✓  3 [desktop] › scenario.spec.ts:221:1 › поставщик отказывает, диспетчер переназначает (4.6s)
+  ✓  4 [desktop] › scenario.spec.ts:249:1 › остальные поставщики подтверждают заявки в портале (5.1s)
+  ✓  5 [desktop] › scenario.spec.ts:260:1 › финансист выставляет котировку (1.9s)
+  ✓  6 [desktop] › scenario.spec.ts:270:1 › диспетчер проводит рейс до прилёта (4.3s)
+  ✓  7 [desktop] › scenario.spec.ts:281:1 › поставщики отмечают исполнение с фактом и актом (8.5s)
+  ✓  8 [desktop] › scenario.spec.ts:321:1 › финансист выставляет счёт по факту, диспетчер завершает рейс (4.4s)
+  ✓  9 [desktop] › scenario.spec.ts:350:1 › заявки на оплату сформированы по выполненным услугам (3.4s)
+  ✓  10 [desktop] › scenario.spec.ts:373:1 › счёт поставщика с расхождением загружается и разбирается (2.8s)
+  ✓  11 [desktop] › scenario.spec.ts:403:1 › маржа, аудит и исходящие отражают сценарий (4.4s)
+
+  Slow test file: [desktop] › scenario.spec.ts (49.4s)
+  Consider splitting slow test files to speed up parallel execution
+  11 passed (2.9m)
+# код выхода: 0

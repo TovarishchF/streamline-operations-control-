@@ -21,13 +21,18 @@ SECRET_KEY = env("SECRET_KEY")
 # ─────────────────────────── Безопасность ───────────────────────────
 # INFRA.md § 6
 
-SECURE_SSL_REDIRECT = True
-SECURE_HSTS_SECONDS = 31_536_000
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-SECURE_HSTS_PRELOAD = True
+# Только HTTPS — по умолчанию. Выключается явно и только для установки
+# для показа на сервере без сертификата (deploy/sample): перенаправление
+# на HTTPS там отправило бы браузер на адрес, которого нет.
+HTTPS_ONLY = env.bool("HTTPS_ONLY", default=True)
+
+SECURE_SSL_REDIRECT = HTTPS_ONLY
+SECURE_HSTS_SECONDS = 31_536_000 if HTTPS_ONLY else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = HTTPS_ONLY
+SECURE_HSTS_PRELOAD = HTTPS_ONLY
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = HTTPS_ONLY
+CSRF_COOKIE_SECURE = HTTPS_ONLY
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
@@ -74,4 +79,10 @@ if SAMPLE_DATA:
     sys.stderr.write(
         "ВНИМАНИЕ: SAMPLE_DATA=true в боевой конфигурации. Администратору доступны "
         "генератор данных и управление модельным временем.\n"
+    )
+
+if not HTTPS_ONLY:
+    sys.stderr.write(
+        "ВНИМАНИЕ: HTTPS_ONLY=false. Система работает по HTTP: пароли и данные "
+        "передаются открытым текстом.\n"
     )
